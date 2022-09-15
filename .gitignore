@@ -1,0 +1,15 @@
+bin/
+build/
+cache/
+dist/
+.gradle/
+test*/
+temp*/
+tmp*/
+models/
+
+*.class
+*.jar
+*.log
+*.exe
+ArkPetsCustom.config
