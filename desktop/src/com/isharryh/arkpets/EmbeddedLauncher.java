@@ -11,7 +11,6 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class EmbeddedLauncher {
 	public static void main (String[] arg) {
-		System.out.println("EL:Start");
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		// Configure FPS
 		config.setForegroundFPS(30);
@@ -34,7 +33,6 @@ public class EmbeddedLauncher {
 		config.setWindowPosition(0, 0);
 		// Instantiate the App
 		Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
-		System.out.println("EL:Dispose");
 	}
 
 	private static String applyWindowTitle() {

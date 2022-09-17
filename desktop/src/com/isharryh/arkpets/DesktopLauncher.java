@@ -11,7 +11,6 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
 	public static void main (String[] arg) {
-		System.out.println("DL:Start");
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		// Configure FPS
 		config.setForegroundFPS(30);
@@ -34,7 +33,6 @@ public class DesktopLauncher {
 		config.setWindowPosition(100, 100);
 		// Instantiate the App
 		Lwjgl3Application app = new Lwjgl3Application(new ArkHome(TITLE), config);
-		System.out.println("DL:Dispose");
 		System.exit(0);
 	}
 
