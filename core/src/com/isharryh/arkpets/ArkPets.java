@@ -1,7 +1,6 @@
 package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -12,7 +11,6 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
-
 import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.utils.AnimCtrl;
 import com.isharryh.arkpets.easings.EasingLinear;
@@ -45,7 +43,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void create() {
 		// When the APP was created
-		System.out.println("AP:Create");
+		Gdx.app.setLogLevel(3);
+		Gdx.app.log("event", "AP:Create");
 		ScreenUtils.clear(0, 0, 0, 0);
 		ArkConfig config = ArkConfig.init();
 		// Window Setup
@@ -70,22 +69,24 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			behavior = new BehaviorOperBuild(config);
 		else
 			behavior = null; // TODO Throw an error.
-		System.out.println("AP:Use "+behavior.getClass().getName());
+		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
-		System.out.println("AP:Render");
+		Gdx.app.log("event", "AP:Render");
 	}
 
 	@Override
 	public void render() {
 		// When render graphics
 		cha.next();
+		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX)
+			Gdx.app.log("info", String.valueOf("FPS"+Gdx.graphics.getFramesPerSecond()+", Heap"+(int)(Gdx.app.getJavaHeap()/1024)+"KB"));
 		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime());
 		if (!mouse_drag) {
 			// If no dragging:
 			setWindowPosTar(WD_postar.x, WD_postar.y);
 			setWindowPosCur(Gdx.graphics.getDeltaTime());
 			if (cha.anim_queue[0].MOBILITY != 0)
-				walkWindow(1f * cha.anim_queue[0].MOBILITY);
+				walkWindow(0.85f * cha.anim_queue[0].MOBILITY);
 		} else {
 			newAnim = behavior.dragStart();
 		}
@@ -99,6 +100,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 	}
 
+	@Override
+	public void dispose() {
+		Gdx.app.log("event", "AP:Dispose");
+	}
+
 	/* INPUT PROCESS */
 	private Vector2 mouse_pos = new Vector2();
 	private boolean mouse_drag = false;
@@ -107,7 +113,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
-		System.out.println("C↓: "+screenX + ", " + screenY);
+		Gdx.app.debug("debug", "C↓: "+screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		mouse_drag = true;
 		cha.setAnimation(behavior.clickStart());
@@ -116,7 +122,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// System.out.println("M: "+screenX + ", " + screenY);
 		return false;
 	}
 
@@ -124,7 +129,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		if (!mouse_drag)
 			return false;
-		// System.out.println("D: "+screenX + ", " + screenY);
 		setWindowPos((int)(WD_poscur.x + screenX - mouse_pos.x), (int)(WD_poscur.y + screenY - mouse_pos.y), true);
 		return true;
 	}
@@ -133,7 +137,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
-		System.out.println("C↑: "+screenX + ", " + screenY);
+			Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
 		mouse_drag = false;
 		cha.setAnimation(behavior.clickEnd());
 		return true;
@@ -141,21 +145,19 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		System.out.println("KD: "+keycode);
-		// cha.setPositionTar((int)cha.positionTar.x, (int)cha.positionTar.y, (int)-cha.positionTar.z);
+		Gdx.app.debug("debug", "K↓: "+keycode);
 		return true;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		System.out.println("KU: "+keycode);
+		Gdx.app.debug("debug", "K↑: "+keycode);
 		return true;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
-		System.out.println("KT: "+character);
-		return true;
+		return false;
 	}
 
 	@Override
@@ -186,13 +188,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
-		setWindowPosTar(WD_postar.x + randomRound(expectedLen), WD_postar.y);
+		int realLen = randomRound(expectedLen);
+		//Gdx.app.debug("walk", expectedLen+" -> "+realLen);
+		setWindowPosTar(WD_postar.x + realLen, WD_postar.y);
 	}
 
 	private int randomRound(float val) {
 		int integer = (int)val;
 		float decimal = val - integer;
-		int offset = Math.random() >= Math.abs(decimal) ? (val >= 0 ? 1 : -1) : 0;
+		int offset = Math.abs(decimal) >= Math.random() ? (val >= 0 ? 1 : -1) : 0;
 		return integer + offset;
 	}
 
@@ -219,8 +223,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
-		//System.out.println(WD_poscur.x);
-		//System.out.println(WD_poscur.y);
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, (int)WD_poscur.x, (int)WD_poscur.y,
 			0, 0, WinUser.SWP_NOSIZE);
 		return true;

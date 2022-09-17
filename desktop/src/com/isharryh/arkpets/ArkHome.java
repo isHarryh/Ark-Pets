@@ -10,9 +10,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Color;
+
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
@@ -35,7 +34,6 @@ public class ArkHome extends ApplicationAdapter {
     private HorizontalGroup[] hGroups;
     private SelectBox[] sBoxs;
     private CheckBox[] cBoxs;
-    private Label[] labels;
 
     public int WD_W = 500;
     public int WD_H = 310;
@@ -54,15 +52,9 @@ public class ArkHome extends ApplicationAdapter {
     @Override
     public void create() {
         // When the APP was created
-		System.out.println("AH:Create");
-        //Texture texture = new Texture(Gdx.files.internal("icon.png"));
-        //SpriteBatch sBatch = new SpriteBatch();
-        //sBatch.begin();
-        //sBatch.draw(texture, 0, 0);
+		Gdx.app.log("event", "AH:Create");
         stage = new Stage();
         skin = SkinLoader.loadSkin(Gdx.files.internal("newmetalui/metal-ui.json"));
-        //sBatch.end();
-        //sBatch.dispose();
 
         //Window window = new Window("文本ABC", skin);
         table = new Table();
@@ -71,7 +63,8 @@ public class ArkHome extends ApplicationAdapter {
         tButton1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent iEvent, float a, float b) {
-                doDispose = true;
+                if (config.character_recent != "")
+                    doDispose = true;
             }
         });
 
@@ -85,9 +78,10 @@ public class ArkHome extends ApplicationAdapter {
         config = ArkConfig.init();
         config.display_monitor_info = MonitorConfig.getDefaultMonitorInfo();
         AssetCtrl[] assets = initAssetCtrls(Gdx.files.local("models"));
-        if (assets.length <= 0) {
+        if (assets == null || assets.length <= 0) {
             sBoxs[0].setItems("未找到模型");
             sBoxs[0].setSelectedIndex(0);
+            config.character_recent = "";
         } else {
             sBoxs[0].setItems(assets);
             sBoxs[0].setSelectedIndex(0);
@@ -97,17 +91,19 @@ public class ArkHome extends ApplicationAdapter {
                     initPreview();
                     break;
                 }
+            config.character_recent = assets[sBoxs[0].getSelectedIndex()].PATH;
         }
-        config.character_recent = assets[sBoxs[0].getSelectedIndex()].PATH;
+        
         config.saveConfig();
         sBoxs[0].addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
                 if (sBoxs[0].getSelected().getClass() == String.class)
                     config.character_recent = "";
-                else
+                else {
                     config.character_recent = assets[sBoxs[0].getSelectedIndex()].PATH;
+                    initPreview();
+                }
                 config.saveConfig();
-                initPreview();
 			}
 		});
         
@@ -201,19 +197,20 @@ public class ArkHome extends ApplicationAdapter {
         
         hideArkHome(false);
         initAssetCtrls(Gdx.files.local("./models"));
-		System.out.println("AH:Render");
+		Gdx.app.log("event", "AH:Render");
     }
 
     @Override
 	public void render() {
         if (doDispose) {
-            System.out.println("AH:Hide");
+            Gdx.app.log("event", "AH:Hide");
             hideArkHome(true);
             startArkPets();
             Gdx.app.exit();
         }
 		ScreenUtils.clear(.70f, .78f, .86f, 1f);
-        //preview.next();
+        if (preview != null)
+            preview.next();
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
 	}
@@ -233,12 +230,13 @@ public class ArkHome extends ApplicationAdapter {
     }
 
     @Override
-    public void dispose() {
-    }
+	public void dispose() {
+		Gdx.app.log("event", "AH:Dispose");
+	}
 
     private void initPreview() {
         preview = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.36f);
-        preview.setCanvas(WD_W, WD_H, 25);
+        preview.setCanvas(WD_W, WD_H, 25, new Color(.70f, .78f, .86f, 1f));
         preview.setPositionTar(400, 10, 0);
         preview.setPositionCur(1);
         preview.setPositionTar(400, 10, -1);

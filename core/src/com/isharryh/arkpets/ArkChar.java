@@ -4,10 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonJson;
@@ -35,6 +37,7 @@ import com.isharryh.arkpets.utils.FrameCtrl;
 public class ArkChar {
     private OrthographicCamera camera;
     private TwoColorPolygonBatch batch;
+    private Texture bgTexture;
     public Vector3 positionCur;
     public Vector3 positionTar;
     public EasingLinearVector3 positionEas;
@@ -68,6 +71,7 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
+        bgTexture = null;
         positionEas = new EasingLinearVector3(new EasingLinear(0, 1, 0.2f));
         positionCur = new Vector3(0, 0, 0);
         positionTar = new Vector3(0, 0, 0);
@@ -105,9 +109,8 @@ public class ArkChar {
         Array<Animation> animations = skeletonData.getAnimations();
         int anim_cont = animations.size;
         anim_list = new String[anim_cont];
-        for (int i = 0; i < anim_cont; i++) {
+        for (int i = 0; i < anim_cont; i++)
             anim_list[i] = animations.get(i).getName();
-        }
         // Set animation mix
         AnimationStateData asd = new AnimationStateData(skeletonData);
         for (String i: anim_list)
@@ -118,6 +121,10 @@ public class ArkChar {
     }
 
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps) {
+        this.setCanvas($anim_width, $anim_height, $anim_fps, new Color(0, 0, 0, 0));
+    }
+
+    public void setCanvas(int $anim_width, int $anim_height, int $anim_fps, Color $bgColor) {
         // Transfer params
         anim_width = $anim_width;
         anim_height = $anim_height;
@@ -128,6 +135,11 @@ public class ArkChar {
         camera.update();
         batch.getProjectionMatrix().set(camera.combined);
         transform = batch.getTransformMatrix();
+        // Set background image
+        Pixmap pixmap = new Pixmap($anim_width, $anim_height, Format.RGBA8888);
+        pixmap.setColor($bgColor);
+        pixmap.fill();
+        bgTexture = new Texture(pixmap);
     }
 
     public void setPositionTar(float $pos_x, float $pos_y, float $flip) {
@@ -141,7 +153,6 @@ public class ArkChar {
     public void setPositionCur(float $deltaTime) {
         // Set current position
         positionCur.set(positionEas.eX.step($deltaTime), positionEas.eY.step($deltaTime), positionEas.eZ.step($deltaTime));
-        // System.out.print(positionCur.x+"\t"+positionCur.y+"\t"+positionCur.z+"\n");
         skeleton.setPosition(positionCur.x, positionCur.y);
         skeleton.setScaleX(positionCur.z);
         skeleton.updateWorldTransform();
@@ -200,6 +211,8 @@ public class ArkChar {
         // Render the skeleton to the FBO
         ScreenUtils.clear(0,0,0,0);
         batch.begin();
+        if (bgTexture != null)
+            batch.draw(bgTexture, 0, 0);
         renderer.draw(batch, skeleton);
         batch.end();
     }
@@ -234,7 +247,7 @@ public class ArkChar {
 
     private void changeAnimation() {
         anim_queue[0] = anim_queue[1];
-        System.out.println(anim_queue[0].ANIM_NAME);
+        Gdx.app.log("info", "Anim:"+anim_queue[0].ANIM_NAME);
         if (anim_queue[0].MOBILITY != 0)
             setPositionTar(positionTar.x, positionTar.y, anim_queue[0].MOBILITY > 0 ? 1 : -1);
         offset_y = anim_queue[0].OFFSET_Y;
