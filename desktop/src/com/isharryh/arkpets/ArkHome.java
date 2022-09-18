@@ -2,6 +2,7 @@ package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -17,6 +18,7 @@ import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.isharryh.arkpets.utils.JavaProcess;
 import com.isharryh.arkpets.utils.SkinLoader;
+import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.utils.AnimCtrl;
 import com.isharryh.arkpets.utils.AssetCtrl;
 import java.io.IOException;
@@ -25,19 +27,13 @@ import java.util.ArrayList;
 
 public class ArkHome extends ApplicationAdapter {
     // Sence2d.ui
-    private Stage stage;
-    private Table table;
+    private Stage mainStage;
     private Skin skin;
     private ArkChar preview;
-    // Elements
-    private TextButton tButton1;
-    private HorizontalGroup[] hGroups;
-    private SelectBox[] sBoxs;
-    private CheckBox[] cBoxs;
 
     public int WD_W = 500;
     public int WD_H = 310;
-    public boolean doDispose = false;
+    public int status = 1;
     public final String APP_TITLE;
     public HWND HWND_MINE;
     public ArkConfig config;
@@ -53,29 +49,71 @@ public class ArkHome extends ApplicationAdapter {
     public void create() {
         // When the APP was created
 		Gdx.app.log("event", "AH:Create");
-        stage = new Stage();
         skin = SkinLoader.loadSkin(Gdx.files.internal("newmetalui/metal-ui.json"));
+        config = ArkConfig.init();
+        hideArkHome(false);
+		Gdx.app.log("event", "AH:Render");
+        mainStage = stageMainPage();
+    }
 
-        //Window window = new Window("文本ABC", skin);
-        table = new Table();
+    @Override
+	public void render() {
+        if (status == 0) {
+            Gdx.app.log("event", "AH:Hide");
+            hideArkHome(true);
+            startArkPets();
+            Gdx.app.exit();
+        }
+		ScreenUtils.clear(.70f, .78f, .86f, 1f);
+        if (preview != null)
+            preview.next();
+		mainStage.act(Gdx.graphics.getDeltaTime());
+		mainStage.draw();
+	}
+
+    @Override
+    public void resize(int newWidth, int newHeight) {
+    }
+
+    @Override
+	public void dispose() {
+		Gdx.app.log("event", "AH:Dispose");
+	}
+
+
+    /* User Interface Area */
+    /** Main page.
+     * @return Stage object.
+     */
+    private Stage stageMainPage() {
+        // Elements' containers
+        TextButton tButton1;
+        HorizontalGroup[] hGroups;
+        SelectBox[] sBoxs;
+        CheckBox[] cBoxs;
+        Stage stage = new Stage();
+        Table table = new Table();
         table.setFillParent(true);
-        tButton1 = new TextButton("启动", skin);
-        tButton1.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent iEvent, float a, float b) {
-                if (config.character_recent != "")
-                    doDispose = true;
-            }
-        });
 
         // Actor lists
         hGroups = new HorizontalGroup[10];
         sBoxs = new SelectBox[5];
         cBoxs = new CheckBox[5];
 
+        // Text buttons
+        tButton1 = new TextButton("启动", skin);
+        tButton1.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                if (config.character_recent != "")
+                    status = 0;
+                else
+                    mainStage = stageWarning("当前未选择任何模型");
+            }
+        });
+
         // Select Model
         sBoxs[0] = new SelectBox<String>(skin);
-        config = ArkConfig.init();
         config.display_monitor_info = MonitorConfig.getDefaultMonitorInfo();
         AssetCtrl[] assets = initAssetCtrls(Gdx.files.local("models"));
         if (assets == null || assets.length <= 0) {
@@ -178,7 +216,7 @@ public class ArkHome extends ApplicationAdapter {
         });
         
 
-        // Add Actor
+        // Add actors
         table.addActor(hGroups[0]);
         table.addActor(hGroups[1]);
         table.addActor(hGroups[3]);
@@ -187,38 +225,14 @@ public class ArkHome extends ApplicationAdapter {
         table.addActor(cBoxs[2]);
         table.addActor(tButton1);
         
+        // Merge table & stage 
         ScrollPane sPane = new ScrollPane(table, skin);
         sPane.setFillParent(true);
-
         Gdx.input.setInputProcessor(stage);
         stage.addActor(sPane);
-        //stage.addActor(window);
-
-        
-        hideArkHome(false);
         initAssetCtrls(Gdx.files.local("./models"));
-		Gdx.app.log("event", "AH:Render");
-    }
 
-    @Override
-	public void render() {
-        if (doDispose) {
-            Gdx.app.log("event", "AH:Hide");
-            hideArkHome(true);
-            startArkPets();
-            Gdx.app.exit();
-        }
-		ScreenUtils.clear(.70f, .78f, .86f, 1f);
-        if (preview != null)
-            preview.next();
-		stage.act(Gdx.graphics.getDeltaTime());
-		stage.draw();
-	}
-
-    @Override
-    public void resize(int newWidth, int newHeight) {
-        WD_W = newWidth;
-        WD_H = newHeight;
+        // Set actors' position
         final float WD_W_CT = (float)(WD_W*0.5-tButton1.getWidth()/2);
         hGroups[0].setPosition(10, WD_H - 25);
         hGroups[1].setPosition(10, WD_H - 65);
@@ -227,20 +241,70 @@ public class ArkHome extends ApplicationAdapter {
         cBoxs[1].setPosition(WD_W_CT, WD_H -165);
         cBoxs[2].setPosition(10, WD_H - 195);
         tButton1.setPosition(WD_W_CT, 5);
+        return stage;
     }
 
-    @Override
-	public void dispose() {
-		Gdx.app.log("event", "AH:Dispose");
-	}
+    /** Warning Page.
+     * @param $msg Warning message.
+     * @return Stage object.
+     */
+    private Stage stageWarning(String $msg) {
+        // Elements' containers
+        Stage stage = new Stage();
+        Table table = new Table();
+        TextButton close = new TextButton("确认", skin);
+        close.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                mainStage = stageMainPage();
+            }
+        });
+        table.setFillParent(true);
 
+        // Show them
+        final float WD_W_CT = (float)(WD_W*0.5);
+        Window window = new Window(" 警 告 ", skin);
+        ScrollPane innerPane = new ScrollPane(new Label($msg, skin), skin);
+        window.defaults().spaceBottom(10);
+        window.setSize(WD_W, WD_H);
+        window.setPosition(0, 0, Align.center);
+        innerPane.setFadeScrollBars(true);
+        innerPane.setSize((int)(WD_W * 0.95f), (int)(WD_H * 0.95f));
+        innerPane.setPosition(WD_W_CT, WD_H, Align.top | Align.center);
+        close.setPosition(WD_W - 5, 5, Align.bottomRight);
+        
+        // Add actors
+        table.addActor(window);
+        table.addActor(innerPane);
+        table.addActor(close);
+        stage.addActor(table);
+        Gdx.input.setInputProcessor(stage);
+        return stage;
+    }
+
+    /* Functional Area */
+    /** Initialize the preview of model.
+     */
     private void initPreview() {
-        preview = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.36f);
-        preview.setCanvas(WD_W, WD_H, 25, new Color(.70f, .78f, .86f, 1f));
-        preview.setPositionTar(400, 10, 0);
-        preview.setPositionCur(1);
-        preview.setPositionTar(400, 10, -1);
-        preview.setAnimation(new AnimCtrl("Relax", true, false));
+        try {
+            preview = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.36f);
+            preview.setCanvas(WD_W, WD_H, 25, new Color(.70f, .78f, .86f, 1f));
+            preview.setPositionTar(400, 10, 0);
+            preview.setPositionCur(1);
+            preview.setPositionTar(400, 10, -1);
+            Behavior[] candidateBehaviors = {new BehaviorOperBuild2(config), new BehaviorOperBuild(config)};
+            Behavior behavior = Behavior.selectBehavior(preview.anim_list, candidateBehaviors);
+            if (behavior == null) {
+                preview = null;
+                mainStage = stageWarning("此类模型可能尚未被本应用支持");
+                return;
+            }
+            preview.setAnimation(behavior.defaultAnim());
+        } catch(Exception e) {
+            preview = null;
+            mainStage = stageWarning("加载模型预览时发生了错误\n"+e.toString());
+            return;
+        }
     }
 
     /** Run the EmbeddedLauncher to launch the ArkPets app.
@@ -249,10 +313,10 @@ public class ArkHome extends ApplicationAdapter {
         try {
             JavaProcess.exec(EmbeddedLauncher.class);
         } catch (IOException e) {
-            System.out.println("CAUGHT: IOException >>\n");
+            Gdx.app.error("error", "CAUGHT: IOException");
             e.printStackTrace();
         } catch (InterruptedException e) {
-            System.out.println("CAUGHT: InterruptException >>\n");
+            Gdx.app.error("error", "CAUGHT: InterruptException");
             e.printStackTrace();
         }
     }

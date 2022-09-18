@@ -1,5 +1,7 @@
 package com.isharryh.arkpets.behaviors;
 
+import java.lang.reflect.InvocationTargetException;
+
 import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.utils.AICtrl;
 import com.isharryh.arkpets.utils.AnimCtrl;
@@ -71,6 +73,30 @@ public class Behavior {
                 return j;
         }
         return -1;
+    }
+
+    /** Select a matched behavior object from a behavior-list.
+     * @param $animList
+     * @param $candidateBehaviors
+     * @return Behavior object.
+     */
+    final public static Behavior selectBehavior(String[] $animList, Behavior[] $candidateBehaviors) {
+        for (int i = 0; i < $candidateBehaviors.length; i++) {
+            try {
+                if ($candidateBehaviors[i].getClass().getMethod("match", String[].class)
+                        .invoke(null, (Object)$animList).equals(true))
+                    return $candidateBehaviors[i];
+            } catch (IllegalAccessException e) {
+                continue;
+            } catch (InvocationTargetException e) {
+                continue;
+            } catch (NoSuchMethodException e) {
+                continue;
+            } catch (SecurityException e) {
+                continue;
+            }
+        }
+        return null;
     }
 
     /** Get the default animation.
