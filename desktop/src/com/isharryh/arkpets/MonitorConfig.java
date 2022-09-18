@@ -1,3 +1,6 @@
+/** Copyright (c) 2022, Harry Huang
+ * At GPL-3.0 License
+ */
 package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Graphics.DisplayMode;

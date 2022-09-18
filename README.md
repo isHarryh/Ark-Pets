@@ -26,28 +26,28 @@ This project only supports Chinese docs. If you are an English user, feel free t
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
 #### 详细步骤
-1. **配置运行环境：**本项目使用**Java**开发，您首先需要配置**Java运行环境(JRE)**，如已配置请跳过此步。您可以网络搜索`JRE环境配置`找到相关教程，通常来说流程如下：
+1. 配置运行环境：本项目使用`Java`开发，您首先需要配置`Java运行环境(JRE)`，如已配置请跳过此步。您可以网络搜索`JRE环境配置`找到相关教程，通常来说流程如下：
     1. 官网下载JRE安装包：[前往页面](https://www.java.com/download)；
     2. 运行安装包并根据提示完成安装。
-2. **下载ArkPets：**[前往页面]下载`.jar`格式的程序文件。
-3. **获取明日方舟Spine动画小人(下简称“模型”)文件：**本项目不会内置这些模型文件，您需要自己下载或解包模型文件以供程序使用：
+2. 下载ArkPets：[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载`.jar`格式的程序文件。
+3. 获取明日方舟Spine动画小人(下简称“模型”)文件：本项目不会内置这些模型文件，您需要自己下载或解包模型文件以供程序使用：
     1. 方法一(推荐)：
         1. 作者已将本项目支持的所有模型文件上传至GitHub仓库，您可以直接前往下载：[前往页面](https://github.com/isHarryh/Ark-Models)，该仓库不定期更新；
         2. 下载压缩包后，解压其中的文件。
     2. 方法二(较为复杂)：
         1. 使用[ArkUnpacker](https://github.com/isHarryh/Ark-Unpacker)之类的解包工具解包出游戏资源文件；
         2. 然后从里面筛选模型文件出来，一套模型文件包括`.png`、`.atlas`、`.skel`三种文件。
-4. **将模型文件放到指定目录中：**确保你的文件夹结构如下：
+4. 将模型文件放到指定目录中：确保你的文件夹结构如下：
 > 根目录  
-> ├─ Models(存放模型文件)  
-> │..├─ 002_amiya(一套模型一个文件夹单独存放)  
+> ├─ Models (存放模型文件)  
+> │..├─ 002_amiya (一套模型一个文件夹单独存放)  
 > │..│..├─ xxxx.atlas  
 > │..│..├─ xxxx.png  
 > │..│..└─ xxxx.skel  
 > │..├─ 003_kalts  
 > │..├─ 009_12fce  
 > │..├─ ……  
-> └─ ArkPets.jar(ArkPets主程序)  
+> └─ ArkPets.jar (ArkPets主程序)  
 5. 运行`.jar`文件即可。
 
 ## 许可证 <sub>License</sub>

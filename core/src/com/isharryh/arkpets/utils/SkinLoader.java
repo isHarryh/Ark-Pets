@@ -1,3 +1,6 @@
+/** Copyright (c) 2022, Harry Huang
+ * At GPL-3.0 License
+ */
 package com.isharryh.arkpets.utils;
 
 import com.badlogic.gdx.utils.Json;
