@@ -22,7 +22,6 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.isharryh.arkpets.utils.JavaProcess;
 import com.isharryh.arkpets.utils.SkinLoader;
 import com.isharryh.arkpets.behaviors.*;
-import com.isharryh.arkpets.utils.AnimCtrl;
 import com.isharryh.arkpets.utils.AssetCtrl;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -217,7 +216,15 @@ public class ArkHome extends ApplicationAdapter {
                 config.saveConfig();
             }
         });
-        
+
+        // Help button
+        TextButton tButton2 = new TextButton("使用手册", skin);
+        tButton2.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                Gdx.net.openURI("https://github.com/isHarryh/Ark-Pets#ark-pets");
+            }
+        });
 
         // Add actors
         table.addActor(hGroups[0]);
@@ -227,6 +234,7 @@ public class ArkHome extends ApplicationAdapter {
         table.addActor(cBoxs[1]);
         table.addActor(cBoxs[2]);
         table.addActor(tButton1);
+        table.addActor(tButton2);
         
         // Merge table & stage 
         ScrollPane sPane = new ScrollPane(table, skin);
@@ -244,6 +252,7 @@ public class ArkHome extends ApplicationAdapter {
         cBoxs[1].setPosition(WD_W_CT, WD_H -165);
         cBoxs[2].setPosition(10, WD_H - 195);
         tButton1.setPosition(WD_W_CT, 5);
+        tButton2.setPosition(10, 5);
         return stage;
     }
 
