@@ -46,10 +46,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void create() {
 		// When the APP was created
+		config = ArkConfig.init();
 		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
 		ScreenUtils.clear(0, 0, 0, 0);
-		ArkConfig config = ArkConfig.init();
 		// Window Setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
@@ -142,7 +142,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			return false;
 			Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
 		mouse_drag = false;
-		cha.setAnimation(behavior.clickEnd());
+		AnimCtrl newAnim = behavior.clickEnd();
+		if (newAnim != null) {
+			if (newAnim.OFFSET_Y != OFFSET_Y) {
+				OFFSET_Y = newAnim.OFFSET_Y;
+			}
+			cha.setAnimation(newAnim);
+		}
 		return true;
 	}
 
@@ -218,7 +224,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		final HWND HWND_TOPMOST = new HWND(Pointer.createConstant(-1));
 		if (HWND_MINE == null || HWND_TOPMOST == null)
 			return false;
-		WD_poscur.set(x > 0 ? x : 0, y > 0 ? y : 0);
+		WD_poscur.set(
+				x > 0 ? (x < config.display_monitor_info[0] - WD_W ? x : config.display_monitor_info[0] - WD_W) : 0,
+				y > 0 ? (y < config.display_monitor_info[1] - WD_H ? y : config.display_monitor_info[1] - WD_H) : 0
+		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
 			WD_poseas.eX.curValue = WD_poscur.x;
