@@ -2,7 +2,7 @@ Ark-Pets
 ==========
 Arknights Desktop Pets.  
 明日方舟桌宠  
-版本(Version)`v1.0`
+版本(Version)`v1.1`
 
 This project only supports Chinese docs. If you are an English user, feel free to contact us.
 
@@ -22,6 +22,9 @@ This project only supports Chinese docs. If you are an English user, feel free t
 以下内容可能在接下来的数个版本内得到实现：
 1. 模拟重力场以允许桌宠自由落体
 2. 支持模拟游戏内敌方小人的行为
+
+#### 更新日志
+[查看CHANGELOG](CHANGELOG.md)
 
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
