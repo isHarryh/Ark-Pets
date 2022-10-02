@@ -42,10 +42,6 @@ public class BehaviorOperBuild extends Behavior {
         return new AnimCtrl("Relax", true, true);
     }
 
-    public AnimCtrl clickStart() {
-        return null;
-    }
-
     public AnimCtrl clickEnd() {
         return config.behavior_allow_interact?new AnimCtrl("Interact", false, false,
                 new AnimCtrl("Relax", true, true)) : null;
@@ -55,7 +51,8 @@ public class BehaviorOperBuild extends Behavior {
         return action_list[0].ANIM;
     }
 
-    public AnimCtrl dragEnd() {
-        return null;
+    public AnimCtrl drop() {
+        return config.behavior_allow_interact?new AnimCtrl("Interact", false, false,
+                new AnimCtrl("Relax", true, true)) : null;
     }
 }

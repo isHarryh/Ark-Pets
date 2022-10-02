@@ -117,23 +117,30 @@ public class Behavior {
     }
 
     /** Get the animation when mouse-up.
-     * @return
+     * @return AnimCtrl object.
      */
     public AnimCtrl clickEnd() {
         return null;
     }
 
     /** Get the animation when user start dragging.
-     * @return
+     * @return AnimCtrl object.
      */
     public AnimCtrl dragStart() {
         return null;
     }
 
     /** Get the animation when user end dragging.
-     * @return
+     * @return AnimCtrl object.
      */
     public AnimCtrl dragEnd() {
+        return null;
+    }
+
+    /** Get the animation when character dropped.
+     * @return AnimCtrl object.
+     */
+    public AnimCtrl drop() {
         return null;
     }
 }
