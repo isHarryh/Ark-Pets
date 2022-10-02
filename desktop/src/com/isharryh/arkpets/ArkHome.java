@@ -89,7 +89,6 @@ public class ArkHome extends ApplicationAdapter {
      */
     private Stage stageMainPage() {
         // Elements' containers
-        TextButton tButton1;
         HorizontalGroup[] hGroups;
         SelectBox[] sBoxs;
         CheckBox[] cBoxs;
@@ -103,7 +102,7 @@ public class ArkHome extends ApplicationAdapter {
         cBoxs = new CheckBox[5];
 
         // Text buttons
-        tButton1 = new TextButton("启动", skin);
+        TextButton tButton1 = new TextButton("启动", skin);
         tButton1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent iEvent, float a, float b) {
@@ -217,6 +216,19 @@ public class ArkHome extends ApplicationAdapter {
             }
         });
 
+        // Set Margin
+        Slider slider1 = new Slider(0, 120, 5, false, skin);
+        Label slider1Lable1 = new Label("下边界距离", skin);
+        Label slider1Lable2 = new Label(String.valueOf(config.display_margin_bottom), skin);
+        slider1.setValue(config.display_margin_bottom);
+        slider1.addListener(new ChangeListener() {
+            public void changed (ChangeEvent event, Actor actor) {
+                config.display_margin_bottom = (int)slider1.getValue();
+                slider1Lable2.setText((int)slider1.getValue());
+                config.saveConfig();
+            }
+        });
+
         // Help button
         TextButton tButton2 = new TextButton("使用手册", skin);
         tButton2.addListener(new ClickListener() {
@@ -235,6 +247,9 @@ public class ArkHome extends ApplicationAdapter {
         table.addActor(cBoxs[2]);
         table.addActor(tButton1);
         table.addActor(tButton2);
+        table.addActor(slider1);
+        table.addActor(slider1Lable1);
+        table.addActor(slider1Lable2);
         
         // Merge table & stage 
         ScrollPane sPane = new ScrollPane(table, skin);
@@ -249,10 +264,13 @@ public class ArkHome extends ApplicationAdapter {
         hGroups[1].setPosition(10, WD_H - 65);
         hGroups[3].setPosition(10, WD_H - 105);
         cBoxs[0].setPosition(10, WD_H - 165);
-        cBoxs[1].setPosition(WD_W_CT, WD_H -165);
+        cBoxs[1].setPosition(WD_W_CT, WD_H - 165);
         cBoxs[2].setPosition(10, WD_H - 195);
         tButton1.setPosition(WD_W_CT, 5);
         tButton2.setPosition(10, 5);
+        slider1.setPosition(150, WD_H - 250);
+        slider1Lable1.setPosition(10, WD_H - 250);
+        slider1Lable2.setPosition(110, WD_H - 250);
         return stage;
     }
 
