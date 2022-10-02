@@ -1,5 +1,11 @@
 # 更新日志 / CHANGELOG
 
+## v1.2
+#### 新增
+1. [`ff1531`](https://github.com/isHarryh/Ark-Pets/commit/ff15314933cb17eab210475f326943911f5b3258) 新增了摔落动作，以搭配平面重力场使用，同时也移除了拖拽结束动作。
+2. [`11b097`](https://github.com/isHarryh/Ark-Pets/commit/11b09770582d7e36548021ec844983627db2f163) 新增了平面重力场系统的模拟实现。
+3. [`11b097`](https://github.com/isHarryh/Ark-Pets/commit/11b09770582d7e36548021ec844983627db2f163) 新增了主页面的“下边界距离”调节滑块。
+
 ## v1.1
 #### 新增
 1. [`4603ab`](https://github.com/isHarryh/Ark-Pets/commit/4603ab020d62f13592e36d771f8525721656970c) 新增了主界面的“使用手册”按钮，点击后可跳转到GitHub仓库主页。

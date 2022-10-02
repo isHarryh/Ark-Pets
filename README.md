@@ -2,7 +2,7 @@ Ark-Pets
 ==========
 Arknights Desktop Pets.  
 明日方舟桌宠  
-版本(Version)`v1.1`
+版本(Version)`v1.2`
 
 This project only supports Chinese docs. If you are an English user, feel free to contact us.
 
@@ -17,11 +17,15 @@ This project only supports Chinese docs. If you are an English user, feel free t
     3. 基建小人能够被鼠标点击交互
     4. 基建小人能够被鼠标拖拽移动
     5. 基建小人能够执行基建动作(如有)
+    5. 基建小人能够在摔落时播放交互动画
+5. 支持模拟平面重力场(NEW)
+    1. 桌宠在被拖拽到空中时能够自由落体
+    2. 桌宠会受地面摩擦力和空气阻力作用
+    3. 桌宠活动范围的下边界距离可以调整
 
 #### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
-1. 模拟重力场以允许桌宠自由落体
-2. 支持模拟游戏内敌方小人的行为
+1. 支持模拟游戏内敌方小人的行为
 
 #### 更新日志
 [查看CHANGELOG](CHANGELOG.md)
@@ -43,13 +47,13 @@ This project only supports Chinese docs. If you are an English user, feel free t
 4. 将模型文件放到指定目录中：确保你的文件夹结构如下：
 > 根目录  
 > ├─ Models (存放模型文件)  
-> │..├─ 002_amiya (一套模型一个文件夹单独存放)  
-> │..│..├─ xxxx.atlas  
-> │..│..├─ xxxx.png  
-> │..│..└─ xxxx.skel  
-> │..├─ 003_kalts  
-> │..├─ 009_12fce  
-> │..├─ ……  
+> │  ├─ 002_amiya (一套模型一个文件夹单独存放)  
+> │  │  ├─ xxxx.atlas  
+> │  │  ├─ xxxx.png  
+> │  │  └─ xxxx.skel  
+> │  ├─ 003_kalts  
+> │  ├─ 009_12fce  
+> │  ├─ ……  
 > └─ ArkPets.jar (ArkPets主程序)  
 5. 运行`.jar`文件即可。
 
