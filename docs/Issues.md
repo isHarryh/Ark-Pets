@@ -11,6 +11,7 @@ ArkPets附加说明文档
 1. [`#2`](https://github.com/isHarryh/Ark-Pets/issues/2) 小人有时候会陷入任务栏。
 2. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/3) 多个模型交叠时会导致堆叠顺序频繁更新，引发闪烁。
 3. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/3) 模型在空中自由落体时开始行走会使其做匀速直线运动。
+4. [`#5`](https://github.com/isHarryh/Ark-Pets/issues/5) 小人在空中被右键后不会落下。
 
 ## 不是漏洞 <sub>Not Bug</sub>
 1. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 小人边界裁剪问题。
