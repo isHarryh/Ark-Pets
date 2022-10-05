@@ -30,6 +30,9 @@ This project only supports Chinese docs. If you are an English user, feel free t
 #### 更新日志
 [查看CHANGELOG](CHANGELOG.md)
 
+#### 已有议题
+提交Issue前必看[这里](docs/Issues.md)
+
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
 #### 详细步骤
@@ -56,6 +59,9 @@ This project only supports Chinese docs. If you are an English user, feel free t
 > │  ├─ ……  
 > └─ ArkPets.jar (ArkPets主程序)  
 5. 运行`.jar`文件即可。
+
+#### 常见问题解答
+[前往页面](docs/Q%26A.md)
 
 ## 许可证 <sub>License</sub>
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
