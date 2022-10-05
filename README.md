@@ -60,6 +60,10 @@ This project only supports Chinese docs. If you are an English user, feel free t
 > └─ ArkPets.jar (ArkPets主程序)  
 5. 运行`.jar`文件即可。
 
+#### 备用步骤
+如果您使用上述步骤还是无法使用ArkPets，最快的解决方法是换一条路走：使用我们的`.exe`文件代替`.jar`（没错，这种方法无需安装`Java运行环境(JRE)`）。  
+[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载`.exe`格式的程序文件。但毕竟是替代方案，其整体性能还是逊于原始方案的。
+
 #### 常见问题解答
 [前往页面](docs/Q%26A.md)
 
