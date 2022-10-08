@@ -122,6 +122,15 @@ public class Plane {
         return false;
     }
 
+    /** Get the dropping-status of the object.
+     * @return true=dropping.
+     */
+    public boolean getDropping() {
+        if (speed.y != 0)
+            return true;
+        return false;
+    }
+
     /** Update the velocity of the object.
      * @param $deltaTime Delta time (s).
      */

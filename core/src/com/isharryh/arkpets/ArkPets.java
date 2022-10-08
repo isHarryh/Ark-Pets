@@ -110,6 +110,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		} else {
 			newAnim = behavior.dragStart();
 		}
+		if (plane.getDropping())
+			newAnim = null;
 		if (plane.getDropped())
 			newAnim = behavior.drop();
 		
@@ -133,10 +135,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		mouse_pos.set(screenX, screenY);
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
 		Gdx.app.debug("debug", "C↓: "+screenX + ", " + screenY);
-		mouse_pos.set(screenX, screenY);
 		cha.setAnimation(behavior.clickStart());
 		return true;
 	}
@@ -158,9 +160,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		mouse_drag = false;
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
-			Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
+		Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
 		if (!mouse_drag) {
 			AnimCtrl newAnim = behavior.clickEnd();
 			if (newAnim != null) {
@@ -170,7 +173,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				cha.setAnimation(newAnim);
 			}
 		}
-		mouse_drag = false;
 		return true;
 	}
 
