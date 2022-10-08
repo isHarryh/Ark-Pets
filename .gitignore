@@ -7,10 +7,11 @@ test*/
 temp*/
 tmp*/
 models/
+gradle-*-bin/
 
 *.class
 *.jar
 *.log
 *.exe
-ArkPetsCustom.config
 *.zip
+*.config
