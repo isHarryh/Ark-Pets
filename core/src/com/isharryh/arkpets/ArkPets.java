@@ -96,6 +96,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void render() {
 		// When render graphics
 		cha.next();
+		System.out.println(OFFSET_Y);
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX)
 			Gdx.app.log("info", String.valueOf("FPS"+Gdx.graphics.getFramesPerSecond()+", Heap"+(int)(Gdx.app.getJavaHeap()/1024)+"KB"));
 		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime());
@@ -114,19 +115,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			newAnim = null;
 		if (plane.getDropped())
 			newAnim = behavior.drop();
-		
-		if (newAnim != null) {
-			// If need to change animation:
-			if (newAnim.OFFSET_Y != OFFSET_Y) {
-				OFFSET_Y = newAnim.OFFSET_Y;
-			}
-			cha.setAnimation(newAnim);
-		}
+		changeAnimation(newAnim);
 	}
 
 	@Override
 	public void dispose() {
 		Gdx.app.log("event", "AP:Dispose");
+	}
+
+	private void changeAnimation(AnimCtrl animCtrl) {
+		if (animCtrl != null) {
+			// If need to change animation:
+			if (cha.setAnimation(animCtrl))
+				OFFSET_Y = animCtrl.OFFSET_Y;
+		}
 	}
 
 	/* INPUT PROCESS */
@@ -159,20 +161,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {	
+		if (!mouse_drag) {
+			changeAnimation(behavior.clickEnd());
+		}
 		mouse_drag = false;
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
 		Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
-		if (!mouse_drag) {
-			AnimCtrl newAnim = behavior.clickEnd();
-			if (newAnim != null) {
-				if (newAnim.OFFSET_Y != OFFSET_Y) {
-					OFFSET_Y = newAnim.OFFSET_Y;
-				}
-				cha.setAnimation(newAnim);
-			}
-		}
 		return true;
 	}
 

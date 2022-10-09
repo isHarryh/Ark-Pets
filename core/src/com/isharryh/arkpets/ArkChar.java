@@ -68,6 +68,11 @@ public class ArkChar {
     public int f_max; // Count of frames in the animation
     public float f_time; // Duration(Sec) per frame
 
+    /** Initialize an ArkPets character.
+     * @param $fp_atlas The file path of the atlas file.
+     * @param $fp_skel The file path of the skel file.
+     * @param $anim_scale The scale of the character.
+     */
     public ArkChar(String $fp_atlas, String $fp_skel, float $anim_scale) {
         // Initialize configuration
         renderer = new SkeletonRenderer();
@@ -92,7 +97,7 @@ public class ArkChar {
         skeleton.updateWorldTransform();
     }
 
-    public void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
+    private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
         // Load atlas & skel/json files to SkeletonData
         atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
         switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
@@ -123,10 +128,21 @@ public class ArkChar {
         animationState = new AnimationState(asd);
     }
 
+    /** Set the canvas.
+     * @param $anim_width
+     * @param $anim_height
+     * @param $anim_fps
+     */
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps) {
         this.setCanvas($anim_width, $anim_height, $anim_fps, new Color(0, 0, 0, 0));
     }
 
+    /** Set the canvas.
+     * @param $anim_width
+     * @param $anim_height
+     * @param $anim_fps
+     * @param $bgColor
+     */
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps, Color $bgColor) {
         // Transfer params
         anim_width = $anim_width;
@@ -145,6 +161,11 @@ public class ArkChar {
         bgTexture = new Texture(pixmap);
     }
 
+    /** Set the target position.
+     * @param $pos_x
+     * @param $pos_y
+     * @param $flip
+     */
     public void setPositionTar(float $pos_x, float $pos_y, float $flip) {
         // Set target position
         positionTar.set($pos_x, $pos_y, $flip);
@@ -153,6 +174,9 @@ public class ArkChar {
         positionEas.eZ.update($flip);
     }
 
+    /** Set the current position.
+     * @param $deltatTime
+     */
     public void setPositionCur(float $deltaTime) {
         // Set current position
         positionCur.set(positionEas.eX.step($deltaTime), positionEas.eY.step($deltaTime), positionEas.eZ.step($deltaTime));
@@ -161,9 +185,16 @@ public class ArkChar {
         skeleton.updateWorldTransform();
     }
 
-    public void setAnimation(AnimCtrl $animCtrl) {
-        if ($animCtrl != null)
+    /** Set a new animation
+     * @param $animCtrl
+     * @return true=success, false=failure.
+     */
+    public boolean setAnimation(AnimCtrl $animCtrl) {
+        if ($animCtrl != null && (anim_queue[0] == null || anim_queue[0].INTERRUPTABLE)) {
             anim_queue[1] = $animCtrl;
+            return true;
+        }
+        return false;
     }
 
     public void allToImg() {
@@ -203,6 +234,9 @@ public class ArkChar {
         PixmapIO.writePNG(new FileHandle("output/" + name), $pixmap);
     }
 
+    /** Render the animation to batch.
+     * @param $frame
+     */
     public void toScreen(int $frame) {
         // Apply Animation
         setPositionTar(positionTar.x, positionTar.y, positionTar.z);
@@ -220,6 +254,8 @@ public class ArkChar {
         batch.end();
     }
 
+    /** Render the next frame.
+     */
     public void next() {
         if (anim_queue[1] != null) {
             // Update the animation queue if it is null

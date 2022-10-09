@@ -20,7 +20,7 @@ public class BehaviorOperBuild extends Behavior {
                     2f, 30*(config.behavior_allow_walk?1:0)),
             new AICtrl(new AnimCtrl("Move", true, true, 0, -1),
                     2f, 30*(config.behavior_allow_walk?1:0)),
-            new AICtrl(new AnimCtrl("Sit", true, true, 50, 0),
+            new AICtrl(new AnimCtrl("Sit", true, true, (int)config.display_scale * 50, 0),
                     6f, 30*(config.behavior_allow_sit?1:0))
         };
     }
