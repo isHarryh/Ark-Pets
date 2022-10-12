@@ -6,6 +6,7 @@
 2. [`#5`](https://github.com/isHarryh/Ark-Pets/issues/5) [`9648fe`](https://github.com/isHarryh/Ark-Pets/commit/9648fe3089bb7b11b7693e2f61eed54a598b2023) 修复了小人在空中被右键后不会落下的问题。
 3. [`#2`](https://github.com/isHarryh/Ark-Pets/issues/2) [`feaa6f`](https://github.com/isHarryh/Ark-Pets/commit/feaa6fa5ffad183d1bb14f6b8057a6c5e2ba31c6) 修复了基建小人在Sit和不可打断动作(例如Special)同时进行时，窗口的垂直位置表现不正常的问题。
 4. [`feaa6f`](https://github.com/isHarryh/Ark-Pets/commit/feaa6fa5ffad183d1bb14f6b8057a6c5e2ba31c6) 修复了基建小人的Sit动作的窗口垂直偏移值不受图像缩放影响的问题。
+5. [`bcbe4c`](https://github.com/isHarryh/Ark-Pets/commit/bcbe4cbea63406ec15c74cd80e7dbaf7cf9ec0f0) 修复了多个模型堆叠时持续闪烁的问题。
 
 ## v1.2
 #### 新增
