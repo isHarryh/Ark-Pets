@@ -10,12 +10,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
+import java.util.ArrayList;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.utils.AnimCtrl;
+import com.isharryh.arkpets.utils.HWndCtrl;
 import com.isharryh.arkpets.utils.Plane;
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector2;
@@ -28,10 +30,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public ArkConfig config;
 	public Behavior behavior;
 
-	private final String APP_TITLE;
-	private HWND HWND_MINE;
 	private int APP_FPS = 30;
-
 	private final int WD_ORI_W = 140; // Window Origin Width
 	private final int WD_ORI_H = 160; // Window Origin Height
 	private float WD_SCALE; // Window Scale
@@ -96,9 +95,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void render() {
 		// When render graphics
 		cha.next();
-		System.out.println(OFFSET_Y);
-		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX)
+		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			Gdx.app.log("info", String.valueOf("FPS"+Gdx.graphics.getFramesPerSecond()+", Heap"+(int)(Gdx.app.getJavaHeap()/1024)+"KB"));
+		}
 		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime());
 		if (!mouse_drag) {
 			// If no dragging:
@@ -130,6 +129,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				OFFSET_Y = animCtrl.OFFSET_Y;
 		}
 	}
+
 
 	/* INPUT PROCESS */
 	private Vector2 mouse_pos = new Vector2();
@@ -195,12 +195,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	/* WINDOW API */
+	private final String APP_TITLE;
+	private HWND HWND_MINE;
+
 	private boolean intiWindow(int x, int y) {
 		if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
             if (HWND_MINE == null)
                 return false;
-		final HWND HWND_TOPMOST = new HWND(Pointer.createConstant(-1));
+		final HWND HWND_TOPMOST = refreshWindowIdx();
 		//final int WL_TRAN_ON = 262160;
 		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
@@ -215,6 +218,63 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return true;
 	}
 
+	private boolean setWindowPos(int x, int y, boolean override) {
+		final HWND HWND_TOPMOST = refreshWindowIdx();
+		if (HWND_MINE == null || HWND_TOPMOST == null)
+			return false;
+		WD_poscur.set(
+				x > 0 ? (x < SCR_W - WD_W ? x : SCR_W - WD_W) : 0,
+				y > 0 ? (y < SCR_H - WD_H ? y : SCR_H - WD_H) : 0
+		);
+		if (override) {
+			setWindowPosTar(WD_poscur.x, WD_poscur.y);
+			WD_poseas.eX.curValue = WD_poscur.x;
+			WD_poseas.eY.curValue = WD_poscur.y;
+			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
+			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
+		}
+		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, (int)WD_poscur.x, (int)WD_poscur.y,
+			0, 0, WinUser.SWP_NOSIZE);
+		return true;
+	}
+
+	private HWND refreshWindowIdx() {
+		ArrayList<HWndCtrl> windowList = HWndCtrl.getWindowList(true);
+		HWND minWindow = null;
+		int minNum = 2048;
+		int myNum = getArkPetsWindowNum(APP_TITLE);
+		for (HWndCtrl hWndCtrl : windowList) {
+			if (getArkPetsWindowNum(hWndCtrl.windowText) > myNum && getArkPetsWindowNum(hWndCtrl.windowText) < minNum) {
+				minNum = getArkPetsWindowNum(hWndCtrl.windowText);
+				minWindow = hWndCtrl.hWnd;
+			}
+		}
+		minWindow = (minWindow == null) ? new HWND(Pointer.createConstant(-1)) : minWindow;
+		return minWindow;
+	}
+
+	private int getArkPetsWindowNum(String title) {
+		final String prefix = "ArkPets";
+		final String prefix2 = " (";
+		final String suffix = ")";
+		if (title != null && !title.isEmpty()) {
+			try {
+				if (title.indexOf(prefix) == 0) {
+					if (title.equals(prefix))
+						return 0;
+					if (title.indexOf(prefix+prefix2) == 0)
+						if (title.lastIndexOf(suffix) == title.length()-suffix.length())
+							return Integer.valueOf(title.substring(prefix.length()+prefix2.length(), title.length()-suffix.length()));
+				}
+			} catch (Exception e) {
+				Gdx.app.log("warning", e.toString());
+				return -1;
+			}
+		}
+		return -1;
+	}
+
+	/* WINDOW OPERATION RELATED */
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
@@ -238,25 +298,5 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void setWindowPosCur(float $deltaTime) {
 		WD_poscur.set(WD_poseas.eX.step($deltaTime), WD_poseas.eY.step($deltaTime));
 		setWindowPos((int)WD_poscur.x, (int)WD_poscur.y, false);
-	}
-
-	private boolean setWindowPos(int x, int y, boolean override) {
-		final HWND HWND_TOPMOST = new HWND(Pointer.createConstant(-1));
-		if (HWND_MINE == null || HWND_TOPMOST == null)
-			return false;
-		WD_poscur.set(
-				x > 0 ? (x < config.display_monitor_info[0] - WD_W ? x : config.display_monitor_info[0] - WD_W) : 0,
-				y > 0 ? (y < config.display_monitor_info[1] - WD_H ? y : config.display_monitor_info[1] - WD_H) : 0
-		);
-		if (override) {
-			setWindowPosTar(WD_poscur.x, WD_poscur.y);
-			WD_poseas.eX.curValue = WD_poscur.x;
-			WD_poseas.eY.curValue = WD_poscur.y;
-			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
-			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
-		}
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, (int)WD_poscur.x, (int)WD_poscur.y,
-			0, 0, WinUser.SWP_NOSIZE);
-		return true;
 	}
 }
