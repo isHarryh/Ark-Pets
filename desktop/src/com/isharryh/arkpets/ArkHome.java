@@ -340,6 +340,10 @@ public class ArkHome extends ApplicationAdapter {
     /** Run the EmbeddedLauncher to launch the ArkPets app.
      */
     private void startArkPets() {
+        mainStage.dispose();
+        skin.dispose();
+        preview = null;
+        System.gc();
         try {
             JavaProcess.exec(EmbeddedLauncher.class);
         } catch (IOException e) {
