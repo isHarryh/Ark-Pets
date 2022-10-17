@@ -7,15 +7,8 @@ ArkPets附加说明文档
 ## 致命漏洞 <sub>Critical Bug</sub>
 - [ ] [`#8`](https://github.com/isHarryh/Ark-Pets/issues/8) 模型文件夹使用生僻字会导致启动器闪退。
 
-## 确是漏洞 <sub>Bug</sub>
-- [x] [`feaa6f`](https://github.com/isHarryh/Ark-Pets/commit/feaa6fa5ffad183d1bb14f6b8057a6c5e2ba31c6)已修复[`#2`](https://github.com/isHarryh/Ark-Pets/issues/2)  
-小人有时候会陷入任务栏。
-- [x] [`bcbe4c`](https://github.com/isHarryh/Ark-Pets/commit/bcbe4cbea63406ec15c74cd80e7dbaf7cf9ec0f0)已修复[`#3`](https://github.com/isHarryh/Ark-Pets/issues/3)  
-多个模型交叠时会导致堆叠顺序频繁更新，引发闪烁。
-- [x] [`9648fe`](https://github.com/isHarryh/Ark-Pets/commit/9648fe3089bb7b11b7693e2f61eed54a598b2023)已修复[`#3`](https://github.com/isHarryh/Ark-Pets/issues/3)  
-模型在空中自由落体时开始行走会使其做匀速直线运动。
-- [x] [`9648fe`](https://github.com/isHarryh/Ark-Pets/commit/9648fe3089bb7b11b7693e2f61eed54a598b2023)已修复[`#5`](https://github.com/isHarryh/Ark-Pets/issues/5)  
-小人在空中被右键后不会落下。
+## 一般漏洞 <sub>Bug</sub>
+在`v1.3`版本中暂未发现一般漏洞。先前版本的已修复的漏洞，在版本迭代后将从此页面移除。
 
 ## 不是漏洞 <sub>Not Bug</sub>
 - [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 小人边界裁剪问题。

@@ -2,7 +2,7 @@ Ark-Pets
 ==========
 Arknights Desktop Pets.  
 明日方舟桌宠  
-版本(Version)`v1.2`
+版本(Version)`v1.3`
 
 This project only supports Chinese docs. If you are an English user, feel free to contact us.
 
@@ -26,6 +26,8 @@ This project only supports Chinese docs. If you are an English user, feel free t
 #### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
 1. 支持模拟游戏内敌方小人的行为
+2. 支持使小人站立在窗口上
+3. 支持搜索模型名称
 
 #### 更新日志
 [查看CHANGELOG](CHANGELOG.md)
@@ -37,16 +39,13 @@ This project only supports Chinese docs. If you are an English user, feel free t
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
 #### 详细步骤
 1. 配置运行环境：本项目使用`Java`开发，您首先需要配置`Java运行环境(JRE)`，如已配置请跳过此步。您可以网络搜索`JRE环境配置`找到相关教程，通常来说流程如下：
-    1. 官网下载JRE安装包：[前往页面](https://www.java.com/download)；
+    1. 官网下载JRE安装包：[前往下载](https://www.java.com/download)；
     2. 运行安装包并根据提示完成安装。
-2. 下载ArkPets：[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载`.jar`格式的程序文件。
-3. 获取明日方舟Spine动画小人(下简称“模型”)文件：本项目不会内置这些模型文件，您需要自己下载或解包模型文件以供程序使用：
-    1. 方法一(推荐)：
-        1. 作者已将本项目支持的所有模型文件上传至GitHub仓库，您可以直接前往下载：[前往页面](https://github.com/isHarryh/Ark-Models)，该仓库不定期更新；
-        2. 下载压缩包后，解压其中的文件。
-    2. 方法二(较为复杂)：
-        1. 使用[ArkUnpacker](https://github.com/isHarryh/Ark-Unpacker)之类的解包工具解包出游戏资源文件；
-        2. 然后从里面筛选模型文件出来，一套模型文件包括`.png`、`.atlas`、`.skel`三种文件。
+2. 下载ArkPets：[前往下载](https://github.com/isHarryh/Ark-Pets/releases)下载`.jar`格式的程序文件。
+3. 获取明日方舟Spine动画小人(下简称“模型”)文件：本项目不会内置这些模型文件，您需要自己获取模型文件以供程序使用，获取流程如下：
+    1. 作者已将本项目支持的所有模型文件上传至GitHub仓库，您可以直接前往下载：[前往仓库](https://github.com/isHarryh/Ark-Models)，该仓库不定期更新；
+    2. 下载压缩包后，解压其中的文件夹`models`。
+    3. 想要了解其他获取模型的方法，请看[这里](docs/GetModels.md)。
 4. 将模型文件放到指定目录中：确保你的文件夹结构如下：
 > 根目录  
 > ├─ Models (存放模型文件)  
