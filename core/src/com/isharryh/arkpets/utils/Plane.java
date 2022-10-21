@@ -3,13 +3,18 @@
  */
 package com.isharryh.arkpets.utils;
 
+import java.util.ArrayList;
+
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.sun.jna.platform.win32.User32;
 
 
 public class Plane {
     public Vector2 position;
     public Vector2 speed;
     public Vector2 speedLimit;
+    public ArrayList<Vector3> barriers;
     private Vector2 world;
     private Vector2 obj;
     private float gravity = 0;
@@ -28,6 +33,7 @@ public class Plane {
         position = new Vector2(0, 0);
         speed = new Vector2(0, 0);
         speedLimit = new Vector2(0, 0);
+        barriers = new ArrayList<Vector3>();
         world = new Vector2($worldWidth, $worldHeight);
         obj = new Vector2(0, 0);
         gravity = $gravity;
@@ -78,11 +84,9 @@ public class Plane {
      * @param $y New y-position (px).
      */
     public void changePosition(float $deltaTime, float $x, float $y) {
-        $x = limitX($x);
-        $y = limitY($y);
         speed.set(($x-position.x)/$deltaTime, ($y-position.y)/$deltaTime);
-        // System.out.println("Speed "+speed.x+"\t"+speed.y);
         position.set($x, $y);
+        position.set(limitX($x), limitY($y));
     }
 
     /** Update the position of the object.
@@ -92,9 +96,19 @@ public class Plane {
         updateVelocity($deltaTime);
         float deltaX = speed.x * $deltaTime;
         float deltaY = speed.y * $deltaTime;
-        if (position.y != borderBottom() && limitY(deltaY + position.y) == borderBottom())
+        if (position.y != borderBottom() && limitY(deltaY + position.y) == borderBottom()) {
             dropped = true;
+            speed.y = 0;
+        }
+        // System.out.println("Y:delta"+deltaY+",speed"+speed.y+",bottom"+borderBottom()+",want"+(deltaY+position.y)+",limit"+limitY(deltaY + position.y));
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
+    }
+
+    public void setBarrier(float $posTop, float $posLeft, float $width, boolean $overCover) {
+        if ($overCover)
+            barriers.add(0, new Vector3($posLeft, $posTop, $width));
+        else
+            barriers.add(new Vector3($posLeft, $posTop, $width));
     }
 
     /** Get the x-position of the object.
@@ -139,8 +153,9 @@ public class Plane {
         final float TOP = borderTop();
         // Gravity
         speed.y -= gravity * $deltaTime;
-        if (position.y == BOTTOM)
+        if (position.y == BOTTOM) {
             speed.y = 0;
+        }
         else if (position.y == TOP && speed.y > 0)
             speed.y = 0;
         // Ground friction
@@ -197,6 +212,11 @@ public class Plane {
      * @return Y (px).
      */
     private float borderBottom() {
+        for (Vector3 i : barriers) {
+            if (i.x <= position.x-obj.x && position.x <= i.x+i.z)
+                if (Math.abs(position.y) <= Math.abs(i.y))
+                    return obj.y < 0 ? i.y - obj.y : i.y;
+        }
         if (world.y > 0)
             return obj.y < 0 ? -obj.y : 0;
         else

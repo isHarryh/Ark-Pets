@@ -43,15 +43,27 @@ public class HWndCtrl {
         windowHeight = posBottom-posTop;
     }
 
+    /** Empty HWnd Controller instance.
+     */
+    public HWndCtrl() {
+        hWnd = null;
+        windowText = null;
+        windowPointer = null;
+        posTop = 0;
+        posBottom = 0;
+        posLeft = 0;
+        posRight = 0;
+        windowWidth = posRight-posLeft;
+        windowHeight = posBottom-posTop;
+    }
+
     /** Judge whether the window is visible.
      * @return true=visible, false=invisible.
      */
     public boolean isVisible() {
-        if (!User32.INSTANCE.IsWindowVisible(hWnd))
+        if (!User32.INSTANCE.IsWindowVisible(hWnd) || !User32.INSTANCE.IsWindowEnabled(hWnd))
             return false;
-        if (windowWidth <= 0 || windowHeight <= 0)
-            return false;
-        if (posBottom < 0 || posRight < 0)
+        if (windowWidth <= 0 || windowHeight <= 0|| posBottom < 0 || posRight < 0)
             return false;
         return true;
     }
@@ -72,8 +84,10 @@ public class HWndCtrl {
         Iterator<HWndCtrl> iter = windowList.iterator();
         while(iter.hasNext()){
             HWndCtrl hWndCtrl = iter.next();
-            if (!User32.INSTANCE.IsWindow(hWndCtrl.hWnd) || ($only_visible && !hWndCtrl.isVisible()))
+            if (!User32.INSTANCE.IsWindow(hWndCtrl.hWnd) || ($only_visible && !hWndCtrl.isVisible())) {
                 iter.remove();
+                continue;
+            }
         }
 		return windowList;
     }
