@@ -1,9 +1,8 @@
 buildscript {
     repositories {
-        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
         mavenLocal()
+        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
         mavenCentral()
-        gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 
@@ -19,21 +18,15 @@ allprojects {
     ext {
         appName = "ArkPets"
         gdxVersion = '1.11.0'
-        roboVMVersion = '2.3.16'
-        box2DLightsVersion = '1.5'
-        ashleyVersion = '1.7.4'
-        aiVersion = '1.8.2'
-        gdxControllersVersion = '2.2.1'
+        jnaVersion = '5.12.1'
     }
 
     repositories {
-        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
         mavenLocal()
+        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
         mavenCentral()
-        gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
-        maven { url "https://jitpack.io" }
     }
 }
 
@@ -59,8 +52,8 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         // JNA
-        implementation "net.java.dev.jna:jna:5.12.1"
-        implementation "net.java.dev.jna:jna-platform:5.12.1"
+        implementation "net.java.dev.jna:jna:$jnaVersion"
+        implementation "net.java.dev.jna:jna-platform:$jnaVersion"
         // FastJson
         implementation "com.alibaba:fastjson:1.2.78"
     }
