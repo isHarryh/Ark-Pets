@@ -8,7 +8,7 @@ ArkPets附加说明文档
 - [ ] [`#8`](https://github.com/isHarryh/Ark-Pets/issues/8) 模型文件夹使用生僻字会导致启动器闪退。
 
 ## 一般漏洞 <sub>Bug</sub>
-在`v1.3`版本中暂未发现一般漏洞。先前版本的已修复的漏洞，在版本迭代后将从此页面移除。
+在当前版本中暂未发现一般漏洞。先前版本的已修复的漏洞，在版本迭代后将从此页面移除。
 
 ## 不是漏洞 <sub>Not Bug</sub>
 - [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 小人边界裁剪问题。
@@ -19,8 +19,18 @@ ArkPets附加说明文档
 3. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 在选择小人模型的界面添加中文索引或搜索框。
 4. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加开机自启动的功能。
 5. [`#9`](https://github.com/isHarryh/Ark-Pets/issues/9) 增加锁定小人动作的功能。
+6. [`#11`](https://github.com/isHarryh/Ark-Pets/issues/11) 增加小人碰到左右边缘后反弹的功能。
 
 ## 难以实现的建议 <sub>Hard Nut</sub>
 1. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/4) 以一个实例同时处理多个模型。
 2. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加多显示器的跨桌面功能。
 3. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加一个爬墙功能。
+
+
+# 议题规范
+我们会及时查看新提交的Issue并给予积极回复，在您提交Issue前，请您：
+- 不要提交重复的Issue，已有Issue参见上文。
+- 在撰写Issue时描述您使用的程序版本。
+- Issue标题命名示例：
+    - `[Bug] XXXXX`
+    - `[Enhancement] XXXXX`
