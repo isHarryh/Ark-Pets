@@ -15,6 +15,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
+
 import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.utils.AnimCtrl;
 import com.isharryh.arkpets.utils.HWndCtrl;
@@ -126,7 +127,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (animCtrl != null) {
 			// If need to change animation:
 			if (cha.setAnimation(animCtrl))
-				OFFSET_Y = animCtrl.OFFSET_Y;
+				OFFSET_Y = (int)(animCtrl.OFFSET_Y * config.display_scale);
 		}
 	}
 
@@ -224,7 +225,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			return false;
 		WD_poscur.set(
 				x > 0 ? (x < SCR_W - WD_W ? x : SCR_W - WD_W) : 0,
-				y > 0 ? (y < SCR_H - WD_H ? y : SCR_H - WD_H) : 0
+				y > 0 ? (y < SCR_H - WD_H + OFFSET_Y ? y : SCR_H - WD_H + OFFSET_Y) : 0
 		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
