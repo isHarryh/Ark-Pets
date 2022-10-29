@@ -39,31 +39,37 @@ This project only supports Chinese docs. If you are an English user, feel free t
 
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
-### 详细步骤
-1. 配置运行环境：本项目使用`Java`开发，您首先需要配置`Java运行环境(JRE)`，如已配置请跳过此步。您可以网络搜索`JRE环境配置`找到相关教程，通常来说流程如下：
-    1. 官网下载JRE安装包：[前往下载](https://www.java.com/download)；
-    2. 运行安装包并根据提示完成安装。
-2. 下载ArkPets：[前往下载](https://github.com/isHarryh/Ark-Pets/releases)下载`.jar`格式的程序文件。
-3. 获取明日方舟Spine动画小人(下简称“模型”)文件：本项目不会内置这些模型文件，您需要自己获取模型文件以供程序使用，获取流程如下：
-    1. 作者已将本项目支持的所有模型文件上传至GitHub仓库，您可以直接前往下载：[前往仓库](https://github.com/isHarryh/Ark-Models)，该仓库不定期更新；
-    2. 下载压缩包后，解压其中的文件夹`models`。
-    3. 想要了解其他获取模型的方法，请看[这里](docs/GetModels.md)。
-4. 将模型文件放到指定目录中：确保你的文件夹结构如下：
+
+### 1.下载程序
+<details><summary>A.我想通过Java运行环境运行</summary>
+
+1. **配置环境**：配置`Java运行环境(JRE)`，如已配置请跳过此步。您需要在[Java官网下载](https://www.java.com/download)JRE安装包，然后根据安装包的提示完成安装。
+2. **下载ArkPets.jar**：[前往这里](https://github.com/isHarryh/Ark-Pets/releases)下载`.jar`格式的程序文件。
+</details>
+
+<details><summary>B.我不想安装Java运行环境或方法A不行</summary>
+
+1. **下载ArkPets_Setup.exe**：[前往这里](https://github.com/isHarryh/Ark-Pets/releases)下载`.exe`格式的程序文件。
+2. **安装**：根据上面下载的安装包的提示完成安装。
+</details>
+
+### 2.模型获取
+下载安装后，您需要获取明日方舟Spine动画小人(下简称“模型”)文件：本项目不会内置这些模型文件，您需要自己获取模型文件以供程序使用，流程如下：
+1. 作者已将本项目支持的所有模型文件上传至GitHub仓库，您可以直接前往下载：[前往仓库](https://github.com/isHarryh/Ark-Models)，该仓库不定期更新；
+2. 下载压缩包后，解压其中的文件夹`models`。
+3. 想要了解其他获取模型的方法，请看[这里](docs/GetModels.md)。
+4. 将模型文件夹放到<u>程序所在目录</u>中，并<u>确保</u>你的文件夹结构如下：
 > 根目录  
 > ├─ Models (存放模型文件)  
-> │  ├─ 002_amiya (一套模型一个文件夹单独存放)  
+> │  ├─ 002_amiya (一套模型由一个文件夹单独存放)  
 > │  │  ├─ xxxx.atlas  
 > │  │  ├─ xxxx.png  
 > │  │  └─ xxxx.skel  
 > │  ├─ 003_kalts  
 > │  ├─ 009_12fce  
-> │  ├─ ……  
+> │  └─ ……  
 > └─ ArkPets.jar (ArkPets主程序)  
-5. 运行`.jar`文件即可。
-
-### 备用步骤
-如果您使用上述步骤还是无法使用ArkPets，最快的解决方法是换一条路走：使用我们的`.exe`文件代替`.jar`（没错，这种方法无需安装`Java运行环境(JRE)`）。  
-[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载`.exe`格式的程序文件。但毕竟是替代方案，其整体性能还是逊于原始方案的。
+5. 运行程序文件即可开始使用，如有任何问题可[查阅文档](#相关文档)。
 
 ## 许可证 <sub>License</sub>
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。

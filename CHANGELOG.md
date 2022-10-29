@@ -9,6 +9,10 @@
 1. [`aeed29a`](https://github.com/isHarryh/Ark-Pets/commit/aeed29a9bf25db445ef15801a83172e1b84d1ccd) 修复了基建小人的Sit动作的渲染偏移受图像缩放的影响被放大的问题。
 2. [`#10`](https://github.com/isHarryh/Ark-Pets/issues/10) [`aeed29a`](https://github.com/isHarryh/Ark-Pets/commit/aeed29a9bf25db445ef15801a83172e1b84d1ccd) 修复了基建小人的Sit动作的窗口垂直位置不能低于屏幕下边界，导致在某些情况下浮空的问题。
 
+#### 优化
+1. 不再使用[EVB](https://lifeinhex.com/tag/enigma-virtual-box)封装exe版的Release，现在采用[InnoSetup](https://jrsoftware.org/isinfo.php)来封装exe。
+2. 微调了重力场系统的质点最大速度限制。
+
 ## v1.3
 #### 修复
 1. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/3) [`9648fe3`](https://github.com/isHarryh/Ark-Pets/commit/9648fe3089bb7b11b7693e2f61eed54a598b2023) 修复了模型在空中自由落体时开始行走会使其做匀速直线运动的问题。

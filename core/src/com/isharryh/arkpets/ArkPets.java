@@ -113,7 +113,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			newAnim = behavior.dragStart();
 		}
 		if (plane.getDropping())
-			newAnim = null;
+			newAnim = behavior.defaultAnim();
 		if (plane.getDropped())
 			newAnim = behavior.drop();
 		changeAnimation(newAnim);
