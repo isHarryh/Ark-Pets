@@ -19,7 +19,6 @@ ArkPets附加说明文档
 3. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 在选择小人模型的界面添加中文索引或搜索框。
 4. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加开机自启动的功能。
 5. [`#9`](https://github.com/isHarryh/Ark-Pets/issues/9) 增加锁定小人动作的功能。
-6. [`#11`](https://github.com/isHarryh/Ark-Pets/issues/11) 增加小人碰到左右边缘后反弹的功能。
 
 ## 难以实现的建议 <sub>Hard Nut</sub>
 1. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/4) 以一个实例同时处理多个模型。
@@ -32,5 +31,6 @@ ArkPets附加说明文档
 - 不要提交重复的Issue，已有Issue参见上文。
 - 在撰写Issue时描述您使用的程序版本。
 - Issue标题命名示例：
-    - `[Bug] XXXXX`
-    - `[Enhancement] XXXXX`
+    - `[Bug] XXXXX` 普遍发生的程序问题
+    - `[Enhancement] XXXXX` 改进建议和功能追加
+    - `[Exception] XXXXX` 少数设备上出现的异常情况
