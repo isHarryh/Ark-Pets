@@ -14,9 +14,7 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
@@ -46,9 +44,6 @@ public class ArkChar {
     public EasingLinearVector3 positionEas;
     public int offset_y;
     public Matrix4 transform;
-
-    private FrameBuffer fbo;
-    private TextureRegion fboRegion;
 
     private TextureAtlas atlas;
     private Skeleton skeleton;
@@ -197,25 +192,7 @@ public class ArkChar {
         return false;
     }
 
-    public void allToImg() {
-        // Initialize the FBO & texture region
-        fbo = new FrameBuffer(Pixmap.Format.RGBA8888, anim_width, anim_height, false);
-        fboRegion = new TextureRegion(fbo.getColorBufferTexture());
-        // Create a pixmap of the same size
-        Pixmap pixmap = new Pixmap(anim_width, anim_height, Format.RGBA8888);
-
-        // Render every frames
-        fbo.begin();
-        for (int f_now = 1; f_now <= f_max; f_now += 1) {
-            toImg(pixmap, f_now);
-        }
-        fbo.end();
-        pixmap.dispose();
-        // Terminate without showing a window
-        System.exit(0);
-    }
-
-    private void toImg(Pixmap $pixmap, int $frame) {
+    public void toImg(Pixmap $pixmap, int $frame) {
         // Apply Animation
         animation.apply(skeleton, ($frame - 1) * f_time, ($frame - 1) * f_time, false, null, 1, MixBlend.first, MixDirection.in);
         skeleton.updateWorldTransform();
