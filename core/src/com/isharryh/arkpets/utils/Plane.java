@@ -154,7 +154,7 @@ public class Plane {
      * @return true=dropping.
      */
     public boolean getDropping() {
-        if (speed.y != 0)
+        if (position.y != borderBottom())
             return true;
         return false;
     }

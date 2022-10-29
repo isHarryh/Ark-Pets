@@ -12,6 +12,7 @@
 #### 优化
 1. 不再使用[EVB](https://lifeinhex.com/tag/enigma-virtual-box)封装exe版的Release，现在采用[InnoSetup](https://jrsoftware.org/isinfo.php)来封装exe。
 2. 微调了重力场系统的质点最大速度限制。
+3. 微调了重力场系统的质点完全失重判定规则。
 
 ## v1.3
 #### 修复
