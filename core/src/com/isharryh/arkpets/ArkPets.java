@@ -72,8 +72,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		// Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
+		plane.setBounce(0);
 		plane.setObjSize(WD_W, -WD_H);
-		plane.setSpeedLimit(SCR_W * 0.25f, SCR_H * 0.75f);
+		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1f);
 		plane.changePosition(0, WD_postar.x, -WD_postar.y);
 		Gdx.graphics.setForegroundFPS(APP_FPS);
 		Gdx.input.setInputProcessor(this);
@@ -242,16 +243,40 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private HWND refreshWindowIdx() {
 		ArrayList<HWndCtrl> windowList = HWndCtrl.getWindowList(true);
 		HWND minWindow = null;
+		HWndCtrl[] line = new HWndCtrl[SCR_H];
+		int myPos = (int)(WD_poscur.x + WD_W / 2);
 		int minNum = 2048;
 		int myNum = getArkPetsWindowNum(APP_TITLE);
 		for (HWndCtrl hWndCtrl : windowList) {
+			// Find windows as ground
+			if ((getArkPetsWindowNum(hWndCtrl.windowText) == -1) && hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
+				// This window IS in the vertical line that the app lies.
+				if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
+					for (int h = hWndCtrl.posTop<0?0:hWndCtrl.posTop; h < (hWndCtrl.posBottom>SCR_H?SCR_H:hWndCtrl.posBottom); h++) {
+						if (line[h] == null)
+							line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl();
+					}
+				}
+			}
+			// Find the last peer window.
 			if (getArkPetsWindowNum(hWndCtrl.windowText) > myNum && getArkPetsWindowNum(hWndCtrl.windowText) < minNum) {
 				minNum = getArkPetsWindowNum(hWndCtrl.windowText);
 				minWindow = hWndCtrl.hWnd;
 			}
 		}
-		minWindow = (minWindow == null) ? new HWND(Pointer.createConstant(-1)) : minWindow;
-		return minWindow;
+		minWindow = (minWindow == null) ? new HWND(Pointer.createConstant(-1)) : minWindow; // Set as the top window if there is no peer.
+		if (plane != null) {
+			// Reset barriers
+			plane.barriers.clear();
+			for (int h = 0; h < SCR_H; h++) {
+				HWndCtrl temp = line[h];
+				if (temp != null && temp.hWnd != null) {
+					plane.setBarrier(-temp.posTop, 0, SCR_W, false);
+					//System.out.println("Barrier at "+(-temp.posTop)+" is "+temp.windowText+" pos "+temp.posLeft+","+temp.posRight);
+				}
+			}
+		}
+		return minWindow; // Return the last peer window.
 	}
 
 	private int getArkPetsWindowNum(String title) {

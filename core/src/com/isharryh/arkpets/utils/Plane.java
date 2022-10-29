@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.sun.jna.platform.win32.User32;
 
 
 public class Plane {
@@ -17,6 +16,7 @@ public class Plane {
     public ArrayList<Vector3> barriers;
     private Vector2 world;
     private Vector2 obj;
+    private float bounce = 0;
     private float gravity = 0;
     private float airFrict = 0;
     private float staticFrict = 0;
@@ -36,6 +36,7 @@ public class Plane {
         barriers = new ArrayList<Vector3>();
         world = new Vector2($worldWidth, $worldHeight);
         obj = new Vector2(0, 0);
+        bounce = 0;
         gravity = $gravity;
         airFrict = 0;
         staticFrict = 0;
@@ -49,6 +50,13 @@ public class Plane {
      */
     public Plane(int $worldWidth, int $worldHeight) {
         this($worldWidth, $worldHeight, 0);
+    }
+
+    /** Set the bounce coefficient.
+     * @param $bounce The ratio of Ek to be reserved after the bounce.
+     */
+    public void setBounce(float $bounce) {
+        bounce = $bounce > 1 ? 1 : ($bounce < 0 ? 0 : $bounce);
     }
 
     /** Set the frictions.
@@ -104,6 +112,12 @@ public class Plane {
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
     }
 
+    /** Set a line barrier that can support the object.
+     * @param $posTop The y-position of the barrier.
+     * @param $posLeft The x-position of the barrier's left edge.
+     * @param $posRight The x-position of the barrier's right edge.
+     * @param $overCover Whether to set the highest priority to this barrier.
+     */
     public void setBarrier(float $posTop, float $posLeft, float $width, boolean $overCover) {
         if ($overCover)
             barriers.add(0, new Vector3($posLeft, $posTop, $width));
@@ -169,6 +183,10 @@ public class Plane {
             speed.x = Math.signum(speed.x) * speedLimit.x;
         if (speedLimit.y != 0 && Math.abs(speed.y) > speedLimit.y)
             speed.y = Math.signum(speed.y) * speedLimit.y;
+        // Bounce
+        if (bounce != 0 && (position.x == borderLeft() || position.x == borderRight())) {
+            speed.x = (float)(Math.sqrt(speed.x * speed.x * bounce) * Math.signum(-speed.x));
+        }
     }
 
     /** Apply a friction to a velocity.
