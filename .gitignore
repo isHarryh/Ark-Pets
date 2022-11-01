@@ -2,12 +2,13 @@ bin/
 build/
 cache/
 dist/
+jre/
+models/
 .gradle/
 .lwjgl/
 test*/
 temp*/
 tmp*/
-models/
 gradle-*-bin/
 
 *.class

@@ -268,7 +268,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (plane != null) {
 			// Reset barriers
 			plane.barriers.clear();
-			for (int h = 0; h < SCR_H; h++) {
+			for (int h = WD_H; h < SCR_H; h++) {
 				HWndCtrl temp = line[h];
 				if (temp != null && temp.hWnd != null) {
 					plane.setBarrier(-temp.posTop, 0, SCR_W, false);

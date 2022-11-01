@@ -152,7 +152,7 @@ public class ArkHome extends ApplicationAdapter {
 
         // Set Scale
         sBoxs[1] = new SelectBox<String>(skin);
-        sBoxs[1].setItems(0.5f, 1.0f, 2.0f);
+        sBoxs[1].setItems(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f);
         for (int i = 0; i < sBoxs[1].getItems().size; i++) {
             if (ArkConfig.compare(sBoxs[1].getItems().get(i), config.display_scale))
                 sBoxs[1].setSelectedIndex(i);
