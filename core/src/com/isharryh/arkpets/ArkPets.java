@@ -19,6 +19,7 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.utils.AnimCtrl;
 import com.isharryh.arkpets.utils.HWndCtrl;
+import com.isharryh.arkpets.utils.LoopCtrl;
 import com.isharryh.arkpets.utils.Plane;
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector2;
@@ -31,13 +32,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public ArkConfig config;
 	public Behavior behavior;
 
+	private HWND HWND_TOPMOST;
+	private LoopCtrl regetHWndLoopCtrl;
+
 	private int APP_FPS = 30;
 	private final int WD_ORI_W = 140; // Window Origin Width
 	private final int WD_ORI_H = 160; // Window Origin Height
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
-
 	private int SCR_W; // Screen Width
 	private int SCR_H; // Screen Height
 
@@ -67,6 +70,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		SCR_W = (int) config.display_monitor_info[0];
 		SCR_H = (int) config.display_monitor_info[1];
 		APP_FPS = config.display_fps;
+		regetHWndLoopCtrl = new LoopCtrl(1 / APP_FPS * 4);
 		intiWindow(100, SCR_H / 2);
 		setWindowPosTar(100, SCR_H / 2);
 		// Plane setup
@@ -79,7 +83,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Gdx.graphics.setForegroundFPS(APP_FPS);
 		Gdx.input.setInputProcessor(this);
 		// Character setup
-		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.36f);
+		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
 		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
 		// Behavior setup
 		if (BehaviorOperBuild2.match(cha.anim_list))
@@ -205,7 +209,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
             if (HWND_MINE == null)
                 return false;
-		final HWND HWND_TOPMOST = refreshWindowIdx();
+		HWND_TOPMOST = refreshWindowIdx();
 		//final int WL_TRAN_ON = 262160;
 		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
@@ -221,9 +225,16 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	private boolean setWindowPos(int x, int y, boolean override) {
-		final HWND HWND_TOPMOST = refreshWindowIdx();
-		if (HWND_MINE == null || HWND_TOPMOST == null)
+		if (HWND_MINE == null)
 			return false;
+		if (regetHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
+			HWND new_hwnd_topmost = refreshWindowIdx();
+			if (new_hwnd_topmost != HWND_TOPMOST || HWND_TOPMOST == null) {
+				HWND_TOPMOST = new_hwnd_topmost;
+				if (x == WD_poscur.x && y == WD_poscur.y)
+					return false;
+			}
+		}
 		WD_poscur.set(
 				x > 0 ? (x < SCR_W - WD_W ? x : SCR_W - WD_W) : 0,
 				y > 0 ? (y < SCR_H - WD_H + OFFSET_Y ? y : SCR_H - WD_H + OFFSET_Y) : 0
