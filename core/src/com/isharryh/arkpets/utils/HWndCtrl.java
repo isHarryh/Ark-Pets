@@ -4,7 +4,6 @@
 package com.isharryh.arkpets.utils;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -73,35 +72,52 @@ public class HWndCtrl {
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible) {
         windowList = new ArrayList<HWndCtrl>();
-        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
-			@Override
-			public boolean callback(HWND hWnd, Pointer arg1) {
-				windowList.add(new HWndCtrl(hWnd));
-                return true;
-			}
-		}, null);
-        Iterator<HWndCtrl> iter = windowList.iterator();
-        while(iter.hasNext()){
-            HWndCtrl hWndCtrl = iter.next();
-            if (!User32.INSTANCE.IsWindow(hWndCtrl.hWnd) || ($only_visible && !hWndCtrl.isVisible())) {
-                iter.remove();
-                continue;
-            }
+        if ($only_visible) {
+            User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
+                @Override
+                public boolean callback(HWND hWnd, Pointer arg1) {
+                    if (User32.INSTANCE.IsWindow(hWnd) && isVisible(hWnd))
+                        windowList.add(new HWndCtrl(hWnd));
+                    return true;
+                }
+            }, null);
+        } else {
+            User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
+                @Override
+                public boolean callback(HWND hWnd, Pointer arg1) {
+                    if (User32.INSTANCE.IsWindow(hWnd))
+                        windowList.add(new HWndCtrl(hWnd));
+                    return true;
+                }
+            }, null);
         }
 		return windowList;
     }
 
-    private Pointer getWindowIdx(HWND $hWnd) {
+    static private boolean isVisible(HWND $hWnd) {
+        if (!User32.INSTANCE.IsWindowVisible($hWnd) || !User32.INSTANCE.IsWindowEnabled($hWnd))
+            return false;
+        RECT rect = getWindowRect($hWnd);
+        int posTop = rect.top;
+        int posBottom = rect.bottom;
+        int posLeft = rect.left;
+        int posRight = rect.right;
+        if (posRight <= posLeft || posBottom <= posTop || posBottom < 0 || posRight < 0)
+            return false;
+        return true;
+    }
+
+    static private Pointer getWindowIdx(HWND $hWnd) {
         return $hWnd.getPointer();
     }
 
-    private String getWindowText(HWND $hWnd) {
+    static private String getWindowText(HWND $hWnd) {
         char[] text = new char[512];
 		User32.INSTANCE.GetWindowText($hWnd, text, 512);
 		return Native.toString(text);
     }
 
-    private RECT getWindowRect(HWND $hWnd) {
+    static private RECT getWindowRect(HWND $hWnd) {
         RECT rect = new RECT();
 		User32.INSTANCE.GetWindowRect($hWnd, rect);
         return rect;
