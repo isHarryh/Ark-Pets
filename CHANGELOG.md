@@ -6,8 +6,8 @@
 2. [`#13`](https://github.com/isHarryh/Ark-Pets/issues/13) [`61908a0`](https://github.com/isHarryh/Ark-Pets/commit/61908a0023980a7ff6affee3b8814a77c92585cf) 修复了在部分设备上由内存抖动引发的卡顿问题，大幅度降低了性能消耗。
 
 #### 优化
-1. [`67a0c66`] (https://github.com/isHarryh/Ark-Pets/commit/67a0c66b9ec0f713d581d5062e9c0098226b39d0) 不再以较高频率获取窗口句柄，一定程度降低了性能消耗。
-2. [`67a0c66`] (https://github.com/isHarryh/Ark-Pets/commit/67a0c66b9ec0f713d581d5062e9c0098226b39d0) 不再在非必要时重设窗口的位置，一定程度降低了性能消耗。
+1. [`67a0c66`](https://github.com/isHarryh/Ark-Pets/commit/67a0c66b9ec0f713d581d5062e9c0098226b39d0) 不再以较高频率获取窗口句柄，一定程度降低了性能消耗。
+2. [`67a0c66`](https://github.com/isHarryh/Ark-Pets/commit/67a0c66b9ec0f713d581d5062e9c0098226b39d0) 不再在非必要时重设窗口的位置，一定程度降低了性能消耗。
 3. 微调了小人的缩放相关常量，略微缓解了小人图像超出窗口边界的问题。
 4. 微调了小人的自定义缩放设置项，已支持0.75/1.25/1.5倍的图像缩放。
 
