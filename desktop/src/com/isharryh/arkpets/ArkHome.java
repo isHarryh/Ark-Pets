@@ -326,7 +326,7 @@ public class ArkHome extends ApplicationAdapter {
             Behavior behavior = Behavior.selectBehavior(preview.anim_list, candidateBehaviors);
             if (behavior == null) {
                 preview = null;
-                mainStage = stageWarning("此类模型可能尚未被本应用支持");
+                mainStage = stageWarning("此类模型可能尚未被本应用支持，或者缺少必要的动画名。");
                 return;
             }
             preview.setAnimation(behavior.defaultAnim());
