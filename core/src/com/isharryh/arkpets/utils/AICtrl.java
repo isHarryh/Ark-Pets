@@ -11,7 +11,7 @@ public class AICtrl {
     public final AnimCtrl ANIM;
 
     /** AI Controller Instance.
-     * @param $name The action name.
+     * @param $animCtrl The AnimCtrl.
      * @param $duration_min The minimal loop-action duration(seconds).
      * @param $weight The weight to call this action.
      */

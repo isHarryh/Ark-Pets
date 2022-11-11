@@ -41,7 +41,6 @@ public class ArkConfig {
     }
 
     /** Save the config to the custom file.
-     * @param content
      */
     public void saveConfig() {
         configCustom.writeString(readConfig(), false);
@@ -50,10 +49,10 @@ public class ArkConfig {
     /** Instantiate an ArkConfig.
      * @return ArkConfig object.
      */
-    public static ArkConfig init() throws JSONException {
-        if (configCustom.exists() && !configCustom.isDirectory()) {
+    public static ArkConfig init() {
+        if (!configCustom.exists() || configCustom.isDirectory()) {
+            configDefault.copyTo(configCustom);
         }
-        else configDefault.copyTo(configCustom);
         return JSONObject.parseObject(configCustom.readString("UTF-8"), ArkConfig.class);
     }
 
@@ -73,7 +72,6 @@ public class ArkConfig {
         if (rowId < 2) {
             if (rowId <= 0)
                 return "\0"; // Illegal rowId
-            curA = 0;
             curB = fullText.indexOf(spl);
         } else {
             for (int i = 1; i < rowId; i++) {

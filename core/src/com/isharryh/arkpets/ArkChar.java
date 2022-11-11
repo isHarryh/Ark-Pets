@@ -45,7 +45,6 @@ public class ArkChar {
     public int offset_y;
     public Matrix4 transform;
 
-    private TextureAtlas atlas;
     private Skeleton skeleton;
     private SkeletonRenderer renderer;
     private SkeletonData skeletonData;
@@ -54,13 +53,10 @@ public class ArkChar {
 
     private int anim_width;
     private int anim_height;
-    private float anim_scale;
     public String[] anim_list;
     public AnimCtrl[] anim_queue;
     public FrameCtrl anim_frame;
     public int anim_fps;
-
-    public int f_max; // Count of frames in the animation
     public float f_time; // Duration(Sec) per frame
 
     /** Initialize an ArkPets character.
@@ -83,10 +79,9 @@ public class ArkChar {
         anim_queue = new AnimCtrl[2];
 
         // Transfer params
-        anim_scale = $anim_scale;
 
         // Initialize the Skeleton
-        loadSkeletonData($fp_atlas, $fp_skel, anim_scale);
+        loadSkeletonData($fp_atlas, $fp_skel, $anim_scale);
         skeleton = new Skeleton(skeletonData);
         animationState.apply(skeleton);
         skeleton.updateWorldTransform();
@@ -94,7 +89,7 @@ public class ArkChar {
 
     private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
         // Load atlas & skel/json files to SkeletonData
-        atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
         switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
             case ".skel":
                 SkeletonBinary binary = new SkeletonBinary(atlas);
@@ -118,7 +113,7 @@ public class ArkChar {
         AnimationStateData asd = new AnimationStateData(skeletonData);
         for (String i: anim_list)
             for (String j: anim_list)
-                if (i != j)
+                if (!i.equals(j))
                     asd.setMix(i, j, 0.2f);
         animationState = new AnimationState(asd);
     }
@@ -144,7 +139,7 @@ public class ArkChar {
         anim_height = $anim_height;
         anim_fps = $anim_fps;
         // Set position (center)
-        setPositionTar(anim_width / 2, 0, 1);
+        setPositionTar(anim_width / 2f, 0, 1);
         camera.setToOrtho(false, anim_width, anim_height);
         camera.update();
         batch.getProjectionMatrix().set(camera.combined);
@@ -170,7 +165,7 @@ public class ArkChar {
     }
 
     /** Set the current position.
-     * @param $deltatTime
+     * @param $deltaTime
      */
     public void setPositionCur(float $deltaTime) {
         // Set current position
@@ -241,7 +236,7 @@ public class ArkChar {
             } else {
             // Interrupt the last animation if it is interruptable
             if (anim_queue[0].INTERRUPTABLE)
-                if (anim_queue[1].ANIM_NAME != anim_queue[0].ANIM_NAME)
+                if (!anim_queue[1].ANIM_NAME.equals(anim_queue[0].ANIM_NAME))
                     changeAnimation();
             }
         }

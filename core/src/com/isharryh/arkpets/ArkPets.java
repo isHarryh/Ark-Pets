@@ -67,12 +67,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_SCALE = config.display_scale;
 		WD_W = (int) (WD_SCALE * WD_ORI_W);
 		WD_H = (int) (WD_SCALE * WD_ORI_H);
-		SCR_W = (int) config.display_monitor_info[0];
-		SCR_H = (int) config.display_monitor_info[1];
+		SCR_W = config.display_monitor_info[0];
+		SCR_H = config.display_monitor_info[1];
 		APP_FPS = config.display_fps;
-		regetHWndLoopCtrl = new LoopCtrl(1 / APP_FPS * 4);
+		regetHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
 		intiWindow(100, SCR_H / 2);
-		setWindowPosTar(100, SCR_H / 2);
+		setWindowPosTar(100, SCR_H / 2f);
 		// Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
@@ -102,7 +102,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		// When render graphics
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
-			Gdx.app.log("info", String.valueOf("FPS"+Gdx.graphics.getFramesPerSecond()+", Heap"+(int)(Gdx.app.getJavaHeap()/1024)+"KB"));
+			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) (Gdx.app.getJavaHeap() / 1024) + "KB");
 		}
 		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime());
 		if (!mouse_drag) {
@@ -207,8 +207,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private boolean intiWindow(int x, int y) {
 		if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
-            if (HWND_MINE == null)
-                return false;
+		if (HWND_MINE == null)
+			return false;
 		HWND_TOPMOST = refreshWindowIdx();
 		//final int WL_TRAN_ON = 262160;
 		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
@@ -236,8 +236,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		WD_poscur.set(
-				x > 0 ? (x < SCR_W - WD_W ? x : SCR_W - WD_W) : 0,
-				y > 0 ? (y < SCR_H - WD_H + OFFSET_Y ? y : SCR_H - WD_H + OFFSET_Y) : 0
+				x > 0 ? (Math.min(x, SCR_W - WD_W)) : 0,
+				y > 0 ? (Math.min(y, SCR_H - WD_H + OFFSET_Y)) : 0
 		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
@@ -263,7 +263,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			if ((getArkPetsWindowNum(hWndCtrl.windowText) == -1) && hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
 				// This window IS in the vertical line that the app lies.
 				if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
-					for (int h = hWndCtrl.posTop<0?0:hWndCtrl.posTop; h < (hWndCtrl.posBottom>SCR_H?SCR_H:hWndCtrl.posBottom); h++) {
+					for (int h = Math.max(hWndCtrl.posTop, 0); h < (Math.min(hWndCtrl.posBottom, SCR_H)); h++) {
 						if (line[h] == null)
 							line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl();
 					}

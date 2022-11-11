@@ -106,7 +106,7 @@ public class ArkHome extends ApplicationAdapter {
         tButton1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent iEvent, float a, float b) {
-                if (config.character_recent != "")
+                if (!config.character_recent.equals(""))
                     status = 0;
                 else
                     mainStage = stageWarning("当前未选择任何模型");
@@ -117,7 +117,7 @@ public class ArkHome extends ApplicationAdapter {
         sBoxs[0] = new SelectBox<String>(skin);
         config.display_monitor_info = MonitorConfig.getDefaultMonitorInfo();
         AssetCtrl[] assets = initAssetCtrls(Gdx.files.local("models"));
-        if (assets == null || assets.length <= 0) {
+        if (assets == null || assets.length == 0) {
             sBoxs[0].setItems("未找到模型");
             sBoxs[0].setSelectedIndex(0);
             config.character_recent = "";
@@ -332,8 +332,7 @@ public class ArkHome extends ApplicationAdapter {
             preview.setAnimation(behavior.defaultAnim());
         } catch(Exception e) {
             preview = null;
-            mainStage = stageWarning("加载模型预览时发生了错误\n"+e.toString());
-            return;
+            mainStage = stageWarning("加载模型预览时发生了错误\n" + e);
         }
     }
 
@@ -362,13 +361,13 @@ public class ArkHome extends ApplicationAdapter {
     private boolean hideArkHome(boolean enable) {
         if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
-            if (HWND_MINE == null)
-                return false;
+        if (HWND_MINE == null)
+            return false;
         User32.INSTANCE.ShowWindow(HWND_MINE, enable ? WinUser.SW_HIDE : WinUser.SW_SHOW);
         return true;
     }
 
-    /** Get a array of AssetCtrls in the specific root dir.
+    /** Get an array of AssetCtrls in the specific root dir.
      * @param $rootDir The root dir.
      * @return An array consists of AssetCtrls.
      */
@@ -377,7 +376,7 @@ public class ArkHome extends ApplicationAdapter {
         if (!$rootDir.exists() || !$rootDir.isDirectory())
             return null;
         FileHandle[] fHs = $rootDir.list();
-        ArrayList<AssetCtrl> results = new ArrayList<AssetCtrl>();
+        ArrayList<AssetCtrl> results = new ArrayList<>();
         // Collect assets
         for (FileHandle cur: fHs) { // cur: dir in root dir
             if (!cur.exists() || !cur.isDirectory())

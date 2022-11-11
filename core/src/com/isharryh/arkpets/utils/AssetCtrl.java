@@ -15,7 +15,7 @@ public class AssetCtrl {
 
     /** Spine animation asset controller.
      * @param $name The name of this spine.
-     * @param $f_png The file handle of the atlas file.
+     * @param $f_atlas The file handle of the atlas file.
      */
     public AssetCtrl(String $name, FileHandle $f_atlas) {
         NAME = $name;

@@ -19,19 +19,19 @@ public class SkinLoader {
     }
 
     public static Skin loadSkin(FileHandle fileHandle) {
-        Skin skin = new Skin(fileHandle) {
+        return new Skin(fileHandle) {
             //Override json loader to process FreeType fonts from skin JSON
             @Override
             protected Json getJsonLoader(final FileHandle skinFile) {
                 Json json = super.getJsonLoader(skinFile);
-                final Skin skin = this;
+                final Skin skin1 = this;
                 json.setSerializer(FreeTypeFontGenerator.class, new Json.ReadOnlySerializer<FreeTypeFontGenerator>() {
                     @Override
                     public FreeTypeFontGenerator read(Json json, JsonValue jsonData, Class type) {
                         String path = json.readValue("font", String.class, jsonData);
                         jsonData.remove("font");
 
-                        Hinting hinting = Hinting.valueOf(json.readValue("hinting", 
+                        Hinting hinting = Hinting.valueOf(json.readValue("hinting",
                                 String.class, "AutoMedium", jsonData));
                         jsonData.remove("hinting");
 
@@ -49,7 +49,7 @@ public class SkinLoader {
                         parameter.magFilter = magFilter;
                         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(skinFile.parent().child(path));
                         BitmapFont font = generator.generateFont(parameter);
-                        skin.add(jsonData.name, font);
+                        skin1.add(jsonData.name, font);
                         if (parameter.incremental) {
                             generator.dispose();
                             return null;
@@ -62,8 +62,6 @@ public class SkinLoader {
             }
             //EndOverride
         };
-
-        return skin;
         //EndFunction
     }
 }

@@ -16,17 +16,17 @@ public class Plane {
     public ArrayList<Vector3> barriers;
     private Vector2 world;
     private Vector2 obj;
-    private float bounce = 0;
-    private float gravity = 0;
-    private float airFrict = 0;
-    private float staticFrict = 0;
+    private float bounce;
+    private float gravity;
+    private float airFrict;
+    private float staticFrict;
     private boolean dropped = false;
 
     /** Initialize a plane with gravity field.
      * The origin of coordinates (0,0) is the left-bottom point,
      * and minus(-) is allowed.
      * @param $worldWidth The width of the plane (px).
-     * @param $worldHieght The height of the plane (px).
+     * @param $worldHeight The height of the plane (px).
      * @param $gravity The acceleration of gravity (px/s^2).
      */
     public Plane(int $worldWidth, int $worldHeight, float $gravity) {
@@ -46,7 +46,7 @@ public class Plane {
      * The origin of coordinates (0,0) is the left-bottom point,
      * and minus(-) is allowed.
      * @param $worldWidth The width of the plane (px).
-     * @param $worldHieght The height of the plane (px).
+     * @param $worldHeight The height of the plane (px).
      */
     public Plane(int $worldWidth, int $worldHeight) {
         this($worldWidth, $worldHeight, 0);
@@ -115,7 +115,7 @@ public class Plane {
     /** Set a line barrier that can support the object.
      * @param $posTop The y-position of the barrier.
      * @param $posLeft The x-position of the barrier's left edge.
-     * @param $posRight The x-position of the barrier's right edge.
+     * @param $width The width of the barrier.
      * @param $overCover Whether to set the highest priority to this barrier.
      */
     public void setBarrier(float $posTop, float $posLeft, float $width, boolean $overCover) {
@@ -154,9 +154,7 @@ public class Plane {
      * @return true=dropping.
      */
     public boolean getDropping() {
-        if (position.y != borderBottom())
-            return true;
-        return false;
+        return position.y != borderBottom();
     }
 
     /** Update the velocity of the object.
@@ -195,8 +193,8 @@ public class Plane {
      * @param $deltaTime Delta time (s).
      * @return New velocity (px/s).
      */
-    private float applyFriction(float $speed, float $firct, float $deltaTime) {
-        float delta = Math.signum($speed) * $firct * $deltaTime;
+    private float applyFriction(float $speed, float $frict, float $deltaTime) {
+        float delta = Math.signum($speed) * $frict * $deltaTime;
         return Math.signum($speed - delta) == Math.signum(delta) ? $speed - delta : 0;
     }
 
@@ -205,15 +203,15 @@ public class Plane {
      * @return New x (px).
      */
     private float limitX(float $x) {
-        return $x<borderLeft() ? borderLeft() : ($x>borderRight() ? borderRight() : $x);
+        return $x<borderLeft() ? borderLeft() : (Math.min($x, borderRight()));
     }
 
     /** Limit the y-position to avoid overstepping.
-     * @param $x Y (px).
+     * @param $y Y (px).
      * @return New y (px).
      */
     private float limitY(float $y) {
-        return $y<borderBottom() ? borderBottom() : ($y>borderTop() ? borderTop() : $y);
+        return $y<borderBottom() ? borderBottom() : (Math.min($y, borderTop()));
     }
 
     /** Get the border position of the top.

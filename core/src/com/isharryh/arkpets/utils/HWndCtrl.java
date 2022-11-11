@@ -51,8 +51,8 @@ public class HWndCtrl {
         posBottom = 0;
         posLeft = 0;
         posRight = 0;
-        windowWidth = posRight-posLeft;
-        windowHeight = posBottom-posTop;
+        windowWidth = 0;
+        windowHeight = 0;
     }
 
     /** Judge whether the window is visible.

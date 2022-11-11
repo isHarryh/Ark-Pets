@@ -45,7 +45,7 @@ public class EmbeddedLauncher {
 		HWND hwnd_test = User32.INSTANCE.FindWindow(null, prefix);
 		while (hwnd_test != null) {
 			cnt++;
-			tmp = " (" + String.valueOf(cnt) + ")";
+			tmp = " (" + cnt + ")";
 			hwnd_test = User32.INSTANCE.FindWindow(null, prefix + tmp);
 		}
 		return (prefix + tmp);

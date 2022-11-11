@@ -83,20 +83,16 @@ public class Behavior {
      * @param $candidateBehaviors
      * @return Behavior object.
      */
-    final public static Behavior selectBehavior(String[] $animList, Behavior[] $candidateBehaviors) {
+    public static Behavior selectBehavior(String[] $animList, Behavior[] $candidateBehaviors) {
         for (int i = 0; i < $candidateBehaviors.length; i++) {
             try {
                 if ($candidateBehaviors[i].getClass().getMethod("match", String[].class)
                         .invoke(null, (Object)$animList).equals(true))
                     return $candidateBehaviors[i];
             } catch (IllegalAccessException e) {
-                continue;
             } catch (InvocationTargetException e) {
-                continue;
             } catch (NoSuchMethodException e) {
-                continue;
             } catch (SecurityException e) {
-                continue;
             }
         }
         return null;

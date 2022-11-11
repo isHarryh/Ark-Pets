@@ -17,14 +17,12 @@ This project only supports Chinese docs. If you are an English user, feel free t
     3. 基建小人能够被鼠标点击交互
     4. 基建小人能够被鼠标拖拽移动
     5. 基建小人能够执行基建动作(如有)
-    5. 基建小人能够在摔落时播放交互动画
-    </details>
+    6. 基建小人能够在摔落时播放交互动画
 5. 支持模拟平面重力场 <details><summary>查看详情</summary>
     1. 桌宠在被拖拽到空中时能够自由落体
     2. 桌宠可以站立在打开的窗口的边缘上(NEW)
     3. 桌宠会受地面摩擦力和空气阻力作用
     4. 桌宠活动范围的下边界距离可以调整
-    </details>
 
 ### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
@@ -59,16 +57,16 @@ This project only supports Chinese docs. If you are an English user, feel free t
 2. 下载压缩包后，解压其中的文件夹`models`。
 3. 想要了解其他获取模型的方法，请看[这里](docs/GetModels.md)。
 4. 将模型文件夹放到<u>程序所在目录</u>中，并<u>确保</u>你的文件夹结构如下：
-> 根目录  
-> ├─ Models (存放模型文件)  
-> │  ├─ 002_amiya (一套模型由一个文件夹单独存放)  
-> │  │  ├─ xxxx.atlas  
-> │  │  ├─ xxxx.png  
-> │  │  └─ xxxx.skel  
-> │  ├─ 003_kalts  
-> │  ├─ 009_12fce  
-> │  └─ ……  
-> └─ ArkPets.jar (ArkPets主程序)  
+   > 根目录  
+   > ├─ Models (存放模型文件)  
+   > │  ├─ 002_amiya (一套模型由一个文件夹单独存放)  
+   > │  │  ├─ xxxx.atlas  
+   > │  │  ├─ xxxx.png  
+   > │  │  └─ xxxx.skel  
+   > │  ├─ 003_kalts  
+   > │  ├─ 009_12fce  
+   > │  └─ ……  
+   > └─ ArkPets.jar (ArkPets主程序)
 5. 运行程序文件即可开始使用，如有任何问题可[查阅文档](#相关文档)。
 
 ## 许可证 <sub>License</sub>
