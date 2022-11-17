@@ -90,6 +90,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			behavior = new BehaviorOperBuild2(config);
 		else if (BehaviorOperBuild.match(cha.anim_list))
 			behavior = new BehaviorOperBuild(config);
+		else if (BehaviorOperBuild3.match(cha.anim_list))
+			behavior = new BehaviorOperBuild3(config);
 		else
 			behavior = null; // TODO Throw an error.
 		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());

@@ -33,6 +33,8 @@ public class ArkHome extends ApplicationAdapter {
     private Skin skin;
     private ArkChar preview;
 
+    private Behavior[] candidateBehaviors;
+
     public int WD_W = 500;
     public int WD_H = 310;
     public int status = 1;
@@ -53,6 +55,7 @@ public class ArkHome extends ApplicationAdapter {
 		Gdx.app.log("event", "AH:Create");
         skin = SkinLoader.loadSkin(Gdx.files.internal("newmetalui/metal-ui.json"));
         config = ArkConfig.init();
+        candidateBehaviors = new Behavior[] {new BehaviorOperBuild2(config), new BehaviorOperBuild(config), new BehaviorOperBuild3(config)};
         hideArkHome(false);
 		Gdx.app.log("event", "AH:Render");
         mainStage = stageMainPage();
@@ -322,7 +325,6 @@ public class ArkHome extends ApplicationAdapter {
             preview.setPositionTar(400, 10, 0);
             preview.setPositionCur(1);
             preview.setPositionTar(400, 10, -1);
-            Behavior[] candidateBehaviors = {new BehaviorOperBuild2(config), new BehaviorOperBuild(config)};
             Behavior behavior = Behavior.selectBehavior(preview.anim_list, candidateBehaviors);
             if (behavior == null) {
                 preview = null;

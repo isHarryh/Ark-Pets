@@ -26,7 +26,9 @@ public class BehaviorOperBuild extends Behavior {
     }
 
     public static boolean match(String[] animList) {
-        Array<String> arr = new Array<String>(animList);
+        Array<String> arr = new Array<>(animList);
+        if (!arr.contains("Interact", false))
+            return false;
         if (!arr.contains("Relax", false))
             return false;
         if (!arr.contains("Move", false))

@@ -28,8 +28,10 @@ public class BehaviorOperBuild2 extends Behavior {
     }
 
     public static boolean match(String[] animList) {
-        Array<String> arr = new Array<String>(animList);
+        Array<String> arr = new Array<>(animList);
         if (!arr.contains("Special", false))
+            return false;
+        if (!arr.contains("Interact", false))
             return false;
         if (!arr.contains("Relax", false))
             return false;

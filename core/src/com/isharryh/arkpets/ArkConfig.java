@@ -11,9 +11,9 @@ import com.alibaba.fastjson.JSONObject;
 
 
 public class ArkConfig {
-    private static FileHandle configCustom
+    private static final FileHandle configCustom
             = Gdx.files.local("ArkPetsCustom.config");
-    private static FileHandle configDefault
+    private static final FileHandle configDefault
             = Gdx.files.internal("ArkPetsDefault.config");
 
     // The following is the config items
@@ -23,6 +23,7 @@ public class ArkConfig {
     public int[] display_monitor_info;
     public String character_recent;
     public int     behavior_ai_activation;
+    public boolean behavior_allow_sleep;
     public boolean behavior_allow_walk;
     public boolean behavior_allow_sit;
     public boolean behavior_allow_interact;
@@ -56,7 +57,7 @@ public class ArkConfig {
         return JSONObject.parseObject(configCustom.readString("UTF-8"), ArkConfig.class);
     }
 
-    /** Get a specific row in a long text.
+    /** Get a specific row in a long text. (Discarded)
      * @param fullText The long text.
      * @param rowId The id of the row, start from 1.
      * @return The content of the row.
