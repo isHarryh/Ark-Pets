@@ -52,9 +52,9 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         // JNA
-        implementation "net.java.dev.jna:jna:$jnaVersion"
-        implementation "net.java.dev.jna:jna-platform:$jnaVersion"
+        api "net.java.dev.jna:jna:$jnaVersion"
+        api "net.java.dev.jna:jna-platform:$jnaVersion"
         // FastJson
-        implementation "com.alibaba:fastjson:1.2.78"
+        api "com.alibaba:fastjson:2.0.8"
     }
 }
