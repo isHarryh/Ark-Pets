@@ -33,7 +33,7 @@ public class Plane {
         position = new Vector2(0, 0);
         speed = new Vector2(0, 0);
         speedLimit = new Vector2(0, 0);
-        barriers = new ArrayList<Vector3>();
+        barriers = new ArrayList<>();
         world = new Vector2($worldWidth, $worldHeight);
         obj = new Vector2(0, 0);
         bounce = 0;
@@ -104,8 +104,10 @@ public class Plane {
         updateVelocity($deltaTime);
         float deltaX = speed.x * $deltaTime;
         float deltaY = speed.y * $deltaTime;
-        if (position.y != borderBottom() && limitY(deltaY + position.y) == borderBottom()) {
-            dropped = true;
+        final float borderBottom = borderBottom();
+        if (position.y != borderBottom && limitY(deltaY + position.y) == borderBottom) {
+            if (Math.signum(gravity) * (position.y - borderBottom) > 0)
+                dropped = true;
             speed.y = 0;
         }
         // System.out.println("Y:delta"+deltaY+",speed"+speed.y+",bottom"+borderBottom()+",want"+(deltaY+position.y)+",limit"+limitY(deltaY + position.y));

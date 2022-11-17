@@ -71,7 +71,7 @@ public class HWndCtrl {
      * @return An ArrayList consists of HWndCtrls.
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible) {
-        windowList = new ArrayList<HWndCtrl>();
+        windowList = new ArrayList<>();
         if ($only_visible) {
             User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
                 @Override
@@ -95,15 +95,24 @@ public class HWndCtrl {
     }
 
     static private boolean isVisible(HWND $hWnd) {
-        if (!User32.INSTANCE.IsWindowVisible($hWnd) || !User32.INSTANCE.IsWindowEnabled($hWnd))
+        try {
+            if (!User32.INSTANCE.IsWindowVisible($hWnd) || !User32.INSTANCE.IsWindowEnabled($hWnd))
+                return false;
+            RECT rect = getWindowRect($hWnd);
+            int posTop = rect.top;
+            int posBottom = rect.bottom;
+            int posLeft = rect.left;
+            int posRight = rect.right;
+            if (posRight <= posLeft || posBottom <= posTop || posBottom < 0 || posRight < 0)
+                return false;
+            /*
+            String text = getWindowText($hWnd);
+            if (text.length() == 0)
+                return false;
+            */
+        } catch(Exception e) {
             return false;
-        RECT rect = getWindowRect($hWnd);
-        int posTop = rect.top;
-        int posBottom = rect.bottom;
-        int posLeft = rect.left;
-        int posRight = rect.right;
-        if (posRight <= posLeft || posBottom <= posTop || posBottom < 0 || posRight < 0)
-            return false;
+        }
         return true;
     }
 

@@ -14,6 +14,10 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
 	public static void main (String[] arg) {
+		if (arg.length > 0 && arg[0].equals("--direct-start")) {
+			EmbeddedLauncher.main(arg);
+			return;
+		}
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		// Configure FPS
 		config.setForegroundFPS(30);
