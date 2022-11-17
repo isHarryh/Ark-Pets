@@ -84,11 +84,11 @@ public class Behavior {
      * @return Behavior object.
      */
     public static Behavior selectBehavior(String[] $animList, Behavior[] $candidateBehaviors) {
-        for (int i = 0; i < $candidateBehaviors.length; i++) {
+        for (Behavior $candidateBehavior : $candidateBehaviors) {
             try {
-                if ($candidateBehaviors[i].getClass().getMethod("match", String[].class)
-                        .invoke(null, (Object)$animList).equals(true))
-                    return $candidateBehaviors[i];
+                if ($candidateBehavior.getClass().getMethod("match", String[].class)
+                        .invoke(null, (Object) $animList).equals(true))
+                    return $candidateBehavior;
             } catch (IllegalAccessException e) {
             } catch (InvocationTargetException e) {
             } catch (NoSuchMethodException e) {

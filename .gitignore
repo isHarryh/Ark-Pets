@@ -6,6 +6,7 @@ jre/
 models/
 .gradle/
 .lwjgl/
+out/
 test*/
 temp*/
 tmp*/
