@@ -19,11 +19,16 @@ ArkPets附加说明文档
 3. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 在选择小人模型的界面添加中文索引或搜索框。
 4. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加开机自启动的功能。
 5. [`#9`](https://github.com/isHarryh/Ark-Pets/issues/9) 增加锁定小人动作的功能。
+6. [`#17`](https://github.com/isHarryh/Ark-Pets/issues/17) 增加小人在窗体下边缘的贴靠。
+7. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 抛出小人后使小人立即面向抛掷方向。
+8. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 小人自动行走至窗口边缘后翻转朝向。
+9. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 多个小人重叠时增加碰撞体积。
 
-## 难以实现的建议 <sub>Hard Nut</sub>
+## 未采纳的建议 <sub>Not Planned</sub>
 1. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/4) 以一个实例同时处理多个模型。
 2. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加多显示器的跨桌面功能。
 3. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加一个爬墙功能。
+4. [`#12`](https://github.com/isHarryh/Ark-Pets/issues/12) 实现批量启动。
 
 
 # 议题规范
