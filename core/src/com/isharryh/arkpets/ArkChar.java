@@ -236,7 +236,8 @@ public class ArkChar {
             } else {
             // Interrupt the last animation if it is interruptable
             if (anim_queue[0].INTERRUPTABLE)
-                if (!anim_queue[1].ANIM_NAME.equals(anim_queue[0].ANIM_NAME))
+                if (!anim_queue[1].ANIM_NAME.equals(anim_queue[0].ANIM_NAME)
+                        || anim_queue[1].MOBILITY != anim_queue[0].MOBILITY)
                     changeAnimation();
             }
         }

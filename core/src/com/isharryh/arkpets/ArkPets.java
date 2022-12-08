@@ -113,8 +113,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			// System.out.println((int)plane.getX()+"\t"+(int)-plane.getY());
 			setWindowPosTar(plane.getX(), -plane.getY());
 			setWindowPosCur(Gdx.graphics.getDeltaTime());
-			if (cha.anim_queue[0].MOBILITY != 0)
+			if (cha.anim_queue[0].MOBILITY != 0) {
+				if (willReachBorder(cha.anim_queue[0].MOBILITY)) {
+					// Turn around if auto-walk cause the collision from screen border.
+					newAnim = cha.anim_queue[0];
+					newAnim = new AnimCtrl(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, -newAnim.MOBILITY);
+				}
 				walkWindow(0.85f * cha.anim_queue[0].MOBILITY);
+			}
 		} else {
 			newAnim = behavior.dragStart();
 		}
@@ -326,6 +332,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		float decimal = val - integer;
 		int offset = Math.abs(decimal) >= Math.random() ? (val >= 0 ? 1 : -1) : 0;
 		return integer + offset;
+	}
+
+	private boolean willReachBorder(float len) {
+		if (plane == null) return false;
+		return (plane.getX() >= SCR_W-WD_W && len > 0) || (plane.getX() <= 0 && len < 0);
 	}
 
 	private void setWindowPosTar(float $pos_x, float $pos_y) {
