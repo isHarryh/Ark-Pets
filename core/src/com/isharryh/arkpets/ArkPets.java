@@ -147,6 +147,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	/* INPUT PROCESS */
 	private Vector2 mouse_pos = new Vector2();
+	private int mouse_intention_x = 1;
 	private boolean mouse_drag = false;
 
 	@Override
@@ -167,6 +168,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		mouse_drag = true;
+		int t = (int)Math.signum(screenX - mouse_pos.x);
+		mouse_intention_x = t == 0 ? mouse_intention_x : t;
+		System.out.println(mouse_intention_x);
 		int x = (int)(WD_poscur.x + screenX - mouse_pos.x);
 		int y = (int)(WD_poscur.y + screenY - mouse_pos.y);
 		setWindowPos(x, y, true);
@@ -176,9 +180,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {	
-		if (!mouse_drag) {
+		if (!mouse_drag)
 			changeAnimation(behavior.clickEnd());
-		}
+		else
+			cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
 		mouse_drag = false;
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
