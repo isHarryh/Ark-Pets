@@ -59,7 +59,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		// 1.App setup
 		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
-		Gdx.graphics.setForegroundFPS(APP_FPS);
 		Gdx.input.setInputProcessor(this);
 		config = ArkConfig.init();
 		ScreenUtils.clear(0, 0, 0, 0);
@@ -76,6 +75,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		getHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
 		intiWindow(100, SCR_H / 2);
 		setWindowPosTar(100, SCR_H / 2f);
+		Gdx.graphics.setForegroundFPS(APP_FPS);
 		// 3.Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
@@ -171,7 +171,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		mouse_drag = true;
 		int t = (int)Math.signum(screenX - mouse_pos.x);
 		mouse_intention_x = t == 0 ? mouse_intention_x : t;
-		System.out.println(mouse_intention_x);
 		int x = (int)(WD_poscur.x + screenX - mouse_pos.x);
 		int y = (int)(WD_poscur.y + screenY - mouse_pos.y);
 		setWindowPos(x, y, true);
@@ -329,7 +328,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
-		//Gdx.app.debug("walk", expectedLen+" -> "+realLen);
 		plane.changePosition(Gdx.graphics.getDeltaTime(), WD_postar.x + realLen, -WD_postar.y);
 	}
 
