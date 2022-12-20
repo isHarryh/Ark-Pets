@@ -33,7 +33,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public Behavior behavior;
 
 	private HWND HWND_TOPMOST;
-	private LoopCtrl regetHWndLoopCtrl;
+	private LoopCtrl getHWndLoopCtrl;
 
 	private int APP_FPS = 30;
 	private final int WD_ORI_W = 140; // Window Origin Width
@@ -56,11 +56,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void create() {
 		// When the APP was created
+		// 1.App setup
 		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
+		Gdx.graphics.setForegroundFPS(APP_FPS);
+		Gdx.input.setInputProcessor(this);
 		config = ArkConfig.init();
 		ScreenUtils.clear(0, 0, 0, 0);
-		// Window setup
+		// 2.Window setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
 		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, 0.2f));
@@ -70,22 +73,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		SCR_W = config.display_monitor_info[0];
 		SCR_H = config.display_monitor_info[1];
 		APP_FPS = config.display_fps;
-		regetHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
+		getHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
 		intiWindow(100, SCR_H / 2);
 		setWindowPosTar(100, SCR_H / 2f);
-		// Plane setup
+		// 3.Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
 		plane.setBounce(0);
 		plane.setObjSize(WD_W, -WD_H);
 		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1f);
 		plane.changePosition(0, WD_postar.x, -WD_postar.y);
-		Gdx.graphics.setForegroundFPS(APP_FPS);
-		Gdx.input.setInputProcessor(this);
-		// Character setup
+		// 4.Character setup
 		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
 		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
-		// Behavior setup
+		// 5.Behavior setup
 		if (BehaviorOperBuild2.match(cha.anim_list))
 			behavior = new BehaviorOperBuild2(config);
 		else if (BehaviorOperBuild.match(cha.anim_list))
@@ -96,6 +97,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			behavior = null; // TODO Throw an error.
 		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
+		// Setup complete
 		Gdx.app.log("event", "AP:Render");
 	}
 
@@ -110,7 +112,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (!mouse_drag) {
 			// If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
-			// System.out.println((int)plane.getX()+"\t"+(int)-plane.getY());
 			setWindowPosTar(plane.getX(), -plane.getY());
 			setWindowPosCur(Gdx.graphics.getDeltaTime());
 			if (cha.anim_queue[0].MOBILITY != 0) {
@@ -138,7 +139,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	private void changeAnimation(AnimCtrl animCtrl) {
 		if (animCtrl != null) {
-			// If need to change animation:
+			// If it is needed to change animation:
 			if (cha.setAnimation(animCtrl))
 				OFFSET_Y = (int)(animCtrl.OFFSET_Y * config.display_scale);
 		}
@@ -226,7 +227,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		//final int WL_TRAN_ON = 262160;
 		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
-		if (HWND_MINE == null || HWND_TOPMOST == null)
+		if (HWND_MINE == null)
 			return false;
 		//System.out.println(User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE));
 		//User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, enable ? WL_TRAN_ON : WL_TRAN_OFF);
@@ -240,9 +241,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private boolean setWindowPos(int x, int y, boolean override) {
 		if (HWND_MINE == null)
 			return false;
-		if (regetHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
+		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
 			HWND new_hwnd_topmost = refreshWindowIdx();
-			if (new_hwnd_topmost != HWND_TOPMOST || HWND_TOPMOST == null) {
+			if (new_hwnd_topmost != HWND_TOPMOST) {
 				HWND_TOPMOST = new_hwnd_topmost;
 				if (x == WD_poscur.x && y == WD_poscur.y)
 					return false;
@@ -314,7 +315,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 						return 0;
 					if (title.indexOf(prefix+prefix2) == 0)
 						if (title.lastIndexOf(suffix) == title.length()-suffix.length())
-							return Integer.valueOf(title.substring(prefix.length()+prefix2.length(), title.length()-suffix.length()));
+							return Integer.parseInt(title.substring(prefix.length()+prefix2.length(), title.length()-suffix.length()));
 				}
 			} catch (Exception e) {
 				Gdx.app.log("warning", e.toString());
