@@ -20,9 +20,7 @@ ArkPets附加说明文档
 4. [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4) 增加开机自启动的功能。
 5. [`#9`](https://github.com/isHarryh/Ark-Pets/issues/9) 增加锁定小人动作的功能。
 6. [`#17`](https://github.com/isHarryh/Ark-Pets/issues/17) 增加小人在窗体下边缘的贴靠。
-7. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 抛出小人后使小人立即面向抛掷方向。
-8. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 小人自动行走至窗口边缘后翻转朝向。
-9. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 多个小人重叠时增加碰撞体积。
+7. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) 多个小人重叠时增加碰撞体积。
 
 ## 未采纳的建议 <sub>Not Planned</sub>
 1. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/4) 以一个实例同时处理多个模型。
@@ -35,7 +33,7 @@ ArkPets附加说明文档
 我们会及时查看新提交的Issue并给予积极回复，在您提交Issue前，请您：
 - 不要提交重复的Issue，已有Issue参见上文。
 - 在撰写Issue时描述您使用的程序版本。
-- Issue标题命名示例：
+- **Issue标题命名示例：**
     - `[Bug] XXXXX` 普遍发生的程序问题
     - `[Enhancement] XXXXX` 改进建议和功能追加
     - `[Exception] XXXXX` 少数设备上出现的异常情况
