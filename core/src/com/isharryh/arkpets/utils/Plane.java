@@ -10,12 +10,13 @@ import com.badlogic.gdx.math.Vector3;
 
 
 public class Plane {
-    public Vector2 position;
-    public Vector2 speed;
-    public Vector2 speedLimit;
     public ArrayList<Vector3> barriers;
-    private Vector2 world;
-    private Vector2 obj;
+    public ArrayList<Vector3> pointCharges;
+    private final Vector2 obj;
+    private final Vector2 world;
+    private final Vector2 position;
+    private final Vector2 speed;
+    private final Vector2 speedLimit;
     private float bounce;
     private float gravity;
     private float airFrict;
@@ -23,8 +24,8 @@ public class Plane {
     private boolean dropped = false;
 
     /** Initialize a plane with gravity field.
-     * The origin of coordinates (0,0) is the left-bottom point,
-     * and minus(-) is allowed.
+     * The origin of coordinates (0,0) is the left-bottom point.
+     * Minus(-) are allowed, but may not be compatible.
      * @param $worldWidth The width of the plane (px).
      * @param $worldHeight The height of the plane (px).
      * @param $gravity The acceleration of gravity (px/s^2).
@@ -42,16 +43,6 @@ public class Plane {
         staticFrict = 0;
     }
 
-    /** Initialize a plane with gravity field.
-     * The origin of coordinates (0,0) is the left-bottom point,
-     * and minus(-) is allowed.
-     * @param $worldWidth The width of the plane (px).
-     * @param $worldHeight The height of the plane (px).
-     */
-    public Plane(int $worldWidth, int $worldHeight) {
-        this($worldWidth, $worldHeight, 0);
-    }
-
     /** Set the bounce coefficient.
      * @param $bounce The ratio of Ek to be reserved after the bounce.
      */
@@ -59,7 +50,7 @@ public class Plane {
         bounce = $bounce > 1 ? 1 : ($bounce < 0 ? 0 : $bounce);
     }
 
-    /** Set the frictions.
+    /** Set the friction params.
      * @param $airFrict The acceleration of air friction (px/s^2).
      * @param $staticFrict The acceleration of static friction provided by the groud (px/s^2).
      */
@@ -69,7 +60,7 @@ public class Plane {
     }
 
     /** Set the size of the object.
-     * Minus(-) is allowed.
+     * Minus(-) are allowed, but may not be compatible.
      * @param $objWidth The width of the object (px).
      * @param $objHeight The height of the object (px).
      */
@@ -85,7 +76,7 @@ public class Plane {
         speedLimit.set($x, $y);
     }
 
-    /** Forcedly change the position of the object,
+    /** Forcibly change the position of the object,
      * which will cause velocity change.
      * @param $deltaTime Delta time (s).
      * @param $x New x-position (px).
@@ -115,9 +106,9 @@ public class Plane {
     }
 
     /** Set a line barrier that can support the object.
-     * @param $posTop The y-position of the barrier.
-     * @param $posLeft The x-position of the barrier's left edge.
-     * @param $width The width of the barrier.
+     * @param $posTop The y-position of the barrier (px).
+     * @param $posLeft The x-position of the barrier's left edge (px).
+     * @param $width The width of the barrier (px).
      * @param $overCover Whether to set the highest priority to this barrier.
      */
     public void setBarrier(float $posTop, float $posLeft, float $width, boolean $overCover) {
