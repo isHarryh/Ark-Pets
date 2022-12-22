@@ -66,6 +66,20 @@ public class HWndCtrl {
         return true;
     }
 
+    /** Get the center X position.
+     * @return X.
+     */
+    public float getCenterX() {
+        return posLeft + windowWidth / 2f;
+    }
+
+    /** Get the center Y position.
+     * @return Y.
+     */
+    public float getCenterY() {
+        return posTop + windowHeight / 2f;
+    }
+
     /** Get the current list of windows.
      * @param $only_visible Only the visible window allowed.
      * @return An ArrayList consists of HWndCtrls.

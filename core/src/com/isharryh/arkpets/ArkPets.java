@@ -271,27 +271,45 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		int myPos = (int)(WD_poscur.x + WD_W / 2);
 		int minNum = 2048;
 		int myNum = getArkPetsWindowNum(APP_TITLE);
+		final float quantityProduct = 1;
+		if (plane != null) {
+			// Reset plane additions.
+			plane.barriers.clear();
+			plane.pointCharges.clear();
+		}
 		for (HWndCtrl hWndCtrl : windowList) {
-			// Find windows as ground
-			if ((getArkPetsWindowNum(hWndCtrl.windowText) == -1) && hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
-				// This window IS in the vertical line that the app lies.
-				if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
-					for (int h = Math.max(hWndCtrl.posTop, 0); h < (Math.min(hWndCtrl.posBottom, SCR_H)); h++) {
-						if (line[h] == null)
-							line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl();
+			int wndNum = getArkPetsWindowNum(hWndCtrl.windowText);
+			// Distinguish non-peer windows from peers.
+			if (wndNum == -1){
+				if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
+					// This window "is" in the vertical line that the app lies.
+					if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
+						// This window is "under" the app.
+						for (int h = Math.max(hWndCtrl.posTop, 0); h < (Math.min(hWndCtrl.posBottom, SCR_H)); h++) {
+							if (line[h] == null)
+								line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl(); // Record this window.
+						}
 					}
 				}
+			} else {
+				if (plane != null && wndNum != myNum) {
+					// Set point charges.
+					plane.setPointCharge(-hWndCtrl.getCenterY(), hWndCtrl.getCenterX(), quantityProduct);
+				}
+				// Find the last peer window.
+				if (wndNum > myNum && wndNum < minNum) {
+					minNum = getArkPetsWindowNum(hWndCtrl.windowText);
+					minWindow = hWndCtrl.hWnd;
+				}
 			}
-			// Find the last peer window.
-			if (getArkPetsWindowNum(hWndCtrl.windowText) > myNum && getArkPetsWindowNum(hWndCtrl.windowText) < minNum) {
-				minNum = getArkPetsWindowNum(hWndCtrl.windowText);
-				minWindow = hWndCtrl.hWnd;
-			}
+			// Window iteration end.
 		}
-		minWindow = (minWindow == null) ? new HWND(Pointer.createConstant(-1)) : minWindow; // Set as the top window if there is no peer.
+		if (minWindow == null) {
+			// Set as the top window if there is no peer.
+			minWindow = new HWND(Pointer.createConstant(-1));
+		}
 		if (plane != null) {
-			// Reset barriers
-			plane.barriers.clear();
+			// Set barriers.
 			for (int h = WD_H; h < SCR_H; h++) {
 				HWndCtrl temp = line[h];
 				if (temp != null && temp.hWnd != null) {

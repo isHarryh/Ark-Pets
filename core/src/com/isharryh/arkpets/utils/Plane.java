@@ -22,6 +22,8 @@ public class Plane {
     private float airFrict;
     private float staticFrict;
     private boolean dropped = false;
+    private float droppedHeight = 0;
+    static float droppedThreshold = 10f;
 
     /** Initialize a plane with gravity field.
      * The origin of coordinates (0,0) is the left-bottom point.
@@ -35,6 +37,7 @@ public class Plane {
         speed = new Vector2(0, 0);
         speedLimit = new Vector2(0, 0);
         barriers = new ArrayList<>();
+        pointCharges = new ArrayList<>();
         world = new Vector2($worldWidth, $worldHeight);
         obj = new Vector2(0, 0);
         bounce = 0;
@@ -96,12 +99,13 @@ public class Plane {
         float deltaX = speed.x * $deltaTime;
         float deltaY = speed.y * $deltaTime;
         final float borderBottom = borderBottom();
+        droppedHeight = Math.max(Math.signum(gravity) * (position.y - borderBottom), droppedHeight);
         if (position.y != borderBottom && limitY(deltaY + position.y) == borderBottom) {
+            // When it fell to the ground.
             if (Math.signum(gravity) * (position.y - borderBottom) > 0)
                 dropped = true;
             speed.y = 0;
         }
-        // System.out.println("Y:delta"+deltaY+",speed"+speed.y+",bottom"+borderBottom()+",want"+(deltaY+position.y)+",limit"+limitY(deltaY + position.y));
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
     }
 
@@ -116,6 +120,16 @@ public class Plane {
             barriers.add(0, new Vector3($posLeft, $posTop, $width));
         else
             barriers.add(new Vector3($posLeft, $posTop, $width));
+    }
+
+    /** Set a point charge whose excited electric field can repulse the object.
+     * The position and quantity of the charge are fixed.
+     * @param $posTop The y-position of the charge (px).
+     * @param $posLeft The x-position of the charge (px).
+     * @param $quantityProduct The product of the point's quantity and the object's quantity (C^2).
+     */
+    public void setPointCharge(float $posTop, float $posLeft, float $quantityProduct) {
+        pointCharges.add(new Vector3($posLeft, $posTop, $quantityProduct));
     }
 
     /** Get the x-position of the object.
@@ -138,7 +152,10 @@ public class Plane {
     public boolean getDropped() {
         if (dropped) {
             dropped = false; // Reset
-            return true;
+            if (droppedHeight >= droppedThreshold) {
+                droppedHeight = 0; // Reset
+                return true;
+            }
         }
         return false;
     }
@@ -163,6 +180,14 @@ public class Plane {
         }
         else if (position.y == TOP && speed.y > 0)
             speed.y = 0;
+        // Electrostatic forces
+        for (Vector3 pc : pointCharges) {
+            float dx = position.x + obj.x / 2f - pc.x;
+            float dy = position.y + obj.y / 2f - pc.y;
+            float hypot = (float)Math.hypot(dx, dy);
+            speed.x = applyElectrostaticEffect(speed.x, pc.z,  hypot, dx / hypot, $deltaTime);
+            speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , $deltaTime);
+        }
         // Ground friction
         if (position.y == BOTTOM)
             speed.x = applyFriction(speed.x, staticFrict, $deltaTime);
@@ -181,7 +206,7 @@ public class Plane {
     }
 
     /** Apply a friction to a velocity.
-     * @param $speed The velocity (px/s).
+     * @param $speed The original velocity (px/s).
      * @param $frict The acceleration of friction (px/s^2).
      * @param $deltaTime Delta time (s).
      * @return New velocity (px/s).
@@ -189,6 +214,23 @@ public class Plane {
     private float applyFriction(float $speed, float $frict, float $deltaTime) {
         float delta = Math.signum($speed) * $frict * $deltaTime;
         return Math.signum($speed - delta) == Math.signum(delta) ? $speed - delta : 0;
+    }
+
+    /** Apply the electrostatic effect of a point charge to a velocity.
+     * @param $speed The original velocity (px/s).
+     * @param $quantityProduct The product of the point's quantity and the object's quantity (C^2).
+     * @param $distance The absolute distance between the point charge and the object.
+     * @param $cosine The cosine of the included angel between the distance and its projection on the direction of speed.
+     * @param $deltaTime Delta time (s).
+     * @return New velocity (px/s).
+     */
+    private float applyElectrostaticEffect(float $speed, float $quantityProduct, float $distance, float $cosine, float $deltaTime){
+        final float k = 2500 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
+        final float dm = 10; // Min distance
+        $distance = Math.max(Math.abs($distance), dm); // Limit the distance
+        float delta = k * $quantityProduct / $distance / $distance * $cosine * $deltaTime;
+        //System.out.println("speed+="+delta);
+        return $speed + delta;
     }
 
     /** Limit the x-position to avoid overstepping.
