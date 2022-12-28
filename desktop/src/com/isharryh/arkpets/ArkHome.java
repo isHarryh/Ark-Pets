@@ -93,16 +93,17 @@ public class ArkHome extends ApplicationAdapter {
     private Stage stageMainPage() {
         // Elements' containers
         HorizontalGroup[] hGroups;
-        SelectBox[] sBoxs;
         CheckBox[] cBoxs;
         Stage stage = new Stage();
         Table table = new Table();
         table.setFillParent(true);
 
         // Actor lists
-        hGroups = new HorizontalGroup[10];
-        sBoxs = new SelectBox[5];
-        cBoxs = new CheckBox[5];
+        hGroups = new HorizontalGroup[3];
+        SelectBox<AssetCtrl> sBox0;
+        SelectBox<String> sBox1;
+        SelectBox<String> sBox2;
+        cBoxs = new CheckBox[3];
 
         // Text buttons
         TextButton tButton1 = new TextButton("启动", skin);
@@ -117,32 +118,38 @@ public class ArkHome extends ApplicationAdapter {
         });
 
         // Select Model
-        sBoxs[0] = new SelectBox<String>(skin);
+        sBox0 = new SelectBox<>(skin);
         config.display_monitor_info = MonitorConfig.getDefaultMonitorInfo();
         AssetCtrl[] assets = initAssetCtrls(Gdx.files.local("models"));
         if (assets == null || assets.length == 0) {
-            sBoxs[0].setItems("未找到模型");
-            sBoxs[0].setSelectedIndex(0);
+            AssetCtrl nullAsset = new AssetCtrl() {
+                @Override
+                public String toString() {
+                    return "未找到模型";
+                }
+            };
+            sBox0.setItems(nullAsset);
+            sBox0.setSelectedIndex(0);
             config.character_recent = "";
         } else {
-            sBoxs[0].setItems(assets);
-            sBoxs[0].setSelectedIndex(0);
+            sBox0.setItems(assets);
+            sBox0.setSelectedIndex(0);
             for (int i = 0; i < assets.length; i++)
                 if (assets[i].PATH.equals(config.character_recent)) {
-                    sBoxs[0].setSelectedIndex(i);
+                    sBox0.setSelectedIndex(i);
                     initPreview();
                     break;
                 }
-            config.character_recent = assets[sBoxs[0].getSelectedIndex()].PATH;
+            config.character_recent = sBox0.getSelected().PATH;
         }
         
         config.saveConfig();
-        sBoxs[0].addListener(new ChangeListener() {
+        sBox0.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-                if (sBoxs[0].getSelected().getClass() == String.class)
+                if (sBox0.getSelected().PATH == null)
                     config.character_recent = "";
                 else {
-                    config.character_recent = assets[sBoxs[0].getSelectedIndex()].PATH;
+                    config.character_recent = sBox0.getSelected().PATH;
                     initPreview();
                 }
                 config.saveConfig();
@@ -151,43 +158,45 @@ public class ArkHome extends ApplicationAdapter {
         
         hGroups[0] = new HorizontalGroup();
         hGroups[0].addActor(new Label("选择模型 ", skin));
-        hGroups[0].addActor(sBoxs[0]);
+        hGroups[0].addActor(sBox0);
 
         // Set Scale
-        sBoxs[1] = new SelectBox<String>(skin);
-        sBoxs[1].setItems(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f);
-        for (int i = 0; i < sBoxs[1].getItems().size; i++) {
-            if (ArkConfig.compare(sBoxs[1].getItems().get(i), config.display_scale))
-                sBoxs[1].setSelectedIndex(i);
+        sBox1 = new SelectBox<>(skin);
+        sBox1.setItems("0.5", "0.75", "1.0", "1.25", "1.5", "2.0");
+        for (int i = 0; i < sBox1.getItems().size; i++) {
+            if (ArkConfig.compare(sBox1.getItems().get(i), config.display_scale))
+                sBox1.setSelectedIndex(i);
         }
-        sBoxs[1].addListener(new ChangeListener() {
+        SelectBox<String> finalSBox1 = sBox1;
+        sBox1.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-                config.display_scale = Float.valueOf(sBoxs[1].getSelected().toString());
+                config.display_scale = Float.parseFloat(finalSBox1.getSelected());
                 config.saveConfig();
 			}
 		});
         
         hGroups[1] = new HorizontalGroup();
         hGroups[1].addActor(new Label("图像缩放 ", skin));
-        hGroups[1].addActor(sBoxs[1]);
+        hGroups[1].addActor(sBox1);
 
         // Set FPS
-        sBoxs[3] = new SelectBox<String>(skin);
-        sBoxs[3].setItems(20, 25, 30, 45, 60);
-        for (int i = 0; i < sBoxs[3].getItems().size; i++) {
-            if (config.compare(sBoxs[3].getItems().get(i), config.display_fps))
-                sBoxs[3].setSelectedIndex(i);
+        sBox2 = new SelectBox<>(skin);
+        sBox2.setItems("20", "25", "30", "45", "60");
+        for (int i = 0; i < sBox2.getItems().size; i++) {
+            if (ArkConfig.compare(sBox2.getItems().get(i), config.display_fps))
+                sBox2.setSelectedIndex(i);
         }
-        sBoxs[3].addListener(new ChangeListener() {
+        SelectBox<String> finalSBox2 = sBox2;
+        sBox2.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-                config.display_fps = Integer.valueOf(sBoxs[3].getSelected().toString());
+                config.display_fps = Integer.parseInt(finalSBox2.getSelected());
                 config.saveConfig();
 			}
 		});
         
-        hGroups[3] = new HorizontalGroup();
-        hGroups[3].addActor(new Label("最大帧率 ", skin));
-        hGroups[3].addActor(sBoxs[3]);
+        hGroups[2] = new HorizontalGroup();
+        hGroups[2].addActor(new Label("最大帧率 ", skin));
+        hGroups[2].addActor(sBox2);
 
         // Set Walk
         cBoxs[0] = new CheckBox("允许行走", skin);
@@ -244,7 +253,7 @@ public class ArkHome extends ApplicationAdapter {
         // Add actors
         table.addActor(hGroups[0]);
         table.addActor(hGroups[1]);
-        table.addActor(hGroups[3]);
+        table.addActor(hGroups[2]);
         table.addActor(cBoxs[0]);
         table.addActor(cBoxs[1]);
         table.addActor(cBoxs[2]);
@@ -265,7 +274,7 @@ public class ArkHome extends ApplicationAdapter {
         final float WD_W_CT = (float)(WD_W*0.5-tButton1.getWidth()/2);
         hGroups[0].setPosition(10, WD_H - 25);
         hGroups[1].setPosition(10, WD_H - 65);
-        hGroups[3].setPosition(10, WD_H - 105);
+        hGroups[2].setPosition(10, WD_H - 105);
         cBoxs[0].setPosition(10, WD_H - 165);
         cBoxs[1].setPosition(WD_W_CT, WD_H - 165);
         cBoxs[2].setPosition(10, WD_H - 195);

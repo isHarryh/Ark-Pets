@@ -164,7 +164,7 @@ public class Plane {
      * @return true=dropping.
      */
     public boolean getDropping() {
-        return position.y != borderBottom();
+        return Math.abs(position.y - borderBottom()) > droppedThreshold;
     }
 
     /** Update the velocity of the object.
@@ -225,8 +225,8 @@ public class Plane {
      * @return New velocity (px/s).
      */
     private float applyElectrostaticEffect(float $speed, float $quantityProduct, float $distance, float $cosine, float $deltaTime){
-        final float k = 2500 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
-        final float dm = 10; // Min distance
+        final float k = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
+        final float dm = 20; // Min distance
         $distance = Math.max(Math.abs($distance), dm); // Limit the distance
         float delta = k * $quantityProduct / $distance / $distance * $cosine * $deltaTime;
         //System.out.println("speed+="+delta);
