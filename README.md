@@ -31,6 +31,7 @@ This project only supports Chinese docs. If you are an English user, feel free t
 - 常见疑问解答 > [点击查看](docs/Q%26A.md)
 - 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
 - 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
+- 命令行启动方法 > [点击查看](docs/CmdLine.md)
 
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。

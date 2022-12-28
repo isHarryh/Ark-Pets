@@ -5,8 +5,9 @@
 
 ## v1.5
 #### 新增
-1. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`76e6883`](https://github.com/isHarryh/Ark-Pets/commit/76e68832d6987ef2cb4fd65ad28dc754ef5e4b56) 新增了小人自动行走至窗口边缘后翻转朝向的特性。
-2. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`a7eba09`](https://github.com/isHarryh/Ark-Pets/commit/a7eba09b35b320ec24816eccf5d4413e175cc6ba) 新增了抛出小人后，使小人立即面向抛掷方向的特性。
+1. `v1.5.1` [`#12`](https://github.com/isHarryh/Ark-Pets/issues/12) [`d5f0bf0`](https://github.com/isHarryh/Ark-Pets/commit/d5f0bf0bae3f1589de5f71aeeb0b5aad82a234b0) 新增了命令行启动参数`--direct-start`用于直接启动桌宠而不打开启动器。
+2. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`76e6883`](https://github.com/isHarryh/Ark-Pets/commit/76e68832d6987ef2cb4fd65ad28dc754ef5e4b56) 新增了小人自动行走至窗口边缘后翻转朝向的特性。
+3. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`a7eba09`](https://github.com/isHarryh/Ark-Pets/commit/a7eba09b35b320ec24816eccf5d4413e175cc6ba) 新增了抛出小人后，使小人立即面向抛掷方向的特性。
 
 #### 修复
 1. [`#15`](https://github.com/isHarryh/Ark-Pets/issues/15) [`afa7bb9`](https://github.com/isHarryh/Ark-Pets/commit/afa7bb94cd46c1d51725f4bb58b7ac462d729bdc) 修复了小人在窗口上缘与屏幕上缘距离小于应用高度时显示异常的问题。
