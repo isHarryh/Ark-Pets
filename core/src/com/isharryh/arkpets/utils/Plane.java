@@ -238,7 +238,7 @@ public class Plane {
      * @return New x (px).
      */
     private float limitX(float $x) {
-        return $x<borderLeft() ? borderLeft() : (Math.min($x, borderRight()));
+        return $x<borderLeft() ? borderLeft() : Math.min($x, borderRight());
     }
 
     /** Limit the y-position to avoid overstepping.
@@ -246,7 +246,7 @@ public class Plane {
      * @return New y (px).
      */
     private float limitY(float $y) {
-        return $y<borderBottom() ? borderBottom() : (Math.min($y, borderTop()));
+        return $y<borderBottom() ? borderBottom() : Math.min($y, borderTop());
     }
 
     /** Get the border position of the top.

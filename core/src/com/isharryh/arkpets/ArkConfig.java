@@ -3,11 +3,10 @@
  */
 package com.isharryh.arkpets;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 
 
 public class ArkConfig {
@@ -94,10 +93,6 @@ public class ArkConfig {
     public static boolean compare(Object $a, Object $b) {
         if ($a == null || $b == null)
             return false;
-        if (String.valueOf($a).equals(String.valueOf($b)))
-            return true;
-        else
-            return false;
+        return String.valueOf($a).equals(String.valueOf($b));
     }
-
 }

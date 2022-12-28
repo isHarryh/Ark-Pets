@@ -25,11 +25,20 @@ public class AssetCtrl {
         SKEL = ATLAS.sibling(ATLAS.nameWithoutExtension()+".skel");
     }
 
+    /** Empty Spine animation asset controller.
+     */
+    public AssetCtrl() {
+        NAME = null;
+        ATLAS = null;
+        PATH = null;
+        PNG = null;
+        SKEL = null;
+    }
+
     /** Get the name of the spine asset.
      * @return The name.
      */
     public String toString() {
         return NAME;
     }
-
 }

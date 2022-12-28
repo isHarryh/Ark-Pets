@@ -13,6 +13,6 @@ public class MonitorConfig {
 
     public static int[] getDefaultMonitorInfo() {
         DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
-        return new int[] {(int)displayMode.width, (int)displayMode.height, (int)displayMode.refreshRate, (int)displayMode.bitsPerPixel};
+        return new int[] {displayMode.width, displayMode.height, displayMode.refreshRate, displayMode.bitsPerPixel};
     }
 }

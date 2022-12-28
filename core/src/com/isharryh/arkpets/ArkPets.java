@@ -36,8 +36,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private LoopCtrl getHWndLoopCtrl;
 
 	private int APP_FPS = 30;
-	private final int WD_ORI_W = 140; // Window Origin Width
-	private final int WD_ORI_H = 160; // Window Origin Height
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
@@ -47,7 +45,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public Vector2 WD_poscur; // Window Current Position
 	public Vector2 WD_postar; // Window Target Position
 	public EasingLinearVector2 WD_poseas; // Window Postion Easing
-	public int OFFSET_Y = 0;
+	private int OFFSET_Y = 0;
 
 	public ArkPets(String $title) {
 		APP_TITLE = $title;
@@ -67,6 +65,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_postar = new Vector2(0, 0);
 		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, 0.2f));
 		WD_SCALE = config.display_scale;
+		int WD_ORI_W = 140; // Window Origin Width
+		int WD_ORI_H = 160; // Window Origin Height
 		WD_W = (int) (WD_SCALE * WD_ORI_W);
 		WD_H = (int) (WD_SCALE * WD_ORI_H);
 		SCR_W = config.display_monitor_info[0];
@@ -93,8 +93,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			behavior = new BehaviorOperBuild(config);
 		else if (BehaviorOperBuild3.match(cha.anim_list))
 			behavior = new BehaviorOperBuild3(config);
-		else
-			behavior = null; // TODO Throw an error.
+		else {
+			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found.");
+			Gdx.app.exit();
+		}
 		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
 		// Setup complete
@@ -147,7 +149,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 
 	/* INPUT PROCESS */
-	private Vector2 mouse_pos = new Vector2();
+	private final Vector2 mouse_pos = new Vector2();
 	private int mouse_intention_x = 1;
 	private boolean mouse_drag = false;
 
@@ -249,8 +251,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		WD_poscur.set(
-				x > 0 ? (Math.min(x, SCR_W - WD_W)) : 0,
-				y > 0 ? (Math.min(y, SCR_H - WD_H + OFFSET_Y)) : 0
+				x > 0 ? Math.min(x, SCR_W - WD_W) : 0,
+				y > 0 ? Math.min(y, SCR_H - WD_H + OFFSET_Y) : 0
 		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
@@ -285,7 +287,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					// This window "is" in the vertical line that the app lies.
 					if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
 						// This window is "under" the app.
-						for (int h = Math.max(hWndCtrl.posTop, 0); h < (Math.min(hWndCtrl.posBottom, SCR_H)); h++) {
+						for (int h = Math.max(hWndCtrl.posTop, 0); h < Math.min(hWndCtrl.posBottom, SCR_H); h++) {
 							if (line[h] == null)
 								line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl(); // Record this window.
 						}
