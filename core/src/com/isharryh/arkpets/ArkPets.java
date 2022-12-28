@@ -30,6 +30,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public Plane plane;
 	public ArkChar cha;
 	public ArkConfig config;
+	public ArkTray tray;
 	public Behavior behavior;
 
 	private HWND HWND_TOPMOST;
@@ -99,20 +100,23 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
+		// 6.Tray icon setup
+		tray = new ArkTray(this);
 		// Setup complete
 		Gdx.app.log("event", "AP:Render");
 	}
 
 	@Override
 	public void render() {
-		// When render graphics
+		// 1.Render the next frame.
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) (Gdx.app.getJavaHeap() / 1024) + "KB");
 		}
-		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime());
-		if (!mouse_drag) {
-			// If no dragging:
+
+		// 2.Select a new anim.
+		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
 			setWindowPosTar(plane.getX(), -plane.getY());
 			setWindowPosCur(Gdx.graphics.getDeltaTime());
@@ -121,22 +125,27 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					// Turn around if auto-walk cause the collision from screen border.
 					newAnim = cha.anim_queue[0];
 					newAnim = new AnimCtrl(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, -newAnim.MOBILITY);
+					tray.keepAnim = tray.keepAnim == null ? null : newAnim;
 				}
 				walkWindow(0.85f * cha.anim_queue[0].MOBILITY);
 			}
-		} else {
+		} else { // If dragging:
 			newAnim = behavior.dragStart();
 		}
-		if (plane.getDropping())
+		if (plane.getDropping()) { // If dropping, do not change anim.
 			newAnim = behavior.defaultAnim();
-		if (plane.getDropped())
+		} else if (plane.getDropped()) { // If dropped, play the dropped anim.
 			newAnim = behavior.drop();
-		changeAnimation(newAnim);
+		} else if (tray.keepAnim != null) { // If keep-anim is enabled.
+			newAnim = tray.keepAnim;
+		}
+		changeAnimation(newAnim); // Apply the new anim.
 	}
 
 	@Override
 	public void dispose() {
 		Gdx.app.log("event", "AP:Dispose");
+		tray.remove();
 	}
 
 	private void changeAnimation(AnimCtrl animCtrl) {
@@ -184,8 +193,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {	
 		if (!mouse_drag)
 			changeAnimation(behavior.clickEnd());
-		else
+		else {
 			cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
+			if (tray.keepAnim != null && cha.anim_queue[0].MOBILITY != 0) {
+				AnimCtrl newAnim = cha.anim_queue[0];
+				newAnim = new AnimCtrl(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
+				tray.keepAnim = newAnim;
+			}
+		}
 		mouse_drag = false;
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
@@ -217,7 +232,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	/* WINDOW API */
 	private final String APP_TITLE;
-	private HWND HWND_MINE;
+	public HWND HWND_MINE;
 
 	private boolean intiWindow(int x, int y) {
 		if (HWND_MINE == null)
@@ -228,8 +243,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		//final int WL_TRAN_ON = 262160;
 		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
-		if (HWND_MINE == null)
-			return false;
 		//System.out.println(User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE));
 		//User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, enable ? WL_TRAN_ON : WL_TRAN_OFF);
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, x, y,
