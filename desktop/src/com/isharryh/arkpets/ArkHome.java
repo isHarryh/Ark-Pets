@@ -242,11 +242,11 @@ public class ArkHome extends ApplicationAdapter {
         });
 
         // Help button
-        TextButton tButton2 = new TextButton("使用手册", skin);
+        TextButton tButton2 = new TextButton("帮助", skin);
         tButton2.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent iEvent, float a, float b) {
-                Gdx.net.openURI("https://github.com/isHarryh/Ark-Pets#ark-pets");
+                mainStage = stageHelp();
             }
         });
 
@@ -319,6 +319,73 @@ public class ArkHome extends ApplicationAdapter {
         table.addActor(window);
         table.addActor(innerPane);
         table.addActor(close);
+        stage.addActor(table);
+        Gdx.input.setInputProcessor(stage);
+        return stage;
+    }
+
+    private Stage stageHelp() {
+        // Elements' containers
+        Stage stage = new Stage();
+        Table table = new Table();
+        TextButton close = new TextButton("返回", skin);
+        close.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                mainStage = stageMainPage();
+            }
+        });
+        // Help button
+        TextButton tButton1 = new TextButton("常见问题", skin);
+        tButton1.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                Gdx.net.openURI("https://github.com/isHarryh/Ark-Pets/blob/v1.x/docs/Q%26A.md");
+            }
+        });
+        TextButton tButton2 = new TextButton("门户网站", skin);
+        tButton2.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                Gdx.net.openURI("http://arkpets.tfev.top");
+            }
+        });
+        TextButton tButton3 = new TextButton("项目仓库", skin);
+        tButton3.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent iEvent, float a, float b) {
+                Gdx.net.openURI("https://github.com/isHarryh/Ark-Pets");
+            }
+        });
+        CheckBox cBox1 = new CheckBox("能够被其他桌宠排斥", skin);
+        cBox1.setChecked(config.behavior_do_peer_repulsion);
+        cBox1.addListener(new ChangeListener() {
+            public void changed (ChangeEvent event, Actor actor) {
+                config.behavior_do_peer_repulsion = cBox1.isChecked();
+                config.saveConfig();
+            }
+        });
+        table.setFillParent(true);
+
+        // Show them
+        final float WD_W_CT = (float)(WD_W*0.5);
+        Window window = new Window(" 帮助与高级选项 ", skin);
+        window.defaults().spaceBottom(10);
+        window.setSize(WD_W, WD_H);
+        window.setPosition(0, 0, Align.center);
+        close.setPosition(WD_W - 5, 5, Align.bottomRight);
+        tButton1.setPosition(20, WD_H - 80);
+        tButton2.setPosition(20, WD_H - 120);
+        tButton3.setPosition(20, WD_H - 160);
+        cBox1.setPosition(25, WD_H - 200);
+
+        // Add actors
+        table.addActor(window);
+        table.addActor(close);
+        table.addActor(tButton1);
+        table.addActor(tButton2);
+        table.addActor(tButton3);
+        table.addActor(cBox1);
         stage.addActor(table);
         Gdx.input.setInputProcessor(stage);
         return stage;

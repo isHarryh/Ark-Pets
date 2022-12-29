@@ -26,6 +26,7 @@ public class ArkConfig {
     public boolean behavior_allow_walk;
     public boolean behavior_allow_sit;
     public boolean behavior_allow_interact;
+    public boolean behavior_do_peer_repulsion;
 
     /** You are supposed to use the static function {@code ArkConfig.init()} to instantiate the ArkConfig,
      * instead of using this constructor.
