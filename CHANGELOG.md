@@ -3,6 +3,21 @@
 以下收录了每个大版本分支所新增、修复、优化的条目。
 > 若条目未注明子版本，默认是在`vX.X.0`版本实现的内容。
 
+## v1.6
+#### 新增
+1. [`a4267c6`](https://github.com/isHarryh/Ark-Pets/commit/a4267c68ddca1bf1cf994e2748d0986ef38a2140) 新增了重力场系统对于点电荷静电斥力的支持。
+2. [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`a4267c6`](https://github.com/isHarryh/Ark-Pets/commit/a4267c68ddca1bf1cf994e2748d0986ef38a2140) 由上一条实现：新增了多个小人重叠时可以被排斥开的特性。
+3. [`40a57e7`](https://github.com/isHarryh/Ark-Pets/commit/40a57e7f279bfce96d2e6b651bc0b9ba5c0104bf) 新增了可操作的任务栏托盘图标。
+4. [`#9`](https://github.com/isHarryh/Ark-Pets/issues/9) [`40a57e7`](https://github.com/isHarryh/Ark-Pets/commit/40a57e7f279bfce96d2e6b651bc0b9ba5c0104bf) 新增了右键托盘图标可锁定小人当前动作的功能。
+
+#### 修复
+1. [`4954639`](https://github.com/isHarryh/Ark-Pets/commit/4954639d623608dfd0443790e786176d57ff2212) 修复了在小人靠近屏幕左侧时无法站立在窗口上的问题。
+
+#### 优化
+1. [`3fd0d36`](https://github.com/isHarryh/Ark-Pets/commit/3fd0d36f0be38fa31563aebf7ef2303c4e917f42) 启动器中以“帮助”按钮替换掉了原来的“使用手册”按钮。
+2. [`#3`](https://github.com/isHarryh/Ark-Pets/issues/3) [`4954639`](https://github.com/isHarryh/Ark-Pets/commit/4954639d623608dfd0443790e786176d57ff2212) 任务栏常驻程序窗口现在可以隐藏；桌宠可以跨桌面显示。
+3. 微调了悬空状态和落地状态触发相关动作的判定阈值。
+
 ## v1.5
 #### 新增
 1. `v1.5.1` [`#12`](https://github.com/isHarryh/Ark-Pets/issues/12) [`d5f0bf0`](https://github.com/isHarryh/Ark-Pets/commit/d5f0bf0bae3f1589de5f71aeeb0b5aad82a234b0) 新增了命令行启动参数`--direct-start`用于直接启动桌宠而不打开启动器。
@@ -23,7 +38,7 @@
 ## v1.4
 #### 新增
 1. [`ae979eb`](https://github.com/isHarryh/Ark-Pets/commit/ae979eb0031b401bc52d44c0d396f12eeba4a64d) 新增了重力场系统对于一维障碍物的支持。
-2. [`d31f49b`](https://github.com/isHarryh/Ark-Pets/commit/d31f49bf116b836bac6b9d1a2db83f72c216e31a) 新增了小人可以站立在电脑窗口边缘上的特性。
+2. [`d31f49b`](https://github.com/isHarryh/Ark-Pets/commit/d31f49bf116b836bac6b9d1a2db83f72c216e31a) 由上一条实现：新增了小人可以站立在电脑窗口边缘上的特性。
 
 #### 修复
 1. [`aeed29a`](https://github.com/isHarryh/Ark-Pets/commit/aeed29a9bf25db445ef15801a83172e1b84d1ccd) 修复了基建小人的Sit动作的渲染偏移受图像缩放的影响被放大的问题。
