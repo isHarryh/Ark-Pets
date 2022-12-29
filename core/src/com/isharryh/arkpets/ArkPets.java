@@ -245,6 +245,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
 		//System.out.println(User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE));
 		//User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, enable ? WL_TRAN_ON : WL_TRAN_OFF);
+		User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE,  0x00000088);
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, x, y,
 				WD_W, WD_H, WinUser.SWP_FRAMECHANGED);
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, x, y,
@@ -307,7 +308,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					}
 				}
 			} else {
-				if (plane != null && wndNum != myNum) {
+				if (config.behavior_do_peer_repulsion && wndNum != myNum && plane != null) {
 					// Set point charges.
 					plane.setPointCharge(-hWndCtrl.getCenterY(), hWndCtrl.getCenterX(), quantityProduct);
 				}

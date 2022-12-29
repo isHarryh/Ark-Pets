@@ -10,6 +10,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
+import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 
 
@@ -37,6 +38,7 @@ public class HWndCtrl {
         posBottom = rect.bottom;
         posLeft = rect.left;
         posRight = rect.right;
+        int test = User32.INSTANCE.GetWindowLong($hWnd, WinUser.GWL_EXSTYLE);
         windowWidth = posRight-posLeft;
         windowHeight = posBottom-posTop;
     }
@@ -81,31 +83,39 @@ public class HWndCtrl {
     }
 
     /** Get the current list of windows.
-     * @param $only_visible Only the visible window allowed.
+     * @param $only_visible Whether exclude the invisible window.
      * @return An ArrayList consists of HWndCtrls.
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible) {
         windowList = new ArrayList<>();
-        if ($only_visible) {
-            User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
-                @Override
-                public boolean callback(HWND hWnd, Pointer arg1) {
-                    if (User32.INSTANCE.IsWindow(hWnd) && isVisible(hWnd))
-                        windowList.add(new HWndCtrl(hWnd));
-                    return true;
-                }
-            }, null);
-        } else {
-            User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
-                @Override
-                public boolean callback(HWND hWnd, Pointer arg1) {
-                    if (User32.INSTANCE.IsWindow(hWnd))
-                        windowList.add(new HWndCtrl(hWnd));
-                    return true;
-                }
-            }, null);
-        }
+        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
+            @Override
+            public boolean callback(HWND hWnd, Pointer arg1) {
+                if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd)))
+                    windowList.add(new HWndCtrl(hWnd));
+                return true;
+            }
+        }, null);
 		return windowList;
+    }
+
+    /** Get the current list of windows. (Advanced)
+     * @param $only_visible Whether exclude the invisible window.
+     * @param $exclude_ws_ex Exclude the specific window-style-extra.
+     * @return An ArrayList consists of HWndCtrls.
+     */
+    public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible, long $exclude_ws_ex) {
+        windowList = new ArrayList<>();
+        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
+            @Override
+            public boolean callback(HWND hWnd, Pointer arg1) {
+                if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd))
+                        && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & $exclude_ws_ex) != $exclude_ws_ex)
+                    windowList.add(new HWndCtrl(hWnd));
+                return true;
+            }
+        }, null);
+        return windowList;
     }
 
     static private boolean isVisible(HWND $hWnd) {

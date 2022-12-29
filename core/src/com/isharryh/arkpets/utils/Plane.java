@@ -264,7 +264,7 @@ public class Plane {
      */
     private float borderBottom() {
         for (Vector3 i : barriers) {
-            if (i.x <= position.x-obj.x && position.x <= i.x+i.z)
+            if (i.x <= position.x+obj.x && position.x <= i.x+i.z)
                 if (Math.abs(position.y) <= Math.abs(i.y))
                     return obj.y < 0 ? i.y - obj.y : i.y;
         }

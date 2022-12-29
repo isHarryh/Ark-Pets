@@ -6,6 +6,7 @@ package com.isharryh.arkpets;
 import com.badlogic.gdx.Gdx;
 import com.isharryh.arkpets.utils.AnimCtrl;
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinUser;
 
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
@@ -79,6 +80,12 @@ public class ArkTray {
         optEcho.addActionListener(e -> {
             Gdx.app.log("info","Tray:Echo");
             User32.INSTANCE.SetForegroundWindow(arkPets.HWND_MINE);
+            WinUser.FLASHWINFO fi = new WinUser.FLASHWINFO();
+            fi.hWnd = arkPets.HWND_MINE;
+            fi.dwFlags = WinUser.FLASHW_ALL;
+            fi.uCount = 5;
+            fi.dwTimeout = 5;
+            User32.INSTANCE.FlashWindowEx(fi);
         });
         optExit.addActionListener(e -> {
             Gdx.app.log("info","Tray:Exit");
