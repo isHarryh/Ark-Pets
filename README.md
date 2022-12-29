@@ -31,8 +31,6 @@ This project only supports Chinese docs. If you are an English user, feel free t
 ### 相关文档
 - 更新日志 > [点击查看](CHANGELOG.md)
 - 常见疑问解答 > [点击查看](docs/Q%26A.md)
-- 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
-- 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
 - 命令行启动方法 > [点击查看](docs/CmdLine.md)
 
 ## 使用方法 <sub>Usage</sub>
@@ -60,9 +58,6 @@ This project only supports Chinese docs. If you are an English user, feel free t
    > 根目录  
    > ├─ Models (存放模型文件)  
    > │  ├─ 002_amiya (一套模型由一个文件夹单独存放)  
-   > │  │  ├─ xxxx.atlas  
-   > │  │  ├─ xxxx.png  
-   > │  │  └─ xxxx.skel  
    > │  ├─ 003_kalts  
    > │  ├─ 009_12fce  
    > │  └─ ……  
@@ -71,3 +66,9 @@ This project only supports Chinese docs. If you are an English user, feel free t
 
 ## 许可证 <sub>License</sub>
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
+
+### 参与贡献
+您可以通过提交Issues、PR、CodeReview等方式参与本项目的贡献。
+- 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
+- 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
+- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)

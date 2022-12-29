@@ -63,7 +63,6 @@ public class ArkTray {
         // Menu options:
         JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
         JMenuItem optKeepAnimDis = new JMenuItem("解除保持");
-        JMenuItem optEcho = new JMenuItem("显示桌宠");
         JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
             Gdx.app.log("info","Tray:Keep-Anim Enabled");
@@ -77,22 +76,11 @@ public class ArkTray {
             pop.remove(optKeepAnimDis);
             pop.add(optKeepAnimEn, 0);
         });
-        optEcho.addActionListener(e -> {
-            Gdx.app.log("info","Tray:Echo");
-            User32.INSTANCE.SetForegroundWindow(arkPets.HWND_MINE);
-            WinUser.FLASHWINFO fi = new WinUser.FLASHWINFO();
-            fi.hWnd = arkPets.HWND_MINE;
-            fi.dwFlags = WinUser.FLASHW_ALL;
-            fi.uCount = 5;
-            fi.dwTimeout = 5;
-            User32.INSTANCE.FlashWindowEx(fi);
-        });
         optExit.addActionListener(e -> {
             Gdx.app.log("info","Tray:Exit");
             Gdx.app.exit();
         });
         pop.add(optKeepAnimEn);
-        pop.add(optEcho);
         pop.add(optExit);
         pop.setSize(100, 24 * pop.getSubElements().length);
 
@@ -122,6 +110,7 @@ public class ArkTray {
             tray.add(icon);
         } catch (AWTException e) {
             Gdx.app.log("warning", "Tray:Unable to apply tray icon. " + e);
+            User32.INSTANCE.SetWindowLong(arkPets.HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000008);
         }
     }
 
