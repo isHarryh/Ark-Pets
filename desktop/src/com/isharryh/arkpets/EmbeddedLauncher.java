@@ -1,4 +1,4 @@
-/** Copyright (c) 2022, Harry Huang
+/** Copyright (c) 2022-2023, Harry Huang
  * At GPL-3.0 License
  */
 package com.isharryh.arkpets;

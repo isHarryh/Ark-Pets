@@ -2,7 +2,8 @@ Ark-Pets
 ==========
 Arknights Desktop Pets.  
 明日方舟桌宠  
-版本(Version)`v1.6`
+版本(Version)`v2.0`
+> 此版本正在开发阶段。
 
 This project only supports Chinese docs. If you are an English user, feel free to contact us.
 
