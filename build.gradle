@@ -1,9 +1,9 @@
 buildscript {
     repositories {
-        mavenLocal()
         maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin/" }
+        mavenLocal()
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     }
 
     dependencies {
@@ -16,17 +16,16 @@ allprojects {
 
     version = '1.0'
     ext {
+    ext { // Constant Definitions
         appName = "ArkPets"
         gdxVersion = '1.11.0'
         jnaVersion = '5.12.1'
     }
 
     repositories {
-        mavenLocal()
         maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+        mavenLocal()
         mavenCentral()
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-        maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     }
 }
 
@@ -48,6 +47,8 @@ project(":core") {
     apply plugin: "java-library"
 
     dependencies {
+        // Spine Runtime
+        api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
         // libGDX Core
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
