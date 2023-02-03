@@ -4,22 +4,21 @@
 package com.isharryh.arkpets.utils;
 
 
-public class AICtrl {
+public class AnimAutoData {
+    public final AnimData ANIM;
     public final String NAME;
     public final float DURATION_MIN;
     public final int WEIGHT;
-    public final AnimCtrl ANIM;
 
-    /** AI Controller Instance.
-     * @param $animCtrl The AnimCtrl.
+    /** Autonomic-Animation Data Object.
+     * @param $animData The Animation Data.
      * @param $duration_min The minimal loop-action duration(seconds).
      * @param $weight The weight to call this action.
      */
-    public AICtrl(AnimCtrl $animCtrl, float $duration_min, int $weight) {
-        NAME = $animCtrl.ANIM_NAME;
+    public AnimAutoData(AnimData $animData, float $duration_min, int $weight) {
+        NAME = $animData.ANIM_NAME;
         DURATION_MIN = $duration_min;
         WEIGHT = $weight;
-        ANIM = $animCtrl;
+        ANIM = $animData;
     }
-    
 }

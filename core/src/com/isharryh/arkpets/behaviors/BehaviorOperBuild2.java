@@ -5,24 +5,24 @@ package com.isharryh.arkpets.behaviors;
 
 import com.badlogic.gdx.utils.Array;
 import com.isharryh.arkpets.ArkConfig;
-import com.isharryh.arkpets.utils.AICtrl;
-import com.isharryh.arkpets.utils.AnimCtrl;
+import com.isharryh.arkpets.utils.AnimAutoData;
+import com.isharryh.arkpets.utils.AnimData;
 
 
 public class BehaviorOperBuild2 extends Behavior {
 
     public BehaviorOperBuild2(ArkConfig $config) {
         super($config);
-        action_list = new AICtrl[] {
-            new AICtrl(new AnimCtrl("Relax", true, true, 0, 0),
+        action_list = new AnimAutoData[] {
+            new AnimAutoData(new AnimData("Relax", true, true, 0, 0),
                     4f, (int) (256 / Math.sqrt(config.behavior_ai_activation))),
-            new AICtrl(new AnimCtrl("Move", true, true, 0, 1),
+            new AnimAutoData(new AnimData("Move", true, true, 0, 1),
                     2f, 32*(config.behavior_allow_walk?1:0)),
-            new AICtrl(new AnimCtrl("Move", true, true, 0, -1),
+            new AnimAutoData(new AnimData("Move", true, true, 0, -1),
                     2f, 32*(config.behavior_allow_walk?1:0)),
-            new AICtrl(new AnimCtrl("Sit", true, true, 50, 0),
+            new AnimAutoData(new AnimData("Sit", true, true, 50, 0),
                     6f, 64*(config.behavior_allow_sit?1:0)),
-            new AICtrl(new AnimCtrl("Special", false, false, defaultAnim()),
+            new AnimAutoData(new AnimData("Special", false, false, defaultAnim()),
                     4f, 16*(1))
         };
     }
@@ -44,21 +44,21 @@ public class BehaviorOperBuild2 extends Behavior {
         return true;
     }
 
-    public AnimCtrl defaultAnim() {
-        return new AnimCtrl("Relax", true, true);
+    public AnimData defaultAnim() {
+        return new AnimData("Relax", true, true);
     }
 
-    public AnimCtrl clickEnd() {
-        return config.behavior_allow_interact?new AnimCtrl("Interact", false, false,
-                new AnimCtrl("Relax", true, true)) : null;
+    public AnimData clickEnd() {
+        return config.behavior_allow_interact?new AnimData("Interact", false, false,
+                new AnimData("Relax", true, true)) : null;
     }
 
-    public AnimCtrl dragStart() {
+    public AnimData dragStart() {
         return action_list[0].ANIM;
     }
 
-    public AnimCtrl drop() {
-        return config.behavior_allow_interact?new AnimCtrl("Interact", false, false,
-                new AnimCtrl("Relax", true, true)) : null;
+    public AnimData drop() {
+        return config.behavior_allow_interact?new AnimData("Interact", false, false,
+                new AnimData("Relax", true, true)) : null;
     }
 }

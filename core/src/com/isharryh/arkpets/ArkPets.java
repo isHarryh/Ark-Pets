@@ -17,7 +17,7 @@ import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
 import com.isharryh.arkpets.behaviors.*;
-import com.isharryh.arkpets.utils.AnimCtrl;
+import com.isharryh.arkpets.utils.AnimData;
 import com.isharryh.arkpets.utils.HWndCtrl;
 import com.isharryh.arkpets.utils.LoopCtrl;
 import com.isharryh.arkpets.utils.Plane;
@@ -59,8 +59,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
 		Gdx.input.setInputProcessor(this);
-		config = ArkConfig.init();
-		ScreenUtils.clear(0, 0, 0, 0);
+		config = ArkConfig.getConfig();
+		ScreenUtils.clear(0, 0, 0, 0, true);
 		// 2.Window setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
@@ -115,7 +115,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 
 		// 2.Select a new anim.
-		AnimCtrl newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
 		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
 			setWindowPosTar(plane.getX(), -plane.getY());
@@ -124,7 +124,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				if (willReachBorder(cha.anim_queue[0].MOBILITY)) {
 					// Turn around if auto-walk cause the collision from screen border.
 					newAnim = cha.anim_queue[0];
-					newAnim = new AnimCtrl(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, -newAnim.MOBILITY);
+					newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, -newAnim.MOBILITY);
 					tray.keepAnim = tray.keepAnim == null ? null : newAnim;
 				}
 				walkWindow(0.85f * cha.anim_queue[0].MOBILITY);
@@ -148,11 +148,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		tray.remove();
 	}
 
-	private void changeAnimation(AnimCtrl animCtrl) {
-		if (animCtrl != null) {
+	private void changeAnimation(AnimData animData) {
+		if (animData != null) {
 			// If it is needed to change animation:
-			if (cha.setAnimation(animCtrl))
-				OFFSET_Y = (int)(animCtrl.OFFSET_Y * config.display_scale);
+			if (cha.setAnimation(animData))
+				OFFSET_Y = (int)(animData.OFFSET_Y * config.display_scale);
 		}
 	}
 
@@ -196,8 +196,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		else {
 			cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
 			if (tray.keepAnim != null && cha.anim_queue[0].MOBILITY != 0) {
-				AnimCtrl newAnim = cha.anim_queue[0];
-				newAnim = new AnimCtrl(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
+				AnimData newAnim = cha.anim_queue[0];
+				newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
 				tray.keepAnim = newAnim;
 			}
 		}

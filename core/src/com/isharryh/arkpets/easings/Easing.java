@@ -4,7 +4,7 @@
 package com.isharryh.arkpets.easings;
 
 
-public class Easing {
+abstract public class Easing {
     public float FROM;
     public float TO;
     public float DURATION;

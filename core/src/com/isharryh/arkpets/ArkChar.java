@@ -4,13 +4,11 @@
 package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -29,10 +27,12 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.Animation.MixBlend;
 import com.esotericsoftware.spine.Animation.MixDirection;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
+
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector3;
-import com.isharryh.arkpets.utils.AnimCtrl;
+import com.isharryh.arkpets.utils.AnimData;
 import com.isharryh.arkpets.utils.FrameCtrl;
+import java.nio.ByteBuffer;
 
 
 public class ArkChar {
@@ -54,7 +54,7 @@ public class ArkChar {
     private int anim_width;
     private int anim_height;
     public String[] anim_list;
-    public AnimCtrl[] anim_queue;
+    public AnimData[] anim_queue;
     public FrameCtrl anim_frame;
     public int anim_fps;
     public float f_time; // Duration(Sec) per frame
@@ -76,7 +76,7 @@ public class ArkChar {
         positionTar = new Vector3(0, 0, 0);
         offset_y = 0;
         transform = new Matrix4();
-        anim_queue = new AnimCtrl[2];
+        anim_queue = new AnimData[2];
 
         // Transfer params
 
@@ -176,18 +176,22 @@ public class ArkChar {
     }
 
     /** Set a new animation
-     * @param $animCtrl
+     * @param $animData
      * @return true=success, false=failure.
      */
-    public boolean setAnimation(AnimCtrl $animCtrl) {
-        if ($animCtrl != null && (anim_queue[0] == null || anim_queue[0].INTERRUPTABLE)) {
-            anim_queue[1] = $animCtrl;
+    public boolean setAnimation(AnimData $animData) {
+        if ($animData != null && (anim_queue[0] == null || anim_queue[0].INTERRUPTABLE)) {
+            anim_queue[1] = $animData;
             return true;
         }
         return false;
     }
 
-    public void toImg(Pixmap $pixmap, int $frame) {
+    /** Render a specified frame to a byte buffer.
+     * @param $frame
+     * @return ByteBuffer object.
+     */
+    public ByteBuffer toBuffer(int $frame) {
         // Apply Animation
         animation.apply(skeleton, ($frame - 1) * f_time, ($frame - 1) * f_time, false, null, 1, MixBlend.first, MixDirection.in);
         skeleton.updateWorldTransform();
@@ -196,14 +200,13 @@ public class ArkChar {
         batch.begin();
         renderer.draw(batch, skeleton);
         batch.end();
-        // Copy the FBO to the pixmap
+        // Copy the FBO to a pixmap
+        Pixmap pixmap = new Pixmap(200, 200, Format.RGBA8888);
         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
         Gdx.gl.glReadPixels(0, 0, anim_width, anim_height,
-                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, $pixmap.getPixels());
-        // Save the image
-        String name = animation.getName() + "_" + $frame + ".png";
-        System.out.println(name);
-        PixmapIO.writePNG(new FileHandle("output/" + name), $pixmap);
+                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixmap.getPixels());
+        // Convert to byte buffer
+        return pixmap.getPixels();
     }
 
     /** Render the animation to batch.
@@ -218,7 +221,7 @@ public class ArkChar {
         // OLD METHOD: animation.apply(skeleton, ($frame - 1) * anim_frame.F_TIME, ($frame - 1) * anim_frame.F_TIME, false, null, 1, MixBlend.first, MixDirection.in);
         skeleton.updateWorldTransform();
         // Render the skeleton to the FBO
-        ScreenUtils.clear(0,0,0,0);
+        ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
         if (bgTexture != null)
             batch.draw(bgTexture, 0, 0);

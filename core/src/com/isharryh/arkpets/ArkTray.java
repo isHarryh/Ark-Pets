@@ -4,7 +4,7 @@
 package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
-import com.isharryh.arkpets.utils.AnimCtrl;
+import com.isharryh.arkpets.utils.AnimData;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 
@@ -28,7 +28,7 @@ public class ArkTray {
     private final JDialog popWindow;
     private final JPopupMenu pop;
     public String name;
-    public AnimCtrl keepAnim;
+    public AnimData keepAnim;
 
     /** Initialize the ArkPets tray icon instance. <br/>
      * Must be used after Gdx.app was initialized.
