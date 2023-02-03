@@ -14,53 +14,55 @@ public class JavaProcess {
     private JavaProcess() {
     }
 
-    /** Excute the main function in a java class.
-     * @param clazz The java class to excute.
+    /** Execute the main function in a java class.
+     * @param clazz The java class to execute.
+     * @param waitForExitValue Whether to wait for the process to end.
+     *                         If false, this method will always return 0 instead of the exit value.
      * @param jvmArgs JVM Arguments.
      * @param args Arguments.
-     * @return The exit value of the process.
-     * @throws IOException
-     * @throws InterruptedException
+     * @return The exit value of the process (if you wait for exit value).
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the current thread is interrupted by another thread while it is waiting.
      */
-    public static int exec(Class clazz, List<String> jvmArgs, List<String> args)
-        throws IOException,InterruptedException {
+    public static int exec(Class clazz, boolean waitForExitValue, List<String> jvmArgs, List<String> args)
+            throws IOException, InterruptedException {
+        // Attributes preparation
         String javaHome = System.getProperty("java.home");
         String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
         String classpath = System.getProperty("java.class.path");
         String className = clazz.getName();
+        // Command preparation
         List<String> command = new ArrayList<>();
         command.add(javaBin);
-        command.addAll(jvmArgs);
+        if (jvmArgs.size() > 0)
+            command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
         command.add(className);
-        command.addAll(args);
+        if (args.size() > 0)
+            command.addAll(args);
+        // Process execution
         ProcessBuilder builder = new ProcessBuilder(command);
         Process process = builder.inheritIO().start();
-        process.waitFor();
-        return process.exitValue();
+        if (waitForExitValue) {
+            process.waitFor();
+            return process.exitValue();
+        }
+        return 0;
     }
 
-    /** Excute the main function in a java class. (Without arguments)
-     * @param clazz The java class to excute.
-     * @return The exit value of the process.
-     * @throws IOException
-     * @throws InterruptedException
+    /** Execute the main function in a java class. (Without arguments)
+     * The invoker's thread will wait until the process ends.
+     * @param clazz The java class to execute.
+     * @param waitForExitValue Whether to wait for the process to end.
+     *                         If false, this method will always return 0 instead of the exit value.
+     * @return The exit value of the process (if you wait for exit value).
+     * @throws IOException If an I/O error occurs.
+     * @throws InterruptedException If the current thread is interrupted by another thread while it is waiting.
      */
-    public static int exec(Class clazz)
-        throws IOException,InterruptedException {
-        String javaHome = System.getProperty("java.home");
-        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-        String classpath = System.getProperty("java.class.path");
-        String className = clazz.getName();
-        List<String> command = new ArrayList<>();
-        command.add(javaBin);
-        command.add("-cp");
-        command.add(classpath);
-        command.add(className);
-        ProcessBuilder builder = new ProcessBuilder(command);
-        Process process = builder.inheritIO().start();
-        process.waitFor();
-        return process.exitValue();
+    public static int exec(Class clazz, boolean waitForExitValue)
+            throws IOException, InterruptedException {
+        List<String> emptyList = new ArrayList<>();
+        return exec(clazz, waitForExitValue, emptyList, emptyList);
     }
 }

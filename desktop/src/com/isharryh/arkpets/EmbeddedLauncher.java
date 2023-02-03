@@ -3,7 +3,6 @@
  */
 package com.isharryh.arkpets;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -11,8 +10,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
-// Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
+
+/** The bootstrap for ArkPets the libGDX app.
+ * @see com.isharryh.arkpets.ArkPets
+ */
 public class EmbeddedLauncher {
+	// Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
+
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		// Configure FPS

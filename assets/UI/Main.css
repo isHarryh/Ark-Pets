@@ -1,0 +1,346 @@
+/** Copyright (c) 2022-2023, Harry Huang
+ * At GPL-3.0 License
+ */
+
+/*******************************************************************************
+ *                                                                             *
+ * 1. Global Styles and Common Controllers                                     *
+ *                                                                             *
+ ******************************************************************************/
+
+/* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/18/javafx.graphics/javafx/scene/doc-files/cssref.html */
+
+* {
+/* Font anti-aliasing */
+-fx-font-smoothing-type: gray;
+}
+
+.scroll-v {
+/* Scroll-pane (Vertical-only) */
+-fx-pannable: true;
+-fx-hbar-policy: never;
+-fx-vbar-policy: as-needed;
+}
+
+.shadowed {
+/* Drop-shadow for Nodes */
+-fx-effect: dropshadow(gaussian, #00000040, 10, 0.2, 0, 1);
+}
+
+.expandable-field {
+/* Expandable text area for Popup dialogs */
+-fx-alignment: top-left;
+-fx-pref-row-count: 12;
+}
+
+.btn-icon {
+/* Anchor-pane that contains an SVG-path */
+-fx-pref-width: 0;
+-fx-pref-height: 0;
+-fx-scale-x: 0.5;
+-fx-scale-y: 0.5;
+-fx-translate-x: -20px;
+-fx-translate-y: 0;
+}
+
+.btn-icon SVGPath {
+-fx-fill: inherit;
+}
+
+.btn-with-icon {
+/* Button that contains a btn-icon on the left */
+-fx-label-padding: 0 0 0 8px;
+-fx-content-display: center;
+}
+
+Button:focused {
+/* Focused */
+-fx-effect: dropshadow(three-pass-box, #80DFFFFF, 8, 0.5, 0, 0);
+}
+
+.btn-primary, .btn-secondary {
+/* Regular */
+-fx-font-size: 12px;
+-fx-text-alignment: center;
+-fx-background-radius: 6px;
+-fx-border-radius: 6px;
+-fx-border-width: 1px;
+-fx-border-style: solid;
+}
+
+.btn-primary {
+/* Regular */
+-fx-text-fill: #FFFFFF;
+-fx-background-color: #204880;
+-fx-border-color: #204880;
+}
+
+.btn-primary .btn-icon {
+/* Regular */
+-fx-fill: #FFFFFF;
+}
+
+.btn-primary:hover {
+/* Hover */
+-fx-background-color: #4D7999;
+}
+
+.btn-primary:pressed {
+/* Active */
+-fx-background-color: #8FABBF;
+}
+
+.btn-secondary {
+/* Regular */
+-fx-text-fill: #204880;
+-fx-background-color: #FFFFFF;
+-fx-border-color: #204880;
+}
+
+.btn-secondary .btn-icon {
+/* Regular */
+-fx-fill: #204880;
+}
+
+.btn-secondary:hover {
+/* Hover */
+-fx-background-color: #8FABBF;
+}
+
+.btn-secondary:pressed {
+/* Active */
+-fx-background-color: #4D7999;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 2. Sidebar and its Menu Buttons                                             *
+ *                                                                             *
+ ******************************************************************************/
+
+#Sidebar {
+-fx-background-color: #95B7E5;
+}
+
+.menu-btn {
+/* Regular */
+-fx-cursor: hand;
+-fx-padding: 0 0 0 20px;
+-fx-text-fill: #204880;
+-fx-text-alignment: left;
+-fx-background-color: #FFFFFF;
+-fx-background-radius: 8px;
+-fx-border-color: #204880;
+-fx-border-radius: 8px;
+-fx-border-width: 1.5px;
+-fx-border-style: solid;
+}
+
+.menu-btn:hover, .menu-btn:focused {
+/* Hover & Focused */
+-fx-text-fill: #FFFFFF;
+-fx-background-color: #4D7999;
+}
+
+.menu-btn-active, .menu-btn-active:hover, .menu-btn-active:focused {
+/* Active */
+-fx-text-fill: #FFFFFF;
+-fx-background-color: #204880;
+}
+
+.menu-btn SVGPath {
+/* Regular */
+-fx-fill: #204880;
+}
+
+.menu-btn:hover SVGPath, .menu-btn:focused SVGPath,
+.menu-btn-active SVGPath, .menu-btn-active:hover SVGPath, .menu-btn-active:focused SVGPath {
+/* Hover & Active */
+-fx-fill: #FFFFFF;
+}
+
+#Start-btn {
+/* Regular */
+-fx-cursor: hand;
+-fx-padding: 0 0 0 20px;
+-fx-text-fill: #FFFFFF;
+-fx-text-alignment: left;
+-fx-background-color: #204880;
+-fx-background-radius: 18px;
+-fx-border-color: #204880;
+-fx-border-radius: 18px;
+-fx-border-width: 1.5px;
+-fx-border-style: solid;
+}
+
+#Start-btn:hover {
+/* Hover */
+-fx-text-fill: #EEEEEE;
+-fx-background-color: #0B3773;
+}
+
+#Start-btn SVGPath {
+/* Regular */
+-fx-fill: #FFFFFF;
+}
+
+#Start-menu-btn:hover SVGPath, #Start-btn:focused SVGPath {
+/* Hover & Focused */
+-fx-fill: #EEEEEE;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 3. Wrappers                                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.wrapper {
+-fx-padding: 5px 10px 5px 10px;
+}
+
+.wrapper-title {
+-fx-text-fill: #606060;
+}
+
+.wrapper-title:hover {
+-fx-text-fill: #F03030;
+}
+
+#Loading-failure-tip {
+-fx-background-color: #F4F4F4;
+-fx-opacity: 0.875;
+}
+
+#Loading-failure-tip>* {
+-fx-fill: #444444;
+}
+
+#Search-models-bar {
+-fx-background-radius: 8px;
+-fx-background-color: #95B7E5;
+-fx-border-style: none;
+}
+
+#Search-models-list {
+-fx-padding: 5px;
+}
+
+.Search-models-item {
+/* Regular */
+-fx-cursor: hand;
+-fx-text-fill: #505050;
+-fx-background-color: rgb(244,247,249);
+-fx-background-radius: 8px;
+-fx-focus-traversable: true;
+-fx-border-color: #95B7E5;
+-fx-border-radius: 6px;
+-fx-border-width: 1px;
+-fx-border-style: solid;
+}
+
+.Search-models-item:hover, .Search-models-item:focused {
+/* Hover & Focused */
+-fx-text-fill: #204880;
+-fx-background-color: rgb(244,247,249);
+-fx-border-color: #204880;
+}
+
+.Search-models-item-active, .Search-models-item-active:hover, .Search-models-item-active:focused {
+/* Active */
+-fx-background-color: #204880;
+-fx-border-color: #204880;
+}
+
+.Search-models-label {
+-fx-text-overrun: ellipsis;
+-fx-label-padding: 2px 2px 2px 6px;
+}
+
+.Search-models-label-primary {
+-fx-font-size: 12px;
+-fx-text-fill: #303030;
+}
+
+.Search-models-label-secondary {
+-fx-font-size: 11px;
+-fx-text-fill: #606060;
+}
+
+.Search-models-item-active .Search-models-label {
+-fx-text-fill: #FFFFFF;
+}
+
+.Info-primary {
+-fx-font-size: 16px;
+-fx-text-fill: #202020;
+-fx-font-weight: bold;
+-fx-label-padding: 4px 2px 4px 2px;
+}
+
+.Info-secondary {
+-fx-font-size: 12px;
+-fx-font-weight: normal;
+-fx-text-fill: #808080;
+-fx-label-padding: 2px;
+}
+
+.Info-tag {
+-fx-font-size: 10px;
+-fx-background-radius: 6px;
+-fx-label-padding: 2px 4px 2px 4px;
+}
+
+.Info-tag-theme {
+-fx-text-fill: #FFFFFF;
+-fx-background-color: #4D7999;
+}
+
+.config-group-title {
+-fx-font-size: 14px;
+-fx-text-fill: #204880;
+-fx-label-padding: 0 0 0 6px;
+-fx-border-width: 0 0 0 2px;
+-fx-border-style: solid;
+-fx-border-color: #204880;
+}
+
+.config-field {
+}
+
+.config-field CheckBox, .config-field HBox Label {
+-fx-font-size: 12px;
+-fx-text-fill: #303030;
+-fx-label-padding: 4px;
+}
+
+.config-field HBox {
+-fx-padding: 8px 4px 4px 4px;
+}
+
+.config-field HBox CheckBox, .config-field HBox Label {
+-fx-pref-width: 180px;
+}
+
+.config-field HBox ChoiceBox {
+-fx-background-radius: 10px;
+-fx-border-radius: 10px;
+}
+
+.config-field HBox Slider {
+-fx-show-tick-marks: true;
+}
+
+.config-field Separator {
+-fx-padding: 8px 0 8px 0;
+-fx-opacity: 0.38;
+}
+
+.config-hyper-link {
+-fx-text-fill: #204880;
+-fx-alignment: top-center;
+}
+
+.config-hyper-link:hover, .config-hyper-link:focused {
+-fx-underline: true;
+}

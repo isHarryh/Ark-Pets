@@ -6,14 +6,30 @@ package com.isharryh.arkpets;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
+import com.isharryh.arkpets.utils.IOUtils.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 
 
 public class ArkConfig {
-    private static final FileHandle configCustom
-            = Gdx.files.local("ArkPetsCustom.config");
-    private static final FileHandle configDefault
-            = Gdx.files.internal("ArkPetsDefault.config");
+    public static final String configCustomPath;
+    public static final String configDefaultPath;
+    private static final File configCustom;
+    private static final File configDefault;
+    static {
+        configCustomPath = "ArkPetsCustom.config";
+        configDefaultPath = "/ArkPetsDefault.config";
+        configCustom = new File(configCustomPath);
+        //configDefault = SrcUtil.getInternalFile(ArkConfig.class, "/ArkPetsDefault.config");
+        configDefault = new File(Objects.requireNonNull(ArkConfig.class.getResource(configDefaultPath)).toExternalForm());
+    }
 
     // The following is the config items
     public float display_scale;
@@ -28,10 +44,7 @@ public class ArkConfig {
     public boolean behavior_allow_interact;
     public boolean behavior_do_peer_repulsion;
 
-    /** You are supposed to use the static function {@code ArkConfig.init()} to instantiate the ArkConfig,
-     * instead of using this constructor.
-     */
-    public ArkConfig() {
+    private ArkConfig() {
     }
 
     /** Get the config in String format.
@@ -44,47 +57,33 @@ public class ArkConfig {
     /** Save the config to the custom file.
      */
     public void saveConfig() {
-        configCustom.writeString(readConfig(), false);
+        try {
+            FileUtil.writeString(configCustom, "UTF-8", readConfig(), false);
+        } catch (IOException e) {
+            System.err.println("[error] Config saving failed");
+            e.printStackTrace();
+        }
     }
 
     /** Instantiate an ArkConfig.
      * @return ArkConfig object.
      */
-    public static ArkConfig init() {
-        if (!configCustom.exists() || configCustom.isDirectory()) {
-            configDefault.copyTo(configCustom);
-        }
-        return JSONObject.parseObject(configCustom.readString("UTF-8"), ArkConfig.class);
-    }
-
-    /** Get a specific row in a long text. (Discarded)
-     * @param fullText The long text.
-     * @param rowId The id of the row, start from 1.
-     * @return The content of the row.
-     */
-    public static String readRow(String fullText, int rowId) {
-        // Return the specified row in a text
-        fullText = fullText.replaceAll("\r\n", "\n");
-        String spl = "\n";
-        int splLen = spl.length();
-        int curA = 0;
-        int curB = 0;
-        
-        if (rowId < 2) {
-            if (rowId <= 0)
-                return "\0"; // Illegal rowId
-            curB = fullText.indexOf(spl);
-        } else {
-            for (int i = 1; i < rowId; i++) {
-                curB = fullText.indexOf(spl, curA) + splLen;
-                if (curB < curA)
-                    return "\0"; // Out of content
-                curA = curB;
+    public static ArkConfig getConfig() {
+        if (!configCustom.isFile()) {
+            try {
+                Files.copy(Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath)), configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                System.err.println("[error] Config copying failed");
+                e.printStackTrace();
             }
-            curB = fullText.indexOf(spl, curA);
         }
-        return (curA < curB && curB < fullText.length()) ?
-                fullText.substring(curA, curB) : "";
+        try {
+            return JSONObject.parseObject(FileUtil.readString(configCustom, "UTF-8"), ArkConfig.class);
+        } catch (IOException e) {
+            System.err.println("[error] Config reading failed");
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /** Compare two object whether their values are the same,

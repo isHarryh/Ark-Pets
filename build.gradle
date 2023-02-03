@@ -7,19 +7,25 @@ buildscript {
     }
 
     dependencies {
+        classpath "org.openjfx:javafx-plugin:0.0.13"
     }
 }
 
 
 allprojects {
     apply plugin: "eclipse"
+    apply plugin: "org.openjfx.javafxplugin"
 
-    version = '1.0'
+    version = '2.0'
     ext {
-    ext { // Constant Definitions
+        // App Metadata
         appName = "ArkPets"
+        appAuthor = "Harry Huang"
+        appCopyright = "© ${new Date().format('yyyy', TimeZone.getTimeZone('GMT+0:00'))} ${appAuthor}"
+        // Dependencies Version
         gdxVersion = '1.11.0'
         jnaVersion = '5.12.1'
+        javaFXVersion = '20-ea+4'
     }
 
     repositories {
@@ -55,6 +61,11 @@ project(":core") {
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
+        // JavaFX
+        api "org.openjfx:javafx-base:$javaFXVersion:win"
+        api "org.openjfx:javafx-controls:$javaFXVersion:win"
+        api "org.openjfx:javafx-graphics:$javaFXVersion:win"
+        api "org.openjfx:javafx-fxml:$javaFXVersion:win"
         // FastJson
         api "com.alibaba:fastjson:2.0.8"
     }

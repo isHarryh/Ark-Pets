@@ -1,5 +1,6 @@
 sourceCompatibility = 1.8
-sourceSets.main.java.srcDirs = [ "src/" ]
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
 project.ext.mainClassName = "com.isharryh.arkpets.DesktopLauncher"
@@ -7,7 +8,7 @@ project.ext.assetsDir = new File("../assets")
 
 import org.gradle.internal.os.OperatingSystem
 
-task run(dependsOn: classes, type: JavaExec) {
+task run(dependsOn: classes, type: JavaExec, group: 'execute') {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -15,12 +16,11 @@ task run(dependsOn: classes, type: JavaExec) {
     ignoreExitValue = true
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
-        // Required to run on macOS
-        jvmArgs += "-XstartOnFirstThread"
+        jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
     }
 }
 
-task debug(dependsOn: classes, type: JavaExec) {
+task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
@@ -29,7 +29,7 @@ task debug(dependsOn: classes, type: JavaExec) {
     debug = true
 }
 
-task dist(type: Jar) {
+task dist(dependsOn: classes, type: Jar, group: 'release') {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes 'Main-Class': project.mainClassName
