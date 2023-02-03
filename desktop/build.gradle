@@ -41,7 +41,68 @@ task dist(dependsOn: classes, type: Jar, group: 'release') {
     with jar
 }
 
+ext {
+    rootDir = file('.').absolutePath
+    javaHome = System.getProperty('java.home')
+    osName = System.getProperty('os.name').toLowerCase(Locale.ROOT).split(' ')[0]
+    osPathSep = File.pathSeparatorChar
+    // Release Related
+    jlinkRuntimeDir = "${buildDir}/jlink"
+    jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
+    jlinkModuleList = "java.base,java.desktop,java.management,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
+    jpackageDir = "${buildDir}/jpackage"
+    distDir = "${buildDir}/dist"
+}
 
-dist.dependsOn classes
+task createRuntime(dependsOn: dist, type: Exec, group: 'release') {
+    doFirst() {
+        delete jlinkRuntimeDir
+    }
+    workingDir project.projectDir
+    inputs.property("runtime", jlinkRuntimeImg)
+    commandLine = [
+            "${javaHome}/bin/jlink",
+            '--module-path', "${javaHome}/jmods",
+            '--add-modules', jlinkModuleList,
+            '--output', jlinkRuntimeImg,
+            '--strip-debug',
+            '--no-header-files',
+            '--no-man-pages',
+            '--vm=server',
+            '--compress=1',
+            '--include-locales=en-US,zh-CN'
+    ]
+    outputs.dir(jlinkRuntimeDir)
+}
+
+task jpackage(dependsOn: createRuntime, type: Exec, group: 'release') {
+    doFirst() {
+        delete jpackageDir
+    }
+    workingDir project.projectDir
+    def commands = [
+            "${javaHome}/bin/jpackage",
+            '--input', "${buildDir}/libs",
+            '--dest', jpackageDir,
+            '--type', 'app-image',
+            '--name', project.appName,
+            '--vendor', project.appAuthor,
+            '--app-version', project.version,
+            '--main-class', project.mainClassName,
+            '--main-jar', jar.archiveFile.get().asFile.getName(),
+            '--runtime-image', jlinkRuntimeImg
+    ]
+    if (osName.contains('windows')) {
+        commands << '--icon'
+        commands << "${project.assetsDir}/icon.ico"
+    } else if (osName.contains('linux')) {
+        commands << '--icon'
+        commands << "${project.assetsDir}/icon.png"
+    } else if (osName.contains('mac')) {
+        commands << '--java-options'
+        commands << "-XstartOnFirstThread"
+    }
+    commandLine = commands
+}
 
 eclipse.project.name = appName + "-desktop"
