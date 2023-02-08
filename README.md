@@ -1,11 +1,14 @@
-Ark-Pets
-==========
-Arknights Desktop Pets.  
-明日方舟桌宠  
-版本(Version)`v2.0`
-> 此版本正在开发阶段。
+<!-- 欢迎阅读 Ark-Pets 说明文档 -->
+<!-- 这是一个 MarkDown 格式的文档 -->
 
-This project only supports Chinese docs. If you are an English user, feel free to contact us.
+<div align="center">
+   <h1 style="margin:0"> Ark-Pets </h1>
+   <img height="64" src="assets/icon.png" title="Icon" width="64"/>
+   <p style="margin:0"> Arknights Desktop Pets <br> 明日方舟桌宠 </p>
+   <hr>
+   <p style="margin:0"> 版本(Version)<code>v2.0</code> </p>
+   <small> This project only supports Chinese docs. If you are an English user, feel free to contact us. </small>
+</div>
 
 ## 介绍 <sub>Intro</sub>
 ### 实现的功能
@@ -35,9 +38,14 @@ This project only supports Chinese docs. If you are an English user, feel free t
 - 常见疑问解答 > [点击查看](docs/Q%26A.md)
 - 命令行启动方法 > [点击查看](docs/CmdLine.md)
 
+
 ## 使用方法 <sub>Usage</sub>
 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
 由于该版本正在开发阶段，暂不提供详细的使用方法。
+
+目前最新可用版本：
+[<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
+
 
 ## 许可证 <sub>License</sub>
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
@@ -46,4 +54,6 @@ This project only supports Chinese docs. If you are an English user, feel free t
 您可以通过提交Issues、PR、CodeReview等方式参与本项目的贡献。
 - 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
 - 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
-- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)
+<!--- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki) -->
+
+**[<p align="center"> 鸣谢 </p>](docs/Thanks.md)**
