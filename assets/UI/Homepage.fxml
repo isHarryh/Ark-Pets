@@ -5,6 +5,7 @@
     At GPL-3.0 License
 -->
 
+<?import com.jfoenix.controls.*?>
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -13,209 +14,174 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="372.0"
-            prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isharryh.arkpets.controllers.Homepage">
-    <Pane id="Sidebar" fx:id="Sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-          minWidth="-Infinity" prefHeight="372.0" prefWidth="140.0" StackPane.alignment="TOP_LEFT">
-        <Line endX="128.0" layoutY="66.0" startX="12.0"/>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="372.0" prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isharryh.arkpets.controllers.Homepage">
+    <Pane id="Sidebar" fx:id="Sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="372.0" prefWidth="140.0" StackPane.alignment="TOP_LEFT">
+        <Line endX="128.0" layoutY="66.0" startX="12.0" />
         <GridPane alignment="CENTER" layoutY="88.0" prefHeight="180.0" prefWidth="140.0" styleClass="menu">
             <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             </columnConstraints>
             <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
-            <Button fx:id="menuBtn1" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed"
-                    text="模型" textAlignment="CENTER">
+            <JFXButton fx:id="menuBtn1" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="模型" textAlignment="CENTER">
                 <font>
-                    <Font name="System" size="18.0"/>
+                    <Font name="System" size="18.0" />
                 </font>
                 <GridPane.margin>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </GridPane.margin>
                 <graphic>
                     <AnchorPane prefHeight="24.0" prefWidth="24.0" translateX="-10.0">
                         <children>
-                            <SVGPath
-                                    content="m3.514 6.636c-.317.179-.514.519-.514.887v8.95c0 .37.197.708.514.887 1.597.901 6.456 3.639 8.005 4.512.152.085.319.128.487.128.164 0 .328-.041.477-.123 1.549-.855 6.39-3.523 7.994-4.408.323-.177.523-.519.523-.891v-9.055c0-.368-.197-.708-.515-.887-1.595-.899-6.444-3.632-7.999-4.508-.151-.085-.319-.128-.486-.128-.168 0-.335.043-.486.128-1.555.876-6.405 3.609-8 4.508zm15.986 2.115v7.525l-6.75 3.722v-7.578zm-14.264-1.344 6.764-3.813 6.801 3.834-6.801 3.716z"
-                                    scaleX="0.95" scaleY="0.95" translateX="5.0"/>
+                            <SVGPath content="m3.514 6.636c-.317.179-.514.519-.514.887v8.95c0 .37.197.708.514.887 1.597.901 6.456 3.639 8.005 4.512.152.085.319.128.487.128.164 0 .328-.041.477-.123 1.549-.855 6.39-3.523 7.994-4.408.323-.177.523-.519.523-.891v-9.055c0-.368-.197-.708-.515-.887-1.595-.899-6.444-3.632-7.999-4.508-.151-.085-.319-.128-.486-.128-.168 0-.335.043-.486.128-1.555.876-6.405 3.609-8 4.508zm15.986 2.115v7.525l-6.75 3.722v-7.578zm-14.264-1.344 6.764-3.813 6.801 3.834-6.801 3.716z" scaleX="0.95" scaleY="0.95" translateX="5.0" />
                         </children>
                     </AnchorPane>
                 </graphic>
-            </Button>
-            <Button fx:id="menuBtn2" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed"
-                    text="行为" textAlignment="CENTER" GridPane.rowIndex="1">
+            </JFXButton>
+            <JFXButton fx:id="menuBtn2" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="行为" textAlignment="CENTER" GridPane.rowIndex="1">
                 <font>
-                    <Font name="System" size="18.0"/>
+                    <Font name="System" size="18.0" />
                 </font>
                 <GridPane.margin>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </GridPane.margin>
                 <graphic>
                     <AnchorPane prefHeight="24.0" prefWidth="24.0" scaleX="0.95" scaleY="0.95" translateX="-10.0">
                         <children>
-                            <SVGPath
-                                    content="m18.39 8.428c-.835.186-2.113.51-2.845.866-1.089.529-1.874 1.358-1.874 2.76 0 4.089 3.073 7.956 3.073 8.293 0 .131-.137.203-.227.113 0-.001-.001-.002-.001-.002-.673-.69-1.997-2.747-2.606-3.738v-.001c-.404-.653-.951-1.448-1.903-1.448h-.003c-.961 0-1.509.791-1.914 1.449-2.274 3.698-2.707 3.738-2.607 3.738-.094.095-.228.015-.228-.111 0-.285 3.073-4.285 3.073-8.293 0-1.336-.697-2.139-1.744-2.678-.833-.428-1.923-.669-2.956-.944-.009-.002-.017-.004-.026-.006-.138-.032-.138-.272.011-.299 1.098.25 3.412.923 6.387.923 2.94 0 5.295-.669 6.389-.923.145.029.152.265.001.301m-6.392-4.928c.858 0 1.552.7 1.552 1.562s-.694 1.563-1.552 1.563c-.856 0-1.55-.701-1.55-1.563s.694-1.562 1.55-1.562m6.367 3.125c-.427 0-2.112.584-4.474.821.699-.561 1.157-1.414 1.157-2.384 0-1.691-1.366-3.062-3.05-3.062-1.681 0-3.049 1.371-3.049 3.062 0 .97.458 1.824 1.158 2.385-2.361-.238-4.018-.822-4.472-.822-.897 0-1.635.738-1.635 1.653 0 .765.536 1.437 1.256 1.608 1.805.478 3.573.755 3.573 2.168 0 3.145-2.041 6.072-2.852 7.462-.002.003-.004.006-.005.009-.142.251-.216.536-.216.822 0 .916.737 1.653 1.635 1.653.437 0 .853-.174 1.165-.494.722-.741 2.157-2.937 2.811-3.999.12-.195.238-.383.371-.537.082-.096.151-.199.267-.199.113 0 .176.105.256.198.133.154.252.343.373.539.652 1.06 2.086 3.255 2.809 3.997.31.319.724.495 1.167.495.896 0 1.634-.737 1.634-1.653 0-.282-.07-.562-.226-.837-.002-.002-.003-.005-.005-.008-.83-1.426-2.843-4.3-2.843-7.448 0-1.516 2.067-1.772 3.567-2.167.728-.173 1.263-.846 1.263-1.609 0-.915-.739-1.653-1.635-1.653"
-                                    translateX="5.0"/>
+                            <SVGPath content="m18.39 8.428c-.835.186-2.113.51-2.845.866-1.089.529-1.874 1.358-1.874 2.76 0 4.089 3.073 7.956 3.073 8.293 0 .131-.137.203-.227.113 0-.001-.001-.002-.001-.002-.673-.69-1.997-2.747-2.606-3.738v-.001c-.404-.653-.951-1.448-1.903-1.448h-.003c-.961 0-1.509.791-1.914 1.449-2.274 3.698-2.707 3.738-2.607 3.738-.094.095-.228.015-.228-.111 0-.285 3.073-4.285 3.073-8.293 0-1.336-.697-2.139-1.744-2.678-.833-.428-1.923-.669-2.956-.944-.009-.002-.017-.004-.026-.006-.138-.032-.138-.272.011-.299 1.098.25 3.412.923 6.387.923 2.94 0 5.295-.669 6.389-.923.145.029.152.265.001.301m-6.392-4.928c.858 0 1.552.7 1.552 1.562s-.694 1.563-1.552 1.563c-.856 0-1.55-.701-1.55-1.563s.694-1.562 1.55-1.562m6.367 3.125c-.427 0-2.112.584-4.474.821.699-.561 1.157-1.414 1.157-2.384 0-1.691-1.366-3.062-3.05-3.062-1.681 0-3.049 1.371-3.049 3.062 0 .97.458 1.824 1.158 2.385-2.361-.238-4.018-.822-4.472-.822-.897 0-1.635.738-1.635 1.653 0 .765.536 1.437 1.256 1.608 1.805.478 3.573.755 3.573 2.168 0 3.145-2.041 6.072-2.852 7.462-.002.003-.004.006-.005.009-.142.251-.216.536-.216.822 0 .916.737 1.653 1.635 1.653.437 0 .853-.174 1.165-.494.722-.741 2.157-2.937 2.811-3.999.12-.195.238-.383.371-.537.082-.096.151-.199.267-.199.113 0 .176.105.256.198.133.154.252.343.373.539.652 1.06 2.086 3.255 2.809 3.997.31.319.724.495 1.167.495.896 0 1.634-.737 1.634-1.653 0-.282-.07-.562-.226-.837-.002-.002-.003-.005-.005-.008-.83-1.426-2.843-4.3-2.843-7.448 0-1.516 2.067-1.772 3.567-2.167.728-.173 1.263-.846 1.263-1.609 0-.915-.739-1.653-1.635-1.653" translateX="5.0" />
                         </children>
                     </AnchorPane>
                 </graphic>
-            </Button>
-            <Button fx:id="menuBtn3" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed"
-                    text="选项" textAlignment="CENTER" GridPane.rowIndex="2">
+            </JFXButton>
+            <JFXButton fx:id="menuBtn3" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="选项" textAlignment="CENTER" GridPane.rowIndex="2">
                 <font>
-                    <Font name="System" size="18.0"/>
+                    <Font name="System" size="18.0" />
                 </font>
                 <GridPane.margin>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                 </GridPane.margin>
                 <graphic>
                     <AnchorPane prefHeight="24.0" prefWidth="24.0" translateX="-10.0">
                         <children>
-                            <SVGPath
-                                    content="M19 18c0 1.104-.896 2-2 2s-2-.896-2-2 .896-2 2-2 2 .896 2 2zm-14-3c-1.654 0-3 1.346-3 3s1.346 3 3 3h14c1.654 0 3-1.346 3-3s-1.346-3-3-3h-14zm19 3c0 2.761-2.239 5-5 5h-14c-2.761 0-5-2.239-5-5s2.239-5 5-5h14c2.761 0 5 2.239 5 5zm0-12c0 2.761-2.239 5-5 5h-14c-2.761 0-5-2.239-5-5s2.239-5 5-5h14c2.761 0 5 2.239 5 5zm-15 0c0-1.104-.896-2-2-2s-2 .896-2 2 .896 2 2 2 2-.896 2-2z"
-                                    scaleX="0.8" scaleY="0.8" translateX="5.0"/>
+                            <SVGPath content="M19 18c0 1.104-.896 2-2 2s-2-.896-2-2 .896-2 2-2 2 .896 2 2zm-14-3c-1.654 0-3 1.346-3 3s1.346 3 3 3h14c1.654 0 3-1.346 3-3s-1.346-3-3-3h-14zm19 3c0 2.761-2.239 5-5 5h-14c-2.761 0-5-2.239-5-5s2.239-5 5-5h14c2.761 0 5 2.239 5 5zm0-12c0 2.761-2.239 5-5 5h-14c-2.761 0-5-2.239-5-5s2.239-5 5-5h14c2.761 0 5 2.239 5 5zm-15 0c0-1.104-.896-2-2-2s-2 .896-2 2 .896 2 2 2 2-.896 2-2z" scaleX="0.8" scaleY="0.8" translateX="5.0" />
                         </children>
                     </AnchorPane>
                 </graphic>
-            </Button>
+            </JFXButton>
         </GridPane>
-        <Button id="Start-btn" fx:id="startBtn" layoutX="25.0" layoutY="310.0" mnemonicParsing="false" prefHeight="36.0"
-                prefWidth="90.0" text="启动" textAlignment="CENTER">
+        <JFXButton id="Start-btn" fx:id="startBtn" layoutX="25.0" layoutY="310.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="90.0" text="启动" textAlignment="CENTER">
             <font>
-                <Font size="18.0"/>
+                <Font size="18.0" />
             </font>
             <graphic>
-                <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0" prefWidth="2.0"
-                            translateX="-20.0" translateY="1.0">
+                <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0" prefWidth="2.0" translateX="-20.0" translateY="1.0">
                     <children>
-                        <SVGPath
-                                content="M13 2.004c5.046.504 9 4.783 9 9.97 0 1.467-.324 2.856-.892 4.113l1.738 1.005c.732-1.553 1.154-3.284 1.154-5.117 0-6.304-4.842-11.464-11-11.975v2.004zm-10.109 14.083c-.568-1.257-.891-2.646-.891-4.112 0-5.188 3.954-9.466 9-9.97v-2.005c-6.158.511-11 5.671-11 11.975 0 1.833.421 3.563 1.153 5.118l1.738-1.006zm17.213 1.734c-1.817 2.523-4.769 4.174-8.104 4.174s-6.288-1.651-8.105-4.175l-1.746 1.01c2.167 3.123 5.768 5.17 9.851 5.17 4.082 0 7.683-2.047 9.851-5.168l-1.747-1.011zm-8.104-13.863c-4.419 0-8 3.589-8 8.017s3.581 8.017 8 8.017 8-3.589 8-8.017-3.581-8.017-8-8.017zm-2 11.023v-6.013l6 3.152-6 2.861z"
-                                scaleX="0.8" scaleY="0.8"/>
+                        <SVGPath content="M13 2.004c5.046.504 9 4.783 9 9.97 0 1.467-.324 2.856-.892 4.113l1.738 1.005c.732-1.553 1.154-3.284 1.154-5.117 0-6.304-4.842-11.464-11-11.975v2.004zm-10.109 14.083c-.568-1.257-.891-2.646-.891-4.112 0-5.188 3.954-9.466 9-9.97v-2.005c-6.158.511-11 5.671-11 11.975 0 1.833.421 3.563 1.153 5.118l1.738-1.006zm17.213 1.734c-1.817 2.523-4.769 4.174-8.104 4.174s-6.288-1.651-8.105-4.175l-1.746 1.01c2.167 3.123 5.768 5.17 9.851 5.17 4.082 0 7.683-2.047 9.851-5.168l-1.747-1.011zm-8.104-13.863c-4.419 0-8 3.589-8 8.017s3.581 8.017 8 8.017 8-3.589 8-8.017-3.581-8.017-8-8.017zm-2 11.023v-6.013l6 3.152-6 2.861z" scaleX="0.8" scaleY="0.8" />
                     </children>
                 </AnchorPane>
             </graphic>
-        </Button>
+        </JFXButton>
     </Pane>
     <!-- -->
-    <Pane id="wrapper-1" fx:id="wrapper1" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper">
-        <Label layoutX="10.0" layoutY="15.0" styleClass="config-group-title" text="模型选择"/>
-        <ImageView fx:id="selectedModelView" fitHeight="140.0" fitWidth="140.0" layoutX="15.0" layoutY="85.0"
-                   pickOnBounds="true" preserveRatio="true"/>
+    <Pane id="wrapper-1" fx:id="wrapper1" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper" visible="false">
+        <Label layoutX="10.0" layoutY="15.0" styleClass="config-group-title" text="模型选择" />
+        <ImageView fx:id="selectedModelView" fitHeight="140.0" fitWidth="140.0" layoutX="15.0" layoutY="85.0" pickOnBounds="true" preserveRatio="true" />
         <VBox layoutX="15.0" layoutY="205.0" prefHeight="140.0" prefWidth="140.0">
             <children>
-                <Label fx:id="selectedModelName" styleClass="Info-primary" text="Name"/>
-                <Label fx:id="selectedModelAppellation" styleClass="Info-secondary" text="Appellation"/>
-                <Label fx:id="selectedModelSkinGroupName" styleClass="Info-secondary" text="SkinGroup"/>
+                <Label fx:id="selectedModelName" styleClass="Info-primary" text="Name" />
+                <Label fx:id="selectedModelAppellation" styleClass="Info-secondary" text="Appellation" />
+                <Label fx:id="selectedModelSkinGroupName" styleClass="Info-secondary" text="SkinGroup" />
                 <Label fx:id="selectedModelType" text="ModelType">
                     <styleClass>
-                        <String fx:value="Info-tag"/>
-                        <String fx:value="Info-tag-theme"/>
+                        <String fx:value="Info-tag" />
+                        <String fx:value="Info-tag-theme" />
                     </styleClass>
                 </Label>
             </children>
         </VBox>
         <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="36.0" prefWidth="430.0">
-            <TextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="7.0" prefHeight="23.0"
-                       prefWidth="170.0"/>
-            <Button id="Search-models-btn" fx:id="searchModelConfirm" layoutX="8.0" layoutY="6.0" maxHeight="-Infinity"
-                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                    prefHeight="25.0" prefWidth="55.0" text="搜索">
+            <JFXTextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="7.0" prefHeight="23.0" prefWidth="170.0" />
+            <JFXButton id="Search-models-btn" fx:id="searchModelConfirm" layoutX="8.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="搜索">
                 <font>
-                    <Font size="12.0"/>
+                    <Font size="12.0" />
                 </font>
                 <graphic>
                     <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                         <children>
-                            <SVGPath
-                                    content="M23.809 21.646l-6.205-6.205c1.167-1.605 1.857-3.579 1.857-5.711 0-5.365-4.365-9.73-9.731-9.73-5.365 0-9.73 4.365-9.73 9.73 0 5.366 4.365 9.73 9.73 9.73 2.034 0 3.923-.627 5.487-1.698l6.238 6.238 2.354-2.354zm-20.955-11.916c0-3.792 3.085-6.877 6.877-6.877s6.877 3.085 6.877 6.877-3.085 6.877-6.877 6.877c-3.793 0-6.877-3.085-6.877-6.877z"/>
+                            <SVGPath content="M23.809 21.646l-6.205-6.205c1.167-1.605 1.857-3.579 1.857-5.711 0-5.365-4.365-9.73-9.731-9.73-5.365 0-9.73 4.365-9.73 9.73 0 5.366 4.365 9.73 9.73 9.73 2.034 0 3.923-.627 5.487-1.698l6.238 6.238 2.354-2.354zm-20.955-11.916c0-3.792 3.085-6.877 6.877-6.877s6.877 3.085 6.877 6.877-3.085 6.877-6.877 6.877c-3.793 0-6.877-3.085-6.877-6.877z" />
                         </children>
                     </AnchorPane>
                 </graphic>
                 <styleClass>
-                    <String fx:value="btn-primary"/>
-                    <String fx:value="btn-with-icon"/>
+                    <String fx:value="btn-primary" />
+                    <String fx:value="btn-with-icon" />
                 </styleClass>
-            </Button>
-            <Button id="Search-models-btn" fx:id="searchModelReset" layoutX="248.0" layoutY="6.0" maxHeight="-Infinity"
-                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                    prefHeight="25.0" prefWidth="55.0" text="清空">
+            </JFXButton>
+            <JFXButton id="Search-models-btn" fx:id="searchModelReset" layoutX="248.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="清空">
                 <font>
-                    <Font size="12.0"/>
+                    <Font size="12.0" />
                 </font>
                 <graphic>
                     <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                         <children>
-                            <SVGPath
-                                    content="M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm.456-11.429l-4.528 4.528 5.658 5.659 4.527-4.53-5.657-5.657z"/>
+                            <SVGPath content="M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm.456-11.429l-4.528 4.528 5.658 5.659 4.527-4.53-5.657-5.657z" />
                         </children>
                     </AnchorPane>
                 </graphic>
                 <styleClass>
-                    <String fx:value="btn-secondary"/>
-                    <String fx:value="btn-with-icon"/>
+                    <String fx:value="btn-secondary" />
+                    <String fx:value="btn-with-icon" />
                 </styleClass>
-            </Button>
-            <Button id="Search-models-btn" fx:id="searchModelRandom" layoutX="308.0" layoutY="6.0" maxHeight="-Infinity"
-                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                    prefHeight="25.0" prefWidth="55.0" text="随机">
+            </JFXButton>
+            <JFXButton id="Search-models-btn" fx:id="searchModelRandom" layoutX="308.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="随机">
                 <font>
-                    <Font size="12.0"/>
+                    <Font size="12.0" />
                 </font>
                 <graphic>
                     <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                         <children>
-                            <SVGPath
-                                    content="M18 9v-3c-1 0-3.308-.188-4.506 2.216l-4.218 8.461c-1.015 2.036-3.094 3.323-5.37 3.323h-3.906v-2h3.906c1.517 0 2.903-.858 3.58-2.216l4.218-8.461c1.356-2.721 3.674-3.323 6.296-3.323v-3l6 4-6 4zm-9.463 1.324l1.117-2.242c-1.235-2.479-2.899-4.082-5.748-4.082h-3.906v2h3.906c2.872 0 3.644 2.343 4.631 4.324zm15.463 8.676l-6-4v3c-3.78 0-4.019-1.238-5.556-4.322l-1.118 2.241c1.021 2.049 2.1 4.081 6.674 4.081v3l6-4z"/>
+                            <SVGPath content="M18 9v-3c-1 0-3.308-.188-4.506 2.216l-4.218 8.461c-1.015 2.036-3.094 3.323-5.37 3.323h-3.906v-2h3.906c1.517 0 2.903-.858 3.58-2.216l4.218-8.461c1.356-2.721 3.674-3.323 6.296-3.323v-3l6 4-6 4zm-9.463 1.324l1.117-2.242c-1.235-2.479-2.899-4.082-5.748-4.082h-3.906v2h3.906c2.872 0 3.644 2.343 4.631 4.324zm15.463 8.676l-6-4v3c-3.78 0-4.019-1.238-5.556-4.322l-1.118 2.241c1.021 2.049 2.1 4.081 6.674 4.081v3l6-4z" />
                         </children>
                     </AnchorPane>
                 </graphic>
                 <styleClass>
-                    <String fx:value="btn-secondary"/>
-                    <String fx:value="btn-with-icon"/>
+                    <String fx:value="btn-secondary" />
+                    <String fx:value="btn-with-icon" />
                 </styleClass>
-            </Button>
-            <Button id="Search-models-btn" fx:id="searchModelReload" layoutX="368.0" layoutY="6.0" maxHeight="-Infinity"
-                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                    prefHeight="25.0" prefWidth="55.0" text="重载">
+            </JFXButton>
+            <JFXButton id="Search-models-btn" fx:id="searchModelReload" layoutX="368.0" layoutY="6.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="重载">
                 <font>
-                    <Font size="12.0"/>
+                    <Font size="12.0" />
                 </font>
                 <graphic>
                     <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                         <children>
-                            <SVGPath
-                                    content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"/>
+                            <SVGPath content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z" />
                         </children>
                     </AnchorPane>
                 </graphic>
                 <styleClass>
-                    <String fx:value="btn-secondary"/>
-                    <String fx:value="btn-with-icon"/>
+                    <String fx:value="btn-secondary" />
+                    <String fx:value="btn-with-icon" />
                 </styleClass>
-            </Button>
+            </JFXButton>
         </Pane>
         <ScrollPane layoutX="165.0" layoutY="85.0" prefHeight="265.0" prefWidth="280.0" styleClass="scroll-v">
-            <VBox id="Search-models-list" fx:id="searchModelList" alignment="TOP_CENTER" layoutX="19.0" layoutY="95.0"
-                  prefHeight="20.0" prefWidth="260.0" spacing="3.0"/>
+            <VBox id="Search-models-list" fx:id="searchModelList" alignment="TOP_CENTER" layoutX="19.0" layoutY="95.0" prefHeight="20.0" prefWidth="260.0" spacing="3.0" />
         </ScrollPane>
-        <VBox id="Loading-failure-tip" fx:id="loadFailureTip" alignment="CENTER" layoutX="1.0" layoutY="85.0"
-              prefHeight="285.0" prefWidth="458.0" spacing="5.0">
+        <VBox id="Loading-failure-tip" fx:id="loadFailureTip" alignment="CENTER" layoutX="1.0" layoutY="85.0" prefHeight="285.0" prefWidth="458.0" spacing="5.0">
             <children>
-                <SVGPath
-                        content="M11.5 23l-8.5-4.535v-3.953l5.4 3.122 3.1-3.406v8.772zm1-.001v-8.806l3.162 3.343 5.338-2.958v3.887l-8.5 4.534zm-10.339-10.125l-2.161-1.244 3-3.302-3-2.823 8.718-4.505 3.215 2.385 3.325-2.385 8.742 4.561-2.995 2.771 2.995 3.443-2.242 1.241v-.001l-5.903 3.27-3.348-3.541 7.416-3.962-7.922-4.372-7.923 4.372 7.422 3.937v.024l-3.297 3.622-5.203-3.008-.16-.092-.679-.393v.002z"
-                        scaleX="1.5" scaleY="1.5" translateY="-10.0"/>
-                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="未能载入模型" textAlignment="CENTER"
-                      translateY="-5.0" wrappingWidth="200.0">
+                <SVGPath content="M11.5 23l-8.5-4.535v-3.953l5.4 3.122 3.1-3.406v8.772zm1-.001v-8.806l3.162 3.343 5.338-2.958v3.887l-8.5 4.534zm-10.339-10.125l-2.161-1.244 3-3.302-3-2.823 8.718-4.505 3.215 2.385 3.325-2.385 8.742 4.561-2.995 2.771 2.995 3.443-2.242 1.241v-.001l-5.903 3.27-3.348-3.541 7.416-3.962-7.922-4.372-7.923 4.372 7.422 3.937v.024l-3.297 3.622-5.203-3.008-.16-.092-.679-.393v.002z" scaleX="1.5" scaleY="1.5" translateY="-10.0" />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="未能载入模型" textAlignment="CENTER" translateY="-5.0" wrappingWidth="200.0">
                     <font>
-                        <Font name="System Bold" size="16.0"/>
+                        <Font name="System Bold" size="16.0" />
                     </font>
                 </Text>
-                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [选项] 中进行模型下载"/>
-                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="如您已下载模型，请尝试点击 [重载] 按钮"/>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [选项] 中进行模型下载" />
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="如您已下载模型，请尝试点击 [重载] 按钮" />
             </children>
         </VBox>
     </Pane>
@@ -224,38 +190,33 @@
         <children>
             <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
                 <content>
-                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
-                                minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
+                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
                         <children>
                             <VBox prefHeight="350.0" prefWidth="440.0">
                                 <children>
-                                    <Label styleClass="config-group-title" text="动作"/>
+                                    <Label styleClass="config-group-title" text="动作" />
                                     <HBox>
                                         <children>
-                                            <CheckBox fx:id="configBehaviorAllowWalk" mnemonicParsing="false"
-                                                      text="允许行走"/>
-                                            <CheckBox fx:id="configBehaviorAllowSit" mnemonicParsing="false"
-                                                      text="允许坐下"/>
+                                            <JFXCheckBox fx:id="configBehaviorAllowWalk" mnemonicParsing="false" text="允许行走" />
+                                            <JFXCheckBox fx:id="configBehaviorAllowSit" mnemonicParsing="false" text="允许坐下" />
                                         </children>
                                     </HBox>
                                     <HBox>
                                         <children>
-                                            <Label text="动作活跃度"/>
-                                            <Slider fx:id="configBehaviorAiActivation"/>
-                                            <Label fx:id="configBehaviorAiActivationValue" text="0"/>
+                                            <Label text="动作活跃度" />
+                                            <JFXSlider fx:id="configBehaviorAiActivation" />
+                                            <Label fx:id="configBehaviorAiActivationValue" text="0" />
                                         </children>
                                     </HBox>
-                                    <Separator/>
-                                    <Label styleClass="config-group-title" text="交互"/>
+                                    <Separator />
+                                    <Label styleClass="config-group-title" text="交互" />
                                     <HBox>
                                         <children>
-                                            <CheckBox fx:id="configBehaviorAllowInteract" mnemonicParsing="false"
-                                                      text="允许触发交互动画"/>
-                                            <CheckBox fx:id="configBehaviorDoPeerRepulsion" mnemonicParsing="false"
-                                                      text="允许被其他桌宠排斥"/>
+                                            <JFXCheckBox fx:id="configBehaviorAllowInteract" mnemonicParsing="false" text="允许触发交互动画" />
+                                            <JFXCheckBox fx:id="configBehaviorDoPeerRepulsion" mnemonicParsing="false" text="允许被其他桌宠排斥" />
                                         </children>
                                     </HBox>
-                                    <Separator/>
+                                    <Separator />
                                 </children>
                             </VBox>
                         </children>
@@ -265,103 +226,88 @@
         </children>
     </Pane>
     <!-- -->
-    <Pane id="wrapper-3" fx:id="wrapper3" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper">
+    <Pane id="wrapper-3" fx:id="wrapper3" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper" visible="false">
         <children>
             <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
                 <content>
-                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
-                                minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
+                    <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
                         <children>
                             <VBox prefHeight="350.0" prefWidth="440.0">
                                 <children>
-                                    <Label styleClass="config-group-title" text="显示设置"/>
+                                    <Label styleClass="config-group-title" text="显示设置" />
                                     <HBox>
                                         <children>
-                                            <Label text="图像缩放"/>
-                                            <ChoiceBox fx:id="configDisplayScale" prefWidth="100.0"/>
+                                            <Label text="图像缩放" />
+                                            <ChoiceBox fx:id="configDisplayScale" prefWidth="100.0" />
                                         </children>
                                     </HBox>
                                     <HBox>
                                         <children>
-                                            <Label text="最大帧率"/>
-                                            <ChoiceBox fx:id="configDisplayFps" prefWidth="100.0"/>
+                                            <Label text="最大帧率" />
+                                            <ChoiceBox fx:id="configDisplayFps" prefWidth="100.0" />
                                         </children>
                                     </HBox>
                                     <HBox>
                                         <children>
-                                            <Label text="下边界距离"/>
-                                            <Slider fx:id="configDisplayMarginBottom"/>
-                                            <Label fx:id="configDisplayMarginBottomValue" text="0"/>
+                                            <Label text="下边界距离" />
+                                            <JFXSlider fx:id="configDisplayMarginBottom" />
+                                            <Label fx:id="configDisplayMarginBottomValue" text="0" />
                                         </children>
                                     </HBox>
-                                    <Separator/>
-                                    <Label styleClass="config-group-title" text="模型下载"/>
+                                    <Separator />
+                                    <Label styleClass="config-group-title" text="模型下载" />
                                     <HBox spacing="20.0">
                                         <children>
-                                            <Button fx:id="manageModelCheck" mnemonicParsing="false" prefHeight="35.0"
-                                                    prefWidth="80.0" text=" 检查更新">
+                                            <JFXButton fx:id="manageModelCheck" mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0" text=" 检查更新">
                                                 <graphic>
-                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0"
-                                                                styleClass="btn-icon">
+                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                                                         <children>
-                                                            <SVGPath
-                                                                    content="M14.601 21.5c0 1.38-1.116 2.5-2.499 2.5-1.378 0-2.499-1.12-2.499-2.5s1.121-2.5 2.499-2.5c1.383 0 2.499 1.119 2.499 2.5zm-2.42-21.5c-4.029 0-7.06 2.693-7.06 8h3.955c0-2.304.906-4.189 3.024-4.189 1.247 0 2.57.828 2.684 2.411.123 1.666-.767 2.511-1.892 3.582-2.924 2.78-2.816 4.049-2.816 7.196h3.943c0-1.452-.157-2.508 1.838-4.659 1.331-1.436 2.986-3.222 3.021-5.943.047-3.963-2.751-6.398-6.697-6.398z"
-                                                                    translateX="-22.0"/>
+                                                            <SVGPath content="M14.601 21.5c0 1.38-1.116 2.5-2.499 2.5-1.378 0-2.499-1.12-2.499-2.5s1.121-2.5 2.499-2.5c1.383 0 2.499 1.119 2.499 2.5zm-2.42-21.5c-4.029 0-7.06 2.693-7.06 8h3.955c0-2.304.906-4.189 3.024-4.189 1.247 0 2.57.828 2.684 2.411.123 1.666-.767 2.511-1.892 3.582-2.924 2.78-2.816 4.049-2.816 7.196h3.943c0-1.452-.157-2.508 1.838-4.659 1.331-1.436 2.986-3.222 3.021-5.943.047-3.963-2.751-6.398-6.697-6.398z" translateX="-22.0" />
                                                         </children>
                                                     </AnchorPane>
                                                 </graphic>
                                                 <styleClass>
-                                                    <String fx:value="btn-primary"/>
-                                                    <String fx:value="btn-with-icon"/>
+                                                    <String fx:value="btn-primary" />
+                                                    <String fx:value="btn-with-icon" />
                                                 </styleClass>
-                                            </Button>
-                                            <Button fx:id="manageModelFetch" mnemonicParsing="false" prefHeight="35.0"
-                                                    prefWidth="80.0" text=" 全部下载">
+                                            </JFXButton>
+                                            <JFXButton fx:id="manageModelFetch" mnemonicParsing="false" prefHeight="35.0" prefWidth="80.0" text=" 全部下载">
                                                 <graphic>
-                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0"
-                                                                styleClass="btn-icon">
+                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                                                         <children>
-                                                            <SVGPath
-                                                                    content="M16 11h5l-9 10-9-10h5v-11h8v11zm3 8v3h-14v-3h-2v5h18v-5h-2z"
-                                                                    translateX="-22.0"/>
+                                                            <SVGPath content="M16 11h5l-9 10-9-10h5v-11h8v11zm3 8v3h-14v-3h-2v5h18v-5h-2z" translateX="-22.0" />
                                                         </children>
                                                     </AnchorPane>
                                                 </graphic>
                                                 <styleClass>
-                                                    <String fx:value="btn-primary"/>
-                                                    <String fx:value="btn-with-icon"/>
+                                                    <String fx:value="btn-primary" />
+                                                    <String fx:value="btn-with-icon" />
                                                 </styleClass>
-                                            </Button>
-                                            <Button fx:id="manageModelVerify" mnemonicParsing="false" prefHeight="35.0"
-                                                    prefWidth="100.0" text="  验证完整性">
+                                            </JFXButton>
+                                            <JFXButton fx:id="manageModelVerify" mnemonicParsing="false" prefHeight="35.0" prefWidth="100.0" text="  验证完整性">
                                                 <graphic>
-                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0"
-                                                                styleClass="btn-icon">
+                                                    <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                                                         <children>
-                                                            <SVGPath
-                                                                    content="M21.856 10.303c.086.554.144 1.118.144 1.697 0 6.075-4.925 11-11 11s-11-4.925-11-11 4.925-11 11-11c2.347 0 4.518.741 6.304 1.993l-1.422 1.457c-1.408-.913-3.082-1.45-4.882-1.45-4.962 0-9 4.038-9 9s4.038 9 9 9c4.894 0 8.879-3.928 8.99-8.795l1.866-1.902zm-.952-8.136l-9.404 9.639-3.843-3.614-3.095 3.098 6.938 6.71 12.5-12.737-3.096-3.096z"
-                                                                    translateX="-33.0"/>
+                                                            <SVGPath content="M21.856 10.303c.086.554.144 1.118.144 1.697 0 6.075-4.925 11-11 11s-11-4.925-11-11 4.925-11 11-11c2.347 0 4.518.741 6.304 1.993l-1.422 1.457c-1.408-.913-3.082-1.45-4.882-1.45-4.962 0-9 4.038-9 9s4.038 9 9 9c4.894 0 8.879-3.928 8.99-8.795l1.866-1.902zm-.952-8.136l-9.404 9.639-3.843-3.614-3.095 3.098 6.938 6.71 12.5-12.737-3.096-3.096z" translateX="-33.0" />
                                                         </children>
                                                     </AnchorPane>
                                                 </graphic>
                                                 <styleClass>
-                                                    <String fx:value="btn-secondary"/>
-                                                    <String fx:value="btn-with-icon"/>
+                                                    <String fx:value="btn-secondary" />
+                                                    <String fx:value="btn-with-icon" />
                                                 </styleClass>
-                                            </Button>
+                                            </JFXButton>
                                         </children>
                                     </HBox>
-                                    <Separator/>
-                                    <Label styleClass="config-group-title" text="关于软件"/>
+                                    <Separator />
+                                    <Label styleClass="config-group-title" text="关于软件" />
                                     <HBox spacing="20.0">
                                         <children>
-                                            <Label fx:id="aboutQueryUpdate" styleClass="config-hyper-link"
-                                                   text="检查软件更新"/>
-                                            <Label fx:id="aboutVisitWebsite" styleClass="config-hyper-link"
-                                                   text="ArkPets官网"/>
+                                            <Label fx:id="aboutQueryUpdate" styleClass="config-hyper-link" text="检查软件更新" />
+                                            <Label fx:id="aboutVisitWebsite" styleClass="config-hyper-link" text="ArkPets官网" />
                                         </children>
                                     </HBox>
-                                    <Separator/>
+                                    <Separator />
                                 </children>
                             </VBox>
                         </children>

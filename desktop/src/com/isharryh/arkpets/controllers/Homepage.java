@@ -10,6 +10,7 @@ import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.AssetCtrl;
 import com.isharryh.arkpets.utils.IOUtils.*;
 import com.isharryh.arkpets.utils.PopupUtils.*;
+import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
@@ -62,11 +63,11 @@ public class Homepage {
     @FXML
     private Pane Sidebar;
     @FXML
-    private Button menuBtn1;
+    private JFXButton menuBtn1;
     @FXML
-    private Button menuBtn2;
+    private JFXButton menuBtn2;
     @FXML
-    private Button menuBtn3;
+    private JFXButton menuBtn3;
     @FXML
     private Pane wrapper1;
     @FXML
@@ -74,20 +75,20 @@ public class Homepage {
     @FXML
     private Pane wrapper3;
     @FXML
-    private Button startBtn;
+    private JFXButton startBtn;
 
     @FXML
     private Pane loadFailureTip;
     @FXML
-    private Button searchModelConfirm;
+    private JFXButton searchModelConfirm;
     @FXML
-    private Button searchModelReset;
+    private JFXButton searchModelReset;
     @FXML
-    private Button searchModelRandom;
+    private JFXButton searchModelRandom;
     @FXML
-    private Button searchModelReload;
+    private JFXButton searchModelReload;
     @FXML
-    private TextField searchModelInput;
+    private JFXTextField searchModelInput;
     @FXML
     private VBox searchModelList;
     @FXML
@@ -102,32 +103,32 @@ public class Homepage {
     private ImageView selectedModelView;
 
     @FXML
-    private CheckBox configBehaviorAllowWalk;
+    private JFXCheckBox configBehaviorAllowWalk;
     @FXML
-    private CheckBox configBehaviorAllowSit;
+    private JFXCheckBox configBehaviorAllowSit;
     @FXML
-    private Slider configBehaviorAiActivation;
+    private JFXSlider configBehaviorAiActivation;
     @FXML
     private Label configBehaviorAiActivationValue;
     @FXML
-    private CheckBox configBehaviorAllowInteract;
+    private JFXCheckBox configBehaviorAllowInteract;
     @FXML
-    private CheckBox configBehaviorDoPeerRepulsion;
+    private JFXCheckBox configBehaviorDoPeerRepulsion;
 
     @FXML
     private ChoiceBox<Float> configDisplayScale;
     @FXML
     private ChoiceBox<Integer> configDisplayFps;
     @FXML
-    private Slider configDisplayMarginBottom;
+    private JFXSlider configDisplayMarginBottom;
     @FXML
     private Label configDisplayMarginBottomValue;
     @FXML
-    private Button manageModelCheck;
+    private JFXButton manageModelCheck;
     @FXML
-    private Button manageModelFetch;
+    private JFXButton manageModelFetch;
     @FXML
-    private Button manageModelVerify;
+    private JFXButton manageModelVerify;
     @FXML
     private Label aboutQueryUpdate;
     @FXML
@@ -268,6 +269,7 @@ public class Homepage {
         configBehaviorAiActivation.setMin(0);
         configBehaviorAiActivation.setMajorTickUnit(1);
         configBehaviorAiActivation.setMinorTickCount(0);
+        configBehaviorAiActivation.setShowTickLabels(false);
         configBehaviorAiActivation.setValue(config.behavior_ai_activation);
         configBehaviorAiActivation.valueProperty().addListener(((observable, oldValue, newValue) -> {
             long value = Math.round((double)newValue);
@@ -306,16 +308,16 @@ public class Homepage {
                 config.saveConfig();
             }
         });
-        configDisplayMarginBottom.setMax(20);
+        configDisplayMarginBottom.setMax(120);
         configDisplayMarginBottom.setMin(0);
-        configDisplayMarginBottom.setMajorTickUnit(2);
-        configDisplayMarginBottom.setMinorTickCount(1);
-        configDisplayMarginBottom.setValue(config.display_margin_bottom / 5);
+        configDisplayMarginBottom.setMajorTickUnit(10);
+        configDisplayMarginBottom.setMinorTickCount(5);
+        configDisplayMarginBottom.setValue(config.display_margin_bottom);
         configDisplayMarginBottom.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            long value = Math.round((double)newValue);
-            configDisplayMarginBottom.setValue(value);
-            configDisplayMarginBottomValue.setText(String.valueOf(value * 5));
-            config.display_margin_bottom = (int)value * 5;
+            int value = (int)Math.round((double)newValue);
+            //configDisplayMarginBottom.setValue(value);
+            configDisplayMarginBottomValue.setText(String.valueOf(value));
+            config.display_margin_bottom = value;
             config.saveConfig();
         }));
         configDisplayMarginBottomValue.setText(String.valueOf(config.display_margin_bottom));
@@ -557,7 +559,7 @@ public class Homepage {
                 Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                        System.out.println(dir);
+                        //System.out.println(dir);
                         if (dir.getNameCount() == (rootPathCount) && !rootPath.equals(dir))
                             return cachedMDSD.containsValue(dir.getFileName().toString()) ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
                         if (dir.getNameCount() == (rootPathCount + 1) && cachedMDD.containsKey(dir.getFileName().toString())) {

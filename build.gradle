@@ -66,6 +66,8 @@ project(":core") {
         api "org.openjfx:javafx-controls:$javaFXVersion:win"
         api "org.openjfx:javafx-graphics:$javaFXVersion:win"
         api "org.openjfx:javafx-fxml:$javaFXVersion:win"
+        // JFoenix
+        api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
         api "com.alibaba:fastjson:2.0.8"
     }

@@ -80,16 +80,6 @@ Button:focused {
 -fx-fill: #FFFFFF;
 }
 
-.btn-primary:hover {
-/* Hover */
--fx-background-color: #4D7999;
-}
-
-.btn-primary:pressed {
-/* Active */
--fx-background-color: #8FABBF;
-}
-
 .btn-secondary {
 /* Regular */
 -fx-text-fill: #204880;
@@ -100,16 +90,6 @@ Button:focused {
 .btn-secondary .btn-icon {
 /* Regular */
 -fx-fill: #204880;
-}
-
-.btn-secondary:hover {
-/* Hover */
--fx-background-color: #8FABBF;
-}
-
-.btn-secondary:pressed {
-/* Active */
--fx-background-color: #4D7999;
 }
 
 /*******************************************************************************
@@ -136,12 +116,6 @@ Button:focused {
 -fx-border-style: solid;
 }
 
-.menu-btn:hover, .menu-btn:focused {
-/* Hover & Focused */
--fx-text-fill: #FFFFFF;
--fx-background-color: #4D7999;
-}
-
 .menu-btn-active, .menu-btn-active:hover, .menu-btn-active:focused {
 /* Active */
 -fx-text-fill: #FFFFFF;
@@ -153,7 +127,6 @@ Button:focused {
 -fx-fill: #204880;
 }
 
-.menu-btn:hover SVGPath, .menu-btn:focused SVGPath,
 .menu-btn-active SVGPath, .menu-btn-active:hover SVGPath, .menu-btn-active:focused SVGPath {
 /* Hover & Active */
 -fx-fill: #FFFFFF;
@@ -171,12 +144,6 @@ Button:focused {
 -fx-border-radius: 18px;
 -fx-border-width: 1.5px;
 -fx-border-style: solid;
-}
-
-#Start-btn:hover {
-/* Hover */
--fx-text-fill: #EEEEEE;
--fx-background-color: #0B3773;
 }
 
 #Start-btn SVGPath {
@@ -308,7 +275,7 @@ Button:focused {
 .config-field {
 }
 
-.config-field CheckBox, .config-field HBox Label {
+.config-field JFXCheckBox, .config-field HBox Label {
 -fx-font-size: 12px;
 -fx-text-fill: #303030;
 -fx-label-padding: 4px;
@@ -318,7 +285,7 @@ Button:focused {
 -fx-padding: 8px 4px 4px 4px;
 }
 
-.config-field HBox CheckBox, .config-field HBox Label {
+.config-field HBox JFXCheckBox, .config-field HBox Label {
 -fx-pref-width: 180px;
 }
 
@@ -327,7 +294,7 @@ Button:focused {
 -fx-border-radius: 10px;
 }
 
-.config-field HBox Slider {
+.config-field HBox JFXSlider {
 -fx-show-tick-marks: true;
 }
 
