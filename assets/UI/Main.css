@@ -9,6 +9,7 @@
  ******************************************************************************/
 
 /* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/18/javafx.graphics/javafx/scene/doc-files/cssref.html */
+/* JFoenix Wiki: https://github.com/sshahine/JFoenix/wiki */
 
 * {
 /* Font anti-aliasing */
@@ -17,7 +18,6 @@
 
 .scroll-v {
 /* Scroll-pane (Vertical-only) */
--fx-pannable: true;
 -fx-hbar-policy: never;
 -fx-vbar-policy: as-needed;
 }
@@ -179,7 +179,7 @@ Button:focused {
 -fx-opacity: 0.875;
 }
 
-#Loading-failure-tip>* {
+#Loading-failure-tip > * {
 -fx-fill: #444444;
 }
 
@@ -190,38 +190,25 @@ Button:focused {
 }
 
 #Search-models-list {
--fx-padding: 5px;
+-fx-padding: 4px;
 }
 
 .Search-models-item {
 /* Regular */
 -fx-cursor: hand;
 -fx-text-fill: #505050;
--fx-background-color: rgb(244,247,249);
--fx-background-radius: 8px;
+-fx-background-color: transparent;
 -fx-focus-traversable: true;
--fx-border-color: #95B7E5;
--fx-border-radius: 6px;
--fx-border-width: 1px;
--fx-border-style: solid;
 }
 
-.Search-models-item:hover, .Search-models-item:focused {
-/* Hover & Focused */
--fx-text-fill: #204880;
--fx-background-color: rgb(244,247,249);
--fx-border-color: #204880;
-}
-
-.Search-models-item-active, .Search-models-item-active:hover, .Search-models-item-active:focused {
+.Search-models-item-active {
 /* Active */
--fx-background-color: #204880;
--fx-border-color: #204880;
 }
 
 .Search-models-label {
 -fx-text-overrun: ellipsis;
--fx-label-padding: 2px 2px 2px 6px;
+-fx-label-padding: 2px 2px 2px 4px;
+-fx-background-color: transparent;
 }
 
 .Search-models-label-primary {
@@ -234,7 +221,13 @@ Button:focused {
 -fx-text-fill: #606060;
 }
 
-.Search-models-item-active .Search-models-label {
+.Search-models-item-active .Search-models-label-primary {
+-fx-font-size: 13px;
+-fx-text-fill: #FFFFFF;
+}
+
+.Search-models-item-active .Search-models-label-secondary {
+-fx-font-size: 12px;
 -fx-text-fill: #FFFFFF;
 }
 
@@ -310,4 +303,68 @@ Button:focused {
 
 .config-hyper-link:hover, .config-hyper-link:focused {
 -fx-underline: true;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 4. ScrollBar and ScrollPane                                                 *
+ *                                                                             *
+ ******************************************************************************/
+
+.scroll-bar:vertical > .track-background, .scroll-bar:horizontal > .track-background {
+-fx-background-color: #F1F1F1;
+-fx-background-insets: 0;
+-fx-background-radius: 1px;
+}
+
+.scroll-bar:vertical > .thumb, .scroll-bar:horizontal > .thumb {
+-fx-background-color: #BCBCBC;
+-fx-background-insets: 0;
+-fx-background-radius: 2px;
+}
+
+.scroll-bar:vertical > .increment-button, .scroll-bar:vertical > .decrement-button {
+-fx-padding: 5px 2px 5px 2px;
+}
+
+.scroll-bar:horizontal > .increment-button, .scroll-bar:horizontal > .decrement-button {
+-fx-padding: 2px 5px 2px 5px;
+}
+
+.scroll-bar > .increment-button, .scroll-bar > .decrement-button,
+.scroll-bar:hover > .increment-button, .scroll-bar:hover > .decrement-button {
+-fx-background-color: transparent;
+}
+
+.scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
+-fx-background-color: #969696;
+}
+
+/* Up Arrow */
+.scroll-bar:vertical > .increment-button > .increment-arrow {
+-fx-shape: "M298 426h428l-214 214z";
+}
+
+/* Down Arrow */
+.scroll-bar:vertical > .decrement-button > .decrement-arrow {
+-fx-shape: "M298 598l214-214 214 214h-428z";
+}
+
+/* Right Arrow */
+.scroll-bar:horizontal > .increment-button > .increment-arrow {
+-fx-shape: "M0 428l0 -428l214 214l-214 214z";
+}
+
+/* Left Arrow */
+.scroll-bar:horizontal > .decrement-button > .decrement-arrow {
+-fx-shape: "M214 0l0 428l-214 -214l214 -214z";
+}
+
+.scroll-pane {
+-fx-background-insets: 0;
+-fx-padding: 0;
+}
+
+.scroll-pane:focused, .scroll-pane .corner {
+-fx-background-insets: 0;
 }

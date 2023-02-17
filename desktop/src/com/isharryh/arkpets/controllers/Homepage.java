@@ -12,32 +12,32 @@ import com.isharryh.arkpets.utils.IOUtils.*;
 import com.isharryh.arkpets.utils.PopupUtils.*;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.zip.ZipException;
 
 
@@ -90,7 +90,7 @@ public class Homepage {
     @FXML
     private JFXTextField searchModelInput;
     @FXML
-    private VBox searchModelList;
+    private JFXListView searchModelList;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -135,9 +135,9 @@ public class Homepage {
     private Label aboutVisitWebsite;
 
     private AssetCtrl selectedModelAsset;
-    private Pane selectedModelItem;
+    private ListCell<AssetCtrl> selectedModelItem;
     private AssetCtrl[] foundModelAssets = {};
-    private Pane[] foundModelItems = {};
+    private JFXListCell[] foundModelItems = {};
 
     public ArkConfig config;
     public JSONObject modelsDatasetFull;
@@ -236,14 +236,20 @@ public class Homepage {
                 if (foundModelAssets.length == 0)
                     throw new RuntimeException("Found no assets in the target directories.");
                 // Models to menu items.
-                ArrayList<Pane> foundModelItemsL = new ArrayList<>();
+                ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
+                searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<ListCell<AssetCtrl>>)(observable -> {
+                    observable.getList().forEach((Consumer<ListCell<AssetCtrl>>) cell -> {
+                        selectModel(cell.getItem(), cell);
+                    });
+                }));
+                searchModelList.setFixedCellSize(30);
                 for (AssetCtrl asset : foundModelAssets)
                     foundModelItemsL.add(getMenuItem(asset, searchModelList));
-                foundModelItems = foundModelItemsL.toArray(new Pane[0]);
+                foundModelItems = foundModelItemsL.toArray(new JFXListCell[0]);
                 return true;
             } catch (Exception e) {
                 foundModelAssets = new AssetCtrl[0];
-                foundModelItems = new Pane[0];
+                foundModelItems = new JFXListCell[0];
                 throw e;
             }
         } catch (RuntimeException e) {
@@ -410,7 +416,6 @@ public class Homepage {
             expandable.appendText("  at " + ste + "\n");
         expandable.setEditable(false);
         expandable.setWrapText(true);
-        expandable.setFocusTraversable(true);
         expandable.getStylesheets().add(urlStyleSheet);
         expandable.getStyleClass().add("expandable-field");
         AnchorPane expandableContainer = new AnchorPane(expandable);
@@ -774,32 +779,29 @@ public class Homepage {
     private void dealModelSearch(String $keyWords) {
         System.out.println("Input: " + $keyWords);
         searchModelInput.setText($keyWords);
-        searchModelList.getChildren().clear();
+        searchModelList.getItems().clear();
         AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
         String[] assetIdList = AssetCtrl.getAssetIdList(result);
-        for (Pane item : foundModelItems) {
+        for (ListCell<AssetCtrl> item : foundModelItems) {
             for (String assetId : assetIdList) {
                 if (item.getId().equals(assetId)) {
-                    searchModelList.getChildren().add(item);
+                    searchModelList.getItems().add(item);
                     break;
                 }
             }
         }
+        searchModelList.refresh();
     }
 
     private void dealModelRandom() {
         if (!assertModelLoaded(true))
             return;
         int idx = (int)(Math.random() * (foundModelItems.length - 1));
-        Pane item = foundModelItems[idx];
-        for (AssetCtrl assetCtrl : foundModelAssets) {
-            if (item.getId().equals(assetCtrl.assetId)) {
-                searchModelList.getChildren().clear();
-                searchModelList.getChildren().add(item);
-                selectModel(assetCtrl, item);
-                break;
-            }
-        }
+        JFXListCell<AssetCtrl> item = foundModelItems[idx];
+        //selectModel(item.getItem(), item);
+        searchModelList.scrollTo(idx);
+        searchModelList.getSelectionModel().select(idx);
+        searchModelList.requestFocus();
     }
 
     private void dealModelReload() {
@@ -810,13 +812,14 @@ public class Homepage {
         System.gc();
     }
 
-    private Pane getMenuItem(AssetCtrl $assetCtrl, VBox $container) {
-        final double width = $container.getPrefWidth() - $container.getPadding().getLeft() - $container.getPadding().getRight();
-        final double height = 30;
-        final double divide = 0.618;
-        Pane item = new Pane();
-        item.getStyleClass().add("Search-models-item");
-        item.setMinSize(width, height);
+    private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<AssetCtrl> $container) {
+        double width = $container.getPrefWidth();
+        width -= $container.getPadding().getLeft() + $container.getPadding().getRight();
+        width *= 0.75;
+        double height = 30;
+        final double divide = 0.5;
+        JFXListCell<AssetCtrl> item = new JFXListCell<>();
+        item.getStyleClass().addAll("Search-models-item", "scroll-v");
         Label name = new Label($assetCtrl.toString());
         name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
         name.setPrefSize(width * divide, height);
@@ -825,25 +828,21 @@ public class Homepage {
         alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
         alias1.setPrefSize(width * (1 - divide), height);
         alias1.setLayoutX(width * divide);
-        item.getChildren().addAll(name, alias1);
+
+        item.setPrefSize(width, height);
+        item.setGraphic(new Group(name, alias1));
+        item.setItem($assetCtrl);
         item.setId($assetCtrl.assetId);
-        item.setOnMousePressed(e -> {
-            selectModel($assetCtrl, item);
-        });
-        item.setOnKeyTyped(e -> {
-            if (e.getCode().getName().equals(KeyCode.ENTER.getName()))
-                selectModel($assetCtrl, item);
-        });
         return item;
     }
 
-    private void selectModel(AssetCtrl $asset, Pane $item) {
+    private void selectModel(AssetCtrl $asset, ListCell<AssetCtrl> $item) {
+        // Reset
         if (selectedModelItem != null)
             selectedModelItem.getStyleClass().setAll("Search-models-item");
-        if ($item != null)
-            $item.getStyleClass().add("Search-models-item-active");
         selectedModelAsset = $asset;
         selectedModelItem = $item;
+        selectedModelItem.getStyleClass().add("Search-models-item-active");
         // Display details
         final String tooltipStyle = "-fx-font-size:10px;-fx-font-weight:normal;";
         selectedModelName.setText($asset.name);

@@ -45,6 +45,7 @@ public class ArkHomeFX extends Application {
         stage.setScene(scene);
         stage.setTitle("ArkPets Launcher TEST");
         stage.show();
+        startBtn.requestFocus();
     }
 
 
