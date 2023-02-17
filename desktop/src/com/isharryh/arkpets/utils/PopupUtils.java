@@ -3,6 +3,11 @@
  */
 package com.isharryh.arkpets.utils;
 
+import javafx.geometry.Insets;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
 
@@ -34,6 +39,34 @@ public class PopupUtils {
             svgPath.setContent(svg);
             svgPath.setFill(Paint.valueOf(color));
             return svgPath;
+        }
+    }
+
+    public static class ExpandableTextArea {
+        private final Dialog<ButtonType> dialog;
+        private final TextArea expandable;
+
+        public ExpandableTextArea(Dialog<ButtonType> target, String content) {
+            dialog = target;
+            expandable = new TextArea();
+            expandable.appendText(content);
+            expandable.setEditable(false);
+            expandable.setWrapText(true);
+            expandable.setStyle("-fx-alignment:top-left;-fx-pref-row-count:12;");
+            AnchorPane expandableContainer = new AnchorPane(expandable);
+            Insets expandablePadding = new Insets(8);
+            dialog.getDialogPane().setExpanded(false);
+            dialog.getDialogPane().setExpandableContent(expandableContainer);
+            dialog.widthProperty().addListener(((observable, oldValue, newValue) -> {
+                expandable.setLayoutX(expandablePadding.getTop());
+                expandable.setLayoutY(expandablePadding.getLeft());
+                expandable.setPrefWidth(dialog.getDialogPane().getWidth() - expandablePadding.getLeft() - expandablePadding.getRight());
+                dialog.setResizable(false);
+            }));
+        }
+
+        public TextArea getTextArea() {
+            return expandable;
         }
     }
 }

@@ -11,22 +11,20 @@ import com.isharryh.arkpets.utils.AssetCtrl;
 import com.isharryh.arkpets.utils.IOUtils.*;
 import com.isharryh.arkpets.utils.PopupUtils.*;
 import com.jfoenix.controls.*;
+
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -213,12 +211,12 @@ public class Homepage {
         } catch (FileNotFoundException e) {
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到模型数据集。",
-                        "模型数据集文件 " + fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。").show();
+                        "模型数据集文件 " + fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。", null).show();
         } catch (IOException e) {
             e.printStackTrace();
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未知原因。",
-                        "失败原因概要：" + e.getLocalizedMessage()).show();
+                        "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
     }
@@ -255,7 +253,7 @@ public class Homepage {
         } catch (RuntimeException e) {
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未能成功解析模型数据集。",
-                        "可能是数据集损坏、版本不兼容或模型存放位置错误。\n失败原因概要：" + e.getLocalizedMessage()).show();
+                        "可能是数据集损坏、版本不兼容或模型存放位置错误。\n失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
     }
@@ -408,26 +406,12 @@ public class Homepage {
         dialog.setContentText("请重试操作，或查看帮助文档。如需联系开发者，请提供下述信息：");
         dialog.setGraphic(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, IconUtil.COLOR_DANGER));
         dialog.setOnCloseRequest(e -> dialog.close());
-        TextArea expandable = new TextArea();
-        expandable.appendText("[Exception] " + $e.getClass().getSimpleName() + "\n");
-        expandable.appendText("[Message] " + ($e.getLocalizedMessage() != null ? $e.getLocalizedMessage() : "") + "\n");
-        expandable.appendText("\n[StackTrace]\nCaused by " + $e.getClass().getCanonicalName() + ": " + $e.getMessage() + "\n");
+        ExpandableTextArea expandable = new ExpandableTextArea(dialog, "");
+        expandable.getTextArea().appendText("[Exception] " + $e.getClass().getSimpleName() + "\n");
+        expandable.getTextArea().appendText("[Message] " + ($e.getLocalizedMessage() != null ? $e.getLocalizedMessage() : "") + "\n");
+        expandable.getTextArea().appendText("\n[StackTrace]\nCaused by " + $e.getClass().getCanonicalName() + ": " + $e.getMessage() + "\n");
         for (StackTraceElement ste : $e.getStackTrace())
-            expandable.appendText("  at " + ste + "\n");
-        expandable.setEditable(false);
-        expandable.setWrapText(true);
-        expandable.getStylesheets().add(urlStyleSheet);
-        expandable.getStyleClass().add("expandable-field");
-        AnchorPane expandableContainer = new AnchorPane(expandable);
-        Insets expandablePadding = new Insets(8);
-        dialogPane.setExpanded(false);
-        dialogPane.setExpandableContent(expandableContainer);
-        dialog.widthProperty().addListener(((observable, oldValue, newValue) -> {
-            expandable.setLayoutX(expandablePadding.getTop());
-            expandable.setLayoutY(expandablePadding.getLeft());
-            expandable.setPrefWidth(dialogPane.getWidth() - expandablePadding.getLeft() - expandablePadding.getRight());
-            dialog.setResizable(false);
-        }));
+            expandable.getTextArea().appendText("  at " + ste + "\n");
         dialogPane.getButtonTypes().add(ButtonType.OK);
 
         if ($e instanceof FileNotFoundException) {
@@ -475,7 +459,7 @@ public class Homepage {
         return dialog;
     }
 
-    public Dialog<ButtonType> popNotice(Node $graphic, String $title, String $header, String $content) {
+    public Dialog<ButtonType> popNotice(Node $graphic, String $title, String $header, String $content, String $detail) {
         Dialog<ButtonType> dialog = new Dialog<>();
         DialogPane dialogPane = dialog.getDialogPane();
         dialog.setTitle($title);
@@ -483,6 +467,9 @@ public class Homepage {
         dialog.setContentText($content);
         dialog.setGraphic($graphic);
         dialogPane.getButtonTypes().add(ButtonType.OK);
+        if ($detail != null && $detail.length() > 0) {
+            new ExpandableTextArea(dialog, $detail);
+        }
         //dialog.show();
         return dialog;
     }
@@ -500,13 +487,27 @@ public class Homepage {
         task.setOnSucceeded(e -> {
             dialog.close();
             try {
+                String versionDescription;
+                try {
+                    JSONObject newModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(tempDirPath + fileModelsDataPath), "UTF-8"));
+                    versionDescription = newModelsDataset.getString("gameDataVersionDescription");
+                } catch (Exception ex) {
+                    versionDescription = "unknown";
+                }
                 // TODO do judgment more precisely
                 if (FileUtil.getMD5(new File(fileModelsDataPath)).equals(FileUtil.getMD5(new File(tempDirPath + fileModelsDataPath)))) {
                     popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, IconUtil.COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
-                            "提示：远程仓库的版本不一定和游戏同步更新。").show();
+                            "提示：远程仓库的版本不一定和游戏同步更新。", "模型仓库版本描述：\n" + versionDescription).show();
                 } else {
+                    String oldVersionDescription;
+                    try {
+                        JSONObject oldModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(fileModelsDataPath), "UTF-8"));
+                        oldVersionDescription = oldModelsDataset.getString("gameDataVersionDescription");
+                    } catch (Exception ex) {
+                        oldVersionDescription = "unknown";
+                    }
                     popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, IconUtil.COLOR_INFO), "检查模型更新", "当前模型版本与远程仓库有差异。",
-                            "可以重新下载模型，以进行更新模型版本。").show();
+                            "可以重新下载模型，以进行更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n当前模型仓库版本描述：\n" + oldVersionDescription).show();
                 }
             } catch (IOException ex) {
                 popError(ex).show();
@@ -612,7 +613,7 @@ public class Homepage {
         task.stateProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals(Worker.State.SUCCEEDED))
                 if (dialogGraphic[0] != null && dialogHeader[0] != null && dialogContent[0] != null)
-                    popNotice(dialogGraphic[0], "验证资源完整性", dialogHeader[0], dialogContent[0]).show();
+                    popNotice(dialogGraphic[0], "验证资源完整性", dialogHeader[0], dialogContent[0], null).show();
         });
         foregroundTask(task, "验证资源完整性", "正在检验模型资源完整性...", "这可能需要数秒", true);
     }
@@ -637,15 +638,15 @@ public class Homepage {
                             (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] > ArkHomeFX.appVersion[1]) ||
                             (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] == ArkHomeFX.appVersion[1] && stableVersionResult[2] > ArkHomeFX.appVersion[2])) {
                         popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, IconUtil.COLOR_INFO), "检查软件更新", "恭喜，检测到软件有新的版本。",
-                                ArkHomeFX.appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。").show();
+                                ArkHomeFX.appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。", null).show();
                     } else {
                         popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, IconUtil.COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
-                                "当前版本：" + ArkHomeFX.appVersionStr).show();
+                                "当前版本：" + ArkHomeFX.appVersionStr, null).show();
                     }
                 } else {
                     if ($popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, IconUtil.COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
-                                "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。").show();
+                                "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
                 if ($popNotice)
@@ -871,7 +872,7 @@ public class Homepage {
             // Not loaded:
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "未能加载模型", "请确保模型加载成功后再进行此操作。",
-                        "请先在[选项]中进行模型下载。\n如您已下载模型，请尝试点击[重载]按钮。").show();
+                        "请先在[选项]中进行模型下载。\n如您已下载模型，请尝试点击[重载]按钮。", null).show();
             return false;
         } else {
             // Loaded:
