@@ -11,16 +11,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
+import com.isharryh.arkpets.utils.*;
 import com.isharryh.arkpets.behaviors.*;
-import com.isharryh.arkpets.utils.AnimData;
-import com.isharryh.arkpets.utils.HWndCtrl;
-import com.isharryh.arkpets.utils.LoopCtrl;
-import com.isharryh.arkpets.utils.Plane;
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector2;
 
@@ -59,34 +58,34 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
 		Gdx.input.setInputProcessor(this);
-		config = ArkConfig.getConfig();
+		config = Objects.requireNonNull(ArkConfig.getConfig());
+		APP_FPS = config.display_fps;
+		Gdx.graphics.setForegroundFPS(APP_FPS);
+		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 12);
 		ScreenUtils.clear(0, 0, 0, 0, true);
-		// 2.Window setup
+		// 2.Character setup
+		int WD_ORI_W = 140; // Window Origin Width
+		int WD_ORI_H = 160; // Window Origin Height
+		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
+		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
+		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
 		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, 0.2f));
 		WD_SCALE = config.display_scale;
-		int WD_ORI_W = 140; // Window Origin Width
-		int WD_ORI_H = 160; // Window Origin Height
-		WD_W = (int) (WD_SCALE * WD_ORI_W);
-		WD_H = (int) (WD_SCALE * WD_ORI_H);
+		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
+		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 		SCR_W = config.display_monitor_info[0];
 		SCR_H = config.display_monitor_info[1];
-		APP_FPS = config.display_fps;
-		getHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
 		intiWindow(100, SCR_H / 2);
-		setWindowPosTar(100, SCR_H / 2f);
-		Gdx.graphics.setForegroundFPS(APP_FPS);
-		// 3.Plane setup
+		setWindowPosTar(100, SCR_H / 2.0f);
+		// 4.Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
 		plane.setBounce(0);
 		plane.setObjSize(WD_W, -WD_H);
-		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1f);
+		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1.0f);
 		plane.changePosition(0, WD_postar.x, -WD_postar.y);
-		// 4.Character setup
-		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
-		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
 		// 5.Behavior setup
 		if (BehaviorOperBuild2.match(cha.anim_list))
 			behavior = new BehaviorOperBuild2(config);
@@ -109,6 +108,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void render() {
 		// 1.Render the next frame.
+		cha.fixCanvasSize();
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) (Gdx.app.getJavaHeap() / 1024) + "KB");
@@ -245,11 +245,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
 		//System.out.println(User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE));
 		//User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, enable ? WL_TRAN_ON : WL_TRAN_OFF);
-		User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088);
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, x, y,
-				WD_W, WD_H, WinUser.SWP_FRAMECHANGED);
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, x, y,
-				WD_W, WD_H, WinUser.SWP_NOSIZE);
+		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
+				x, y, WD_W, WD_H,
+				WinUser.SWP_SHOWWINDOW | WinUser.SWP_NOACTIVATE
+		);
+		Gdx.app.debug("debug", "JNA SetWindowLong returns " + Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088)));
 		return true;
 	}
 
@@ -257,6 +257,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (HWND_MINE == null)
 			return false;
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
+			WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
+			WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 			HWND new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != HWND_TOPMOST) {
 				HWND_TOPMOST = new_hwnd_topmost;
@@ -275,8 +277,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST, (int)WD_poscur.x, (int)WD_poscur.y,
-			0, 0, WinUser.SWP_NOSIZE);
+		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
+				(int)WD_poscur.x - cha.flexibleLayout.curInsert.left,
+				(int)WD_poscur.y,
+				WD_W, WD_H, WinUser.SWP_NOACTIVATE
+		);
 		return true;
 	}
 
@@ -360,7 +365,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	/* WINDOW OPERATION RELATED */
 	private void walkWindow(float len) {
-		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
+		float expectedLen = len * WD_SCALE * (30.0f / APP_FPS);
 		int realLen = randomRound(expectedLen);
 		plane.changePosition(Gdx.graphics.getDeltaTime(), WD_postar.x + realLen, -WD_postar.y);
 	}

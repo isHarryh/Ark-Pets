@@ -13,7 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import com.esotericsoftware.spine.Skeleton;
@@ -24,40 +24,38 @@ import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.Animation;
 import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
-import com.esotericsoftware.spine.Animation.MixBlend;
-import com.esotericsoftware.spine.Animation.MixDirection;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector3;
 import com.isharryh.arkpets.utils.AnimData;
+import com.isharryh.arkpets.utils.FlexibleWindowCtrl;
 import com.isharryh.arkpets.utils.FrameCtrl;
-import java.nio.ByteBuffer;
 
 
 public class ArkChar {
-    private OrthographicCamera camera;
-    private TwoColorPolygonBatch batch;
+    private final OrthographicCamera camera;
+    private final TwoColorPolygonBatch batch;
     private Texture bgTexture;
     public Vector3 positionCur;
     public Vector3 positionTar;
     public EasingLinearVector3 positionEas;
     public int offset_y;
-    public Matrix4 transform;
 
-    private Skeleton skeleton;
-    private SkeletonRenderer renderer;
+    private final Skeleton skeleton;
+    private final SkeletonRenderer renderer;
+    private final int MAX_SKELETON_SIZE = 500;
     private SkeletonData skeletonData;
     private Animation animation;
     private AnimationState animationState;
+    private Pixmap lastTexture;
 
-    private int anim_width;
-    private int anim_height;
+    public FlexibleWindowCtrl flexibleLayout;
     public String[] anim_list;
     public AnimData[] anim_queue;
     public FrameCtrl anim_frame;
     public int anim_fps;
-    public float f_time; // Duration(Sec) per frame
+
 
     /** Initialize an ArkPets character.
      * @param $fp_atlas The file path of the atlas file.
@@ -75,7 +73,6 @@ public class ArkChar {
         positionCur = new Vector3(0, 0, 0);
         positionTar = new Vector3(0, 0, 0);
         offset_y = 0;
-        transform = new Matrix4();
         anim_queue = new AnimData[2];
 
         // Transfer params
@@ -135,20 +132,49 @@ public class ArkChar {
      */
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps, Color $bgColor) {
         // Transfer params
-        anim_width = $anim_width;
-        anim_height = $anim_height;
+        flexibleLayout = new FlexibleWindowCtrl(
+                new Vector2($anim_width, $anim_height),
+                ($anim_width + $anim_height) / 4
+        );
         anim_fps = $anim_fps;
         // Set position (center)
-        setPositionTar(anim_width / 2f, 0, 1);
-        camera.setToOrtho(false, anim_width, anim_height);
-        camera.update();
-        batch.getProjectionMatrix().set(camera.combined);
-        transform = batch.getTransformMatrix();
+        setPositionTar(MAX_SKELETON_SIZE * 0.5f, 0, 1);
+        updateCanvas();
         // Set background image
         Pixmap pixmap = new Pixmap($anim_width, $anim_height, Format.RGBA8888);
         pixmap.setColor($bgColor);
         pixmap.fill();
         bgTexture = new Texture(pixmap);
+    }
+
+    /** Fix the canvas size to make it adapted to the animation.
+     */
+    public void fixCanvasSize() {
+        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 15, 30, 5, false, true))
+            return;
+        System.out.println(
+                "^"+flexibleLayout.curInsert.top+
+                        "\tv"+flexibleLayout.curInsert.bottom+
+                        "\t<"+flexibleLayout.curInsert.left+
+                        "\t>"+flexibleLayout.curInsert.right
+        );
+        //if (anim_frame != null)
+            //PixmapIO.writePNG(new FileHandle("temp").child("temp" + (anim_frame.F_CUR % 50 + 1) + ".png"), getCurrentTexture(true));
+            //PixmapIO.writePNG(new FileHandle("temp.png"), getCurrentTexture(true));
+        //updateCanvas();
+    }
+
+    /** Update the canvas and the camera.
+     * If you didn't update the canvas in properly, unexpected rendering may cause.
+     */
+    public void updateCanvas() {
+        camera.setToOrtho(false, flexibleLayout.getWidth(), flexibleLayout.getHeight());
+        camera.translate(
+                ((MAX_SKELETON_SIZE - flexibleLayout.getHeight()) >> 1) - flexibleLayout.curInsert.left,
+                -flexibleLayout.curInsert.top
+        ); // Translated X = (Canvas - Camera) / 2 - Insert
+        camera.update();
+        batch.getProjectionMatrix().set(camera.combined);
     }
 
     /** Set the target position.
@@ -169,7 +195,11 @@ public class ArkChar {
      */
     public void setPositionCur(float $deltaTime) {
         // Set current position
-        positionCur.set(positionEas.eX.step($deltaTime), positionEas.eY.step($deltaTime), positionEas.eZ.step($deltaTime));
+        positionCur.set(
+                positionEas.eX.step($deltaTime),
+                positionEas.eY.step($deltaTime),
+                positionEas.eZ.step($deltaTime)
+        );
         skeleton.setPosition(positionCur.x, positionCur.y);
         skeleton.setScaleX(positionCur.z);
         skeleton.updateWorldTransform();
@@ -187,46 +217,50 @@ public class ArkChar {
         return false;
     }
 
-    /** Render a specified frame to a byte buffer.
-     * @param $frame
-     * @return ByteBuffer object.
+    /** Get the current framebuffer contents as a Pixmap.
+     * Note that the image may not be flipped along the y-axis.
+     * @param debug Whether to show debug additions in the pixmap.
+     * @return Pixmap object.
      */
-    public ByteBuffer toBuffer(int $frame) {
-        // Apply Animation
-        animation.apply(skeleton, ($frame - 1) * f_time, ($frame - 1) * f_time, false, null, 1, MixBlend.first, MixDirection.in);
-        skeleton.updateWorldTransform();
-        // Render the skeleton to the FBO
-        ScreenUtils.clear(0, 0, 0, 0);
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
-        // Copy the FBO to a pixmap
-        Pixmap pixmap = new Pixmap(200, 200, Format.RGBA8888);
-        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
-        Gdx.gl.glReadPixels(0, 0, anim_width, anim_height,
-                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixmap.getPixels());
-        // Convert to byte buffer
-        return pixmap.getPixels();
+    public Pixmap getCurrentTexture(boolean debug) {
+        Pixmap pixmap = lastTexture == null ? Pixmap.createFromFrameBuffer(0, 0, flexibleLayout.getWidth(), flexibleLayout.getHeight()) : lastTexture;
+        if (debug) {
+            pixmap.setColor(new Color(1, 0, 0, 0.75f));
+            if (flexibleLayout.curInsert.bottom > 0)
+                pixmap.drawRectangle(0, 0, pixmap.getWidth(), flexibleLayout.curInsert.bottom);
+            if (flexibleLayout.curInsert.top > 0)
+                pixmap.drawRectangle(0, pixmap.getHeight() - flexibleLayout.curInsert.top, pixmap.getWidth(), flexibleLayout.curInsert.top);
+            if (flexibleLayout.curInsert.left > 0)
+                pixmap.drawRectangle(0, 0, flexibleLayout.curInsert.left, pixmap.getHeight());
+            if (flexibleLayout.curInsert.right > 0)
+                pixmap.drawRectangle(pixmap.getWidth() - flexibleLayout.curInsert.right, 0, flexibleLayout.curInsert.right, pixmap.getHeight());
+        }
+        return pixmap;
     }
 
     /** Render the animation to batch.
      * @param $frame
      */
-    public void toScreen(int $frame) {
+    public void toScreen() {
         // Apply Animation
         setPositionTar(positionTar.x, positionTar.y, positionTar.z);
         setPositionCur(Gdx.graphics.getDeltaTime());
         animationState.apply(skeleton);
         animationState.update(Gdx.graphics.getDeltaTime());
-        // OLD METHOD: animation.apply(skeleton, ($frame - 1) * anim_frame.F_TIME, ($frame - 1) * anim_frame.F_TIME, false, null, 1, MixBlend.first, MixDirection.in);
         skeleton.updateWorldTransform();
-        // Render the skeleton to the FBO
+        // Render the skeleton to the batch
+        updateCanvas();
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
         if (bgTexture != null)
             batch.draw(bgTexture, 0, 0);
         renderer.draw(batch, skeleton);
         batch.end();
+        // Write the current graphic texture to cache
+        lastTexture = new Pixmap(flexibleLayout.getWidth(), flexibleLayout.getHeight(), Format.RGBA8888);
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Gdx.gl.glReadPixels(0, 0, flexibleLayout.getWidth(), flexibleLayout.getHeight(),
+                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, lastTexture.getPixels());
     }
 
     /** Render the next frame.
@@ -257,7 +291,7 @@ public class ArkChar {
             }
         }
         // Render the next frame
-        toScreen(anim_frame.F_CUR);
+        toScreen();
     }
 
     private void changeAnimation() {
