@@ -3,11 +3,13 @@
 
 <div align="center">
    <h1> Ark-Pets </h1>
-   <img height="48" src="assets/icon.png" title="Icon" width="48"/>
+   <img height="64" src="assets/icon.png" title="Icon" width="64"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      版本(Version) <code>v2.0</code> <br>
-      <sub> This project only supports Chinese docs. If you are an English user, feel free to contact us. </sub>
+      版本(Version) <code> v2.0 </code> <br>
+      <sub>
+         <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
+      </sub>
    </p>
 </div>
 
@@ -55,6 +57,5 @@
 您可以通过提交Issues、PR、CodeReview等方式参与本项目的贡献。
 - 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
 - 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
+- **[鸣谢](docs/Thanks.md)**
 <!--- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki) -->
-
-**[<p align="center"> 鸣谢 </p>](docs/Thanks.md)**

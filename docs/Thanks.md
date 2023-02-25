@@ -8,3 +8,10 @@ ArkPets附加说明文档
 - [@南陽劉子驥](https://github.com/KaiserWilheim) [@NappingSodion](https://github.com/KJH-x) - 提交了诸多有益的Issues
 - 所有以任何形式为项目提供过建议的个人
 - 以及程序所[依赖的库](../build.gradle)的开发单位
+  - [EsotericSoftware Spine](https://esotericsoftware.com) - Spine Runtime
+  - [BadlogicGames libGDX](https://badlogicgames.com) - libGDX Framework
+  - [OpenJFX](https://openjfx.io) - JavaFX UI Framework
+  - [JFoenix](https://github.com/sshahine/JFoenix) - JavaFX Material Design Library
+  - [JNA](https://github.com/java-native-access/jna) - Java Native Access
+  - [Alibaba FastJSON](https://github.com/alibaba/fastjson) - JSON Utils
+  - etc.

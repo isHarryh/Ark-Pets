@@ -2,9 +2,9 @@ ArkPets附加说明文档
 # 已有议题
 
 如果您希望反馈Bug或提供建议，需要注意的是您的议题可能已经有人反馈过了。如果您的议题不在下列项中，欢迎您将其反馈给我们。
-> ArkPets将在你们和开源社区的支持下变得更加美好！  
+> ArkPets将在你们和开源社区的支持下变得更加美好！
+> 
 > [<img alt="Issues open" src="https://img.shields.io/github/issues-raw/isHarryh/Ark-Pets?label=Open%20Issues">](https://github.com/isHarryh/Ark-Pets/issues?q=is%3Aissue+is%3Aopen)
-> [<img alt="Issues closed" src="https://img.shields.io/github/issues-raw-closed/isHarryh/Ark-Pets?label=Closed%20Issues">](https://github.com/isHarryh/Ark-Pets/issues?q=is%3Aissue+is%3Aclosed)
 > [<img alt="Repo Stars" src="https://img.shields.io/github/stars/isHarryh/Ark-Pets?label=Stars">](https://github.com/isHarryh/Ark-Pets/stargazers)
 
 ## 漏洞 <sub>Bug</sub>
