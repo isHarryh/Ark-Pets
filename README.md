@@ -2,11 +2,11 @@
 <!-- 这是一个 MarkDown 格式的文档 -->
 
 <div align="center">
-   <p> Arknights Desktop Pets <br> 明日方舟桌宠 </p>
-   <img height="64" src="assets/icon.png" title="Icon" width="64"/>
-   <h1 style="margin:0"> Ark-Pets </h1>   
-   <p> 版本(Version) <code>v2.0</code> </p>
+   <h1> Ark-Pets </h1>
+   <img height="48" src="assets/icon.png" title="Icon" width="48"/>
    <p>
+      Arknights Desktop Pets | 明日方舟桌宠 <br>
+      版本(Version) <code>v2.0</code> <br>
       <sub> This project only supports Chinese docs. If you are an English user, feel free to contact us. </sub>
    </p>
 </div>

@@ -46,7 +46,6 @@ public class ArkChar {
     private final SkeletonRenderer renderer;
     private final int MAX_SKELETON_SIZE = 500;
     private SkeletonData skeletonData;
-    private Animation animation;
     private AnimationState animationState;
     private Pixmap lastTexture;
 
@@ -115,20 +114,13 @@ public class ArkChar {
         animationState = new AnimationState(asd);
     }
 
-    /** Set the canvas.
-     * @param $anim_width
-     * @param $anim_height
-     * @param $anim_fps
+    /** Set the canvas with transparent background.
      */
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps) {
         this.setCanvas($anim_width, $anim_height, $anim_fps, new Color(0, 0, 0, 0));
     }
 
-    /** Set the canvas.
-     * @param $anim_width
-     * @param $anim_height
-     * @param $anim_fps
-     * @param $bgColor
+    /** Set the canvas with the specified background color.
      */
     public void setCanvas(int $anim_width, int $anim_height, int $anim_fps, Color $bgColor) {
         // Transfer params
@@ -178,9 +170,6 @@ public class ArkChar {
     }
 
     /** Set the target position.
-     * @param $pos_x
-     * @param $pos_y
-     * @param $flip
      */
     public void setPositionTar(float $pos_x, float $pos_y, float $flip) {
         // Set target position
@@ -191,7 +180,6 @@ public class ArkChar {
     }
 
     /** Set the current position.
-     * @param $deltaTime
      */
     public void setPositionCur(float $deltaTime) {
         // Set current position
@@ -206,7 +194,6 @@ public class ArkChar {
     }
 
     /** Set a new animation
-     * @param $animData
      * @return true=success, false=failure.
      */
     public boolean setAnimation(AnimData $animData) {
@@ -239,7 +226,6 @@ public class ArkChar {
     }
 
     /** Render the animation to batch.
-     * @param $frame
      */
     public void toScreen() {
         // Apply Animation
@@ -295,12 +281,16 @@ public class ArkChar {
     }
 
     private void changeAnimation() {
+        // Overwrite the current animation(index0) with the new one
         anim_queue[0] = anim_queue[1];
         Gdx.app.log("info", "Anim:"+anim_queue[0].ANIM_NAME);
+        // Let the character face to the correct direction if the new animation is a moving animation
         if (anim_queue[0].MOBILITY != 0)
             setPositionTar(positionTar.x, positionTar.y, anim_queue[0].MOBILITY > 0 ? 1 : -1);
+        // Let the character have the correct y-offset
         offset_y = anim_queue[0].OFFSET_Y;
-        animation = skeletonData.findAnimation(anim_queue[0].ANIM_NAME);
+        // Update the animation state with the new animation
+        Animation animation = skeletonData.findAnimation(anim_queue[0].ANIM_NAME);
         anim_frame = new FrameCtrl(animation.getDuration(), anim_fps);
         animationState.setAnimation(0, anim_queue[0].ANIM_NAME, anim_queue[0].LOOP);
     }

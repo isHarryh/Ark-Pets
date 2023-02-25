@@ -111,10 +111,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		cha.fixCanvasSize();
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
-			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) (Gdx.app.getJavaHeap() / 1024) + "KB");
+			// When an animation's loop ends:
+			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (Gdx.app.getJavaHeap() >> 10) + "KB");
 		}
 
-		// 2.Select a new anim.
+		// 2.Select a new animation.
 		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
 		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
@@ -140,6 +141,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			newAnim = tray.keepAnim;
 		}
 		changeAnimation(newAnim); // Apply the new anim.
+	}
+
+	@Override
+	public void resize(int x, int y) {
+		Gdx.app.debug("debug", "AP:Resized (" + x + "*" + y + ")");
+		//cha.updateCanvas();
 	}
 
 	@Override
