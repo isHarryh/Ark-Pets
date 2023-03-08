@@ -61,11 +61,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		config = Objects.requireNonNull(ArkConfig.getConfig());
 		APP_FPS = config.display_fps;
 		Gdx.graphics.setForegroundFPS(APP_FPS);
-		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 12);
+		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
 		ScreenUtils.clear(0, 0, 0, 0, true);
 		// 2.Character setup
-		int WD_ORI_W = 140; // Window Origin Width
-		int WD_ORI_H = 160; // Window Origin Height
+		int WD_ORI_W = 150; // Window Origin Width
+		int WD_ORI_H = 150; // Window Origin Height
 		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
 		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
 		// 3.Window params setup
@@ -108,7 +108,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void render() {
 		// 1.Render the next frame.
-		cha.fixCanvasSize();
+		if (Math.abs(cha.positionCur.z) == 1) // Don't fix canvas while the character isn't completely flipped.
+			cha.fixCanvasSize();
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			// When an animation's loop ends:
@@ -274,8 +275,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		WD_poscur.set(
-				x > 0 ? Math.min(x, SCR_W - WD_W) : 0,
-				y > 0 ? Math.min(y, SCR_H - WD_H + OFFSET_Y) : 0
+				x > 0 ? Math.min(x, SCR_W - WD_W + cha.flexibleLayout.curInsert.left) : 0,
+				y > 0 ? Math.min(y, SCR_H - WD_H + cha.flexibleLayout.curInsert.top + OFFSET_Y) : 0
 		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
@@ -286,7 +287,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
 				(int)WD_poscur.x - cha.flexibleLayout.curInsert.left,
-				(int)WD_poscur.y,
+				(int)WD_poscur.y - cha.flexibleLayout.curInsert.top,
 				WD_W, WD_H, WinUser.SWP_NOACTIVATE
 		);
 		return true;

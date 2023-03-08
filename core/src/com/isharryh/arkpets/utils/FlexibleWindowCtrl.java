@@ -3,7 +3,9 @@
  */
 package com.isharryh.arkpets.utils;
 
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -28,26 +30,32 @@ public class FlexibleWindowCtrl {
     /** Fix the window's size to the best cropped size using the given parameters.
      * Note that {@code offset} should be set greater than {@code extensionLength}, or it may cause shaking.
      * @param pixmap The pixmap got from the current rendered frame of libGDX.
-     * @param extensionLength The extension length to be added to each overflowed side (px), no negative. 2~6 recommended.
-     * @param offset The offset to apply to the white space (px). 4~8 recommended.
-     * @param moderateThreshold The threshold to moderate the variation (px), no negative. 2~4 recommended.
+     * @param extended The extension length to be added to each overflowed side (px).
+     * @param reserved The reservation length of the white space (px), to avoid misjudging the non-captured buffer.
      * @param flipX Flip the pixmap along the x-axis.
      * @param flipY Flip the pixmap along the y-axis.
      * @return False if the size didn't change, true otherwise.
      */
-    public boolean fixToBestCroppedSize(Pixmap pixmap, int extensionLength, int offset, int moderateThreshold, boolean flipX, boolean flipY) {
+    public boolean fixToBestCroppedSize(Pixmap pixmap, int extended, int reserved, boolean flipX, boolean flipY) {
         Insert insert = curInsert.clone();
         final int alphaThreshold = 128;
         final int edgeWidth = pixmap.getWidth() - 1;
         final int edgeHeight = pixmap.getHeight() - 1;
+        PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);
+
+        if (flipX)
+            insert.swapHorizontal();
+        if (flipY)
+            insert.swapVertical();
 
         // TOP
         for (int y = 0; y <= edgeHeight; y++)
             for (int x = 0; x <= edgeWidth; x++)
                 if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
-                    insert.top += (y == 0 ? extensionLength : - y);
-                    if (insert.top < (flipY ? curInsert.bottom : curInsert.top))
-                        insert.top = (insert.top < -offset ? insert.top + 1 : (flipY ? curInsert.bottom : curInsert.top));
+                    if (y == 0)
+                        insert.top += extended;
+                    else if (y - reserved > 0)
+                        insert.top -= y - reserved;
                     x = Integer.MAX_VALUE - 1;
                     y = Integer.MAX_VALUE - 1;
                 }
@@ -55,9 +63,10 @@ public class FlexibleWindowCtrl {
         for (int y = edgeHeight; y >= 0; y--)
             for (int x = 0; x <= edgeWidth; x++)
                 if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
-                    insert.bottom += (y == edgeHeight ? extensionLength : y - edgeHeight);
-                    if (insert.bottom < (flipY ? curInsert.top : curInsert.bottom))
-                        insert.bottom = (insert.bottom < -offset ? insert.bottom + 1 : (flipY ? curInsert.top : curInsert.bottom));
+                    if (y == edgeHeight)
+                        insert.bottom += extended;
+                    else if (edgeHeight - y - reserved > 0)
+                        insert.bottom -= edgeHeight - y - reserved;
                     x = Integer.MAX_VALUE - 1;
                     y = Integer.MIN_VALUE + 1;
                 }
@@ -65,9 +74,10 @@ public class FlexibleWindowCtrl {
         for (int x = 0; x <= edgeWidth; x++)
             for (int y = 0; y <= edgeHeight; y++)
                 if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
-                    insert.left += (x == 0 ? extensionLength : - x);
-                    if (insert.left < (flipX ? curInsert.right : curInsert.left))
-                        insert.left = (insert.left < -offset ? insert.left + 1 : (flipX ? curInsert.right : curInsert.left));
+                    if (x == 0)
+                        insert.left += extended;
+                    else if (x - reserved > 0)
+                        insert.left -= x - reserved;
                     x = Integer.MAX_VALUE - 1;
                     y = Integer.MAX_VALUE - 1;
                 }
@@ -75,9 +85,10 @@ public class FlexibleWindowCtrl {
         for (int x = edgeWidth; x >= 0; x--)
             for (int y = 0; y <= edgeHeight; y++)
                 if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
-                    insert.right += (x == edgeWidth ? extensionLength : x - edgeWidth);
-                    if (insert.right < (flipX ? curInsert.left : curInsert.right))
-                        insert.right = (insert.right < -offset ? insert.right + 1 : (flipX ? curInsert.left : curInsert.right));
+                    if (x == edgeWidth)
+                        insert.right += extended;
+                    else if (edgeWidth - x - reserved > 0)
+                        insert.right -= edgeWidth - x - reserved;
                     x = Integer.MIN_VALUE + 1;
                     y = Integer.MAX_VALUE - 1;
                 }
@@ -89,7 +100,7 @@ public class FlexibleWindowCtrl {
 
         insert.bottom = 0; // Temporarily set bottom insert value to 0
         insert.limitMaxNoNegative(maxInsert);
-        return curInsert.moderatelyModify(insert, moderateThreshold);
+        return curInsert.moderatelyModify(insert, 0);
     }
 
     /** Get the total width.

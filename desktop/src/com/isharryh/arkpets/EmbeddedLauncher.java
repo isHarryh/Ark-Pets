@@ -23,10 +23,9 @@ public class EmbeddedLauncher {
 		config.setForegroundFPS(30);
 		config.setIdleFPS(30);
 		// Configure window size
-		final int SCR_W = 140;
-		final int SCR_H = 160;
-		config.setWindowedMode(SCR_W, SCR_H);
-		config.setWindowSizeLimits(SCR_W, SCR_H, SCR_W, SCR_H);
+		final int WD_W = 150;
+		final int WD_H = 150;
+		config.setWindowedMode(WD_W, WD_H);
 		config.setResizable(false);
 		// Configure window title
 		final String TITLE = applyWindowTitle();

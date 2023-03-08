@@ -6,6 +6,7 @@ package com.isharryh.arkpets;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -126,7 +127,7 @@ public class ArkChar {
         // Transfer params
         flexibleLayout = new FlexibleWindowCtrl(
                 new Vector2($anim_width, $anim_height),
-                ($anim_width + $anim_height) / 4
+                ($anim_width + $anim_height) * 2
         );
         anim_fps = $anim_fps;
         // Set position (center)
@@ -142,7 +143,7 @@ public class ArkChar {
     /** Fix the canvas size to make it adapted to the animation.
      */
     public void fixCanvasSize() {
-        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 15, 30, 5, false, true))
+        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 40, 80, false, true))
             return;
         System.out.println(
                 "^"+flexibleLayout.curInsert.top+
@@ -150,9 +151,6 @@ public class ArkChar {
                         "\t<"+flexibleLayout.curInsert.left+
                         "\t>"+flexibleLayout.curInsert.right
         );
-        //if (anim_frame != null)
-            //PixmapIO.writePNG(new FileHandle("temp").child("temp" + (anim_frame.F_CUR % 50 + 1) + ".png"), getCurrentTexture(true));
-            //PixmapIO.writePNG(new FileHandle("temp.png"), getCurrentTexture(true));
         //updateCanvas();
     }
 
@@ -163,7 +161,7 @@ public class ArkChar {
         camera.setToOrtho(false, flexibleLayout.getWidth(), flexibleLayout.getHeight());
         camera.translate(
                 ((MAX_SKELETON_SIZE - flexibleLayout.getHeight()) >> 1) - flexibleLayout.curInsert.left,
-                -flexibleLayout.curInsert.top
+                -flexibleLayout.curInsert.bottom
         ); // Translated X = (Canvas - Camera) / 2 - Insert
         camera.update();
         batch.getProjectionMatrix().set(camera.combined);
@@ -206,7 +204,7 @@ public class ArkChar {
 
     /** Get the current framebuffer contents as a Pixmap.
      * Note that the image may not be flipped along the y-axis.
-     * @param debug Whether to show debug additions in the pixmap.
+     * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
      * @return Pixmap object.
      */
     public Pixmap getCurrentTexture(boolean debug) {

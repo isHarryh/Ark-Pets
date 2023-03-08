@@ -19,6 +19,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.AWTException;
+import java.io.File;
 
 
 public class ArkTray {
@@ -38,7 +39,10 @@ public class ArkTray {
         arkPets = boundArkPets;
         tray = SystemTray.getSystemTray();
         try {
-            name = arkPets.config.character_recent.substring(arkPets.config.character_recent.lastIndexOf("_") + 1);
+            name = arkPets.config.character_recent;
+            name = name.substring(name.lastIndexOf(File.separator) + 1);
+            name = name.substring(name.indexOf("_") + 1);
+            name = name.substring(name.indexOf("_") + 1);
             name = name.substring(0, 1).toUpperCase() + name.substring(1);
         } catch (Exception e) {
             name = "Unknown";

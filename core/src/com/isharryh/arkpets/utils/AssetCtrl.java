@@ -206,12 +206,14 @@ public class AssetCtrl {
         ArrayList<AssetCtrl> result = new ArrayList<>();
         for (AssetCtrl asset : $assetList) {
             for (String word : wordList) {
-                if (asset.name.toLowerCase().contains(word.toLowerCase())) {
+                if (asset.name != null &&
+                        asset.name.toLowerCase().contains(word.toLowerCase())) {
                     result.add(asset);
                 }
             }
             for (String word : wordList) {
-                if (asset.appellation.toLowerCase().contains(word.toLowerCase())) {
+                if (asset.appellation != null &&
+                        asset.appellation.toLowerCase().contains(word.toLowerCase())) {
                     if (!result.contains(asset))
                         result.add(asset);
                 }
