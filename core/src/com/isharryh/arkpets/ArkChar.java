@@ -87,18 +87,22 @@ public class ArkChar {
     private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
         // Load atlas & skel/json files to SkeletonData
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
-        switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
-            case ".skel":
-                SkeletonBinary binary = new SkeletonBinary(atlas);
-                binary.setScale($scale);
-                skeletonData = binary.readSkeletonData(Gdx.files.internal($fp_skel));
-                break;
-            case ".json":
-                SkeletonJson json = new SkeletonJson(atlas);
-                json.setScale($scale);
-                skeletonData = json.readSkeletonData(Gdx.files.internal($fp_skel));
-                break;
-            // default:
+        try {
+            switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
+                case ".skel":
+                    SkeletonBinary binary = new SkeletonBinary(atlas);
+                    binary.setScale($scale);
+                    skeletonData = binary.readSkeletonData(Gdx.files.internal($fp_skel));
+                    break;
+                case ".json":
+                    SkeletonJson json = new SkeletonJson(atlas);
+                    json.setScale($scale);
+                    skeletonData = json.readSkeletonData(Gdx.files.internal($fp_skel));
+                    break;
+                // default:
+            }
+        } catch (SerializationException e) {
+            throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
         }
         // Write animations' names to the array
         Array<Animation> animations = skeletonData.getAnimations();

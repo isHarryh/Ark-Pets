@@ -114,7 +114,6 @@ public class ArkTray {
             tray.add(icon);
         } catch (AWTException e) {
             Gdx.app.log("warning", "Tray:Unable to apply tray icon. " + e);
-            User32.INSTANCE.SetWindowLong(arkPets.HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000008);
         }
     }
 

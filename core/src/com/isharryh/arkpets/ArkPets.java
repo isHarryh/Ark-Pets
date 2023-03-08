@@ -11,6 +11,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import com.sun.jna.Pointer;
@@ -94,8 +95,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		else if (BehaviorOperBuild3.match(cha.anim_list))
 			behavior = new BehaviorOperBuild3(config);
 		else {
-			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found.");
-			Gdx.app.exit();
+			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found, you can contact the developer.\n" +
+					"This model only contains the animation below:\n" + Arrays.toString(cha.anim_list));
+			throw new RuntimeException("Launch ArkPets failed due to unsupported model.");
 		}
 		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
