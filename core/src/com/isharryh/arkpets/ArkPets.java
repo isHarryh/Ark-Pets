@@ -94,6 +94,16 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			behavior = new BehaviorOperBuild(config);
 		else if (BehaviorOperBuild3.match(cha.anim_list))
 			behavior = new BehaviorOperBuild3(config);
+		else if (BehaviorEnemy.match(cha.anim_list))
+			behavior = new BehaviorEnemy(config);
+		else if (BehaviorEnemy2.match(cha.anim_list))
+			behavior = new BehaviorEnemy2(config);
+		else if (BehaviorEnemy3.match(cha.anim_list))
+			behavior = new BehaviorEnemy3(config);
+		else if (BehaviorEnemy4.match(cha.anim_list))
+			behavior = new BehaviorEnemy4(config);
+		else if (BehaviorEnemy5.match(cha.anim_list))
+			behavior = new BehaviorEnemy5(config);
 		else {
 			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found, you can contact the developer.\n" +
 					"This model only contains the animation below:\n" + Arrays.toString(cha.anim_list));
