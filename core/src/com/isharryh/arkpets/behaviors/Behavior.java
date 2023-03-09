@@ -12,6 +12,7 @@ import com.isharryh.arkpets.utils.AnimData;
 
 abstract public class Behavior {
     public AnimAutoData[] action_list;
+    public String[] anim_list;
     protected ArkConfig config;
     protected float deltaMin;
     protected float timeRec;
@@ -20,13 +21,15 @@ abstract public class Behavior {
     
     /** Character Behavior Controller Instance.
      * @param $config ArkConfig object.
+     * @param $animList The animation name list.
      */
-    public Behavior(ArkConfig $config) {
+    public Behavior(ArkConfig $config, String[] $animList) {
         action_list = null;
+        anim_list = $animList;
         config = $config;
         deltaMin = 0.5f;
-        timeRec = 0f;
-        duraRec = 0f;
+        timeRec = 0;
+        duraRec = 0;
         idxRec = 0;
     }
 
@@ -71,7 +74,7 @@ abstract public class Behavior {
     }
 
     /** Whether the provided animation list match this behavior class.
-     * @param animList The animation list.
+     * @param animList The animation name list.
      * @return true=match, false=mismatch.
      */
     public static boolean match(String[] animList) {

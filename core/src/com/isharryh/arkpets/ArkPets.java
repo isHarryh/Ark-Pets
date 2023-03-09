@@ -87,23 +87,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1.0f);
 		plane.changePosition(0, WD_postar.x, -WD_postar.y);
 		// 5.Behavior setup
-		if (BehaviorOperBuild2.match(cha.anim_list))
-			behavior = new BehaviorOperBuild2(config);
-		else if (BehaviorOperBuild.match(cha.anim_list))
-			behavior = new BehaviorOperBuild(config);
-		else if (BehaviorOperBuild3.match(cha.anim_list))
-			behavior = new BehaviorOperBuild3(config);
-		else if (BehaviorEnemy.match(cha.anim_list))
-			behavior = new BehaviorEnemy(config);
-		else if (BehaviorEnemy2.match(cha.anim_list))
-			behavior = new BehaviorEnemy2(config);
-		else if (BehaviorEnemy3.match(cha.anim_list))
-			behavior = new BehaviorEnemy3(config);
-		else if (BehaviorEnemy4.match(cha.anim_list))
-			behavior = new BehaviorEnemy4(config);
-		else if (BehaviorEnemy5.match(cha.anim_list))
-			behavior = new BehaviorEnemy5(config);
-		else {
+		behavior = Behavior.selectBehavior(cha.anim_list, new Behavior[] {
+				new BehaviorOperBuild2(config, cha.anim_list),
+				new BehaviorOperBuild(config, cha.anim_list),
+				new BehaviorOperBuild3(config, cha.anim_list),
+				new BehaviorBattleGeneral(config, cha.anim_list),
+				new BehaviorBattleGeneral2(config, cha.anim_list),
+				new BehaviorBattleGeneral3(config, cha.anim_list),
+		});
+		if (behavior == null) {
 			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found, you can contact the developer.\n" +
 					"This model only contains the animation below:\n" + Arrays.toString(cha.anim_list));
 			throw new RuntimeException("Launch ArkPets failed due to unsupported model.");

@@ -11,8 +11,8 @@ import com.isharryh.arkpets.utils.AnimData;
 
 public class BehaviorOperBuild3 extends Behavior {
 
-    public BehaviorOperBuild3(ArkConfig $config) {
-        super($config);
+    public BehaviorOperBuild3(ArkConfig $config, String[] $animList) {
+        super($config, $animList);
         action_list = new AnimAutoData[] {
             new AnimAutoData(new AnimData("Relax", true, true, 0, 0),
                     4f, (int) (256 / Math.sqrt(config.behavior_ai_activation))),
