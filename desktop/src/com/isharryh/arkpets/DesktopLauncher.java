@@ -3,6 +3,7 @@
  */
 package com.isharryh.arkpets;
 
+import com.isharryh.arkpets.utils.ArgPending;
 import javafx.application.Application;
 
 
@@ -10,13 +11,15 @@ import javafx.application.Application;
  * @see com.isharryh.arkpets.ArkHomeFX
  */
 public class DesktopLauncher {
-	public static void main (String[] arg) {
-		if (arg.length > 0 && arg[0].equals("--direct-start")) {
-			EmbeddedLauncher.main(arg);
-			return;
-		}
+	public static void main (String[] args) {
+		new ArgPending("--direct-start", args) {
+			protected void process(String command, String addition) {
+				EmbeddedLauncher.main(args);
+				System.exit(0);
+			}
+		};
 		// Java FX bootstrap
-		Application.launch(ArkHomeFX.class, arg);
+		Application.launch(ArkHomeFX.class, args);
 		System.exit(0);
 	}
 }

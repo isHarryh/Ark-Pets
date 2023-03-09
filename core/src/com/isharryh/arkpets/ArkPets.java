@@ -56,7 +56,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void create() {
 		// When the APP was created
 		// 1.App setup
-		Gdx.app.setLogLevel(3);
 		Gdx.app.log("event", "AP:Create");
 		Gdx.input.setInputProcessor(this);
 		config = Objects.requireNonNull(ArkConfig.getConfig());
