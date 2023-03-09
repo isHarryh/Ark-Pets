@@ -108,7 +108,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					"This model only contains the animation below:\n" + Arrays.toString(cha.anim_list));
 			throw new RuntimeException("Launch ArkPets failed due to unsupported model.");
 		}
-		Gdx.app.log("info", "AP:Use "+behavior.getClass().getName());
+		Gdx.app.log("info", "AP:Use " + behavior.getClass().getName());
 		cha.setAnimation(behavior.defaultAnim());
 		// 6.Tray icon setup
 		tray = new ArkTray(this);

@@ -35,7 +35,7 @@ abstract public class ArgPending {
         String command = null;
         boolean specified = false;
 
-        for (String arg: args) {
+        for (String arg : args) {
             if (arg != null) {
                 if (specified) {
                     if (arg.indexOf(argPrefix) != 0)
