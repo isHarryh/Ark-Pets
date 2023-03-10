@@ -27,9 +27,11 @@
 -fx-effect: dropshadow(gaussian, #00000040, 10, 0.2, 0, 1);
 }
 
-.expandable-field {
+.popup-detail-field {
 /* Expandable text area for Popup dialogs */
 -fx-alignment: top-left;
+-fx-font-size: 12px;
+-fx-text-fill: #484848;
 -fx-pref-row-count: 12;
 }
 

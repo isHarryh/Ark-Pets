@@ -3,11 +3,15 @@
  */
 package com.isharryh.arkpets.utils;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
 
@@ -39,6 +43,79 @@ public class PopupUtils {
             svgPath.setContent(svg);
             svgPath.setFill(Paint.valueOf(color));
             return svgPath;
+        }
+    }
+
+    public static class DialogUtil {
+        public static JFXDialog createCenteredDialog(Pane root, boolean overlayClose) {
+            StackPane container = new StackPane();
+            container.setPrefSize(root.getWidth(), root.getHeight());
+            root.getChildren().add(container);
+            JFXDialog dialog = new JFXDialog();
+            dialog.setDialogContainer(container);
+            dialog.setOverlayClose(overlayClose);
+            dialog.setTransitionType(JFXDialog.DialogTransition.CENTER);
+            return dialog;
+        }
+
+        public static Node getHeading(Node graphic, String text, String color) {
+            Label label = new Label(text);
+            label.setGraphic(graphic);
+            label.setGraphicTextGap(5);
+            label.setStyle("-fx-font-size:1.25em;-fx-font-weight:bold;-fx-text-fill:" + color);
+            return label;
+        }
+
+        public static Node getPrefabsH2(String text) {
+            Label h2 = new Label(text);
+            h2.setStyle("-fx-font-size:16px;-fx-text-fill:#333;");
+            h2.setWrapText(true);
+            return h2;
+        }
+
+        public static Node getPrefabsH3(String text) {
+            Label h3 = new Label(text);
+            h3.setStyle("-fx-font-size:14px;-fx-pref-height:30px;-fx-text-fill:#666;");
+            h3.setWrapText(true);
+            return h3;
+        }
+
+        public static JFXButton getCancelButton(JFXDialog dialog, Pane root) {
+            JFXButton button = new JFXButton();
+            button.setText("取 消");
+            button.setTextFill(Paint.valueOf(IconUtil.COLOR_WHITE));
+            button.setStyle("-fx-font-size:14px;-fx-text-fill:" + IconUtil.COLOR_WHITE + ";-fx-background-color:" + IconUtil.COLOR_INFO);
+            button.setOnAction(e -> {
+                dialog.close();
+                dialog.getDialogContainer().getChildren().remove(dialog);
+                root.getChildren().remove(dialog.getDialogContainer());
+            });
+            return button;
+        }
+
+        public static JFXButton getOkayButton(JFXDialog dialog, Pane root) {
+            JFXButton button = new JFXButton();
+            button.setText("确 认");
+            button.setTextFill(Paint.valueOf(IconUtil.COLOR_WHITE));
+            button.setStyle("-fx-font-size:14px;-fx-text-fill:" + IconUtil.COLOR_WHITE + ";-fx-background-color:" + IconUtil.COLOR_INFO);
+            button.setOnAction(e -> {
+                dialog.close();
+                dialog.getDialogContainer().getChildren().remove(dialog);
+                root.getChildren().remove(dialog.getDialogContainer());
+            });
+            return button;
+        }
+
+        public static JFXButton getTrustButton(JFXDialog dialog, Pane root) {
+            JFXButton button = new JFXButton();
+            button.setText("信 任");
+            button.setStyle("-fx-font-size:14px;-fx-text-fill:" + IconUtil.COLOR_WHITE + ";-fx-background-color:" + IconUtil.COLOR_INFO);
+            button.setOnAction(e -> {
+                dialog.close();
+                dialog.getDialogContainer().getChildren().remove(dialog);
+                root.getChildren().remove(dialog.getDialogContainer());
+            });
+            return button;
         }
     }
 

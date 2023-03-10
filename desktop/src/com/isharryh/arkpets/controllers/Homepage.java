@@ -57,7 +57,9 @@ public class Homepage {
     private final String tempQueryVersionCachePath = tempDirPath + "ApiQueryVersionCache";
 
     @FXML
-    private Pane Sidebar;
+    private AnchorPane root;
+    @FXML
+    private Pane sidebar;
     @FXML
     private JFXButton menuBtn1;
     @FXML
@@ -112,9 +114,9 @@ public class Homepage {
     private JFXCheckBox configBehaviorDoPeerRepulsion;
 
     @FXML
-    private ChoiceBox<Float> configDisplayScale;
+    private JFXComboBox<Float> configDisplayScale;
     @FXML
-    private ChoiceBox<Integer> configDisplayFps;
+    private JFXComboBox<Integer> configDisplayFps;
     @FXML
     private JFXSlider configDisplayMarginBottom;
     @FXML
@@ -342,22 +344,39 @@ public class Homepage {
         });
     }
 
-    public Dialog<ButtonType> foregroundTask(Task $task, String $title, String $header, String $defaultContent, Boolean $cancelable) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        ProgressBar bar = new ProgressBar(-1);
-        DialogPane dialogPane = dialog.getDialogPane();
+    public JFXDialog foregroundTask(Task $task, String $title, String $header, String $defaultContent, Boolean $cancelable) {
+        JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+        JFXProgressBar bar = new JFXProgressBar(-1);
+        StackPane barPane = new StackPane(bar);
+
+        VBox content = new VBox();
+        Label h2 = (Label)DialogUtil.getPrefabsH2($header);
+        Label h3 = (Label)DialogUtil.getPrefabsH3($defaultContent);
+        content.setSpacing(5);
+        content.getChildren().add(h2);
+        content.getChildren().add(new Separator());
+        content.getChildren().add(h3);
+
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(barPane);
+        layout.setBody(content);
+        layout.setActions(DialogUtil.getOkayButton(dialog, root));
+        barPane.setPrefSize(layout.getWidth(), 5);
+        System.out.println(barPane.getWidth() + "," + barPane.getHeight());
+        dialog.setContent(layout);
+
         if ($cancelable) {
-            dialogPane.getButtonTypes().add(ButtonType.CANCEL);
-            Button cancelBtn = (Button)(dialogPane.lookupButton(ButtonType.CANCEL));
-            cancelBtn.setOnAction(e -> $task.cancel());
-            dialog.setOnCloseRequest(e -> $task.cancel());
+            JFXButton cancel = DialogUtil.getCancelButton(dialog, root);
+            cancel.setOnAction(e -> {
+                $task.cancel();
+                dialog.close();
+                dialog.getDialogContainer().getChildren().remove(dialog);
+                root.getChildren().remove(dialog.getDialogContainer());
+            });
+            layout.setActions(cancel);
         }
-        dialog.setTitle($title);
-        dialog.setHeaderText($header);
-        dialog.setContentText($defaultContent);
-        dialog.setResizable(false);
-        dialog.setGraphic(bar);
         dialog.show();
+
         final double[] cachedProgress = {-1};
         $task.progressProperty().addListener((observable, oldValue, newValue) -> {
             if (Math.abs((double)newValue - cachedProgress[0]) >= 0.005) {
@@ -366,7 +385,7 @@ public class Homepage {
             }
         });
         $task.messageProperty().addListener(((observable, oldValue, newValue) -> {
-            dialog.setContentText(newValue);
+            h3.setText(newValue);
         }));
         $task.setOnCancelled(e -> {
             System.out.println("[AH]A foreground task was cancelled.");
@@ -376,17 +395,15 @@ public class Homepage {
             System.err.println("[AH]A foreground task failed, cause:");
             $task.getException().printStackTrace();
             popError($task.getException()).show();
-            if (!$cancelable) {
-                dialogPane.getButtonTypes().add(ButtonType.CLOSE);
-            }
             dialog.close();
+            dialog.getDialogContainer().getChildren().remove(dialog);
+            root.getChildren().remove(dialog.getDialogContainer());
         });
         $task.setOnSucceeded(e -> {
             System.out.println("[AH]A foreground task done.");
-            if (!$cancelable) {
-                dialogPane.getButtonTypes().add(ButtonType.CLOSE);
-            }
             dialog.close();
+            dialog.getDialogContainer().getChildren().remove(dialog);
+            root.getChildren().remove(dialog.getDialogContainer());
         });
         $task.stateProperty().addListener(((observable, oldValue, newValue) -> {
             //System.out.println(Thread.currentThread().getName() + ": " + newValue.toString());
@@ -396,77 +413,104 @@ public class Homepage {
         return dialog;
     }
 
-    public Dialog<ButtonType> popError(Throwable $e) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        DialogPane dialogPane = dialog.getDialogPane();
-        dialog.setTitle("发生异常");
-        dialog.setHeaderText("啊哦~ ArkPets启动器抛出了一个异常。");
-        dialog.setContentText("请重试操作，或查看帮助文档。如需联系开发者，请提供下述信息：");
-        dialog.setGraphic(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, IconUtil.COLOR_DANGER));
-        dialog.setOnCloseRequest(e -> dialog.close());
-        ExpandableTextArea expandable = new ExpandableTextArea(dialog, "");
-        expandable.getTextArea().appendText("[Exception] " + $e.getClass().getSimpleName() + "\n");
-        expandable.getTextArea().appendText("[Message] " + ($e.getLocalizedMessage() != null ? $e.getLocalizedMessage() : "") + "\n");
-        expandable.getTextArea().appendText("\n[StackTrace]\nCaused by " + $e.getClass().getCanonicalName() + ": " + $e.getMessage() + "\n");
+    public JFXDialog popError(Throwable $e) {
+        JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+
+        VBox content = new VBox();
+        Label h2 = (Label)DialogUtil.getPrefabsH2("啊哦~ ArkPets启动器抛出了一个异常。");
+        Label h3 = (Label)DialogUtil.getPrefabsH3("请重试操作，或查看帮助文档。如需联系开发者，请提供下述信息：");
+        content.setSpacing(5);
+        content.getChildren().add(h2);
+        content.getChildren().add(new Separator());
+        content.getChildren().add(h3);
+
+        JFXTextArea textArea = new JFXTextArea();
+        textArea.setEditable(false);
+        textArea.setScrollTop(0);
+        textArea.getStyleClass().add("popup-detail-field");
+        textArea.appendText("[Exception] " + $e.getClass().getSimpleName() + "\n");
+        textArea.appendText("[Message] " + ($e.getLocalizedMessage() != null ? $e.getLocalizedMessage() : "") + "\n");
+        textArea.appendText("\n[StackTrace]\nCaused by " + $e.getClass().getCanonicalName() + ": " + $e.getMessage() + "\n");
         for (StackTraceElement ste : $e.getStackTrace())
-            expandable.getTextArea().appendText("  at " + ste + "\n");
-        dialogPane.getButtonTypes().add(ButtonType.OK);
+            textArea.appendText("  at " + ste + "\n");
+        content.getChildren().add(textArea);
+
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_DANGER, IconUtil.COLOR_DANGER), "发生异常", IconUtil.COLOR_DANGER));
+        layout.setBody(content);
+        layout.setActions(DialogUtil.getOkayButton(dialog, root));
+        dialog.setContent(layout);
 
         if ($e instanceof FileNotFoundException) {
-            dialog.setContentText("原因是未找到某个文件或目录，请重试操作。详细信息：");
+            h3.setText("未找到某个文件或目录，请重试操作。详细信息：");
         }
         if ($e instanceof NetUtil.HttpResponseCodeException) {
             //TODO 准确获知错误码
-            dialog.setHeaderText("啊哦~ 请求的服务器返回了一个HTTP错误码。");
+            h2.setText("神经网络连接异常。");
             if ($e instanceof NetUtil.HttpRedirected) {
-                dialog.setContentText("错误码[3XX]，可能是该地址被重定向。详细信息：");
+                h3.setText("错误码[3XX]，可能是该地址被重定向。详细信息：");
             }
             if ($e instanceof NetUtil.HttpClientError) {
-                dialog.setContentText("错误码[4XX]，详细信息：");
+                h3.setText("错误码[4XX]，详细信息：");
             }
             if ($e instanceof NetUtil.HttpServerError) {
-                dialog.setContentText("错误码[5XX]，可能是服务器故障。详细信息：");
+                h3.setText("错误码[5XX]，可能是服务器故障。详细信息：");
             }
         }
         if ($e instanceof UnknownHostException) {
-            dialog.setHeaderText("啊哦~ 发生了网络问题。");
-            dialog.setContentText("原因是找不到服务器地址，可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
+            h2.setText("无法建立神经网络连接。");
+            h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof ConnectException) {
-            dialog.setHeaderText("啊哦~ 发生了网络问题。");
-            dialog.setContentText("原因是无法建立网络连接，请尝试更换网络环境、检查防火墙和代理设置。");
+            h2.setText("无法建立神经网络连接。");
+            h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SocketTimeoutException) {
-            dialog.setHeaderText("啊哦~ 发生了网络问题。");
-            dialog.setContentText("原因是接收超时，请尝试更换网络环境、检查防火墙和代理设置。");
+            h2.setText("神经网络连接异常。");
+            h3.setText("接收神经递质超时。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SSLException) {
-            dialog.setHeaderText("啊哦~ 发生了网络问题。");
-            dialog.setContentText("原因是SSL相关的证书错误，请检查代理设置。您也可以尝试[信任所有证书]后重试刚才的操作。");
-            dialogPane.getButtonTypes().add(ButtonType.APPLY);
-            Button apply = (Button)dialogPane.lookupButton(ButtonType.APPLY);
-            apply.setText("信任所有证书");
+            h2.setText("神经网络连接异常。");
+            h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
+            JFXButton apply = DialogUtil.getTrustButton(dialog, root);
             apply.setOnAction(e -> {
                 httpsTrustAll = true;
+                dialog.close();
+                dialog.getDialogContainer().getChildren().remove(dialog);
+                root.getChildren().remove(dialog.getDialogContainer());
             });
+            layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
         }
         if ($e instanceof ZipException) {
-            dialog.setContentText("原因是压缩文件相关错误。推测可能是下载源问题，请尝试更换下载源。");
+            h3.setText("压缩文件相关错误。推测可能是下载源问题，请尝试更换下载源。");
         }
         //dialog.show();
         return dialog;
     }
 
-    public Dialog<ButtonType> popNotice(Node $graphic, String $title, String $header, String $content, String $detail) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        DialogPane dialogPane = dialog.getDialogPane();
-        dialog.setTitle($title);
-        dialog.setHeaderText($header);
-        dialog.setContentText($content);
-        dialog.setGraphic($graphic);
-        dialogPane.getButtonTypes().add(ButtonType.OK);
+    public JFXDialog popNotice(Node $graphic, String $title, String $header, String $content, String $detail) {
+        JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+        VBox content = new VBox();
+        Label h2 = (Label)DialogUtil.getPrefabsH2($header);
+        Label h3 = (Label)DialogUtil.getPrefabsH3($content);
+        content.setSpacing(5);
+        content.getChildren().add(h2);
+        content.getChildren().add(new Separator());
+        content.getChildren().add(h3);
+
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(DialogUtil.getHeading($graphic, $header, IconUtil.COLOR_BLACK));
+        layout.setBody(content);
+        layout.setActions(DialogUtil.getOkayButton(dialog, root));
+        dialog.setContent(layout);
+
         if ($detail != null && $detail.length() > 0) {
-            new ExpandableTextArea(dialog, $detail);
+            JFXTextArea textArea = new JFXTextArea();
+            textArea.setEditable(false);
+            textArea.setScrollTop(0);
+            textArea.getStyleClass().add("popup-detail-field");
+            textArea.appendText($detail);
+            content.getChildren().add(textArea);
         }
         //dialog.show();
         return dialog;
@@ -481,7 +525,7 @@ public class Homepage {
         if (!initModelDataset(true))
             return;
         Task<Boolean> task = createDownloadTask(urlModelsData, tempDirPath + fileModelsDataPath);
-        Dialog<ButtonType> dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "正在尝试建立连接", true);
+        JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "正在尝试建立连接", true);
         task.setOnSucceeded(e -> {
             dialog.close();
             try {
@@ -522,21 +566,23 @@ public class Homepage {
         //1
         // TODO change download source
         Task<Boolean> task1 = createDownloadTask(urlModelsZip, tempModelsZipCachePath);
-        Dialog<ButtonType> task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "正在尝试建立连接", true);
+        JFXDialog task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "正在尝试建立连接", true);
         task1.setOnSucceeded(e1 -> {
             task1dialog.close();
             //2
             Task<Boolean> task2 = createUnzipTask(tempModelsZipCachePath, tempModelsUnzipDirPath);
-            Dialog<ButtonType> task2dialog = foregroundTask(task2, "正在更新模型", "正在解压模型资源文件...", "这可能需要十几秒", false);
+            JFXDialog task2dialog = foregroundTask(task2, "正在更新模型", "正在解压模型资源文件...", "这可能需要十几秒", false);
             task2.setOnSucceeded(e2 -> {
-                task2dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
                 task2dialog.close();
+                task2dialog.getDialogContainer().getChildren().remove(task2dialog);
+                root.getChildren().remove(task2dialog.getDialogContainer());
                 //3
                 Task<Boolean> task3 = createModelsMovingTask(tempModelsUnzipDirPath, fileModelsDataPath);
-                Dialog<ButtonType> task3dialog = foregroundTask(task3, "正在更新模型", "正在应用模型更新...", "即将完成", false);
+                JFXDialog task3dialog = foregroundTask(task3, "正在更新模型", "正在应用模型更新...", "即将完成", false);
                 task3.setOnSucceeded(e3 -> {
-                    task3dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
                     task3dialog.close();
+                    task3dialog.getDialogContainer().getChildren().remove(task3dialog);
+                    root.getChildren().remove(task3dialog.getDialogContainer());
                     dealModelReload();
                 });
             });
@@ -624,7 +670,7 @@ public class Homepage {
         }
         String queryStr = "?type=queryVersion&cliVer=" + ArkHomeFX.appVersionStr + "&source=" + $sourceStr;
         Task<Boolean> task = createDownloadTask(urlApi + queryStr, tempQueryVersionCachePath);
-        Dialog<ButtonType> dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "正在尝试建立连接", true);
+        JFXDialog dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "正在尝试建立连接", true);
         task.setOnSucceeded(e -> {
             dialog.close();
             try {
