@@ -2,6 +2,11 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <option name="BUILD_PROCESS_ADDITIONAL_VM_OPTIONS" value="-Dfile.encoding=UTF-8" />
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="18" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Ark-Pets.desktop.main" options="--add-modules java.desktop" />
+    </option>
   </component>
 </project>

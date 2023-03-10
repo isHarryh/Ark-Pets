@@ -60,7 +60,7 @@ public class ArkHomeFX extends Application {
      * @see javafx.concurrent.Task
      */
     public void startArkPets() {
-        Task<Boolean> task = new Task<Boolean>() {
+        Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws IOException, InterruptedException {
                 JavaProcess.exec(EmbeddedLauncher.class, false);

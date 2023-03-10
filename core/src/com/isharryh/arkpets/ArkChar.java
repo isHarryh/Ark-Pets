@@ -147,9 +147,9 @@ public class ArkChar {
     /** Fix the canvas size to make it adapted to the animation.
      */
     public void fixCanvasSize() {
-        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 40, 80, false, true))
+        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 50, 75, false, true))
             return;
-        System.out.println(
+        Gdx.app.debug("debug",
                 "^"+flexibleLayout.curInsert.top+
                         "\tv"+flexibleLayout.curInsert.bottom+
                         "\t<"+flexibleLayout.curInsert.left+
