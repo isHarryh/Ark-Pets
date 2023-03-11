@@ -348,8 +348,8 @@ public class Homepage {
 
     public JFXDialog foregroundTask(Task $task, String $title, String $header, String $defaultContent, Boolean $cancelable) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
-        JFXProgressBar bar = new JFXProgressBar(-1);
-        StackPane barPane = new StackPane(bar);
+        ProgressBar bar = new ProgressBar(-1);
+        bar.setPrefSize(root.getWidth() * 0.6, 10);
 
         VBox content = new VBox();
         Label h2 = (Label)DialogUtil.getPrefabsH2($header);
@@ -360,11 +360,9 @@ public class Homepage {
         content.getChildren().add(h3);
 
         JFXDialogLayout layout = new JFXDialogLayout();
-        layout.setHeading(barPane);
+        layout.setHeading(bar);
         layout.setBody(content);
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
-        barPane.setPrefSize(layout.getWidth(), 5);
-        System.out.println(barPane.getWidth() + "," + barPane.getHeight());
         dialog.setContent(layout);
 
         if ($cancelable) {
@@ -501,7 +499,7 @@ public class Homepage {
         content.getChildren().add(h3);
 
         JFXDialogLayout layout = new JFXDialogLayout();
-        layout.setHeading(DialogUtil.getHeading($graphic, $header, IconUtil.COLOR_BLACK));
+        layout.setHeading(DialogUtil.getHeading($graphic, $title, COLOR_LIGHT_GRAY));
         layout.setBody(content);
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
@@ -530,6 +528,8 @@ public class Homepage {
         JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "正在尝试建立连接", true);
         task.setOnSucceeded(e -> {
             dialog.close();
+            dialog.getDialogContainer().getChildren().remove(dialog);
+            root.getChildren().remove(dialog.getDialogContainer());
             try {
                 String versionDescription;
                 try {

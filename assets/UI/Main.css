@@ -35,6 +35,20 @@
 -fx-pref-row-count: 12;
 }
 
+ProgressBar > .track{
+/* Progress bar's outer track */
+-fx-background-color: #DDDDDDDD;
+-fx-background-radius: 2.5px;
+-fx-background-insets: 0;
+}
+
+ProgressBar > .bar, ProgressBar:indeterminate > .bar{
+/* Progress bar's inner bar */
+-fx-background-color: #204880DD;
+-fx-background-radius: 2.5px;
+-fx-background-insets: 0;
+}
+
 .btn-icon {
 /* Anchor-pane that contains an SVG-path */
 -fx-pref-width: 0;
