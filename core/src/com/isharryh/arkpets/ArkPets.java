@@ -278,8 +278,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		WD_poscur.set(
-				x > 0 ? Math.min(x, SCR_W - WD_W + cha.flexibleLayout.curInsert.left) : 0,
-				y > 0 ? Math.min(y, SCR_H - WD_H + cha.flexibleLayout.curInsert.top + OFFSET_Y) : 0
+				x > 0 ? Math.min(x, SCR_W - WD_W) : 0,
+				y > 0 ? Math.min(y, SCR_H - WD_H + OFFSET_Y) : 0
 		);
 		if (override) {
 			setWindowPosTar(WD_poscur.x, WD_poscur.y);
@@ -289,8 +289,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
-				(int)WD_poscur.x - cha.flexibleLayout.curInsert.left,
-				(int)WD_poscur.y - cha.flexibleLayout.curInsert.top,
+				(int)WD_poscur.x - (int)(cha.flexibleLayout.curInsert.left * WD_SCALE),
+				(int)WD_poscur.y - (int)(cha.flexibleLayout.curInsert.top * WD_SCALE),
 				WD_W, WD_H, WinUser.SWP_NOACTIVATE
 		);
 		return true;

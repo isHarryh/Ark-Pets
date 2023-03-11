@@ -4,7 +4,6 @@
 package com.isharryh.arkpets.utils;
 
 import com.alibaba.fastjson.JSONObject;
-import com.isharryh.arkpets.utils.IOUtils.*;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -123,8 +122,8 @@ public class AssetCtrl {
                 return false;
             for (String ext : extensions)
                 if (!checksum.getObject(ext, String.class)
-                        .equals(FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))))) {
-                    System.out.println("The md5 of file " + getAssetFilePath($assetDir, $modelsDataset, ext) + " is:\n" + FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))) +
+                        .equals(IOUtils.FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))))) {
+                    System.out.println("The md5 of file " + getAssetFilePath($assetDir, $modelsDataset, ext) + " is:\n" + IOUtils.FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))) +
                             "\nbut in the dataset, it is recorded as:\n" + checksum.getObject(ext, String.class));
                     return false;
                 }

@@ -3,10 +3,9 @@
  */
 package com.isharryh.arkpets.behaviors;
 
-import com.badlogic.gdx.utils.Array;
-import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.utils.AnimAutoData;
 import com.isharryh.arkpets.utils.AnimData;
+import com.isharryh.arkpets.ArkConfig;
 
 
 public class BehaviorBattleGeneral extends Behavior {

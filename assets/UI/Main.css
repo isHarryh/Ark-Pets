@@ -31,7 +31,7 @@
 /* Expandable text area for Popup dialogs */
 -fx-alignment: top-left;
 -fx-font-size: 12px;
--fx-text-fill: #484848;
+-fx-text-fill: #666;
 -fx-pref-row-count: 12;
 }
 

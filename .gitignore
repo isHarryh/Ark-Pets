@@ -22,3 +22,6 @@ test*/
 *.jar
 *.log
 *.zip
+
+.idea/uiDesigner.xml
+.idea/inspectionProfiles

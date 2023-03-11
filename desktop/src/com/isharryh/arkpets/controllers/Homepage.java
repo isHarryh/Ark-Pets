@@ -36,6 +36,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.ZipException;
 
+import static com.isharryh.arkpets.utils.PopupUtils.*;
+
 
 public class Homepage {
     private final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
@@ -210,12 +212,12 @@ public class Homepage {
             }
         } catch (FileNotFoundException e) {
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到模型数据集。",
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到模型数据集。",
                         "模型数据集文件 " + fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。", null).show();
         } catch (IOException e) {
             e.printStackTrace();
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未知原因。",
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未知原因。",
                         "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
@@ -252,7 +254,7 @@ public class Homepage {
             }
         } catch (RuntimeException e) {
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "模型载入失败", "模型未成功载入：未能成功解析模型数据集。",
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未能成功解析模型数据集。",
                         "可能是数据集损坏、版本不兼容或模型存放位置错误。\n失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
@@ -436,7 +438,7 @@ public class Homepage {
         content.getChildren().add(textArea);
 
         JFXDialogLayout layout = new JFXDialogLayout();
-        layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_DANGER, IconUtil.COLOR_DANGER), "发生异常", IconUtil.COLOR_DANGER));
+        layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_DANGER, COLOR_DANGER), "发生异常", COLOR_DANGER));
         layout.setBody(content);
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
@@ -538,7 +540,7 @@ public class Homepage {
                 }
                 // TODO do judgment more precisely
                 if (FileUtil.getMD5(new File(fileModelsDataPath)).equals(FileUtil.getMD5(new File(tempDirPath + fileModelsDataPath)))) {
-                    popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, IconUtil.COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
+                    popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
                             "提示：远程仓库的版本不一定和游戏同步更新。", "模型仓库版本描述：\n" + versionDescription).show();
                 } else {
                     String oldVersionDescription;
@@ -548,7 +550,7 @@ public class Homepage {
                     } catch (Exception ex) {
                         oldVersionDescription = "unknown";
                     }
-                    popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, IconUtil.COLOR_INFO), "检查模型更新", "当前模型版本与远程仓库有差异。",
+                    popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查模型更新", "当前模型版本与远程仓库有差异。",
                             "可以重新下载模型，以进行更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n当前模型仓库版本描述：\n" + oldVersionDescription).show();
                 }
             } catch (IOException ex) {
@@ -619,7 +621,7 @@ public class Homepage {
                             } else if (!AssetCtrl.isValidAsset(dir.toFile(), cachedMDD)) {
                                 return FileVisitResult.CONTINUE;
                             } else {
-                                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING);
+                                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
                                 dialogHeader[0] = "已发现问题，模型资源可能不完整。";
                                 dialogContent[0] = "位于 " + dir + " 的模型资源，可能" + (AssetCtrl.isIntegralAsset(dir.toFile(), cachedMDD) ? "已被修改" : "缺少关键文件") + "。\n请尝试重新下载模型。";
                                 flag[0] = true;
@@ -636,7 +638,7 @@ public class Homepage {
                 for (String key : cachedMDD.keySet()) {
                     try {
                         if (!cachedMDD.getJSONObject("key").getJSONObject("checksum").isEmpty()) {
-                            dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING);
+                            dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
                             dialogHeader[0] = "已发现问题，模型资源可能不完整。";
                             dialogContent[0] = "没有找到 " + key + " 的模型资源。\n请尝试重新下载模型。";
                             flag[0] = true;
@@ -648,7 +650,7 @@ public class Homepage {
                 this.updateProgress(1, 1);
                 if (flag[0] || this.isCancelled())
                     return false;
-                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, IconUtil.COLOR_SUCCESS);
+                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS);
                 dialogHeader[0] = "模型资源是完整的。";
                 dialogContent[0] = "这只能说明本地的模型资源是完整的，但不一定是最新的。";
                 return true;
@@ -681,15 +683,15 @@ public class Homepage {
                     if (stableVersionResult[0] > ArkHomeFX.appVersion[0] ||
                             (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] > ArkHomeFX.appVersion[1]) ||
                             (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] == ArkHomeFX.appVersion[1] && stableVersionResult[2] > ArkHomeFX.appVersion[2])) {
-                        popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, IconUtil.COLOR_INFO), "检查软件更新", "恭喜，检测到软件有新的版本。",
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "恭喜，检测到软件有新的版本。",
                                 ArkHomeFX.appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。", null).show();
                     } else {
-                        popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, IconUtil.COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
                                 "当前版本：" + ArkHomeFX.appVersionStr, null).show();
                     }
                 } else {
                     if ($popNotice)
-                        popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, IconUtil.COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
                                 "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
@@ -915,7 +917,7 @@ public class Homepage {
         if (modelsDatasetFull == null) {
             // Not loaded:
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, IconUtil.COLOR_WARNING), "未能加载模型", "请确保模型加载成功后再进行此操作。",
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "未能加载模型", "请确保模型加载成功后再进行此操作。",
                         "请先在[选项]中进行模型下载。\n如您已下载模型，请尝试点击[重载]按钮。", null).show();
             return false;
         } else {

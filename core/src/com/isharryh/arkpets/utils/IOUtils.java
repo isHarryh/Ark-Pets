@@ -3,8 +3,6 @@
  */
 package com.isharryh.arkpets.utils;
 
-import com.badlogic.gdx.Gdx;
-
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.URL;
@@ -13,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
 import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

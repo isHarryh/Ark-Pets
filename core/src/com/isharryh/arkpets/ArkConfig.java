@@ -5,14 +5,10 @@ package com.isharryh.arkpets;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.badlogic.gdx.Gdx;
-import com.isharryh.arkpets.utils.IOUtils.*;
+import com.isharryh.arkpets.utils.IOUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
@@ -58,7 +54,7 @@ public class ArkConfig {
      */
     public void saveConfig() {
         try {
-            FileUtil.writeString(configCustom, "UTF-8", readConfig(), false);
+            IOUtils.FileUtil.writeString(configCustom, "UTF-8", readConfig(), false);
         } catch (IOException e) {
             System.err.println("[error] Config saving failed");
             e.printStackTrace();
@@ -78,7 +74,7 @@ public class ArkConfig {
             }
         }
         try {
-            return JSONObject.parseObject(FileUtil.readString(configCustom, "UTF-8"), ArkConfig.class);
+            return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, "UTF-8"), ArkConfig.class);
         } catch (IOException e) {
             System.err.println("[error] Config reading failed");
             e.printStackTrace();

@@ -5,8 +5,6 @@ package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
 import com.isharryh.arkpets.utils.AnimData;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinUser;
 
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;

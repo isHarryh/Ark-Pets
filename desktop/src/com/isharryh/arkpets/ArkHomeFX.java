@@ -5,7 +5,6 @@ package com.isharryh.arkpets;
 
 import com.isharryh.arkpets.utils.JavaProcess;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
