@@ -1,3 +1,4 @@
+# Exclude all non-repository files
 /*/
 !/.idea/
 !/assets/
@@ -16,6 +17,7 @@ tmp*/
 temp*/
 test*/
 
+# Exclude generated program files
 *.class
 *.config
 *.exe
@@ -23,5 +25,7 @@ test*/
 *.log
 *.zip
 
+# Special files
 .idea/uiDesigner.xml
 .idea/inspectionProfiles
+!/docs/dist/

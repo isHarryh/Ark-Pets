@@ -4,9 +4,11 @@ sourceSets.main.resources.srcDirs = ["../assets"]
 
 project.ext.mainClassName = "com.isharryh.arkpets.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
+eclipse.project.name = appName + "-desktop"
 
 import org.gradle.internal.os.OperatingSystem
 
+// Runs the app without debug.
 task run(dependsOn: classes, type: JavaExec, group: 'execute') {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
@@ -19,6 +21,7 @@ task run(dependsOn: classes, type: JavaExec, group: 'execute') {
     }
 }
 
+// Runs the app within debug.
 task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
     main = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
@@ -28,7 +31,29 @@ task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
     debug = true
 }
 
-task dist(dependsOn: classes, type: Jar, group: 'release') {
+
+/* DISTRIBUTION TASKS */
+
+ext {
+    // Environment vars
+    rootDir = file('.').absolutePath
+    javaHome = System.getProperty('java.home')
+    osName = System.getProperty('os.name').toLowerCase(Locale.ROOT).split(' ')[0]
+    osPathSep = File.pathSeparatorChar
+    // Distribution related vars
+    jarLibDir = "${buildDir}/libs"
+    jarLibName = "${project.name}-${project.version}"
+    jlinkRuntimeDir = "${buildDir}/jlink"
+    jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
+    jlinkModuleList = "java.base,java.desktop,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
+    jlinkLocalesList = "en-US,zh-CN"
+    jpackageDir = "${buildDir}/jpackage"
+    distDir = "${buildDir}/dist"
+    distName = "${project.ext.appName}-v${project.version}"
+}
+
+// Generates a distributable JAR file for the app.
+task distJar(dependsOn: classes, type: Jar, group: 'dist') {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes 'Main-Class': project.mainClassName
@@ -37,26 +62,17 @@ task dist(dependsOn: classes, type: Jar, group: 'release') {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    copy {
+        from "${jarLibDir}/${jarLibName}.jar"
+        into distDir
+        rename "${jarLibName}.jar", "${distName}.jar"
+    }
     with jar
 }
 
-ext {
-    rootDir = file('.').absolutePath
-    javaHome = System.getProperty('java.home')
-    osName = System.getProperty('os.name').toLowerCase(Locale.ROOT).split(' ')[0]
-    osPathSep = File.pathSeparatorChar
-    // Release Related
-    jlinkRuntimeDir = "${buildDir}/jlink"
-    jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
-    jlinkModuleList = "java.base,java.desktop,java.management,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
-    jpackageDir = "${buildDir}/jpackage"
-    distDir = "${buildDir}/dist"
-}
-
-task createRuntime(dependsOn: dist, type: Exec, group: 'release') {
-    doFirst() {
-        delete jlinkRuntimeDir
-    }
+// Creates a customized Java Runtime Environment for the app.
+task jlink(dependsOn: distJar, type: Exec, group: 'dist') {
+    doFirst() { delete jlinkRuntimeDir }
     workingDir project.projectDir
     inputs.property("runtime", jlinkRuntimeImg)
     commandLine = [
@@ -69,14 +85,20 @@ task createRuntime(dependsOn: dist, type: Exec, group: 'release') {
             '--no-man-pages',
             '--vm=server',
             '--compress=1',
-            '--include-locales=en-US,zh-CN'
+            '--include-locales', jlinkLocalesList
     ]
     outputs.dir(jlinkRuntimeDir)
 }
 
-task jpackage(dependsOn: createRuntime, type: Exec, group: 'release') {
-    doFirst() {
-        delete jpackageDir
+// Packs the app into an EXE.
+task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
+    doFirst() { delete jpackageDir }
+    doLast() {
+        copy {
+            from "${project.rootDir}/LICENSE"
+            into jpackageDir
+        }
+        delete jlinkRuntimeDir
     }
     workingDir project.projectDir
     def commands = [
@@ -104,4 +126,10 @@ task jpackage(dependsOn: createRuntime, type: Exec, group: 'release') {
     commandLine = commands
 }
 
-eclipse.project.name = appName + "-desktop"
+// Generates a distributable ZIP file for the app.
+task distZip(dependsOn: jpackage, type: Zip, group: 'dist') {
+    from(jpackageDir) { include("**") }
+    from(project.rootDir) { include("README.md") }
+    archiveName "${distName}.zip"
+    destinationDir file(distDir)
+}
