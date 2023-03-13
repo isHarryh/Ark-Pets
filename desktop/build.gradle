@@ -42,13 +42,15 @@ ext {
     osPathSep = File.pathSeparatorChar
     // Distribution related vars
     jarLibDir = "${buildDir}/libs"
-    jarLibName = "${project.name}-${project.version}"
+    jarLibName = "${project.ext.appName}-${project.version}"
     jlinkRuntimeDir = "${buildDir}/jlink"
     jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
     jlinkModuleList = "java.base,java.desktop,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = "${buildDir}/jpackage"
+    issFile = "${project.rootDir}/doc/dist/ExePacking.iss"
     distDir = "${buildDir}/dist"
+    distDirRel = "${project.name}/build/dist"
     distName = "${project.ext.appName}-v${project.version}"
 }
 
@@ -132,4 +134,15 @@ task distZip(dependsOn: jpackage, type: Zip, group: 'dist') {
     from(project.rootDir) { include("README.md") }
     archiveName "${distName}.zip"
     destinationDir file(distDir)
+}
+
+task distExe(dependsOn: jpackage, type: Exec, group: 'dist') {
+    workingDir project.rootDir
+    def commands = [
+            "iscc",
+            "/O${distDirRel}",
+            "/F${distName}.exe",
+            issFile
+    ]
+    commandLine = commands
 }
