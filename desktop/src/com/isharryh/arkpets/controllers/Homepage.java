@@ -7,7 +7,7 @@ import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.AssetCtrl;
 import com.isharryh.arkpets.utils.IOUtils.*;
-import com.isharryh.arkpets.utils.PopupUtils.*;
+import static com.isharryh.arkpets.utils.PopupUtils.*;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -25,8 +25,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLException;
 import java.awt.Desktop;
 import java.io.*;
 import java.net.*;
@@ -35,8 +33,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.zip.ZipException;
-
-import static com.isharryh.arkpets.utils.PopupUtils.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
 
 
 public class Homepage {
@@ -231,8 +229,10 @@ public class Homepage {
                 // Find every model.
                 ArrayList<AssetCtrl> foundModelAssetsL = new ArrayList<>();
                 for (String key : modelsDatasetFull.getJSONObject("storageDirectory").keySet())
-                    foundModelAssetsL.addAll(Arrays.asList(AssetCtrl.getAssetList(new File(modelsDatasetFull.getJSONObject("storageDirectory").getString(key)), modelsDatasetFull.getJSONObject("data"))));
-                foundModelAssets = foundModelAssetsL.toArray(new AssetCtrl[0]);
+                    foundModelAssetsL.addAll(Arrays.asList(
+                            AssetCtrl.getAssetList(new File(modelsDatasetFull.getJSONObject("storageDirectory").getString(key)), modelsDatasetFull.getJSONObject("data"))
+                    ));
+                foundModelAssets = AssetCtrl.sortAssetList(foundModelAssetsL.toArray(new AssetCtrl[0]));
                 if (foundModelAssets.length == 0)
                     throw new RuntimeException("Found no assets in the target directories.");
                 // Models to menu items.
@@ -369,9 +369,7 @@ public class Homepage {
             JFXButton cancel = DialogUtil.getCancelButton(dialog, root);
             cancel.setOnAction(e -> {
                 $task.cancel();
-                dialog.close();
-                dialog.getDialogContainer().getChildren().remove(dialog);
-                root.getChildren().remove(dialog.getDialogContainer());
+                DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(cancel);
         }
@@ -389,21 +387,17 @@ public class Homepage {
         }));
         $task.setOnCancelled(e -> {
             System.out.println("[AH]A foreground task was cancelled.");
-            dialog.close();
+            DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnFailed(e -> {
             System.err.println("[AH]A foreground task failed, cause:");
             $task.getException().printStackTrace();
             popError($task.getException()).show();
-            dialog.close();
-            dialog.getDialogContainer().getChildren().remove(dialog);
-            root.getChildren().remove(dialog.getDialogContainer());
+            DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnSucceeded(e -> {
             System.out.println("[AH]A foreground task done.");
-            dialog.close();
-            dialog.getDialogContainer().getChildren().remove(dialog);
-            root.getChildren().remove(dialog.getDialogContainer());
+            DialogUtil.disposeDialog(dialog, root);
         });
         $task.stateProperty().addListener(((observable, oldValue, newValue) -> {
             //System.out.println(Thread.currentThread().getName() + ": " + newValue.toString());
@@ -475,9 +469,7 @@ public class Homepage {
             JFXButton apply = DialogUtil.getTrustButton(dialog, root);
             apply.setOnAction(e -> {
                 httpsTrustAll = true;
-                dialog.close();
-                dialog.getDialogContainer().getChildren().remove(dialog);
-                root.getChildren().remove(dialog.getDialogContainer());
+                DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
         }
@@ -527,9 +519,7 @@ public class Homepage {
         Task<Boolean> task = createDownloadTask(urlModelsData, tempDirPath + fileModelsDataPath);
         JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "正在尝试建立连接", true);
         task.setOnSucceeded(e -> {
-            dialog.close();
-            dialog.getDialogContainer().getChildren().remove(dialog);
-            root.getChildren().remove(dialog.getDialogContainer());
+            DialogUtil.disposeDialog(dialog, root);
             try {
                 String versionDescription;
                 try {
@@ -570,21 +560,17 @@ public class Homepage {
         Task<Boolean> task1 = createDownloadTask(urlModelsZip, tempModelsZipCachePath);
         JFXDialog task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "正在尝试建立连接", true);
         task1.setOnSucceeded(e1 -> {
-            task1dialog.close();
+            DialogUtil.disposeDialog(task1dialog, root);
             //2
             Task<Boolean> task2 = createUnzipTask(tempModelsZipCachePath, tempModelsUnzipDirPath);
             JFXDialog task2dialog = foregroundTask(task2, "正在更新模型", "正在解压模型资源文件...", "这可能需要十几秒", false);
             task2.setOnSucceeded(e2 -> {
-                task2dialog.close();
-                task2dialog.getDialogContainer().getChildren().remove(task2dialog);
-                root.getChildren().remove(task2dialog.getDialogContainer());
+                DialogUtil.disposeDialog(task2dialog, root);
                 //3
                 Task<Boolean> task3 = createModelsMovingTask(tempModelsUnzipDirPath, fileModelsDataPath);
                 JFXDialog task3dialog = foregroundTask(task3, "正在更新模型", "正在应用模型更新...", "即将完成", false);
                 task3.setOnSucceeded(e3 -> {
-                    task3dialog.close();
-                    task3dialog.getDialogContainer().getChildren().remove(task3dialog);
-                    root.getChildren().remove(task3dialog.getDialogContainer());
+                    DialogUtil.disposeDialog(task3dialog, root);
                     dealModelReload();
                 });
             });
@@ -674,7 +660,7 @@ public class Homepage {
         Task<Boolean> task = createDownloadTask(urlApi + queryStr, tempQueryVersionCachePath);
         JFXDialog dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "正在尝试建立连接", true);
         task.setOnSucceeded(e -> {
-            dialog.close();
+            DialogUtil.disposeDialog(dialog, root);
             try {
                 JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(FileUtil.readByte(new File(tempQueryVersionCachePath))));
                 // TODO show in-test version

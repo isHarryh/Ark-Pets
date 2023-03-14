@@ -51,6 +51,13 @@ public class PopupUtils {
     }
 
     public static class DialogUtil {
+        public static void disposeDialog(JFXDialog dialog, Pane root) {
+            dialog.close();
+            dialog.getDialogContainer().getChildren().remove(dialog);
+            root.getChildren().remove(dialog.getDialogContainer());
+            root.requestFocus();
+        }
+
         public static JFXDialog createCenteredDialog(Pane root, boolean overlayClose) {
             StackPane container = new StackPane();
             container.setPrefSize(root.getWidth(), root.getHeight());
@@ -79,7 +86,7 @@ public class PopupUtils {
 
         public static Node getPrefabsH3(String text) {
             Label h3 = new Label(text);
-            h3.setStyle("-fx-font-size:13px;-fx-pref-height:30px;-fx-text-fill:" + COLOR_LIGHT_GRAY);
+            h3.setStyle("-fx-font-size:13px;-fx-pref-height:36px;-fx-text-fill:" + COLOR_LIGHT_GRAY);
             h3.setWrapText(true);
             return h3;
         }
@@ -89,11 +96,7 @@ public class PopupUtils {
             button.setText("取 消");
             button.setTextFill(Paint.valueOf(COLOR_WHITE));
             button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
-            button.setOnAction(e -> {
-                dialog.close();
-                dialog.getDialogContainer().getChildren().remove(dialog);
-                root.getChildren().remove(dialog.getDialogContainer());
-            });
+            button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
 
@@ -102,23 +105,15 @@ public class PopupUtils {
             button.setText("确 认");
             button.setTextFill(Paint.valueOf(COLOR_WHITE));
             button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
-            button.setOnAction(e -> {
-                dialog.close();
-                dialog.getDialogContainer().getChildren().remove(dialog);
-                root.getChildren().remove(dialog.getDialogContainer());
-            });
+            button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
 
         public static JFXButton getTrustButton(JFXDialog dialog, Pane root) {
             JFXButton button = new JFXButton();
             button.setText("信 任");
-            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
-            button.setOnAction(e -> {
-                dialog.close();
-                dialog.getDialogContainer().getChildren().remove(dialog);
-                root.getChildren().remove(dialog.getDialogContainer());
-            });
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_WARNING);
+            button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
     }

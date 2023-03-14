@@ -180,6 +180,27 @@ public class AssetCtrl {
         return list.toArray(new AssetCtrl[0]);
     }
 
+    /** Sort the asset controller list.
+     * @param $assetList The specified asset controller list.
+     * @return The sorted list.
+     */
+    public static AssetCtrl[] sortAssetList(AssetCtrl[] $assetList) {
+        ArrayList<AssetCtrl> list = new ArrayList<>(List.of($assetList));
+        ArrayList<AssetCtrl> newList = new ArrayList<>();
+        for (AssetCtrl i : list) {
+            boolean flag = true;
+            for (AssetCtrl j : newList) {
+                if (j.equals(i)) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag)
+                newList.add(i);
+        }
+        return newList.toArray(new AssetCtrl[0]);
+    }
+
     /** Get a list of asset id in the given asset controller list.
      * @param $assetList The specified asset controller list.
      * @return The array containing asset ids.
@@ -221,10 +242,21 @@ public class AssetCtrl {
         return result.toArray(new AssetCtrl[0]);
     }
 
-    /** Get the name of the spine asset.
-     * @return The name.
-     */
+    @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(assetDir, assetId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AssetCtrl) {
+            return ((AssetCtrl)obj).assetDir.equals(assetDir) && ((AssetCtrl)obj).assetId.equals(assetId);
+        }
+        return false;
     }
 }

@@ -147,8 +147,12 @@ public class ArkChar {
     /** Fix the canvas size to make it adapted to the animation.
      */
     public void fixCanvasSize() {
-        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 50, 75, false, true))
+        Pixmap current = getCurrentTexture(false);
+        if (!flexibleLayout.fixToBestCroppedSize(getCurrentTexture(false), 50, 55, false, true)) {
+            current.dispose();
             return;
+        }
+        current.dispose();
         Gdx.app.debug("debug",
                 "^"+flexibleLayout.curInsert.top+
                         "\tv"+flexibleLayout.curInsert.bottom+

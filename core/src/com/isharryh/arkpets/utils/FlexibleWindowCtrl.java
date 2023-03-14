@@ -41,7 +41,7 @@ public class FlexibleWindowCtrl {
         final int alphaThreshold = 128;
         final int edgeWidth = pixmap.getWidth() - 1;
         final int edgeHeight = pixmap.getHeight() - 1;
-        PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);
+        //PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);
 
         if (flipX)
             insert.swapHorizontal();
