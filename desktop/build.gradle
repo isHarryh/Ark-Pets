@@ -42,15 +42,14 @@ ext {
     osPathSep = File.pathSeparatorChar
     // Distribution related vars
     jarLibDir = "${buildDir}/libs"
-    jarLibName = "${project.ext.appName}-${project.version}"
+    jarLibName = "${project.name}-${project.version}"
     jlinkRuntimeDir = "${buildDir}/jlink"
     jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
     jlinkModuleList = "java.base,java.desktop,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = "${buildDir}/jpackage"
-    issFile = "${project.rootDir}/doc/dist/ExePacking.iss"
+    issFileRel = "docs/dist/ExePacking.iss"
     distDir = "${buildDir}/dist"
-    distDirRel = "${project.name}/build/dist"
     distName = "${project.ext.appName}-v${project.version}"
 }
 
@@ -64,12 +63,14 @@ task distJar(dependsOn: classes, type: Jar, group: 'dist') {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    copy {
-        from "${jarLibDir}/${jarLibName}.jar"
-        into distDir
-        rename "${jarLibName}.jar", "${distName}.jar"
-    }
     with jar
+    doLast() {
+        copy {
+            from "${jarLibDir}/${jarLibName}.jar"
+            into distDir
+            rename "${jarLibName}.jar", "${distName}.jar"
+        }
+    }
 }
 
 // Creates a customized Java Runtime Environment for the app.
@@ -136,13 +137,28 @@ task distZip(dependsOn: jpackage, type: Zip, group: 'dist') {
     destinationDir file(distDir)
 }
 
+// Generates a distributable EXE file for the app, using Inno Setup.
+// Note that you must install Inno Setup in your environment and add it to PATH before running this task.
 task distExe(dependsOn: jpackage, type: Exec, group: 'dist') {
     workingDir project.rootDir
     def commands = [
             "iscc",
-            "/O${distDirRel}",
-            "/F${distName}.exe",
-            issFile
+            "/Q",
+            issFileRel
     ]
     commandLine = commands
+}
+
+// Generates ALL kinds of distributing files.
+task distAll(dependsOn: [distJar, distZip, distExe], group: 'dist') {
+    doLast() {
+        print("\tAll files were successfully generated.")
+        try {
+            delete "${buildDir}/tmp"
+            delete jpackageDir
+            delete jarLibDir
+        } catch (IOException e) {
+            print("\tUnable to delete temp files.")
+        }
+    }
 }
