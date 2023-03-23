@@ -165,14 +165,8 @@ public class IOUtils {
             connection.setReadTimeout(readTimeout);
             connection.connect();
             int code = connection.getResponseCode();
-            if (300 <= code && code <= 399)
-                throw new HttpRedirected();
-            if (400 <= code && code <= 499)
-                throw new HttpClientError();
-            if (500 <= code && code <= 599)
-                throw new HttpServerError();
-            if (200 > code || code > 500 )
-                throw new HttpResponseCodeException();
+            if (200 > code || code >= 300 )
+                throw new HttpResponseCodeException(code, connection.getResponseMessage());
             return connection;
         }
 
@@ -222,15 +216,42 @@ public class IOUtils {
         }
 
         public static class HttpResponseCodeException extends IOException {
-        }
+            private final int code;
+            private final String message;
 
-        public static final class HttpRedirected extends HttpResponseCodeException {
-        }
+            public HttpResponseCodeException(int code, String message) {
+                this.code = code;
+                this.message = message;
+            }
 
-        public static final class HttpClientError extends HttpResponseCodeException {
-        }
+            public int getCode() {
+                return code;
+            }
 
-        public static final class HttpServerError extends  HttpResponseCodeException {
+            @Override
+            public String getMessage() {
+                return message;
+            }
+
+            public boolean isInformation() {
+                return code >= 100 && code < 200;
+            }
+
+            public boolean isSuccess() {
+                return code >= 200 && code < 300;
+            }
+
+            public boolean isRedirection() {
+                return code >= 300 && code < 400;
+            }
+
+            public boolean isClientError() {
+                return code >= 400 && code < 500;
+            }
+
+            public boolean isServerError() {
+                return code >= 500 && code < 600;
+            }
         }
     }
 

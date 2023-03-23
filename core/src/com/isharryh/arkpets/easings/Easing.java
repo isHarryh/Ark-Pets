@@ -11,7 +11,7 @@ abstract public class Easing {
     public float curDuration;
     public float curValue;
 
-    /** Easing tool. (Basic class)
+    /** Easing tool.
      * @param $from The start value.
      * @param $to The end value.
      * @param $duration The duration(second) of the whole easing process.
@@ -66,5 +66,10 @@ abstract public class Easing {
         if ($curDuration >= DURATION)
             return TO;
         return curValue;
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf((int)curValue);
     }
 }

@@ -94,8 +94,8 @@ public class ArkChar {
 
     private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
         // Load atlas & skel/json files to SkeletonData
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
         try {
+        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
             switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
                 case ".skel":
                     SkeletonBinary binary = new SkeletonBinary(atlas);

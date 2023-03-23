@@ -436,35 +436,43 @@ public class Homepage {
         dialog.setContent(layout);
 
         if ($e instanceof FileNotFoundException) {
-            h3.setText("未找到某个文件或目录，请重试操作。详细信息：");
+            h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
         }
         if ($e instanceof NetUtil.HttpResponseCodeException) {
-            //TODO 准确获知错误码
-            h2.setText("神经网络连接异常。");
-            if ($e instanceof NetUtil.HttpRedirected) {
-                h3.setText("错误码[3XX]，可能是该地址被重定向。详细信息：");
+            h2.setText("神经递质接收异常。");
+            if (((NetUtil.HttpResponseCodeException)$e).isClientError()) {
+                h3.setText("请求的网络地址被重定向转移。详细信息：");
             }
-            if ($e instanceof NetUtil.HttpClientError) {
-                h3.setText("错误码[4XX]，详细信息：");
+            if (((NetUtil.HttpResponseCodeException)$e).isClientError()) {
+                h3.setText("可能是客户端引发的网络错误，详细信息：");
+                if (((NetUtil.HttpResponseCodeException)$e).getCode() == 403) {
+                    h3.setText("(403)访问被拒绝。详细信息：");
+                }
+                if (((NetUtil.HttpResponseCodeException)$e).getCode() == 404) {
+                    h3.setText("(404)找不到要访问的目标。详细信息：");
+                }
             }
-            if ($e instanceof NetUtil.HttpServerError) {
-                h3.setText("错误码[5XX]，可能是服务器故障。详细信息：");
+            if (((NetUtil.HttpResponseCodeException)$e).isServerError()) {
+                h3.setText("可能是服务器引发的网络错误，详细信息：");
+                if (((NetUtil.HttpResponseCodeException)$e).getCode() == 500) {
+                    h3.setText("(500)服务器发生故障，请稍后重试。详细信息");
+                }
             }
         }
         if ($e instanceof UnknownHostException) {
-            h2.setText("无法建立神经网络连接。");
+            h2.setText("无法建立神经连接。");
             h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof ConnectException) {
-            h2.setText("无法建立神经网络连接。");
+            h2.setText("无法建立神经连接。");
             h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SocketTimeoutException) {
-            h2.setText("神经网络连接异常。");
-            h3.setText("接收神经递质超时。请尝试更换网络环境、检查防火墙和代理设置。");
+            h2.setText("神经递质接收异常。");
+            h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SSLException) {
-            h2.setText("神经网络连接异常。");
+            h2.setText("神经连接校验失败。");
             h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
             JFXButton apply = DialogUtil.getTrustButton(dialog, root);
             apply.setOnAction(e -> {

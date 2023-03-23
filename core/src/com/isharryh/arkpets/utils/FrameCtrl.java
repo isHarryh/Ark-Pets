@@ -3,10 +3,10 @@
  */
 package com.isharryh.arkpets.utils;
 
+
 public class FrameCtrl {
     public int F_MAX;
     public int F_CUR;
-    public int FPS;
     public float F_TIME;
     public boolean LOOPED;
 
@@ -17,11 +17,12 @@ public class FrameCtrl {
     public FrameCtrl(float $duration, int $fps) {
         LOOPED = false;
         F_TIME = (float) 1 / $fps;
-        FPS = $fps;
         F_CUR = 0;
         F_MAX = (int) Math.floor($duration / F_TIME) + 2;
     }
 
+    /** Step to the next frame.
+     */
     public void next() {
         if (F_CUR >= F_MAX) {
             LOOPED = true;
