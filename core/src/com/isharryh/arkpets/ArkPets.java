@@ -67,7 +67,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		int WD_ORI_W = 150; // Window Origin Width
 		int WD_ORI_H = 150; // Window Origin Height
 		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
-		cha.setCanvas(WD_ORI_W, WD_ORI_H, APP_FPS);
+		cha.setCanvas(APP_FPS);
 		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
@@ -77,8 +77,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 		SCR_W = config.display_monitor_info[0];
 		SCR_H = config.display_monitor_info[1];
-		intiWindow(100, SCR_H / 2);
-		setWindowPosTar(100, SCR_H / 2.0f);
+		intiWindow(100, SCR_H - WD_H);
+		setWindowPosTar(100, SCR_H - WD_H);
 		// 4.Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
@@ -111,8 +111,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void render() {
 		// 1.Render the next frame.
-		if (Math.abs(cha.positionCur.z) == 1) // Don't fix canvas while the character isn't completely flipped.
-			cha.fixCanvasSize();
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			// When an animation's loop ends:
@@ -267,9 +265,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private boolean setWindowPos(int x, int y, boolean override) {
 		if (HWND_MINE == null)
 			return false;
+		CroppingCtrl flexibleLayout = cha.flexibleLayout;
+		WD_W = (int) (WD_SCALE * flexibleLayout.getWidth());
+		WD_H = (int) (WD_SCALE * flexibleLayout.getHeight());
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
-			WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
-			WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 			HWND new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != HWND_TOPMOST) {
 				HWND_TOPMOST = new_hwnd_topmost;
@@ -289,8 +288,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
-				(int)WD_poscur.x - (int)(cha.flexibleLayout.curInsert.left * WD_SCALE),
-				(int)WD_poscur.y - (int)(cha.flexibleLayout.curInsert.top * WD_SCALE),
+				(int) WD_poscur.x, (int) WD_poscur.y,
 				WD_W, WD_H, WinUser.SWP_NOACTIVATE
 		);
 		return true;
