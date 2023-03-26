@@ -56,16 +56,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void create() {
 		// When the APP was created
 		// 1.App setup
-		Gdx.app.log("event", "AP:Create");
+		Logger.info("App", "Create");
 		Gdx.input.setInputProcessor(this);
 		config = Objects.requireNonNull(ArkConfig.getConfig());
 		APP_FPS = config.display_fps;
 		Gdx.graphics.setForegroundFPS(APP_FPS);
 		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
-		ScreenUtils.clear(0, 0, 0, 0, true);
 		// 2.Character setup
-		int WD_ORI_W = 150; // Window Origin Width
-		int WD_ORI_H = 150; // Window Origin Height
+		Logger.info("App", "Using model asset \"" + config.character_recent + "\"");
 		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
 		cha.setCanvas(APP_FPS);
 		// 3.Window params setup
@@ -96,16 +94,16 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				new BehaviorBattleGeneral3(config, cha.anim_list),
 		});
 		if (behavior == null) {
-			Gdx.app.error("error", "AP:No suitable ArkPets behavior instance found, you can contact the developer.\n" +
-					"This model only contains the animation below:\n" + Arrays.toString(cha.anim_list));
+			Logger.error("App", "No suitable ArkPets behavior instance found, you can contact the developer, details see below.");
+			Logger.error("App", "This model only contains these animations: " + Arrays.toString(cha.anim_list));
 			throw new RuntimeException("Launch ArkPets failed due to unsupported model.");
 		}
-		Gdx.app.log("info", "AP:Use " + behavior.getClass().getName());
+		Logger.info("App", "Using behavior class \"" + behavior.getClass().getSimpleName() + "\"");
 		cha.setAnimation(behavior.defaultAnim());
 		// 6.Tray icon setup
 		tray = new ArkTray(this);
 		// Setup complete
-		Gdx.app.log("event", "AP:Render");
+		Logger.info("App", "Render");
 	}
 
 	@Override
@@ -114,7 +112,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		cha.next();
 		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
 			// When an animation's loop ends:
-			Gdx.app.log("info", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (Gdx.app.getJavaHeap() >> 10) + "KB");
+			Logger.debug("Monitor", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int)Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
 		}
 
 		// 2.Select a new animation.
@@ -147,13 +145,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public void resize(int x, int y) {
-		Gdx.app.debug("debug", "AP:Resized (" + x + "*" + y + ")");
-		//cha.updateCanvas();
+		Logger.debug("Window", "Resized to " + x + " * " + y);
 	}
 
 	@Override
 	public void dispose() {
-		Gdx.app.log("event", "AP:Dispose");
+		Logger.info("App", "Dispose");
 		tray.remove();
 	}
 
@@ -176,7 +173,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		mouse_pos.set(screenX, screenY);
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
-		Gdx.app.debug("debug", "C↓: "+screenX + ", " + screenY);
+		Logger.debug("Input", "Click+ @ " + screenX + ", " + screenY);
 		cha.setAnimation(behavior.clickStart());
 		return true;
 	}
@@ -213,19 +210,19 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		mouse_drag = false;
 		if (button != Input.Buttons.LEFT || pointer > 0)
 			return false;
-		Gdx.app.debug("debug", "C↑: "+screenX + ", " + screenY);
+		Logger.debug("Input", "Click- @ " + screenX + ", " + screenY);
 		return true;
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
-		Gdx.app.debug("debug", "K↓: "+keycode);
+		Logger.debug("Input", "Key+ @ " + keycode);
 		return true;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		Gdx.app.debug("debug", "K↑: "+keycode);
+		Logger.debug("Input", "Key- @ " + keycode);
 		return true;
 	}
 
@@ -258,16 +255,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				x, y, WD_W, WD_H,
 				WinUser.SWP_SHOWWINDOW | WinUser.SWP_NOACTIVATE
 		);
-		Gdx.app.debug("debug", "JNA SetWindowLong returns " + Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088)));
+		Logger.debug("Window", "JNA SetWindowLong returns " +
+				Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088)));
 		return true;
 	}
 
 	private boolean setWindowPos(int x, int y, boolean override) {
 		if (HWND_MINE == null)
 			return false;
-		CroppingCtrl flexibleLayout = cha.flexibleLayout;
-		WD_W = (int) (WD_SCALE * flexibleLayout.getWidth());
-		WD_H = (int) (WD_SCALE * flexibleLayout.getHeight());
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
 			HWND new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != HWND_TOPMOST) {
@@ -365,7 +360,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 							return Integer.parseInt(title.substring(prefix.length()+prefix2.length(), title.length()-suffix.length()));
 				}
 			} catch (Exception e) {
-				Gdx.app.log("warning", e.toString());
+				Logger.error("Window", "Unable to get ArkPets window number, details see below.", e);
 				return -1;
 			}
 		}

@@ -31,6 +31,7 @@ import com.isharryh.arkpets.easings.EasingLinearVector3;
 import com.isharryh.arkpets.utils.AnimData;
 import com.isharryh.arkpets.utils.CroppingCtrl;
 import com.isharryh.arkpets.utils.FrameCtrl;
+import com.isharryh.arkpets.utils.Logger;
 
 
 public class ArkChar {
@@ -49,6 +50,7 @@ public class ArkChar {
     private final int MAX_CANVAS_SIZE = 720;
     private final int DEFAULT_FPS = 30;
     private final int DEFAULT_RESERVED = 100;
+    private boolean isInitialized = false;
     private SkeletonData skeletonData;
     private AnimationState animationState;
 
@@ -88,8 +90,9 @@ public class ArkChar {
         skeleton.updateWorldTransform();
         for (int i = 0; i < anim_list.length; i++)
             adjustCanvas(Math.round(DEFAULT_RESERVED * $anim_scale), anim_list[i], i == 0);
-        Gdx.app.log("info", "Canvas size: " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
+        Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
         updateCanvas();
+        isInitialized = true;
     }
 
     private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
@@ -298,7 +301,7 @@ public class ArkChar {
     private void changeAnimation() {
         // Overwrite the current animation(index0) with the new one
         anim_queue[0] = anim_queue[1];
-        Gdx.app.log("info", "Anim:"+anim_queue[0].ANIM_NAME);
+        Logger.debug("Character", "Animation \"" + anim_queue[0].ANIM_NAME + "\"");
         // Let the character face to the correct direction if the new animation is a moving animation
         if (anim_queue[0].MOBILITY != 0)
             setPositionTar(positionTar.x, positionTar.y, anim_queue[0].MOBILITY > 0 ? 1 : -1);

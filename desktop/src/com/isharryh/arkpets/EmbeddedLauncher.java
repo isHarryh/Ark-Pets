@@ -9,6 +9,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 
 import com.isharryh.arkpets.utils.ArgPending;
+import com.isharryh.arkpets.utils.Logger;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
@@ -20,6 +21,30 @@ public class EmbeddedLauncher {
 	// Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 
 	public static void main (String[] args) {
+		ArgPending.argCache = args;
+		// Logger
+		Logger.initialize("logs/core", 32);
+		new ArgPending("--quiet", args) {
+			protected void process(String command, String addition) {
+				Logger.setLevel(Logger.ERROR);
+			}
+		};
+		new ArgPending("--warn", args) {
+			protected void process(String command, String addition) {
+				Logger.setLevel(Logger.WARN);
+			}
+		};
+		new ArgPending("--info", args) {
+			protected void process(String command, String addition) {
+				Logger.setLevel(Logger.INFO);
+			}
+		};
+		new ArgPending("--debug", args) {
+			protected void process(String command, String addition) {
+				Logger.setLevel(Logger.DEBUG);
+			}
+		};
+
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		// Configure FPS
 		config.setForegroundFPS(30);
@@ -41,23 +66,6 @@ public class EmbeddedLauncher {
 		config.setWindowPosition(0, 0);
 		// Instantiate the App
 		Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
-		// Set logging level
-		app.setLogLevel(Application.LOG_DEBUG);
-		new ArgPending("--quiet", args) {
-			protected void process(String command, String addition) {
-				app.setLogLevel(Application.LOG_ERROR);
-			}
-		};
-		new ArgPending("--info", args) {
-			protected void process(String command, String addition) {
-				app.setLogLevel(Application.LOG_INFO);
-			}
-		};
-		new ArgPending("--debug", args) {
-			protected void process(String command, String addition) {
-				app.setLogLevel(Application.LOG_DEBUG);
-			}
-		};
 	}
 
 	private static String applyWindowTitle() {

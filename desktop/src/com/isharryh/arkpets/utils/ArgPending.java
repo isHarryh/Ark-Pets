@@ -4,6 +4,7 @@
 package com.isharryh.arkpets.utils;
 
 abstract public class ArgPending {
+    public static String[] argCache = new String[0];
     private static final String argPrefix = "-";
     private final String pattern;
 

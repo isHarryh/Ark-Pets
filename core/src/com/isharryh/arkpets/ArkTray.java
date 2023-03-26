@@ -5,6 +5,7 @@ package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
 import com.isharryh.arkpets.utils.AnimData;
+import com.isharryh.arkpets.utils.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
@@ -67,19 +68,19 @@ public class ArkTray {
         JMenuItem optKeepAnimDis = new JMenuItem("解除保持");
         JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
-            Gdx.app.log("info","Tray:Keep-Anim Enabled");
+            Logger.info("Tray", "Keep-Anim enabled");
             keepAnim = arkPets.cha.anim_queue[0];
             pop.remove(optKeepAnimEn);
             pop.add(optKeepAnimDis, 0);
         });
         optKeepAnimDis.addActionListener(e -> {
-            Gdx.app.log("info","Tray:Keep-Anim Disabled");
+            Logger.info("Tray","Keep-Anim disabled");
             keepAnim = null;
             pop.remove(optKeepAnimDis);
             pop.add(optKeepAnimEn, 0);
         });
         optExit.addActionListener(e -> {
-            Gdx.app.log("info","Tray:Exit");
+            Logger.info("Tray","Request to exit");
             Gdx.app.exit();
         });
         pop.add(optKeepAnimEn);
@@ -111,7 +112,7 @@ public class ArkTray {
         try {
             tray.add(icon);
         } catch (AWTException e) {
-            Gdx.app.log("warning", "Tray:Unable to apply tray icon. " + e);
+            Logger.error("Tray", "Unable to apply tray icon.", e);
         }
     }
 

@@ -3,6 +3,8 @@
  */
 package com.isharryh.arkpets;
 
+import com.isharryh.arkpets.controllers.Homepage;
+import com.isharryh.arkpets.utils.ArgPending;
 import com.isharryh.arkpets.utils.JavaProcess;
 import javafx.application.Application;
 import javafx.concurrent.Task;
@@ -14,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -64,7 +67,15 @@ public class ArkHomeFX extends Application {
         Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws IOException, InterruptedException {
-                JavaProcess.exec(EmbeddedLauncher.class, false);
+                int code = JavaProcess.exec(
+                        EmbeddedLauncher.class, true,
+                        Arrays.stream(new String[0]).toList(),
+                        Arrays.stream(ArgPending.argCache).toList()
+                );
+                if (code != 0) {
+                    // TODO pop error
+                    return false;
+                }
                 return true;
             }
         };

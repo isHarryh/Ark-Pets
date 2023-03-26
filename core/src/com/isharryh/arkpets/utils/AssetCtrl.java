@@ -123,8 +123,9 @@ public class AssetCtrl {
             for (String ext : extensions)
                 if (!checksum.getObject(ext, String.class)
                         .equals(IOUtils.FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))))) {
-                    System.out.println("The md5 of file " + getAssetFilePath($assetDir, $modelsDataset, ext) + " is:\n" + IOUtils.FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))) +
-                            "\nbut in the dataset, it is recorded as:\n" + checksum.getObject(ext, String.class));
+                    Logger.warn("Verify", "The md5 of file " + getAssetFilePath($assetDir, $modelsDataset, ext) +
+                            " is: " + IOUtils.FileUtil.getMD5(new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)))) +
+                            " but in the dataset, it is recorded as: " + checksum.getObject(ext, String.class));
                     return false;
                 }
             return true;

@@ -7,6 +7,7 @@ import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.AssetCtrl;
 import com.isharryh.arkpets.utils.IOUtils.*;
+import com.isharryh.arkpets.utils.Logger;
 import static com.isharryh.arkpets.utils.PopupUtils.*;
 
 import com.alibaba.fastjson.JSONException;
@@ -55,6 +56,13 @@ public class Homepage {
     private final String tempModelsZipCachePath = tempDirPath + "ArkModels.zip";
     private final String fileModelsDataPath = "models_data.json";
     private final String tempQueryVersionCachePath = tempDirPath + "ApiQueryVersionCache";
+
+    private static Map<String, String[]> remoteSources = new HashMap<>();
+    static {
+        remoteSources.put("GitHub", new String[]{"https://github.com/", "https://github.com/"});
+        remoteSources.put("FastGit", new String[]{"https://download.fastgit.org/", "https://raw.fastgit.org/"});
+        remoteSources.put("GHProxy", new String[]{"https://ghproxy.com/?q=https://github.com/", "https://ghproxy.com/?q=https://github.com/"});
+    }
 
     @FXML
     private AnchorPane root;
@@ -144,7 +152,7 @@ public class Homepage {
     }
 
     public void initialize() {
-        System.out.println("[AH] Initializing (JavaFX" + System.getProperty("javafx.version") + " Java" + System.getProperty("java.version") + ")");
+        Logger.info("Launcher", "Initializing (JavaFX" + System.getProperty("javafx.version") + " Java" + System.getProperty("java.version") + ")");
         config = ArkConfig.getConfig();
         initMenuBtn(menuBtn1, 1);
         initMenuBtn(menuBtn2, 2);
@@ -160,7 +168,7 @@ public class Homepage {
             startBtn.setDisable(foundModelItems.length == 0);
             dealModelSearch("");
         });
-        System.out.println("[AH] Initialized");
+        Logger.info("Launcher", "Initialized");
     }
 
     private void initMenuBtn(Button $menuBtn, int $boundIdx) {
@@ -386,17 +394,16 @@ public class Homepage {
             h3.setText(newValue);
         }));
         $task.setOnCancelled(e -> {
-            System.out.println("[AH]A foreground task was cancelled.");
+            Logger.info("Task", "Foreground task was cancelled.");
             DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnFailed(e -> {
-            System.err.println("[AH]A foreground task failed, cause:");
-            $task.getException().printStackTrace();
+            Logger.error("Task", "Foreground task failed, details see below.", $task.getException());
             popError($task.getException()).show();
             DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnSucceeded(e -> {
-            System.out.println("[AH]A foreground task done.");
+            Logger.info("Task", "Foreground task completed.");
             DialogUtil.disposeDialog(dialog, root);
         });
         Thread thread = new Thread($task);
@@ -696,7 +703,7 @@ public class Homepage {
         return new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
-                System.out.println("[MultiThreading] Start downloading");
+                Logger.info("Download", "Downloading " + $remotePath + " to " + $localPath);
                 URL urlFile;
                 HttpsURLConnection connection = null;
                 BufferedInputStream bis = null;
@@ -753,7 +760,7 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                System.out.println("[MultiThreading] Download completed, total size:"+sum);
+                Logger.info("Download", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -763,14 +770,14 @@ public class Homepage {
         return new Task<Boolean>() {
             @Override
             protected Boolean call() throws Exception {
-                System.out.println("[MultiThreading] Start unzipping");
+                Logger.info("Unzip", "Unzipping " + $zipPath + " to " + $destPath);
                 try {
                     ZipUtil.unzip($zipPath, $destPath, true);
                 } catch (IOException e) {
                     //e.printStackTrace();
                     throw e;
                 }
-                System.out.println("[MultiThreading] Unzip done");
+                Logger.info("Unzip", "Unzipped to " + $destPath + " , finished");
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -815,7 +822,6 @@ public class Homepage {
     }
 
     private void dealModelSearch(String $keyWords) {
-        System.out.println("Input: " + $keyWords);
         searchModelInput.setText($keyWords);
         searchModelList.getItems().clear();
         AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
@@ -828,6 +834,7 @@ public class Homepage {
                 }
             }
         }
+        Logger.info("ModelSearch", $keyWords + " (" + searchModelList.getItems().size() + ")");
         searchModelList.refresh();
     }
 

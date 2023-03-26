@@ -6,6 +6,7 @@ package com.isharryh.arkpets;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.isharryh.arkpets.utils.IOUtils;
+import com.isharryh.arkpets.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,8 +57,7 @@ public class ArkConfig {
         try {
             IOUtils.FileUtil.writeString(configCustom, "UTF-8", readConfig(), false);
         } catch (IOException e) {
-            System.err.println("[error] Config saving failed");
-            e.printStackTrace();
+            Logger.error("Config", "Config saving failed, details see below.", e);
         }
     }
 
@@ -69,15 +69,13 @@ public class ArkConfig {
             try {
                 Files.copy(Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath)), configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                System.err.println("[error] Config copying failed");
-                e.printStackTrace();
+                Logger.error("Config", "Config copying failed, details see below.", e);
             }
         }
         try {
             return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, "UTF-8"), ArkConfig.class);
         } catch (IOException e) {
-            System.err.println("[error] Config reading failed");
-            e.printStackTrace();
+            Logger.error("Config", "Config reading failed, details see below.", e);
             return null;
         }
     }
