@@ -52,7 +52,6 @@ public class JavaProcess {
     }
 
     /** Execute the main function in a java class. (Without arguments)
-     * The invoker's thread will wait until the process ends.
      * @param clazz The java class to execute.
      * @param waitForExitValue Whether to wait for the process to end.
      *                         If false, this method will always return 0 instead of the exit value.
@@ -64,5 +63,18 @@ public class JavaProcess {
             throws IOException, InterruptedException {
         List<String> emptyList = new ArrayList<>();
         return exec(clazz, waitForExitValue, emptyList, emptyList);
+    }
+
+    public static class UnexpectedExitCodeException extends Exception {
+        private final int exitCode;
+
+        public UnexpectedExitCodeException(int exitCode) {
+            this.exitCode = exitCode;
+        }
+
+        @Override
+        public String getMessage() {
+            return "The process exited with a non-zero exit code: " + exitCode + ".";
+        }
     }
 }

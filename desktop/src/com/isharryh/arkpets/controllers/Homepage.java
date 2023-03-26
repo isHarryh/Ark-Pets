@@ -399,9 +399,6 @@ public class Homepage {
             System.out.println("[AH]A foreground task done.");
             DialogUtil.disposeDialog(dialog, root);
         });
-        $task.stateProperty().addListener(((observable, oldValue, newValue) -> {
-            //System.out.println(Thread.currentThread().getName() + ": " + newValue.toString());
-        }));
         Thread thread = new Thread($task);
         thread.start();
         return dialog;

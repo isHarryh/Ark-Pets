@@ -401,4 +401,32 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_poscur.set(WD_poseas.eX.step($deltaTime), WD_poseas.eY.step($deltaTime));
 		setWindowPos((int)WD_poscur.x, (int)WD_poscur.y, false);
 	}
+
+
+	/* UTILS */
+	public static class LoopCtrl {
+		private float minIntervalTime;
+		private float accumTime;
+
+		/** Loop Controller instance.
+		 * @param $minIntervalTime The minimal interval time for each loop.
+		 */
+		public LoopCtrl(float $minIntervalTime) {
+			minIntervalTime = $minIntervalTime;
+		}
+
+		/** Query whether the loop is executable now.
+		 * @param $deltaTime The delta time.
+		 * @return true=okay.
+		 */
+		public boolean isExecutable(float $deltaTime) {
+			accumTime += $deltaTime;
+			if (accumTime >= minIntervalTime) {
+				accumTime = 0;
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
 }

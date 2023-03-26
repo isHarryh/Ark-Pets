@@ -20,6 +20,7 @@ import java.util.Objects;
 /** ArkPets Homepage the JavaFX app.
  */
 public class ArkHomeFX extends Application {
+    private Homepage ctrl;
     public final static int[] appVersion = {2, 0, 0};
     public final static String appVersionStr = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
     public final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
@@ -49,6 +50,7 @@ public class ArkHomeFX extends Application {
         stage.setTitle("ArkPets Launcher TEST");
         stage.show();
         startBtn.requestFocus();
+        ctrl = fxml.getController();
     }
 
 

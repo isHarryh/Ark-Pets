@@ -6,8 +6,8 @@ package com.isharryh.arkpets.behaviors;
 import java.lang.reflect.InvocationTargetException;
 
 import com.isharryh.arkpets.ArkConfig;
-import com.isharryh.arkpets.utils.AnimAutoData;
 import com.isharryh.arkpets.utils.AnimData;
+import com.isharryh.arkpets.utils.AnimData.AnimAutoData;
 
 
 abstract public class Behavior {
