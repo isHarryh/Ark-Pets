@@ -6,6 +6,7 @@ package com.isharryh.arkpets.controllers;
 import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.AssetCtrl;
+import com.isharryh.arkpets.utils.Downloader;
 import com.isharryh.arkpets.utils.IOUtils.*;
 import com.isharryh.arkpets.utils.Logger;
 import static com.isharryh.arkpets.utils.PopupUtils.*;
@@ -42,27 +43,17 @@ public class Homepage {
     private final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
     private int bufferSize = 8 * 1024;
     private int httpTimeout = 30 * 1000;
-    private boolean httpsTrustAll = false;
+    private boolean isHttpsTrustAll = false;
+    private boolean isDelayTested = false;
     private final String urlApi = "https://arkpets.tfev.top/p/arkpets/client/api.php";
     private final String urlOfficial = "https://arkpets.tfev.top/p/arkpets/?from=client";
-    private final String urlModelsZip = "https://github.com/isHarryh/Ark-Models/archive/refs/heads/main.zip";
-    private final String urlModelsData = "https://raw.githubusercontent.com/isHarryh/Ark-Models/main/models_data.json";
-    private final String[] urlSourcePrefix = {
-            "https://ghproxy.com/?q=",
-            ""
-    };
+    private final String urlModelsZip = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
+    private final String urlModelsData = "isHarryh/Ark-Models/main/models_data.json";
     private final String tempDirPath = "temp/";
     private final String tempModelsUnzipDirPath = tempDirPath + "models_unzipped/";
     private final String tempModelsZipCachePath = tempDirPath + "ArkModels.zip";
     private final String fileModelsDataPath = "models_data.json";
     private final String tempQueryVersionCachePath = tempDirPath + "ApiQueryVersionCache";
-
-    private static Map<String, String[]> remoteSources = new HashMap<>();
-    static {
-        remoteSources.put("GitHub", new String[]{"https://github.com/", "https://github.com/"});
-        remoteSources.put("FastGit", new String[]{"https://download.fastgit.org/", "https://raw.fastgit.org/"});
-        remoteSources.put("GHProxy", new String[]{"https://ghproxy.com/?q=https://github.com/", "https://ghproxy.com/?q=https://github.com/"});
-    }
 
     @FXML
     private AnchorPane root;
@@ -164,9 +155,17 @@ public class Homepage {
         menuBtn1.getStyleClass().add("menu-btn-active");
         Platform.runLater(() -> {
             initModelAssets(false);
+            dealModelSearch("");
+            if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
+                // Scroll to recent selected model
+                int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
+                searchModelList.scrollTo(character_recent_idx);
+                searchModelList.getSelectionModel().select(character_recent_idx);
+                searchModelList.refresh();
+            }
+            // Judge if no model available
             loadFailureTip.setVisible(foundModelItems.length == 0);
             startBtn.setDisable(foundModelItems.length == 0);
-            dealModelSearch("");
         });
         Logger.info("Launcher", "Initialized");
     }
@@ -480,7 +479,7 @@ public class Homepage {
             h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
             JFXButton apply = DialogUtil.getTrustButton(dialog, root);
             apply.setOnAction(e -> {
-                httpsTrustAll = true;
+                isHttpsTrustAll = true;
                 DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
@@ -528,8 +527,8 @@ public class Homepage {
         }
         if (!initModelDataset(true))
             return;
-        Task<Boolean> task = createDownloadTask(urlModelsData, tempDirPath + fileModelsDataPath);
-        JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "正在尝试建立连接", true);
+        Task<Boolean> task = createDownloadTask(false, urlModelsData, tempDirPath + fileModelsDataPath);
+        JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "", true);
         task.setOnSucceeded(e -> {
             DialogUtil.disposeDialog(dialog, root);
             try {
@@ -569,8 +568,8 @@ public class Homepage {
         }
         //1
         // TODO change download source
-        Task<Boolean> task1 = createDownloadTask(urlModelsZip, tempModelsZipCachePath);
-        JFXDialog task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "正在尝试建立连接", true);
+        Task<Boolean> task1 = createDownloadTask(true, urlModelsZip, tempModelsZipCachePath);
+        JFXDialog task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "", true);
         task1.setOnSucceeded(e1 -> {
             DialogUtil.disposeDialog(task1dialog, root);
             //2
@@ -670,7 +669,7 @@ public class Homepage {
         }
         String queryStr = "?type=queryVersion&cliVer=" + ArkHomeFX.appVersionStr + "&source=" + $sourceStr;
         Task<Boolean> task = createDownloadTask(urlApi + queryStr, tempQueryVersionCachePath);
-        JFXDialog dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "正在尝试建立连接", true);
+        JFXDialog dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "", true);
         task.setOnSucceeded(e -> {
             DialogUtil.disposeDialog(dialog, root);
             try {
@@ -699,19 +698,27 @@ public class Homepage {
         });
     }
 
-    public Task<Boolean> createDownloadTask(String $remotePath, String $localPath) {
-        return new Task<Boolean>() {
+    public Task<Boolean> createDownloadTask(boolean $isArchive, String $remotePathSuffix, String $localPath) {
+        return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                Logger.info("Download", "Downloading " + $remotePath + " to " + $localPath);
+                this.updateMessage("正在选择最佳线路");
+                Logger.info("Download", "Testing real delay");
+                Downloader.GitHubSource[] sources = Downloader.GitHubSource.sortByDelay(Downloader.ghSources);
+                Downloader.GitHubSource source = sources[0];
+                Logger.info("Download", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
+                String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
+                Logger.info("Download", "Downloading " + remotePath + " to " + $localPath);
+                this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
+
                 URL urlFile;
                 HttpsURLConnection connection = null;
                 BufferedInputStream bis = null;
                 BufferedOutputStream bos = null;
                 File file = new File($localPath);
                 try {
-                    urlFile = new URL($remotePath);
-                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeout, httpTimeout, httpsTrustAll);
+                    urlFile = new URL(remotePath);
+                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeout, httpTimeout, isHttpsTrustAll);
                     bis = new BufferedInputStream(connection.getInputStream(), bufferSize);
                     bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), bufferSize);
                 } catch (IOException e) {
@@ -724,7 +731,6 @@ public class Homepage {
                             bos.close();
                     } catch (Exception ignored){
                     }
-                    //e.printStackTrace();
                     throw e;
                 }
                 int len = bufferSize;
@@ -747,7 +753,73 @@ public class Homepage {
                     this.updateProgress(max, max);
                     bos.flush();
                 } catch (IOException e) {
-                    //e.printStackTrace();
+                    throw e;
+                } finally {
+                    try {
+                        if (connection != null && connection.getInputStream() != null)
+                            connection.getInputStream().close();
+                        if (bis != null)
+                            bis.close();
+                        if (bos != null)
+                            bos.close();
+                    } catch (Exception ignored){
+                    }
+                }
+                Logger.info("Download", "Downloaded " + $localPath + " , file size: " + sum);
+                return this.isDone() && !this.isCancelled();
+            }
+        };
+    }
+
+    public Task<Boolean> createDownloadTask(String $remotePath, String $localPath) {
+        return new Task<>() {
+            @Override
+            protected Boolean call() throws Exception {
+                this.updateMessage("正在尝试建立连接");
+                Logger.info("Download", "Downloading " + $remotePath + " to " + $localPath);
+
+                URL urlFile;
+                HttpsURLConnection connection = null;
+                BufferedInputStream bis = null;
+                BufferedOutputStream bos = null;
+                File file = new File($localPath);
+                try {
+                    urlFile = new URL($remotePath);
+                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeout, httpTimeout, isHttpsTrustAll);
+                    bis = new BufferedInputStream(connection.getInputStream(), bufferSize);
+                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), bufferSize);
+                } catch (IOException e) {
+                    try {
+                        if (connection != null && connection.getInputStream() != null)
+                            connection.getInputStream().close();
+                        if (bis != null)
+                            bis.close();
+                        if (bos != null)
+                            bos.close();
+                    } catch (Exception ignored){
+                    }
+                    throw e;
+                }
+                int len = bufferSize;
+                int unit_KB = 1024;
+                int unit_MB = unit_KB * 1024;
+                long sum = 0;
+                long max = connection.getContentLengthLong();
+                byte[] bytes = new byte[len];
+                try {
+                    while ((len = bis.read(bytes)) != -1) {
+                        bos.write(bytes, 0, len);
+                        sum += len;
+                        this.updateMessage("当前已下载：" + (sum / unit_KB) + " KB");
+                        this.updateProgress(sum, max);
+                        if (this.isCancelled()) {
+                            this.updateMessage("下载进程已被取消");
+                            break;
+                        }
+                    }
+                    this.updateProgress(max, max);
+                    bos.flush();
+                } catch (IOException e) {
                     throw e;
                 } finally {
                     try {
@@ -767,7 +839,7 @@ public class Homepage {
     }
 
     public Task<Boolean> createUnzipTask(String $zipPath, String $destPath) {
-        return new Task<Boolean>() {
+        return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
                 Logger.info("Unzip", "Unzipping " + $zipPath + " to " + $destPath);
@@ -784,7 +856,7 @@ public class Homepage {
     }
 
     public Task<Boolean> createModelsMovingTask(String $rootPath, String $modelsDataPath) {
-        return new Task<Boolean>() {
+        return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
                 if (!new File($rootPath).isDirectory())

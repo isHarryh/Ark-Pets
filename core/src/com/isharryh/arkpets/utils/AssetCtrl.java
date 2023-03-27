@@ -221,7 +221,7 @@ public class AssetCtrl {
      * @return The array containing asset controller instances that matches the keywords.
      */
     public static AssetCtrl[] searchByKeyWords(String $keywords, AssetCtrl[] $assetList) {
-        if ($keywords.equals(""))
+        if ($keywords.isEmpty())
             return $assetList;
         String[] wordList = $keywords.split(" ");
         ArrayList<AssetCtrl> result = new ArrayList<>();
@@ -241,6 +241,24 @@ public class AssetCtrl {
             }
         }
         return result.toArray(new AssetCtrl[0]);
+    }
+
+    /** Search index by relative asset path in the given asset controller list.
+     * @param $assetRelPath The relative asset path (without ext), like {@code "models\xxx_xxx"}.
+     * @param $assetList The specified asset controller list.
+     * @return The index of the 1st matched asset, otherwise {@code 0} will be return by default.
+     */
+    public static int searchByAssetRelPath(String $assetRelPath, AssetCtrl[] $assetList) {
+        if ($assetRelPath.isEmpty())
+            return 0;
+        String assetId = new File($assetRelPath).getName();
+        for (int i = 0; i < $assetList.length; i++) {
+            if ($assetList[i].assetId != null &&
+                    $assetList[i].assetId.equalsIgnoreCase(assetId)) {
+                return i;
+            }
+        }
+        return 0;
     }
 
     @Override
