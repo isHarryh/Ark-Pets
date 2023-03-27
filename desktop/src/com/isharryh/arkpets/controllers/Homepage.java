@@ -152,7 +152,7 @@ public class Homepage {
     }
 
     public void initialize() {
-        Logger.info("Launcher", "Initializing (JavaFX" + System.getProperty("javafx.version") + " Java" + System.getProperty("java.version") + ")");
+        Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ")");
         config = ArkConfig.getConfig();
         initMenuBtn(menuBtn1, 1);
         initMenuBtn(menuBtn2, 2);
@@ -834,7 +834,7 @@ public class Homepage {
                 }
             }
         }
-        Logger.info("ModelSearch", $keyWords + " (" + searchModelList.getItems().size() + ")");
+        Logger.info("ModelList", "Search \"" + $keyWords + "\" (" + searchModelList.getItems().size() + ")");
         searchModelList.refresh();
     }
 
@@ -842,8 +842,6 @@ public class Homepage {
         if (!assertModelLoaded(true))
             return;
         int idx = (int)(Math.random() * (foundModelItems.length - 1));
-        JFXListCell<AssetCtrl> item = foundModelItems[idx];
-        //selectModel(item.getItem(), item);
         searchModelList.scrollTo(idx);
         searchModelList.getSelectionModel().select(idx);
         searchModelList.requestFocus();
@@ -855,6 +853,7 @@ public class Homepage {
         startBtn.setDisable(foundModelItems.length == 0);
         dealModelSearch("");
         System.gc();
+        Logger.info("ModelList", "Reloaded");
     }
 
     private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<AssetCtrl> $container) {

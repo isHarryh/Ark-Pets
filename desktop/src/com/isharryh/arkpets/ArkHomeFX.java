@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -69,8 +70,8 @@ public class ArkHomeFX extends Application {
             protected Boolean call() throws IOException, InterruptedException {
                 int code = JavaProcess.exec(
                         EmbeddedLauncher.class, true,
-                        Arrays.stream(new String[0]).toList(),
-                        Arrays.stream(ArgPending.argCache).toList()
+                        List.of(),
+                        Arrays.asList(ArgPending.argCache)
                 );
                 if (code != 0) {
                     // TODO pop error

@@ -119,8 +119,11 @@ public class Logger {
 
         public static void cleanByModifiedTime(String logPrefixName, int maxFileCount) {
             List<File> fileList = getAllLogs(logPrefixName);
-            sortByModifiedTime(fileList);
-            deleteButKeep(fileList, maxFileCount);
+            maxFileCount = Math.max(1, maxFileCount);
+            if (fileList.size() >= maxFileCount) {
+                sortByModifiedTime(fileList);
+                deleteButKeep(fileList, maxFileCount);
+            }
         }
 
         private static void deleteButKeep(List<File> fileList, int maxFileCount) {
@@ -155,6 +158,8 @@ public class Logger {
         }
 
         private static void sortByModifiedTime(List<File> fileList) {
+            if (fileList.isEmpty())
+                return;
             fileList.sort((o1, o2) -> {
                 long t1 = o1.lastModified();
                 long t2 = o2.lastModified();
@@ -173,6 +178,8 @@ public class Logger {
             File dir = file.getParentFile() == null ? new File(".") : file.getParentFile();
             String finalLogPrefixName = file.getName();
             File[] files = dir.listFiles(pathname -> pathname.getName().indexOf(finalLogPrefixName) == 0);
+            if (files == null)
+                return List.of();
             return Arrays.asList(files);
         }
     }
