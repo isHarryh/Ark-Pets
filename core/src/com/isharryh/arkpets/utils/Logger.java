@@ -22,6 +22,7 @@ public class Logger {
     private static boolean isFileLoggerAvailable = false;
     private static boolean isInitialized = false;
     private static int maxFileCount = 256;
+    private static Level level = Level.INFO;
 
     public static final int ERROR = 40000;
     public static final int WARN  = 30000;
@@ -41,7 +42,7 @@ public class Logger {
             public String getHeader() {
                 return "# *** " + header + " ***" + Layout.LINE_SEP +
                         "# Created: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS")) + Layout.LINE_SEP +
-                        "# OS name: " + System.getProperty("os.name") + Layout.LINE_SEP +
+                        "# OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ")" + Layout.LINE_SEP +
                         "# Java version: " + System.getProperty("java.version") + Layout.LINE_SEP +
                         "# Working directory: " + System.getProperty("user.dir") + Layout.LINE_SEP +
                         Layout.LINE_SEP;
@@ -63,15 +64,33 @@ public class Logger {
         ConsoleAppender consoleAppender = new ConsoleAppender(consoleLayout);
         rootLogger.addAppender(consoleAppender);
 
-        setLevel(INFO);
+        setLevel(level);
         isInitialized = true;
     }
 
     /** Set a new log level.
+     * @param level The new level.
+     */
+    public static void setLevel(Level level) {
+        Logger.level = level;
+        rootLogger.setLevel(level);
+        currentLogger.setLevel(level);
+    }
+
+    /** Set a new log level.
+     * @param level The new level in int format.
      */
     public static void setLevel(int level) {
-        rootLogger.setLevel(Level.toLevel(level));
-        currentLogger.setLevel(Level.toLevel(level));
+        Logger.level = Level.toLevel(level);
+        rootLogger.setLevel(Logger.level);
+        currentLogger.setLevel(Logger.level);
+    }
+
+    /** Get the level of root logger.
+     * @return The level object.
+     */
+    public static Level getLevel() {
+        return rootLogger.getLevel();
     }
 
     /** Log a message that has the level {@code DEBUG}.

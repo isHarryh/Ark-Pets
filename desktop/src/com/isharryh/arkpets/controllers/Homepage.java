@@ -14,6 +14,7 @@ import static com.isharryh.arkpets.utils.PopupUtils.*;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import org.apache.log4j.Level;
 
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
@@ -127,6 +128,8 @@ public class Homepage {
     @FXML
     private JFXButton manageModelVerify;
     @FXML
+    private JFXComboBox<String> configLoggingLevel;
+    @FXML
     private Label aboutQueryUpdate;
     @FXML
     private Label aboutVisitWebsite;
@@ -151,6 +154,7 @@ public class Homepage {
         initWrapper(1);
         initModelSearch();
         initModelManage();
+        initConfigAdvanced();
         initAbout();
         menuBtn1.getStyleClass().add("menu-btn-active");
         Platform.runLater(() -> {
@@ -340,6 +344,18 @@ public class Homepage {
         manageModelCheck.setOnAction(e -> foregroundCheckModels());
         manageModelFetch.setOnAction(e -> foregroundFetchModels());
         manageModelVerify.setOnAction(e -> foregroundVerifyModels());
+    }
+
+    private void initConfigAdvanced() {
+        configLoggingLevel.getItems().setAll("DEBUG", "INFO", "WARN", "ERROR");
+        configLoggingLevel.getSelectionModel().select(config.logging_level);
+        configLoggingLevel.valueProperty().addListener(observable -> {
+            if (configLoggingLevel.getValue() != null) {
+                Logger.setLevel(Level.toLevel(configLoggingLevel.getValue(), Level.INFO));
+                config.logging_level = Logger.getLevel().toString();
+                config.saveConfig();
+            }
+        });
     }
 
     private void initAbout() {
@@ -703,12 +719,12 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在选择最佳线路");
-                Logger.info("Download", "Testing real delay");
+                Logger.info("Downloader", "Testing real delay");
                 Downloader.GitHubSource[] sources = Downloader.GitHubSource.sortByDelay(Downloader.ghSources);
                 Downloader.GitHubSource source = sources[0];
-                Logger.info("Download", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
+                Logger.info("Downloader", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
                 String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
-                Logger.info("Download", "Downloading " + remotePath + " to " + $localPath);
+                Logger.info("Downloader", "Downloading " + remotePath + " to " + $localPath);
                 this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
 
                 URL urlFile;
@@ -765,7 +781,7 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Download", "Downloaded " + $localPath + " , file size: " + sum);
+                Logger.info("Downloader", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -776,7 +792,7 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在尝试建立连接");
-                Logger.info("Download", "Downloading " + $remotePath + " to " + $localPath);
+                Logger.info("Downloader", "Downloading " + $remotePath + " to " + $localPath);
 
                 URL urlFile;
                 HttpsURLConnection connection = null;
@@ -832,7 +848,7 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Download", "Downloaded " + $localPath + " , file size: " + sum);
+                Logger.info("Downloader", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };

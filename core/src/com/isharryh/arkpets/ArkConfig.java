@@ -24,7 +24,6 @@ public class ArkConfig {
         configCustomPath = "ArkPetsCustom.config";
         configDefaultPath = "/ArkPetsDefault.config";
         configCustom = new File(configCustomPath);
-        //configDefault = SrcUtil.getInternalFile(ArkConfig.class, "/ArkPetsDefault.config");
         configDefault = new File(Objects.requireNonNull(ArkConfig.class.getResource(configDefaultPath)).toExternalForm());
     }
 
@@ -33,13 +32,14 @@ public class ArkConfig {
     public int   display_fps;
     public int   display_margin_bottom;
     public int[] display_monitor_info;
-    public String character_recent;
+    public String  character_recent;
     public int     behavior_ai_activation;
     public boolean behavior_allow_sleep;
     public boolean behavior_allow_walk;
     public boolean behavior_allow_sit;
     public boolean behavior_allow_interact;
     public boolean behavior_do_peer_repulsion;
+    public String  logging_level;
 
     private ArkConfig() {
     }

@@ -38,7 +38,7 @@ public class ArkHomeFX extends Application {
         // Set handler for internal start button.
         Button startBtn = (Button)root.lookup("#Start-btn");
         startBtn.setOnAction(e -> {
-            // When request to launch ArkPets
+            // When request to launch ArkPets:
             startArkPets();
             try {
                 Thread.sleep(1000);
@@ -68,10 +68,26 @@ public class ArkHomeFX extends Application {
         Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws IOException, InterruptedException {
+                // Renew the logging level arg to match the custom value of the Launcher.
+                List<String> args = Arrays.asList(ArgPending.argCache.clone());
+                args.remove("--quiet");
+                args.remove("--warn");
+                args.remove("--info");
+                args.remove("--debug");
+                String temp = null;
+                switch (ctrl.config.logging_level) {
+                    case "ERROR": temp = "--quiet"; break;
+                    case "WARN":  temp = "--warn";  break;
+                    case "INFO":  temp = "--info";  break;
+                    case "DEBUG": temp = "--debug"; break;
+                    default:      temp = "";
+                }
+                args.add(temp);
+                // Start ArkPets core.
                 int code = JavaProcess.exec(
                         EmbeddedLauncher.class, true,
                         List.of(),
-                        Arrays.asList(ArgPending.argCache)
+                        args
                 );
                 if (code != 0) {
                     // TODO pop error

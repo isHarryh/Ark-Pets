@@ -228,7 +228,7 @@
                     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
                                 minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
                         <children>
-                            <VBox prefHeight="350.0" prefWidth="440.0">
+                            <VBox>
                                 <children>
                                     <Label styleClass="config-group-title" text="动作"/>
                                     <HBox>
@@ -274,7 +274,7 @@
                     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
                                 minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
                         <children>
-                            <VBox prefHeight="350.0" prefWidth="440.0">
+                            <VBox>
                                 <children>
                                     <Label styleClass="config-group-title" text="显示设置"/>
                                     <HBox>
@@ -351,6 +351,14 @@
                                                     <String fx:value="btn-with-icon"/>
                                                 </styleClass>
                                             </JFXButton>
+                                        </children>
+                                    </HBox>
+                                    <Separator/>
+                                    <Label styleClass="config-group-title" text="高级设置"/>
+                                    <HBox>
+                                        <children>
+                                            <Label text="日志级别"/>
+                                            <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
                                         </children>
                                     </HBox>
                                     <Separator/>

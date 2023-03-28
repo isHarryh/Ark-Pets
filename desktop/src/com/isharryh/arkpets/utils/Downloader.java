@@ -86,7 +86,12 @@ public class Downloader {
     protected void onSucceed(long sum) {
     }
 
-
+    /** Test the real connection delay of the given URL (with a specified port).
+     * @param $url The URL to be tested.
+     * @param $port The port to connect.
+     * @param $timeoutMillis Timeout (ms).
+     * @return The delay (ms). {@code -1} when connection failed or timeout.
+     */
     public static int testDelay(String $url, int $port, int $timeoutMillis) {
         Socket socket = new Socket();
         int delayMillis = -1;
@@ -122,6 +127,7 @@ public class Downloader {
 
         public int testDelay(int $port, int $timeoutMillis) {
             delay = Downloader.testDelay(preUrl, $port, $timeoutMillis);
+            Logger.debug("Downloader", "Real delay for \"" + tag + "\" is " + delay + "ms");
             return delay;
         }
 
@@ -130,11 +136,9 @@ public class Downloader {
                 s.testDelay();
             ArrayList<Source> sources = new ArrayList<>(Arrays.stream($sources).toList());
             sources.sort((o1, o2) -> {
-                if (o1.delay < 0)
-                    return 1;
-                if (o1.delay != o2.delay)
-                    return o1.delay > o2.delay ? 1 : -1;
-                return 0;
+                if (o1.delay == o2.delay)
+                    return 0;
+                return (o1.delay > o2.delay || o1.delay < 0) ? 1 : -1;
             });
             return sources.toArray(new Source[0]);
         }
