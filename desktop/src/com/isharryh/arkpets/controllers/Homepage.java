@@ -7,7 +7,6 @@ import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.*;
 import com.isharryh.arkpets.utils.IOUtils.*;
-
 import static com.isharryh.arkpets.utils.PopupUtils.*;
 
 import com.alibaba.fastjson.JSONException;
@@ -15,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import org.apache.log4j.Level;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.ScheduledService;
@@ -48,6 +48,7 @@ public class Homepage {
 
     private boolean isHttpsTrustAll = false;
     private boolean isDelayTested = false;
+    private boolean isNoFilter = true;
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
 
     private final String urlApi = "https://arkpets.tfev.top/p/arkpets/client/api.php";
@@ -92,7 +93,9 @@ public class Homepage {
     @FXML
     private JFXTextField searchModelInput;
     @FXML
-    private JFXListView searchModelList;
+    private JFXListView<JFXListCell<AssetCtrl>> searchModelList;
+    @FXML
+    private JFXComboBox<String> searchModelFilter;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -138,7 +141,6 @@ public class Homepage {
     @FXML
     private Label aboutVisitWebsite;
 
-    private AssetCtrl selectedModelAsset;
     private ListCell<AssetCtrl> selectedModelItem;
     private AssetCtrl[] foundModelAssets = {};
     private JFXListCell[] foundModelItems = {};
@@ -158,6 +160,8 @@ public class Homepage {
         initWrapper(1);
         initModelSearch();
         initModelManage();
+        initConfigBehavior();
+        initConfigDisplay();
         initConfigAdvanced();
         initAbout();
         initLaunchingStatusListener();
@@ -191,11 +195,23 @@ public class Homepage {
     }
 
     private void initWrapper(int $activeIdx) {
-        wrapper1.setVisible(wrapper1.getId().contains(String.valueOf($activeIdx)));
-        wrapper2.setVisible(wrapper2.getId().contains(String.valueOf($activeIdx)));
-        wrapper3.setVisible(wrapper3.getId().contains(String.valueOf($activeIdx)));
-        initConfigBehavior();
-        initConfigDisplay();
+        Duration duration = new Duration(500);
+        List<Node> wrappers = Arrays.asList(null, wrapper1, wrapper2, wrapper3);
+        for (short i = 0; i < wrappers.size(); i++) {
+            if (wrappers.get(i) != null) {
+                FadeTransition fadeT = new FadeTransition(duration, wrappers.get(i));
+                if ($activeIdx == i) {
+                    // Show
+                    wrappers.get(i).setVisible(true);
+                    fadeT.setFromValue(0.025);
+                    fadeT.setToValue(1);
+                    fadeT.playFromStart();
+                } else {
+                    // Hide
+                    wrappers.get(i).setVisible(false);
+                }
+            }
+        }
     }
 
     private void initModelSearch() {
@@ -205,9 +221,31 @@ public class Homepage {
                 dealModelSearch(searchModelInput.getText());
         });
         searchModelConfirm.setOnAction(e -> dealModelSearch(searchModelInput.getText()));
-        searchModelReset.setOnAction(e -> dealModelSearch(""));
+        searchModelReset.setOnAction(e -> {
+            searchModelInput.setText("");
+            searchModelInput.requestFocus();
+            searchModelFilter.getSelectionModel().select(0);
+            dealModelSearch("");
+        });
         searchModelRandom.setOnAction(e -> dealModelRandom());
         searchModelReload.setOnAction(e -> dealModelReload());
+
+        searchModelFilter.getItems().setAll("全部");
+        searchModelFilter.getSelectionModel().select(0);
+        if (initModelAssets(false)) {
+            Set<String> filterTags = modelsDatasetFull.getJSONObject("storageDirectory").keySet();
+            for (String s : filterTags) {
+                searchModelFilter.getItems().add(s);
+            }
+        }
+        searchModelFilter.valueProperty().addListener(observable -> {
+            if (searchModelFilter.getValue() != null) {
+                isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
+                Logger.info("ModelList", "Filter \"" + searchModelFilter.getValue() + "\"");
+                dealModelSearch(searchModelInput.getText());
+                searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
+            }
+        });
     }
 
     private boolean initModelDataset(boolean $doPopNotice) {
@@ -253,8 +291,8 @@ public class Homepage {
                     throw new RuntimeException("Found no assets in the target directories.");
                 // Models to menu items.
                 ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
-                searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<ListCell<AssetCtrl>>)(observable -> {
-                    observable.getList().forEach((Consumer<ListCell<AssetCtrl>>) cell -> {
+                searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)(observable -> {
+                    observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> {
                         selectModel(cell.getItem(), cell);
                     });
                 }));
@@ -954,13 +992,13 @@ public class Homepage {
     }
 
     private void dealModelSearch(String $keyWords) {
-        searchModelInput.setText($keyWords);
         searchModelList.getItems().clear();
         AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
         String[] assetIdList = AssetCtrl.getAssetIdList(result);
-        for (ListCell<AssetCtrl> item : foundModelItems) {
+        for (JFXListCell<AssetCtrl> item : foundModelItems) {
             for (String assetId : assetIdList) {
-                if (item.getId().equals(assetId)) {
+                if (item.getId().equals(assetId) &&
+                        (isNoFilter || searchModelFilter.getValue().equals(item.getItem().type))) {
                     searchModelList.getItems().add(item);
                     break;
                 }
@@ -973,7 +1011,7 @@ public class Homepage {
     private void dealModelRandom() {
         if (!assertModelLoaded(true))
             return;
-        int idx = (int)(Math.random() * (foundModelItems.length - 1));
+        int idx = (int)(Math.random() * (searchModelList.getItems().size() - 1));
         searchModelList.scrollTo(idx);
         searchModelList.getSelectionModel().select(idx);
         searchModelList.requestFocus();
@@ -988,22 +1026,22 @@ public class Homepage {
         Logger.info("ModelList", "Reloaded");
     }
 
-    private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<AssetCtrl> $container) {
+    private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<JFXListCell<AssetCtrl>> $container) {
         double width = $container.getPrefWidth();
         width -= $container.getPadding().getLeft() + $container.getPadding().getRight();
         width *= 0.75;
         double height = 30;
-        final double divide = 0.5;
+        double divide = 0.5;
         JFXListCell<AssetCtrl> item = new JFXListCell<>();
         item.getStyleClass().addAll("Search-models-item", "scroll-v");
         Label name = new Label($assetCtrl.toString());
         name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
-        name.setPrefSize(width * divide, height);
+        name.setPrefSize($assetCtrl.skinGroupName == null ? width : width * divide, height);
         name.setLayoutX(0);
         Label alias1 = new Label($assetCtrl.skinGroupName);
         alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
         alias1.setPrefSize(width * (1 - divide), height);
-        alias1.setLayoutX(width * divide);
+        alias1.setLayoutX($assetCtrl.skinGroupName == null ? 0 : width * (1 - divide));
 
         item.setPrefSize(width, height);
         item.setGraphic(new Group(name, alias1));
@@ -1016,7 +1054,6 @@ public class Homepage {
         // Reset
         if (selectedModelItem != null)
             selectedModelItem.getStyleClass().setAll("Search-models-item");
-        selectedModelAsset = $asset;
         selectedModelItem = $item;
         selectedModelItem.getStyleClass().add("Search-models-item-active");
         // Display details

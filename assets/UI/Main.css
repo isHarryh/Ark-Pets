@@ -237,14 +237,38 @@ Button:focused {
 -fx-text-fill: #606060;
 }
 
-.Search-models-item-active .Search-models-label-primary {
+.Search-models-list .Search-models-item-active .Search-models-label-primary {
+-fx-font-size: 13px;
+-fx-text-fill: #303030;
+}
+
+.Search-models-list .Search-models-item-active .Search-models-label-secondary {
+-fx-font-size: 12px;
+-fx-text-fill: #606060;
+}
+
+.Search-models-list:focused .Search-models-item-active .Search-models-label-primary {
 -fx-font-size: 13px;
 -fx-text-fill: #FFFFFF;
 }
 
-.Search-models-item-active .Search-models-label-secondary {
+.Search-models-list:focused .Search-models-item-active .Search-models-label-secondary {
 -fx-font-size: 12px;
 -fx-text-fill: #FFFFFF;
+}
+
+#Info-filter-label {
+-fx-font-size: 12px;
+-fx-text-fill: #204880;
+}
+
+#Info-filter-label SVGPath {
+-fx-fill: #204880;
+}
+
+#Info-filter-box {
+-fx-font-size: 11px;
+-fx-text-fill: #606060;
 }
 
 .Info-primary {
@@ -333,13 +357,13 @@ Button:focused {
  ******************************************************************************/
 
 .scroll-bar:vertical > .track-background, .scroll-bar:horizontal > .track-background {
--fx-background-color: #F1F1F1;
+-fx-background-color: #F1F1F5;
 -fx-background-insets: 0;
 -fx-background-radius: 1px;
 }
 
 .scroll-bar:vertical > .thumb, .scroll-bar:horizontal > .thumb {
--fx-background-color: #BCBCBC;
+-fx-background-color: #BCBCC2;
 -fx-background-insets: 0;
 -fx-background-radius: 2px;
 }
@@ -358,7 +382,7 @@ Button:focused {
 }
 
 .scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
--fx-background-color: #969696;
+-fx-background-color: #9696A0;
 }
 
 /* Up Arrow */
