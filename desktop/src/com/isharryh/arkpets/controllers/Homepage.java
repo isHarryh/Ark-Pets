@@ -5,10 +5,9 @@ package com.isharryh.arkpets.controllers;
 
 import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.ArkHomeFX;
-import com.isharryh.arkpets.utils.AssetCtrl;
-import com.isharryh.arkpets.utils.Downloader;
+import com.isharryh.arkpets.utils.*;
 import com.isharryh.arkpets.utils.IOUtils.*;
-import com.isharryh.arkpets.utils.Logger;
+
 import static com.isharryh.arkpets.utils.PopupUtils.*;
 
 import com.alibaba.fastjson.JSONException;
@@ -18,9 +17,11 @@ import org.apache.log4j.Level;
 
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
+import javafx.util.Duration;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -44,8 +45,11 @@ public class Homepage {
     private final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
     private int bufferSize = 8 * 1024;
     private int httpTimeout = 30 * 1000;
+
     private boolean isHttpsTrustAll = false;
     private boolean isDelayTested = false;
+    public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
+
     private final String urlApi = "https://arkpets.tfev.top/p/arkpets/client/api.php";
     private final String urlOfficial = "https://arkpets.tfev.top/p/arkpets/?from=client";
     private final String urlModelsZip = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
@@ -156,6 +160,7 @@ public class Homepage {
         initModelManage();
         initConfigAdvanced();
         initAbout();
+        initLaunchingStatusListener();
         menuBtn1.getStyleClass().add("menu-btn-active");
         Platform.runLater(() -> {
             initModelAssets(false);
@@ -348,7 +353,6 @@ public class Homepage {
 
     private void initConfigAdvanced() {
         configLoggingLevel.getItems().setAll("DEBUG", "INFO", "WARN", "ERROR");
-        configLoggingLevel.getSelectionModel().select(config.logging_level);
         configLoggingLevel.valueProperty().addListener(observable -> {
             if (configLoggingLevel.getValue() != null) {
                 Logger.setLevel(Level.toLevel(configLoggingLevel.getValue(), Level.INFO));
@@ -356,6 +360,17 @@ public class Homepage {
                 config.saveConfig();
             }
         });
+        String level = config.logging_level;
+        List<String> args = Arrays.asList(ArgPending.argCache);
+        if (args.contains("--quiet"))
+            level = "ERROR";
+        else if (args.contains("--warn"))
+            level = "WARN";
+        else if (args.contains("--info"))
+            level = "INFO";
+        else if (args.contains("--debug"))
+            level = "DEBUG";
+        configLoggingLevel.getSelectionModel().select(level);
     }
 
     private void initAbout() {
@@ -367,6 +382,31 @@ public class Homepage {
                 ex.printStackTrace();
             }
         });
+    }
+
+    private void initLaunchingStatusListener() {
+        ScheduledService<Boolean> ss = new ScheduledService<>() {
+            @Override
+            protected Task<Boolean> createTask() {
+                Task<Boolean> task = new Task<>() {
+                    @Override
+                    protected Boolean call() throws Exception {
+                        if (lastLaunchFailed != null) {
+                            Exception e = lastLaunchFailed;
+                            lastLaunchFailed = null;
+                            throw e;
+                        }
+                        return false;
+                    }
+                };
+                task.setOnFailed(e -> popError(task.getException()).show());
+                return task;
+            }
+        };
+        ss.setDelay(new Duration(1000));
+        ss.setPeriod(new Duration(500));
+        ss.setRestartOnFailure(true);
+        ss.start();
     }
 
     public JFXDialog foregroundTask(Task $task, String $title, String $header, String $defaultContent, Boolean $cancelable) {
@@ -454,12 +494,16 @@ public class Homepage {
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
 
+        if ($e instanceof JavaProcess.UnexpectedExitCodeException) {
+            h2.setText("检测到桌宠异常退出");
+            h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
+        }
         if ($e instanceof FileNotFoundException) {
             h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
         }
         if ($e instanceof NetUtil.HttpResponseCodeException) {
-            h2.setText("神经递质接收异常。");
-            if (((NetUtil.HttpResponseCodeException)$e).isClientError()) {
+            h2.setText("神经递质接收异常");
+            if (((NetUtil.HttpResponseCodeException)$e).isRedirection()) {
                 h3.setText("请求的网络地址被重定向转移。详细信息：");
             }
             if (((NetUtil.HttpResponseCodeException)$e).isClientError()) {
@@ -479,19 +523,19 @@ public class Homepage {
             }
         }
         if ($e instanceof UnknownHostException) {
-            h2.setText("无法建立神经连接。");
+            h2.setText("无法建立神经连接");
             h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof ConnectException) {
-            h2.setText("无法建立神经连接。");
+            h2.setText("无法建立神经连接");
             h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SocketTimeoutException) {
-            h2.setText("神经递质接收异常。");
+            h2.setText("神经递质接收异常");
             h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
         }
         if ($e instanceof SSLException) {
-            h2.setText("神经连接校验失败。");
+            h2.setText("无法建立安全的神经连接");
             h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
             JFXButton apply = DialogUtil.getTrustButton(dialog, root);
             apply.setOnAction(e -> {
@@ -501,7 +545,7 @@ public class Homepage {
             layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
         }
         if ($e instanceof ZipException) {
-            h3.setText("压缩文件相关错误。推测可能是下载源问题，请尝试更换下载源。");
+            h3.setText("压缩文件相关错误。推测可能是下载源问题。");
         }
         //dialog.show();
         return dialog;

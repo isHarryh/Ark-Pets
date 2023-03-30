@@ -50,6 +50,7 @@ public class PopupUtils {
         }
     }
 
+
     public static class DialogUtil {
         public static void disposeDialog(JFXDialog dialog, Pane root) {
             dialog.close();
@@ -86,7 +87,7 @@ public class PopupUtils {
 
         public static Node getPrefabsH3(String text) {
             Label h3 = new Label(text);
-            h3.setStyle("-fx-font-size:13px;-fx-pref-height:36px;-fx-text-fill:" + COLOR_LIGHT_GRAY);
+            h3.setStyle("-fx-font-size:13px;-fx-min-height:36px;-fx-wrap-text:true;-fx-text-fill:" + COLOR_LIGHT_GRAY);
             h3.setWrapText(true);
             return h3;
         }
@@ -115,34 +116,6 @@ public class PopupUtils {
             button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_WARNING);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
-        }
-    }
-
-    public static class ExpandableTextArea {
-        private final Dialog<ButtonType> dialog;
-        private final TextArea expandable;
-
-        public ExpandableTextArea(Dialog<ButtonType> target, String content) {
-            dialog = target;
-            expandable = new TextArea();
-            expandable.appendText(content);
-            expandable.setEditable(false);
-            expandable.setWrapText(true);
-            expandable.setStyle("-fx-alignment:top-left;-fx-pref-row-count:12;");
-            AnchorPane expandableContainer = new AnchorPane(expandable);
-            Insets expandablePadding = new Insets(8);
-            dialog.getDialogPane().setExpanded(false);
-            dialog.getDialogPane().setExpandableContent(expandableContainer);
-            dialog.widthProperty().addListener(((observable, oldValue, newValue) -> {
-                expandable.setLayoutX(expandablePadding.getTop());
-                expandable.setLayoutY(expandablePadding.getLeft());
-                expandable.setPrefWidth(dialog.getDialogPane().getWidth() - expandablePadding.getLeft() - expandablePadding.getRight());
-                dialog.setResizable(false);
-            }));
-        }
-
-        public TextArea getTextArea() {
-            return expandable;
         }
     }
 }

@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 public class Downloader {
     public static GitHubSource[] ghSources = new GitHubSource[] {
-            new GitHubSource("GitHub", "https://github.com/"),
+            new GitHubSource("GitHub", "https://raw.githubusercontent.com/", "https://github.com/"),
             new GitHubSource("FastGit", "https://raw.fastgit.org/", "https://download.fastgit.org/"),
             new GitHubSource("GHProxy", "https://ghproxy.com/?q=https://github.com/")
     };

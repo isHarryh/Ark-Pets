@@ -6,6 +6,7 @@ package com.isharryh.arkpets;
 import com.isharryh.arkpets.controllers.Homepage;
 import com.isharryh.arkpets.utils.ArgPending;
 import com.isharryh.arkpets.utils.JavaProcess;
+import com.isharryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -69,34 +71,41 @@ public class ArkHomeFX extends Application {
             @Override
             protected Boolean call() throws IOException, InterruptedException {
                 // Renew the logging level arg to match the custom value of the Launcher.
-                List<String> args = Arrays.asList(ArgPending.argCache.clone());
+                ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
                 args.remove("--quiet");
                 args.remove("--warn");
                 args.remove("--info");
                 args.remove("--debug");
-                String temp = null;
-                switch (ctrl.config.logging_level) {
-                    case "ERROR": temp = "--quiet"; break;
-                    case "WARN":  temp = "--warn";  break;
-                    case "INFO":  temp = "--info";  break;
-                    case "DEBUG": temp = "--debug"; break;
-                    default:      temp = "";
-                }
+                String temp = switch (ctrl.config.logging_level) {
+                    case "ERROR" -> "--quiet";
+                    case "WARN"  -> "--warn";
+                    case "INFO"  -> "--info";
+                    case "DEBUG" -> "--debug";
+                    default      -> "";
+                };
                 args.add(temp);
                 // Start ArkPets core.
+                Logger.info("Launcher", "Launching " + ctrl.config.character_recent);
+                Logger.debug("Launcher", "With args " + args);
                 int code = JavaProcess.exec(
                         EmbeddedLauncher.class, true,
                         List.of(),
                         args
                 );
+                // ArkPets core finalized.
                 if (code != 0) {
-                    // TODO pop error
+                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + code + "). Please check the log file for details.");
+                    ctrl.lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(code);
                     return false;
                 }
+                Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
                 return true;
             }
         };
         Thread thread = new Thread(task);
+        task.setOnFailed(e ->
+                Logger.error("Launcher", "Detected an unexpected failure of an ArkPets thread, details see below.", task.getException())
+        );
         thread.start();
     }
 }

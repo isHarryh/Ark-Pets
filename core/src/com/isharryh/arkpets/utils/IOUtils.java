@@ -230,7 +230,7 @@ public class IOUtils {
 
             @Override
             public String getMessage() {
-                return message;
+                return code + ": " + message;
             }
 
             public boolean isInformation() {

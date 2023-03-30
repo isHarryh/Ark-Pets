@@ -74,7 +74,7 @@ public class JavaProcess {
 
         @Override
         public String getMessage() {
-            return "The process exited with a non-zero exit code: " + exitCode + ".";
+            return "The process exited with a non-zero exit code: " + exitCode;
         }
     }
 }

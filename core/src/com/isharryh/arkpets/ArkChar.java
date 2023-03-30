@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -112,7 +113,8 @@ public class ArkChar {
                     break;
                 // default:
             }
-        } catch (SerializationException e) {
+        } catch (SerializationException | GdxRuntimeException e) {
+            Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
             throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
         }
 

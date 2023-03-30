@@ -284,6 +284,11 @@ Button:focused {
 .config-field {
 }
 
+.config-field JFXComboBox {
+-fx-font-size: 12px;
+-fx-text-fill: #303030;
+}
+
 .config-field JFXCheckBox, .config-field HBox Label {
 -fx-font-size: 12px;
 -fx-text-fill: #303030;
