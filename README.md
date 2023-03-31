@@ -3,10 +3,10 @@
 
 <div align="center">
    <h1> Ark-Pets </h1>
-   <img height="64" src="assets/icon.png" title="Icon" width="64"/>
+   <img height="64" src="//raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" title="Icon" width="64"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      版本(Version) <code> v2.0 </code> <br>
+      <code> <b> v2.0 </b> </code> <br>
       <sub>
          <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
       </sub>

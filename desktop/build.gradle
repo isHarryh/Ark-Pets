@@ -2,7 +2,7 @@
 sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
-project.ext.mainClassName = "com.isharryh.arkpets.DesktopLauncher"
+project.ext.mainClassName = "cn.harryh.arkpets.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 eclipse.project.name = appName + "-desktop"
 
