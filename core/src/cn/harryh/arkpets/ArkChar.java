@@ -40,7 +40,6 @@ public class ArkChar {
     private final OrthographicCamera camera;
     private final TwoColorPolygonBatch batch;
     private final FrameBuffer fbo;
-//    private final TextureRegion fboRegion;
     private Texture bgTexture;
     public Vector3 positionCur;
     public Vector3 positionTar;
@@ -71,7 +70,6 @@ public class ArkChar {
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
         fbo = new FrameBuffer(Format.RGBA8888, MAX_CANVAS_SIZE, MAX_CANVAS_SIZE, false);
-//        fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         flexibleLayout = new CroppingCtrl(new Vector2(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE), 0);
 
         // Layout

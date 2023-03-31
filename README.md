@@ -1,12 +1,12 @@
 <!-- 欢迎阅读 Ark-Pets 说明文档 -->
-<!-- 这是一个 MarkDown 格式的文档 -->
+<!-- 仓库：https://github.com/isHarryh/Ark-Pets -->
 
 <div align="center">
    <h1> Ark-Pets </h1>
-   <img height="64" src="//raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" title="Icon" width="64"/>
+   <img height="64" src="https://github.com/isHarryh/Ark-Pets/raw/v2.x/assets/icon.png" title="Icon" width="64"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code> <b> v2.0 </b> </code> <br>
+      <code><b> v2.0 </b></code> <br>
       <sub>
          <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
       </sub>
@@ -18,23 +18,26 @@
 1. 支持自定义选择、按关键词搜索明日方舟小人模型
 2. 支持在启动器中显示模型的详细信息，调整缩放和帧率等设置
 3. 实现了在启动器中检查模型更新、一键下载模型文件等联网功能
-4. 支持模拟游戏内基建小人的行为 <details><summary>查看详情</summary>
+4. 支持模拟游戏内 **干员基建小人** 的行为 <details><summary>查看详情</summary>
    1. 基建小人能够执行行走和坐下的动作
-   2. 基建小人能够被鼠标点击和拖拽交互
-   3. 基建小人能够执行基建动作(如有)
-5. 实现了模拟平面重力场 <details><summary>查看详情</summary>
-   1. 桌宠在被拖拽到空中时能够自由落体
+   2. 基建小人能够被鼠标交互 (执行戳一戳动作)
+   3. 基建小人能够执行基建动作 (如有)
+5. 支持模拟游戏内 **敌方小人** 的行为 <details><summary>查看详情</summary>
+   1. 敌方小人能够执行行走动作
+   2. 敌方小人能够被鼠标交互 (执行攻击动作)
+6. 实现了模拟平面重力场 <details><summary>查看详情</summary>
+   1. 桌宠在被拖拽到空中后能够自由落体
    2. 桌宠可以站立在打开的窗口的边缘上
    3. 桌宠会受地面摩擦力和空气阻力作用
    4. 桌宠会在其他桌宠靠近时被排斥推动
    5. 桌宠活动范围的下边界距离可以调整
-6. 实现了任务栏托盘图标 <details><summary>查看详情</summary>
+7. 实现了任务栏托盘图标 <details><summary>查看详情</summary>
    1. 右键托盘可以选择是否保持当前动作
    2. 右键托盘可以退出桌宠
 
 ### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
-1. 支持模拟游戏内敌方小人的行为
+1. 支持部分敌方首领的阶段形态切换
 
 ### 相关文档
 - 更新日志 > [点击查看](CHANGELOG.md)
