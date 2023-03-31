@@ -7,6 +7,8 @@ import com.isharryh.arkpets.utils.ArgPending;
 import com.isharryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
  * @see com.isharryh.arkpets.ArkHomeFX
@@ -16,22 +18,22 @@ public class DesktopLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/desktop", 8);
-		new ArgPending("--quiet", args) {
+		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
 			}
 		};
-		new ArgPending("--warn", args) {
+		new ArgPending(LogLevels.warnArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.WARN);
 			}
 		};
-		new ArgPending("--info", args) {
+		new ArgPending(LogLevels.infoArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.INFO);
 			}
 		};
-		new ArgPending("--debug", args) {
+		new ArgPending(LogLevels.debugArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.DEBUG);
 			}

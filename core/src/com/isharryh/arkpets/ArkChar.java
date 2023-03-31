@@ -34,6 +34,8 @@ import com.isharryh.arkpets.utils.CroppingCtrl;
 import com.isharryh.arkpets.utils.FrameCtrl;
 import com.isharryh.arkpets.utils.Logger;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 public class ArkChar {
     private final OrthographicCamera camera;
@@ -76,7 +78,7 @@ public class ArkChar {
         flexibleLayout = new CroppingCtrl(new Vector2(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE), 0);
 
         // Layout
-        positionEas = new EasingLinearVector3(new EasingLinear(0, 1, 0.2f));
+        positionEas = new EasingLinearVector3(new EasingLinear(0, 1, linearEasingDuration));
         positionCur = new Vector3(0, 0, 0);
         positionTar = new Vector3(0, 0, 0);
         offset_y = 0;
@@ -130,7 +132,7 @@ public class ArkChar {
         for (String i: anim_list)
             for (String j: anim_list)
                 if (!i.equals(j))
-                    asd.setMix(i, j, 0.2f);
+                    asd.setMix(i, j, linearEasingDuration);
         animationState = new AnimationState(asd);
     }
 

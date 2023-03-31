@@ -13,6 +13,8 @@ import com.isharryh.arkpets.utils.Logger;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 /** The bootstrap for ArkPets the libGDX app.
  * @see com.isharryh.arkpets.ArkPets
@@ -24,22 +26,22 @@ public class EmbeddedLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/core", 32);
-		new ArgPending("--quiet", args) {
+		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
 			}
 		};
-		new ArgPending("--warn", args) {
+		new ArgPending(LogLevels.warnArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.WARN);
 			}
 		};
-		new ArgPending("--info", args) {
+		new ArgPending(LogLevels.infoArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.INFO);
 			}
 		};
-		new ArgPending("--debug", args) {
+		new ArgPending(LogLevels.debugArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.DEBUG);
 			}
@@ -50,9 +52,7 @@ public class EmbeddedLauncher {
 		config.setForegroundFPS(30);
 		config.setIdleFPS(30);
 		// Configure window size
-		final int WD_W = 150;
-		final int WD_H = 150;
-		config.setWindowedMode(WD_W, WD_H);
+		config.setWindowedMode(coreWidthDefault, coreHeightDefault);
 		config.setResizable(false);
 		// Configure window title
 		final String TITLE = applyWindowTitle();
@@ -69,7 +69,7 @@ public class EmbeddedLauncher {
 	}
 
 	private static String applyWindowTitle() {
-		final String prefix = "ArkPets";
+		final String prefix = coreTitle;
 		int cnt = 1;
 		String tmp = "";
 		HWND hwnd_test = User32.INSTANCE.FindWindow(null, prefix);

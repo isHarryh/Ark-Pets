@@ -22,13 +22,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 /** ArkPets Homepage the JavaFX app.
  */
 public class ArkHomeFX extends Application {
     private Homepage ctrl;
-    public final static int[] appVersion = {2, 0, 0};
-    public final static String appVersionStr = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
     public final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
 
     @Override
@@ -53,7 +53,7 @@ public class ArkHomeFX extends Application {
         scene.getStylesheets().setAll(urlStyleSheet);
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.setTitle("ArkPets Launcher TEST");
+        stage.setTitle(desktopTitle);
         stage.show();
         startBtn.requestFocus();
         ctrl = fxml.getController();
@@ -72,15 +72,15 @@ public class ArkHomeFX extends Application {
             protected Boolean call() throws IOException, InterruptedException {
                 // Renew the logging level arg to match the custom value of the Launcher.
                 ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
-                args.remove("--quiet");
-                args.remove("--warn");
-                args.remove("--info");
-                args.remove("--debug");
+                args.remove(LogLevels.errorArg);
+                args.remove(LogLevels.warnArg);
+                args.remove(LogLevels.infoArg);
+                args.remove(LogLevels.debugArg);
                 String temp = switch (ctrl.config.logging_level) {
-                    case "ERROR" -> "--quiet";
-                    case "WARN"  -> "--warn";
-                    case "INFO"  -> "--info";
-                    case "DEBUG" -> "--debug";
+                    case LogLevels.error -> LogLevels.errorArg;
+                    case LogLevels.warn  -> LogLevels.warnArg;
+                    case LogLevels.info  -> LogLevels.infoArg;
+                    case LogLevels.debug -> LogLevels.debugArg;
                     default      -> "";
                 };
                 args.add(temp);

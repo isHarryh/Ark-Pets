@@ -4,9 +4,10 @@
 package com.isharryh.arkpets.controllers;
 
 import com.isharryh.arkpets.ArkConfig;
-import com.isharryh.arkpets.ArkHomeFX;
 import com.isharryh.arkpets.utils.*;
 import com.isharryh.arkpets.utils.IOUtils.*;
+
+import static com.isharryh.arkpets.Const.*;
 import static com.isharryh.arkpets.utils.PopupUtils.*;
 
 import com.alibaba.fastjson.JSONException;
@@ -42,24 +43,10 @@ import javax.net.ssl.SSLException;
 
 
 public class Homepage {
-    private final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
-    private int bufferSize = 8 * 1024;
-    private int httpTimeout = 30 * 1000;
-
     private boolean isHttpsTrustAll = false;
     private boolean isDelayTested = false;
     private boolean isNoFilter = true;
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
-
-    private final String urlApi = "https://arkpets.tfev.top/p/arkpets/client/api.php";
-    private final String urlOfficial = "https://arkpets.tfev.top/p/arkpets/?from=client";
-    private final String urlModelsZip = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
-    private final String urlModelsData = "isHarryh/Ark-Models/main/models_data.json";
-    private final String tempDirPath = "temp/";
-    private final String tempModelsUnzipDirPath = tempDirPath + "models_unzipped/";
-    private final String tempModelsZipCachePath = tempDirPath + "ArkModels.zip";
-    private final String fileModelsDataPath = "models_data.json";
-    private final String tempQueryVersionCachePath = tempDirPath + "ApiQueryVersionCache";
 
     @FXML
     private AnchorPane root;
@@ -152,7 +139,7 @@ public class Homepage {
     }
 
     public void initialize() {
-        Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ")");
+        Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
         config = ArkConfig.getConfig();
         initMenuBtn(menuBtn1, 1);
         initMenuBtn(menuBtn2, 2);
@@ -251,7 +238,7 @@ public class Homepage {
     private boolean initModelDataset(boolean $doPopNotice) {
         try {
             try {
-                modelsDatasetFull = Objects.requireNonNull(JSONObject.parseObject(FileUtil.readString(new File(fileModelsDataPath), "UTF-8")));
+                modelsDatasetFull = Objects.requireNonNull(JSONObject.parseObject(FileUtil.readString(new File(PathConfig.fileModelsDataPath), "UTF-8")));
                 if (!modelsDatasetFull.containsKey("data"))
                     throw new JSONException("The key 'data' may not in the dataset.");
                 if (!modelsDatasetFull.containsKey("storageDirectory"))
@@ -265,7 +252,7 @@ public class Homepage {
         } catch (FileNotFoundException e) {
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到模型数据集。",
-                        "模型数据集文件 " + fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。", null).show();
+                        "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。", null).show();
         } catch (IOException e) {
             e.printStackTrace();
             if ($doPopNotice)
@@ -292,9 +279,7 @@ public class Homepage {
                 // Models to menu items.
                 ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
                 searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)(observable -> {
-                    observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> {
-                        selectModel(cell.getItem(), cell);
-                    });
+                    observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> selectModel(cell.getItem(), cell));
                 }));
                 searchModelList.setFixedCellSize(30);
                 for (AssetCtrl asset : foundModelAssets)
@@ -390,7 +375,7 @@ public class Homepage {
     }
 
     private void initConfigAdvanced() {
-        configLoggingLevel.getItems().setAll("DEBUG", "INFO", "WARN", "ERROR");
+        configLoggingLevel.getItems().setAll(LogLevels.debug, LogLevels.info, LogLevels.warn, LogLevels.error);
         configLoggingLevel.valueProperty().addListener(observable -> {
             if (configLoggingLevel.getValue() != null) {
                 Logger.setLevel(Level.toLevel(configLoggingLevel.getValue(), Level.INFO));
@@ -400,14 +385,14 @@ public class Homepage {
         });
         String level = config.logging_level;
         List<String> args = Arrays.asList(ArgPending.argCache);
-        if (args.contains("--quiet"))
-            level = "ERROR";
-        else if (args.contains("--warn"))
-            level = "WARN";
-        else if (args.contains("--info"))
-            level = "INFO";
-        else if (args.contains("--debug"))
-            level = "DEBUG";
+        if (args.contains(LogLevels.errorArg))
+            level = LogLevels.error;
+        else if (args.contains(LogLevels.warnArg))
+            level = LogLevels.warn;
+        else if (args.contains(LogLevels.infoArg))
+            level = LogLevels.info;
+        else if (args.contains(LogLevels.debugArg))
+            level = LogLevels.debug;
         configLoggingLevel.getSelectionModel().select(level);
     }
 
@@ -415,7 +400,7 @@ public class Homepage {
         aboutQueryUpdate.setOnMouseClicked(e -> foregroundCheckUpdate(true, "manual"));
         aboutVisitWebsite.setOnMouseClicked(e -> {
             try {
-                Desktop.getDesktop().browse(URI.create(urlOfficial));
+                Desktop.getDesktop().browse(URI.create(PathConfig.urlOfficial));
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -447,7 +432,7 @@ public class Homepage {
         ss.start();
     }
 
-    public JFXDialog foregroundTask(Task $task, String $title, String $header, String $defaultContent, Boolean $cancelable) {
+    public JFXDialog foregroundTask(Task $task, String $header, String $defaultContent, Boolean $cancelable) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
         ProgressBar bar = new ProgressBar(-1);
         bar.setPrefSize(root.getWidth() * 0.6, 10);
@@ -483,9 +468,7 @@ public class Homepage {
                 bar.setProgress((double)newValue);
             }
         });
-        $task.messageProperty().addListener(((observable, oldValue, newValue) -> {
-            h3.setText(newValue);
-        }));
+        $task.messageProperty().addListener(((observable, oldValue, newValue) -> h3.setText(newValue)));
         $task.setOnCancelled(e -> {
             Logger.info("Task", "Foreground task was cancelled.");
             DialogUtil.disposeDialog(dialog, root);
@@ -619,32 +602,32 @@ public class Homepage {
 
     private void foregroundCheckModels() {
         try {
-            Files.createDirectories(new File(tempDirPath).toPath());
+            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         if (!initModelDataset(true))
             return;
-        Task<Boolean> task = createDownloadTask(false, urlModelsData, tempDirPath + fileModelsDataPath);
-        JFXDialog dialog = foregroundTask(task, "检查模型更新", "正在下载模型版本信息...", "", true);
+        Task<Boolean> task = createDownloadTask(false, PathConfig.urlModelsData, PathConfig.tempDirPath + PathConfig.fileModelsDataPath);
+        JFXDialog dialog = foregroundTask(task, "正在下载模型版本信息...", "", true);
         task.setOnSucceeded(e -> {
             DialogUtil.disposeDialog(dialog, root);
             try {
                 String versionDescription;
                 try {
-                    JSONObject newModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(tempDirPath + fileModelsDataPath), "UTF-8"));
+                    JSONObject newModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath), "UTF-8"));
                     versionDescription = newModelsDataset.getString("gameDataVersionDescription");
                 } catch (Exception ex) {
                     versionDescription = "unknown";
                 }
                 // TODO do judgment more precisely
-                if (FileUtil.getMD5(new File(fileModelsDataPath)).equals(FileUtil.getMD5(new File(tempDirPath + fileModelsDataPath)))) {
+                if (FileUtil.getMD5(new File(PathConfig.fileModelsDataPath)).equals(FileUtil.getMD5(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath)))) {
                     popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
                             "提示：远程仓库的版本不一定和游戏同步更新。", "模型仓库版本描述：\n" + versionDescription).show();
                 } else {
                     String oldVersionDescription;
                     try {
-                        JSONObject oldModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(fileModelsDataPath), "UTF-8"));
+                        JSONObject oldModelsDataset = JSONObject.parseObject(FileUtil.readString(new File(PathConfig.fileModelsDataPath), "UTF-8"));
                         oldVersionDescription = oldModelsDataset.getString("gameDataVersionDescription");
                     } catch (Exception ex) {
                         oldVersionDescription = "unknown";
@@ -660,24 +643,24 @@ public class Homepage {
 
     private void foregroundFetchModels() {
         try {
-            Files.createDirectories(new File(tempDirPath).toPath());
+            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         //1
         // TODO change download source
-        Task<Boolean> task1 = createDownloadTask(true, urlModelsZip, tempModelsZipCachePath);
-        JFXDialog task1dialog = foregroundTask(task1, "正在更新模型", "正在下载模型资源文件...", "", true);
+        Task<Boolean> task1 = createDownloadTask(true, PathConfig.urlModelsZip, PathConfig.tempModelsZipCachePath);
+        JFXDialog task1dialog = foregroundTask(task1, "正在下载模型资源文件...", "", true);
         task1.setOnSucceeded(e1 -> {
             DialogUtil.disposeDialog(task1dialog, root);
             //2
-            Task<Boolean> task2 = createUnzipTask(tempModelsZipCachePath, tempModelsUnzipDirPath);
-            JFXDialog task2dialog = foregroundTask(task2, "正在更新模型", "正在解压模型资源文件...", "这可能需要十几秒", false);
+            Task<Boolean> task2 = createUnzipTask(PathConfig.tempModelsZipCachePath, PathConfig.tempModelsUnzipDirPath);
+            JFXDialog task2dialog = foregroundTask(task2, "正在解压模型资源文件...", "这可能需要十几秒", false);
             task2.setOnSucceeded(e2 -> {
                 DialogUtil.disposeDialog(task2dialog, root);
                 //3
-                Task<Boolean> task3 = createModelsMovingTask(tempModelsUnzipDirPath, fileModelsDataPath);
-                JFXDialog task3dialog = foregroundTask(task3, "正在更新模型", "正在应用模型更新...", "即将完成", false);
+                Task<Boolean> task3 = createModelsMovingTask(PathConfig.tempModelsUnzipDirPath, PathConfig.fileModelsDataPath);
+                JFXDialog task3dialog = foregroundTask(task3, "正在应用模型更新...", "即将完成", false);
                 task3.setOnSucceeded(e3 -> {
                     DialogUtil.disposeDialog(task3dialog, root);
                     dealModelReload();
@@ -692,18 +675,18 @@ public class Homepage {
         final Node[] dialogGraphic = new Node[1];
         final String[] dialogHeader = new String[1];
         final String[] dialogContent = new String[1];
-        Task<Boolean> task = new Task<Boolean>() {
+        Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws Exception {
                 this.updateProgress(0.1, 1);
                 Path rootPath = new File("").toPath();
                 int rootPathCount = rootPath.getNameCount();
-                JSONObject cachedMDSD = (JSONObject)modelsDatasetFull.getJSONObject("storageDirectory").clone();
-                JSONObject cachedMDD = (JSONObject)modelsDatasetFull.getJSONObject("data").clone();
+                JSONObject cachedMDSD = (JSONObject) modelsDatasetFull.getJSONObject("storageDirectory").clone();
+                JSONObject cachedMDD = (JSONObject) modelsDatasetFull.getJSONObject("data").clone();
                 Thread.sleep(100);
                 this.updateProgress(0.2, 1);
                 final boolean[] flag = {false};
-                Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+                Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
                         //System.out.println(dir);
@@ -756,33 +739,33 @@ public class Homepage {
                 if (dialogGraphic[0] != null && dialogHeader[0] != null && dialogContent[0] != null)
                     popNotice(dialogGraphic[0], "验证资源完整性", dialogHeader[0], dialogContent[0], null).show();
         });
-        foregroundTask(task, "验证资源完整性", "正在检验模型资源完整性...", "这可能需要数秒", true);
+        foregroundTask(task, "正在检验模型资源完整性...", "这可能需要数秒", true);
     }
 
     private void foregroundCheckUpdate(boolean $popNotice, String $sourceStr) {
         try {
-            Files.createDirectories(new File(tempDirPath).toPath());
+            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String queryStr = "?type=queryVersion&cliVer=" + ArkHomeFX.appVersionStr + "&source=" + $sourceStr;
-        Task<Boolean> task = createDownloadTask(urlApi + queryStr, tempQueryVersionCachePath);
-        JFXDialog dialog = foregroundTask(task, "正在检查软件更新", "正在下载软件版本信息...", "", true);
+        String queryStr = "?type=queryVersion&cliVer=" + appVersionStr + "&source=" + $sourceStr;
+        Task<Boolean> task = createDownloadTask(PathConfig.urlApi + queryStr, PathConfig.tempQueryVersionCachePath);
+        JFXDialog dialog = foregroundTask(task, "正在下载软件版本信息...", "", true);
         task.setOnSucceeded(e -> {
             DialogUtil.disposeDialog(dialog, root);
             try {
-                JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(FileUtil.readByte(new File(tempQueryVersionCachePath))));
+                JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath))));
                 // TODO show in-test version
                 if (queryVersionResult.getString("msg").equals("success")) {
                     int[] stableVersionResult = queryVersionResult.getJSONObject("data").getObject("stableVersion", int[].class);
-                    if (stableVersionResult[0] > ArkHomeFX.appVersion[0] ||
-                            (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] > ArkHomeFX.appVersion[1]) ||
-                            (stableVersionResult[0] == ArkHomeFX.appVersion[0] && stableVersionResult[1] == ArkHomeFX.appVersion[1] && stableVersionResult[2] > ArkHomeFX.appVersion[2])) {
+                    if (stableVersionResult[0] > appVersion[0] ||
+                            (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] > appVersion[1]) ||
+                            (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] == appVersion[1] && stableVersionResult[2] > appVersion[2])) {
                         popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "恭喜，检测到软件有新的版本。",
-                                ArkHomeFX.appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。", null).show();
+                                appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。", null).show();
                     } else {
                         popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
-                                "当前版本：" + ArkHomeFX.appVersionStr, null).show();
+                                "当前版本：" + appVersionStr, null).show();
                     }
                 } else {
                     if ($popNotice)
@@ -816,9 +799,9 @@ public class Homepage {
                 File file = new File($localPath);
                 try {
                     urlFile = new URL(remotePath);
-                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeout, httpTimeout, isHttpsTrustAll);
-                    bis = new BufferedInputStream(connection.getInputStream(), bufferSize);
-                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), bufferSize);
+                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
+                    bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
+                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
                 } catch (IOException e) {
                     try {
                         if (connection != null && connection.getInputStream() != null)
@@ -831,7 +814,7 @@ public class Homepage {
                     }
                     throw e;
                 }
-                int len = bufferSize;
+                int len = httpBufferSizeDefault;
                 int unit_KB = 1024;
                 int unit_MB = unit_KB * 1024;
                 long sum = 0;
@@ -883,9 +866,9 @@ public class Homepage {
                 File file = new File($localPath);
                 try {
                     urlFile = new URL($remotePath);
-                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeout, httpTimeout, isHttpsTrustAll);
-                    bis = new BufferedInputStream(connection.getInputStream(), bufferSize);
-                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), bufferSize);
+                    connection = NetUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
+                    bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
+                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
                 } catch (IOException e) {
                     try {
                         if (connection != null && connection.getInputStream() != null)
@@ -898,7 +881,7 @@ public class Homepage {
                     }
                     throw e;
                 }
-                int len = bufferSize;
+                int len = httpBufferSizeDefault;
                 int unit_KB = 1024;
                 int unit_MB = unit_KB * 1024;
                 long sum = 0;
@@ -962,7 +945,7 @@ public class Homepage {
                 Path rootPath = new File($rootPath).toPath();
                 int rootPathCount = rootPath.getNameCount();
                 final boolean[] hasDataset = {false};
-                Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+                Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         if (file.getNameCount() == (rootPathCount + 2) && file.getName(rootPathCount + 1).toString().equals($modelsDataPath)) {

@@ -5,7 +5,6 @@ package com.isharryh.arkpets;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
@@ -24,6 +23,8 @@ import com.isharryh.arkpets.behaviors.*;
 import com.isharryh.arkpets.easings.EasingLinear;
 import com.isharryh.arkpets.easings.EasingLinearVector2;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	/* RENDER PROCESS */
@@ -36,7 +37,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private HWND HWND_TOPMOST;
 	private LoopCtrl getHWndLoopCtrl;
 
-	private int APP_FPS = 30;
+	private int APP_FPS = fpsDefault;
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
@@ -64,12 +65,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_recent + "\"");
-		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", 0.33f);
+		cha = new ArkChar(config.character_recent+".atlas", config.character_recent+".skel", skelBaseScale);
 		cha.setCanvas(APP_FPS);
 		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
-		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, 0.2f));
+		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, linearEasingDuration));
 		WD_SCALE = config.display_scale;
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
@@ -347,7 +348,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	private int getArkPetsWindowNum(String title) {
-		final String prefix = "ArkPets";
+		final String prefix = coreTitle;
 		final String prefix2 = " (";
 		final String suffix = ")";
 		if (title != null && !title.isEmpty()) {
