@@ -10,22 +10,19 @@ import com.isharryh.arkpets.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 
 public class ArkConfig {
-    public static final String configCustomPath;
-    public static final String configDefaultPath;
-    private static final File configCustom;
-    private static final File configDefault;
-    static {
-        configCustomPath = "ArkPetsCustom.config";
-        configDefaultPath = "/ArkPetsDefault.config";
-        configCustom = new File(configCustomPath);
-        configDefault = new File(Objects.requireNonNull(ArkConfig.class.getResource(configDefaultPath)).toExternalForm());
-    }
+    public static final String configCustomPath = "ArkPetsConfig.json";
+    public static final String configDefaultPath = "/ArkPetsConfigDefault.json";
+    private static final File configCustom =
+            new File(configCustomPath);
+    private static final InputStream configDefault =
+            Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
 
     // The following is the config items
     public float display_scale;
@@ -45,13 +42,13 @@ public class ArkConfig {
     }
 
     /** Get the config in String format.
-     * @return The text.
+     * @return All the content in the config file.
      */
     public String readConfig() {
         return JSON.toJSONString(this, true);
     }
 
-    /** Save the config to the custom file.
+    /** Save the config into the custom file.
      */
     public void saveConfig() {
         try {
@@ -61,13 +58,13 @@ public class ArkConfig {
         }
     }
 
-    /** Instantiate an ArkConfig.
+    /** Instantiate an ArkConfig object.
      * @return ArkConfig object.
      */
     public static ArkConfig getConfig() {
         if (!configCustom.isFile()) {
             try {
-                Files.copy(Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath)), configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(configDefault, configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 Logger.error("Config", "Config copying failed, details see below.", e);
             }
@@ -78,15 +75,5 @@ public class ArkConfig {
             Logger.error("Config", "Config reading failed, details see below.", e);
             return null;
         }
-    }
-
-    /** Compare two object whether their values are the same,
-     * no matter what types they are.
-     * @return true=same, false=diff.
-     */
-    public static boolean compare(Object $a, Object $b) {
-        if ($a == null || $b == null)
-            return false;
-        return String.valueOf($a).equals(String.valueOf($b));
     }
 }

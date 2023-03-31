@@ -1,0 +1,19 @@
+{
+    "behavior_ai_activation":8,
+    "behavior_allow_interact":true,
+    "behavior_allow_sit":true,
+    "behavior_allow_sleep":false,
+    "behavior_allow_walk":true,
+    "behavior_do_peer_repulsion":true,
+    "character_recent":"",
+    "display_fps":30,
+    "display_margin_bottom":0,
+    "display_monitor_info":[
+        1920,
+        1080,
+        60,
+        24
+    ],
+    "display_scale":1.25,
+    "logging_level":"INFO"
+}

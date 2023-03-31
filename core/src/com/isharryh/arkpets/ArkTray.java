@@ -20,6 +20,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.AWTException;
 import java.io.File;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 public class ArkTray {
     private final ArkPets arkPets;
@@ -49,7 +51,7 @@ public class ArkTray {
 
         // Load tray icon image.
         Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png"));
-        icon = new TrayIcon(image,  name + " - ArkPets");
+        icon = new TrayIcon(image,  name + " - " + coreTitle);
         icon.setImageAutoSize(true);
 
         popWindow = new JDialog(); // JDialog is the container of JPopupMenu.

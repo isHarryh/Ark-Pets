@@ -76,8 +76,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 		SCR_W = config.display_monitor_info[0];
 		SCR_H = config.display_monitor_info[1];
-		intiWindow(100, SCR_H - WD_H);
-		setWindowPosTar(100, SCR_H - WD_H);
+		int x = (int)(SCR_W * 0.05f);
+		int y = SCR_H - WD_H;
+		intiWindow(x, y);
+		setWindowPosTar(x, y);
 		// 4.Plane setup
 		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
 		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
@@ -241,35 +243,29 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private final String APP_TITLE;
 	public HWND HWND_MINE;
 
-	private boolean intiWindow(int x, int y) {
+	private void intiWindow(int x, int y) {
 		if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
 		if (HWND_MINE == null)
-			return false;
+			return;
 		HWND_TOPMOST = refreshWindowIdx();
-		//final int WL_TRAN_ON = 262160;
-		//final int WL_TRAN_OFF = User32.INSTANCE.GetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE)
-		//		| WinUser.WS_EX_LAYERED | WinUser.WS_EX_TRANSPARENT;
-		//System.out.println(User32.INSTANCE.GetWindowLong(hwnd, WinUser.GWL_EXSTYLE));
-		//User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, enable ? WL_TRAN_ON : WL_TRAN_OFF);
 		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
 				x, y, WD_W, WD_H,
 				WinUser.SWP_SHOWWINDOW | WinUser.SWP_NOACTIVATE
 		);
 		Logger.debug("Window", "JNA SetWindowLong returns " +
 				Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088)));
-		return true;
 	}
 
-	private boolean setWindowPos(int x, int y, boolean override) {
+	private void setWindowPos(int x, int y, boolean override) {
 		if (HWND_MINE == null)
-			return false;
+			return;
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
 			HWND new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != HWND_TOPMOST) {
 				HWND_TOPMOST = new_hwnd_topmost;
 				if (x == WD_poscur.x && y == WD_poscur.y)
-					return false;
+					return;
 			}
 		}
 		WD_poscur.set(
@@ -287,7 +283,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				(int) WD_poscur.x, (int) WD_poscur.y,
 				WD_W, WD_H, WinUser.SWP_NOACTIVATE
 		);
-		return true;
 	}
 
 	private HWND refreshWindowIdx() {
@@ -401,7 +396,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	/* UTILS */
 	public static class LoopCtrl {
-		private float minIntervalTime;
+		private final float minIntervalTime;
 		private float accumTime;
 
 		/** Loop Controller instance.

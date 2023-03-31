@@ -41,7 +41,7 @@ public class ArkChar {
     private final OrthographicCamera camera;
     private final TwoColorPolygonBatch batch;
     private final FrameBuffer fbo;
-    private final TextureRegion fboRegion;
+//    private final TextureRegion fboRegion;
     private Texture bgTexture;
     public Vector3 positionCur;
     public Vector3 positionTar;
@@ -51,9 +51,7 @@ public class ArkChar {
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
     private final int MAX_CANVAS_SIZE = 720;
-    private final int DEFAULT_FPS = 30;
     private final int DEFAULT_RESERVED = 100;
-    private boolean isInitialized = false;
     private SkeletonData skeletonData;
     private AnimationState animationState;
 
@@ -74,7 +72,7 @@ public class ArkChar {
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
         fbo = new FrameBuffer(Format.RGBA8888, MAX_CANVAS_SIZE, MAX_CANVAS_SIZE, false);
-        fboRegion = new TextureRegion(fbo.getColorBufferTexture());
+//        fboRegion = new TextureRegion(fbo.getColorBufferTexture());
         flexibleLayout = new CroppingCtrl(new Vector2(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE), 0);
 
         // Layout
@@ -95,7 +93,6 @@ public class ArkChar {
             adjustCanvas(Math.round(DEFAULT_RESERVED * $anim_scale), anim_list[i], i == 0);
         Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
         updateCanvas();
-        isInitialized = true;
     }
 
     private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
@@ -103,16 +100,16 @@ public class ArkChar {
         try {
         TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
             switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
-                case ".skel":
+                case ".skel" -> {
                     SkeletonBinary binary = new SkeletonBinary(atlas);
                     binary.setScale($scale);
                     skeletonData = binary.readSkeletonData(Gdx.files.internal($fp_skel));
-                    break;
-                case ".json":
+                }
+                case ".json" -> {
                     SkeletonJson json = new SkeletonJson(atlas);
                     json.setScale($scale);
                     skeletonData = json.readSkeletonData(Gdx.files.internal($fp_skel));
-                    break;
+                }
                 // default:
             }
         } catch (SerializationException | GdxRuntimeException e) {
@@ -170,7 +167,7 @@ public class ArkChar {
      * @param $reserved_length The reserved length of the canvas (px).
      */
     public void adjustCanvas(int $reserved_length, String $anim_name, boolean $initialize) {
-        setCanvas(DEFAULT_FPS);
+        setCanvas(fpsDefault);
         setAnimation(new AnimData($anim_name, false, true));
         setPositionCur(Float.MAX_VALUE);
         changeAnimation();
@@ -222,6 +219,7 @@ public class ArkChar {
      * Note that the image may not be flipped along the y-axis.
      * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
      */
+    @Deprecated
     private void saveCurrentTexture(boolean debug) {
         Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, flexibleLayout.getWidth(), flexibleLayout.getHeight());
         if (debug) {

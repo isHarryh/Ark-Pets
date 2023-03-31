@@ -3,6 +3,8 @@
  */
 package com.isharryh.arkpets.controllers;
 
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.isharryh.arkpets.ArkConfig;
 import com.isharryh.arkpets.utils.*;
 import com.isharryh.arkpets.utils.IOUtils.*;
@@ -140,7 +142,8 @@ public class Homepage {
 
     public void initialize() {
         Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
-        config = ArkConfig.getConfig();
+        config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
+        config.display_monitor_info = getDefaultMonitorInfo();
         initMenuBtn(menuBtn1, 1);
         initMenuBtn(menuBtn2, 2);
         initMenuBtn(menuBtn3, 3);
@@ -152,6 +155,7 @@ public class Homepage {
         initConfigAdvanced();
         initAbout();
         initLaunchingStatusListener();
+        config.saveConfig();
         menuBtn1.getStyleClass().add("menu-btn-active");
         Platform.runLater(() -> {
             initModelAssets(false);
@@ -1073,5 +1077,10 @@ public class Homepage {
             // Loaded:
             return true;
         }
+    }
+
+    private static int[] getDefaultMonitorInfo() {
+        Graphics.DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
+        return new int[] {displayMode.width, displayMode.height, displayMode.refreshRate, displayMode.bitsPerPixel};
     }
 }

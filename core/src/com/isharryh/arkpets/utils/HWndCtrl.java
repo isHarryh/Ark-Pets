@@ -38,7 +38,6 @@ public class HWndCtrl {
         posBottom = rect.bottom;
         posLeft = rect.left;
         posRight = rect.right;
-        int test = User32.INSTANCE.GetWindowLong($hWnd, WinUser.GWL_EXSTYLE);
         windowWidth = posRight-posLeft;
         windowHeight = posBottom-posTop;
     }
@@ -129,11 +128,6 @@ public class HWndCtrl {
             int posRight = rect.right;
             if (posRight <= posLeft || posBottom <= posTop || posBottom < 0 || posRight < 0)
                 return false;
-            /*
-            String text = getWindowText($hWnd);
-            if (text.length() == 0)
-                return false;
-            */
         } catch(Exception e) {
             return false;
         }

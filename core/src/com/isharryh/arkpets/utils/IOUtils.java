@@ -20,12 +20,13 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static com.isharryh.arkpets.Const.*;
+
 
 public class IOUtils {
 
     public static class FileUtil {
-        /**
-         * Read the entire file into a byte array.
+        /** Read the entire file into a byte array.
          * @param file The file to be read.
          * @return A byte array.
          * @throws IOException If I/O error occurs. It may be FileNotFoundException, etc.
@@ -39,8 +40,7 @@ public class IOUtils {
             return content;
         }
 
-        /**
-         * Read the entire file into a string using the specified charset.
+        /** Read the entire file into a string using the specified charset.
          * @param file        The file to be read.
          * @param charsetName The name of the specified charset.
          * @return A String.
@@ -51,6 +51,12 @@ public class IOUtils {
             return new String(readByte(file), charsetName);
         }
 
+        /** Write a byte array into a file.
+         * @param file The file to be written.
+         * @param content The specified bytes.
+         * @param append If false, the existed file will be overwritten; If true, content will be appended to its end.
+         * @throws IOException If I/O error occurs. It may be FileNotFoundException, etc.
+         */
         public static void writeByte(File file, byte[] content, boolean append)
                 throws IOException {
             if (!append && file.exists() && !file.delete())
@@ -62,11 +68,17 @@ public class IOUtils {
             stream.close();
         }
 
+        /** Write a string into a file using the specified charset.
+         * @param file The file to be written.
+         * @param charsetName The name of the specified charset.
+         * @param content The specified string.
+         * @param append If false, the existed file will be overwritten; If true, content will be appended to its end.
+         * @throws IOException If I/O error occurs. It may be FileNotFoundException, etc.
+         */
         public static void writeString(File file, String charsetName, String content, boolean append)
                 throws IOException {
             writeByte(file, content.getBytes(charsetName), append);
         }
-
 
         /**
          * Get the MD5 hex string of the given content.
@@ -123,7 +135,7 @@ public class IOUtils {
                 return;
             }
             try {
-                Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                Files.walkFileTree(path, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         try {
@@ -152,6 +164,7 @@ public class IOUtils {
             }
         }
     }
+
 
     public static class NetUtil {
         public static HttpsURLConnection createHttpsConnection(URL url, int connectTimeout, int readTimeout, boolean trustAll)
@@ -255,9 +268,8 @@ public class IOUtils {
         }
     }
 
-    public static class ZipUtil {
-        private static int bufferSize = 4096;
 
+    public static class ZipUtil {
         /** Unzip the entire zip file into the given directory.
          * @param zipFilePath The path of the zip file.
          * @param destDirPath The path of the destination directory which will be created if it is not existed.
@@ -297,11 +309,11 @@ public class IOUtils {
                 entry = item.nextElement();
                 if (!entry.isDirectory()) {
                     int len;
-                    byte[] bytes = new byte[bufferSize];
+                    byte[] bytes = new byte[zipBufferSizeDefault];
                     FileOutputStream fos = new FileOutputStream(destDirPath + entry.getName());
-                    bos = new BufferedOutputStream(fos, bufferSize);
+                    bos = new BufferedOutputStream(fos, zipBufferSizeDefault);
                     bis = new BufferedInputStream(zipfile.getInputStream(entry));
-                    while ((len = bis.read(bytes, 0, bufferSize)) != -1)
+                    while ((len = bis.read(bytes, 0, zipBufferSizeDefault)) != -1)
                         bos.write(bytes, 0, len);
                     bos.flush();
                     bos.close();
@@ -310,5 +322,4 @@ public class IOUtils {
             }
         }
     }
-
 }

@@ -10,6 +10,7 @@ public final class Const {
     public static final int[] appVersion        = {2, 0, 0};
     public static final String appVersionStr    = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
 
+    public static final int zipBufferSizeDefault    = 8 * 1024;
     public static final int httpBufferSizeDefault   = 8 * 1024;
     public static final int httpTimeoutDefault      = 30 * 1000;
 
