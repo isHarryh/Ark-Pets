@@ -17,7 +17,7 @@
 <AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="372.0"
             prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.isharryh.arkpets.controllers.Homepage">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.harryh.arkpets.controllers.Homepage">
     <Pane id="Sidebar" fx:id="sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
           minWidth="-Infinity" prefHeight="372.0" prefWidth="140.0" StackPane.alignment="TOP_LEFT">
         <Line endX="128.0" layoutY="66.0" startX="12.0"/>
