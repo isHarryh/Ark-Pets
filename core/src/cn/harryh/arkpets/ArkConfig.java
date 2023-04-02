@@ -9,16 +9,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
+import static cn.harryh.arkpets.Const.*;
+
 
 public class ArkConfig {
-    public static final String configCustomPath = "ArkPetsConfig.json";
-    public static final String configDefaultPath = "/ArkPetsConfigDefault.json";
+    public static final String configCustomPath = configExternal;
+    public static final String configDefaultPath = configInternal;
     private static final File configCustom =
             new File(configCustomPath);
     private static final InputStream configDefault =
@@ -52,7 +55,7 @@ public class ArkConfig {
      */
     public void saveConfig() {
         try {
-            IOUtils.FileUtil.writeString(configCustom, "UTF-8", readConfig(), false);
+            IOUtils.FileUtil.writeString(configCustom, charsetDefault, readConfig(), false);
         } catch (IOException e) {
             Logger.error("Config", "Config saving failed, details see below.", e);
         }
@@ -70,10 +73,80 @@ public class ArkConfig {
             }
         }
         try {
-            return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, "UTF-8"), ArkConfig.class);
+            return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, charsetDefault), ArkConfig.class);
         } catch (IOException e) {
             Logger.error("Config", "Config reading failed, details see below.", e);
             return null;
+        }
+    }
+
+
+    public static class StartupConfig {
+        public static File startupDir;
+        public static File startupFile;
+
+        static {
+            try {
+                startupDir = new File(System.getProperty("user.home") + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup");
+                if (!startupDir.isDirectory())
+                    throw new FileNotFoundException("No such directory " + startupDir.getAbsolutePath());
+                startupFile = new File(startupDir.getAbsolutePath(), startUpScript);
+            } catch (Exception e) {
+                startupDir = null;
+                startupFile = null;
+                Logger.error("Config", "Auto-startup config may be unavailable, details see below.", e);
+            }
+        }
+
+        public static boolean addStartup() {
+            try {
+                String script = generateScript();
+                if (script == null || startupDir == null)
+                    throw new IOException("Generate script failed.");
+                IOUtils.FileUtil.writeString(startupFile, charsetVBS, script, false);
+                Logger.info("Config", "Auto-startup was added: " + startupFile.getAbsolutePath());
+                return true;
+            } catch (IOException e) {
+                Logger.error("Config", "Auto-startup adding failed, details see below.", e);
+                return false;
+            }
+        }
+
+        public static void removeStartup() {
+            try {
+                IOUtils.FileUtil.delete(startupFile.toPath(), false);
+            } catch (IOException e) {
+                Logger.error("Config", "Auto-startup removing failed, details see below.", e);
+            }
+        }
+
+        public static boolean isSetStartup() {
+            try {
+                if (!Files.exists(startupFile.toPath()))
+                    return false;
+                String script = generateScript();
+                if (script == null || startupDir == null)
+                    throw new IOException("Generate script failed.");
+                String checksum1 = IOUtils.FileUtil.getMD5(Objects.requireNonNull(script).getBytes(charsetVBS));
+                String checksum2 = IOUtils.FileUtil.getMD5(startupFile);
+                return checksum1.equals(checksum2);
+            } catch (IOException e) {
+                return false;
+            }
+        }
+
+        public static String generateScript() {
+            if (!Files.exists(new File(startupTarget).toPath()))
+                return null;
+            String cd = System.getProperty("user.dir");
+            cd = cd.replaceAll("\"", "\"\"");
+            String run = startupTarget + " --direct-start";
+            run = run.replaceAll("\"", "\"\"");
+            String cmd = "rem *** This is an auto-startup script, you can delete it if you want. ***\n" +
+                    "set ws = WScript.CreateObject(\"WScript.shell\")\n" +
+                    "ws.CurrentDirectory = \"" + cd + "\"\n" +
+                    "ws.run \"" + run + "\"\n";
+            return cmd;
         }
     }
 }

@@ -27,6 +27,13 @@
 -fx-effect: dropshadow(gaussian, #00000040, 10, 0.2, 0, 1);
 }
 
+.fluorescent {
+/* Fluorescent strokes for Shapes */
+-fx-stroke: #80DFFF;
+-fx-stroke-type: outside;
+-fx-stroke-width: 0.382px;
+}
+
 .popup-detail-field {
 /* Expandable text area for Popup dialogs */
 -fx-alignment: top-left;
@@ -71,7 +78,7 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 
 Button:focused {
 /* Focused */
--fx-effect: dropshadow(three-pass-box, #80DFFFFF, 8, 0.5, 0, 0);
+-fx-effect: dropshadow(three-pass-box, #80DFFF, 8, 0.5, 0, 0);
 }
 
 .btn-primary, .btn-secondary {
@@ -116,6 +123,12 @@ Button:focused {
 
 #Sidebar {
 -fx-background-color: #95B7E5;
+}
+
+#Title {
+-fx-fill: #204880;
+-fx-font-size: 24px;
+-fx-font-weight: bold;
 }
 
 .menu-btn {
@@ -190,13 +203,12 @@ Button:focused {
 -fx-text-fill: #F03030;
 }
 
-#Loading-failure-tip {
--fx-background-color: #F4F4F4;
--fx-opacity: 0.875;
+#Loading-failure-tip, #Loading-waiting-tip {
+-fx-background-color: #F4F4F4E0;
 }
 
-#Loading-failure-tip > * {
--fx-fill: #444444;
+#Loading-failure-tip > *, #Loading-waiting-tip > * {
+-fx-fill: #505050;
 }
 
 #Search-models-bar {
@@ -338,7 +350,7 @@ Button:focused {
 
 .config-field Separator {
 -fx-padding: 8px 0 8px 0;
--fx-opacity: 0.38;
+-fx-opacity: 0.382;
 }
 
 .config-hyper-link {

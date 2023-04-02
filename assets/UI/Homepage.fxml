@@ -15,12 +15,15 @@
 <?import javafx.scene.text.*?>
 
 <AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="372.0"
-            prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea"
+            prefHeight="372.0" prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.harryh.arkpets.controllers.Homepage">
+
+    <!-- ********** Sidebar ********** -->
     <Pane id="Sidebar" fx:id="sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
           minWidth="-Infinity" prefHeight="372.0" prefWidth="140.0" StackPane.alignment="TOP_LEFT">
-        <Line endX="128.0" layoutY="66.0" startX="12.0"/>
+        <Text id="Title" layoutX="12.0" layoutY="55.0" styleClass="fluorescent" text="ArkPets" textAlignment="CENTER"
+              wrappingWidth="117.0"/>
+        <Line endX="128.0" layoutY="66.0" startX="12.0" stroke="#0000009e"/>
         <GridPane alignment="CENTER" layoutY="88.0" prefHeight="180.0" prefWidth="140.0" styleClass="menu">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
@@ -102,7 +105,8 @@
             </graphic>
         </JFXButton>
     </Pane>
-    <!-- -->
+
+    <!-- ********* Wrapper 1 ********* -->
     <Pane id="wrapper-1" fx:id="wrapper1" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
           visible="false">
         <Label layoutX="10.0" layoutY="15.0" styleClass="config-group-title" text="模型选择"/>
@@ -132,7 +136,7 @@
                         </AnchorPane>
                     </graphic>
                 </Label>
-                <JFXComboBox fx:id="searchModelFilter" id="Info-filter-box" prefWidth="95.0"/>
+                <JFXComboBox id="Info-filter-box" fx:id="searchModelFilter" prefWidth="95.0"/>
             </children>
         </HBox>
         <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="36.0" prefWidth="430.0">
@@ -234,13 +238,15 @@
             </children>
         </VBox>
     </Pane>
-    <!-- -->
-    <Pane id="wrapper-2" fx:id="wrapper2" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper">
+
+    <!-- ********* Wrapper 2 ********* -->
+    <Pane id="wrapper-2" fx:id="wrapper2" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
+          visible="false">
         <children>
             <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
                 <content>
                     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
-                                minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
+                                minWidth="0.0" prefWidth="425.0" styleClass="config-field">
                         <children>
                             <VBox>
                                 <children>
@@ -279,14 +285,15 @@
             </ScrollPane>
         </children>
     </Pane>
-    <!-- -->
+
+    <!-- ********* Wrapper 3 ********* -->
     <Pane id="wrapper-3" fx:id="wrapper3" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
           visible="false">
         <children>
             <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
                 <content>
                     <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0"
-                                minWidth="0.0" prefHeight="335.0" prefWidth="425.0" styleClass="config-field">
+                                minWidth="0.0" prefWidth="425.0" styleClass="config-field">
                         <children>
                             <VBox>
                                 <children>
@@ -370,6 +377,10 @@
                                     <Separator/>
                                     <Label styleClass="config-group-title" text="高级设置"/>
                                     <HBox>
+                                        <JFXCheckBox fx:id="configAutoStartup" mnemonicParsing="false"
+                                                     text="开机自动生成桌宠"/>
+                                    </HBox>
+                                    <HBox>
                                         <children>
                                             <Label text="日志级别"/>
                                             <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
@@ -385,13 +396,27 @@
                                                    text="ArkPets官网"/>
                                         </children>
                                     </HBox>
-                                    <Separator/>
                                 </children>
                             </VBox>
                         </children>
                     </AnchorPane>
                 </content>
             </ScrollPane>
+        </children>
+    </Pane>
+
+    <!-- ** Wrapper for loading mask ** -->
+    <Pane id="wrapper-0" fx:id="wrapper0" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper">
+        <children>
+            <VBox id="Loading-waiting-tip" alignment="CENTER" layoutX="1.0" prefHeight="370.0" prefWidth="458.0"
+                  spacing="5.0">
+                <children>
+                    <SVGPath
+                            content="M18.513 7.119c.958-1.143 1.487-2.577 1.487-4.036v-3.083h-16v3.083c0 1.459.528 2.892 1.487 4.035l3.087 3.68c.566.677.57 1.625.009 2.306l-3.13 3.794c-.937 1.136-1.453 2.555-1.453 3.995v3.107h16v-3.107c0-1.44-.517-2.858-1.453-3.994l-3.13-3.794c-.562-.681-.558-1.629.009-2.306l3.087-3.68zm-.513-4.12c0 1.101-.363 2.05-1.02 2.834l-.978 1.167h-8.004l-.978-1.167c-.66-.785-1.02-1.736-1.02-2.834h12zm-.996 15.172c.652.791.996 1.725.996 2.829h-1.061c-1.939-2-4.939-2-4.939-2s-3 0-4.939 2h-1.061c0-1.104.344-2.039.996-2.829l3.129-3.793c.342-.415.571-.886.711-1.377h.164v1h2v-1h.163c.141.491.369.962.711 1.376l3.13 3.794zm-6.004-1.171h2v1h-2v-1zm0-2h2v1h-2v-1z"
+                            scaleX="1.25" scaleY="1.25" translateY="-10.0"/>
+                    <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Loading"/>
+                </children>
+            </VBox>
         </children>
     </Pane>
 </AnchorPane>

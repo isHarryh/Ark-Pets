@@ -3,6 +3,8 @@
  */
 package cn.harryh.arkpets;
 
+import javafx.util.Duration;
+
 
 public final class Const {
     // Constants list
@@ -22,12 +24,27 @@ public final class Const {
     public static final float linearEasingDuration  = 0.2f;
 
     public static final String coreTitle    = "ArkPets";
-    public static final String desktopTitle = coreTitle + " Launcher EA";
+    public static final String desktopTitle = coreTitle + " Launcher " + appVersionStr;
+
+    public static final Duration durationFast   = new Duration(150);
+    public static final Duration durationNormal = new Duration(300);
+
+    public static final String configExternal   = "ArkPetsConfig.json";
+    public static final String configInternal   = "/ArkPetsConfigDefault.json";
+
+    public static final String iconFileIco  = "icon.ico";
+    public static final String iconFilePng  = "icon.png";
+
+    public static final String charsetDefault   = "UTF-8";
+    public static final String charsetVBS       = "GB2312";
+
+    public static final String startupTarget    = "ArkPets.exe";
+    public static final String startUpScript    = "ArkPetsStartupService.vbs";
 
 
     public static class PathConfig {
-        public static final String urlApi           = "https://arkpets.tfev.top/p/arkpets/client/api.php";
-        public static final String urlOfficial      = "https://arkpets.tfev.top/p/arkpets/?from=client";
+        public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
+        public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
         public static final String urlModelsZip     = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
         public static final String urlModelsData    = "isHarryh/Ark-Models/main/models_data.json";
         public static final String tempDirPath      = "temp/";

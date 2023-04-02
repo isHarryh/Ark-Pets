@@ -46,25 +46,32 @@ public class EmbeddedLauncher {
 			}
 		};
 
-		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
-		// Configure FPS
-		config.setForegroundFPS(30);
-		config.setIdleFPS(30);
-		// Configure window size
-		config.setWindowedMode(coreWidthDefault, coreHeightDefault);
-		config.setResizable(false);
-		// Configure window title
-		final String TITLE = applyWindowTitle();
-		config.setTitle(TITLE);
-		config.setDecorated(false);
-		// Configure window display
-		config.setInitialVisible(true);
-		config.setTransparentFramebuffer(true);
-		config.setInitialBackgroundColor(new Color(0,0,0,0));
-		// Configure window position
-		config.setWindowPosition(0, 0);
-		// Instantiate the App
-		Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
+
+		try {
+			Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+			// Configure FPS
+			config.setForegroundFPS(30);
+			config.setIdleFPS(30);
+			// Configure window size
+			config.setWindowedMode(coreWidthDefault, coreHeightDefault);
+			config.setResizable(false);
+			// Configure window title
+			final String TITLE = applyWindowTitle();
+			config.setTitle(TITLE);
+			config.setDecorated(false);
+			// Configure window display
+			config.setInitialVisible(true);
+			config.setTransparentFramebuffer(true);
+			config.setInitialBackgroundColor(new Color(0,0,0,0));
+			// Configure window position
+			config.setWindowPosition(0, 0);
+			// Instantiate the App
+			Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
+		} catch (Exception e) {
+			Logger.error("Application", "An fatal error occurs in the runtime, details see below.", e);
+			System.exit(-1);
+		}
+		System.exit(0);
 	}
 
 	private static String applyWindowTitle() {

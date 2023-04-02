@@ -14,6 +14,8 @@ import static cn.harryh.arkpets.utils.PopupUtils.*;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
@@ -65,6 +67,8 @@ public class Homepage {
     private Pane wrapper2;
     @FXML
     private Pane wrapper3;
+    @FXML
+    private Pane wrapper0;
     @FXML
     private JFXButton startBtn;
 
@@ -125,6 +129,8 @@ public class Homepage {
     @FXML
     private JFXComboBox<String> configLoggingLevel;
     @FXML
+    private JFXCheckBox configAutoStartup;
+    @FXML
     private Label aboutQueryUpdate;
     @FXML
     private Label aboutVisitWebsite;
@@ -141,34 +147,38 @@ public class Homepage {
 
     public void initialize() {
         Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
-        config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
-        config.display_monitor_info = getDefaultMonitorInfo();
-        initMenuBtn(menuBtn1, 1);
-        initMenuBtn(menuBtn2, 2);
-        initMenuBtn(menuBtn3, 3);
-        initWrapper(1);
-        initModelSearch();
-        initModelManage();
-        initConfigBehavior();
-        initConfigDisplay();
-        initConfigAdvanced();
-        initAbout();
-        initLaunchingStatusListener();
-        config.saveConfig();
-        menuBtn1.getStyleClass().add("menu-btn-active");
-        Platform.runLater(() -> {
-            initModelAssets(false);
-            dealModelSearch("");
-            if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
-                // Scroll to recent selected model
-                int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
-                searchModelList.scrollTo(character_recent_idx);
-                searchModelList.getSelectionModel().select(character_recent_idx);
-                searchModelList.refresh();
-            }
-            // Judge if no model available
-            loadFailureTip.setVisible(foundModelItems.length == 0);
-            startBtn.setDisable(foundModelItems.length == 0);
+        wrapper0.setVisible(true);
+        popLoading(e -> {
+            config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
+            config.display_monitor_info = getDefaultMonitorInfo();
+            initMenuBtn(menuBtn1, 1);
+            initMenuBtn(menuBtn2, 2);
+            initMenuBtn(menuBtn3, 3);
+            initWrapper(1);
+            initModelSearch();
+            initModelManage();
+            initConfigBehavior();
+            initConfigDisplay();
+            initConfigAdvanced();
+            initAbout();
+            initLaunchingStatusListener();
+            config.saveConfig();
+            menuBtn1.getStyleClass().add("menu-btn-active");
+            Platform.runLater(() -> {
+                initModelAssets(false);
+                dealModelSearch("");
+                if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
+                    // Scroll to recent selected model
+                    int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
+                    searchModelList.scrollTo(character_recent_idx);
+                    searchModelList.getSelectionModel().select(character_recent_idx);
+                    searchModelList.refresh();
+                }
+                // Judge if no model available
+                loadFailureTip.setVisible(foundModelItems.length == 0);
+                startBtn.setDisable(foundModelItems.length == 0);
+                foregroundCheckUpdate(false, "auto");
+            });
         });
         Logger.info("Launcher", "Initialized");
     }
@@ -185,17 +195,12 @@ public class Homepage {
     }
 
     private void initWrapper(int $activeIdx) {
-        Duration duration = new Duration(500);
         List<Node> wrappers = Arrays.asList(null, wrapper1, wrapper2, wrapper3);
         for (short i = 0; i < wrappers.size(); i++) {
             if (wrappers.get(i) != null) {
-                FadeTransition fadeT = new FadeTransition(duration, wrappers.get(i));
                 if ($activeIdx == i) {
                     // Show
-                    wrappers.get(i).setVisible(true);
-                    fadeT.setFromValue(0.025);
-                    fadeT.setToValue(1);
-                    fadeT.playFromStart();
+                    fadeInNode(wrappers.get(i), durationNormal, null);
                 } else {
                     // Hide
                     wrappers.get(i).setVisible(false);
@@ -211,12 +216,12 @@ public class Homepage {
                 dealModelSearch(searchModelInput.getText());
         });
         searchModelConfirm.setOnAction(e -> dealModelSearch(searchModelInput.getText()));
-        searchModelReset.setOnAction(e -> {
+        searchModelReset.setOnAction(e -> popLoading(ev -> {
             searchModelInput.setText("");
             searchModelInput.requestFocus();
             searchModelFilter.getSelectionModel().select(0);
             dealModelSearch("");
-        });
+        }));
         searchModelRandom.setOnAction(e -> dealModelRandom());
         searchModelReload.setOnAction(e -> dealModelReload());
 
@@ -230,10 +235,12 @@ public class Homepage {
         }
         searchModelFilter.valueProperty().addListener(observable -> {
             if (searchModelFilter.getValue() != null) {
-                isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
-                Logger.info("ModelList", "Filter \"" + searchModelFilter.getValue() + "\"");
-                dealModelSearch(searchModelInput.getText());
-                searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
+                popLoading(e -> {
+                    isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
+                    Logger.info("ModelList", "Filter \"" + searchModelFilter.getValue() + "\"");
+                    dealModelSearch(searchModelInput.getText());
+                    searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
+                });
             }
         });
     }
@@ -241,7 +248,7 @@ public class Homepage {
     private boolean initModelDataset(boolean $doPopNotice) {
         try {
             try {
-                modelsDatasetFull = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), "UTF-8")));
+                modelsDatasetFull = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), charsetDefault)));
                 if (!modelsDatasetFull.containsKey("data"))
                     throw new JSONException("The key 'data' may not in the dataset.");
                 if (!modelsDatasetFull.containsKey("storageDirectory"))
@@ -397,6 +404,26 @@ public class Homepage {
         else if (args.contains(LogLevels.debugArg))
             level = LogLevels.debug;
         configLoggingLevel.getSelectionModel().select(level);
+
+        configAutoStartup.setSelected(ArkConfig.StartupConfig.isSetStartup());
+        configAutoStartup.setOnAction(e -> {
+            if (configAutoStartup.isSelected()) {
+                if (ArkConfig.StartupConfig.addStartup()) {
+                    popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "开机自启动", "开机自启动设置成功。",
+                            "下次开机时将会自动生成您最后一次启动的桌宠。", null).show();
+                } else {
+                    if (ArkConfig.StartupConfig.generateScript() == null)
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "开机自启动", "开机自启动设置失败。",
+                                "无法确认目标程序的位置，其原因和相关解决方案如下：", "为确保自启动服务的稳定性，直接打开的ArkPets的\".jar\"版启动器，是不支持配置自启动的。请使用exe版的安装包安装ArkPets后运行，或使用zip版的压缩包解压程序文件后运行。另外，当您使用错误的工作目录运行启动器时也可能出现此情况。").show();
+                    else
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "开机自启动", "开机自启动设置失败。",
+                                "无法写入系统的启动目录，其原因可参见日志文件。", "这有可能是由于权限不足导致的，请尝试关闭反病毒软件，并以管理员权限运行启动器。").show();
+                    configAutoStartup.setSelected(false);
+                }
+            } else {
+                ArkConfig.StartupConfig.removeStartup();
+            }
+        });
     }
 
     private void initAbout() {
@@ -488,6 +515,13 @@ public class Homepage {
         Thread thread = new Thread($task);
         thread.start();
         return dialog;
+    }
+
+    public void popLoading(EventHandler<ActionEvent> $onLoading) {
+        fadeInNode(wrapper0, durationFast, e -> {
+            $onLoading.handle(e);
+            fadeOutNode(wrapper0, durationFast, null);
+        });
     }
 
     public JFXDialog popError(Throwable $e) {
@@ -618,7 +652,7 @@ public class Homepage {
             try {
                 String versionDescription;
                 try {
-                    JSONObject newModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath), "UTF-8"));
+                    JSONObject newModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath), charsetDefault));
                     versionDescription = newModelsDataset.getString("gameDataVersionDescription");
                 } catch (Exception ex) {
                     versionDescription = "unknown";
@@ -627,18 +661,21 @@ public class Homepage {
                 if (IOUtils.FileUtil.getMD5(new File(PathConfig.fileModelsDataPath)).equals(IOUtils.FileUtil.getMD5(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath)))) {
                     popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
                             "提示：远程仓库的版本不一定和游戏同步更新。", "模型仓库版本描述：\n" + versionDescription).show();
+                    Logger.info("Checker", "Model repo version check finished (up-to-dated)");
                 } else {
                     String oldVersionDescription;
                     try {
-                        JSONObject oldModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), "UTF-8"));
+                        JSONObject oldModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), charsetDefault));
                         oldVersionDescription = oldModelsDataset.getString("gameDataVersionDescription");
                     } catch (Exception ex) {
                         oldVersionDescription = "unknown";
                     }
                     popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查模型更新", "当前模型版本与远程仓库有差异。",
                             "可以重新下载模型，以进行更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n当前模型仓库版本描述：\n" + oldVersionDescription).show();
+                    Logger.info("Checker", "Model repo version check finished (not up-to-dated)");
                 }
             } catch (IOException ex) {
+                Logger.warn("Checker", "Model repo version check failed");
                 popError(ex).show();
             }
         });
@@ -692,7 +729,6 @@ public class Homepage {
                 Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                        //System.out.println(dir);
                         if (dir.getNameCount() == (rootPathCount) && !rootPath.equals(dir))
                             return cachedMDSD.containsValue(dir.getFileName().toString()) ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
                         if (dir.getNameCount() == (rootPathCount + 1) && cachedMDD.containsKey(dir.getFileName().toString())) {
@@ -712,8 +748,10 @@ public class Homepage {
                         return FileVisitResult.CONTINUE;
                     }
                 });
-                if (flag[0] || this.isCancelled())
+                if (flag[0] || this.isCancelled()) {
+                    Logger.info("Checker", "Model repo check finished (may modified)");
                     return false;
+                }
                 Thread.sleep(100);
                 this.updateProgress(0.7, 1);
                 for (String key : cachedMDD.keySet()) {
@@ -729,11 +767,14 @@ public class Homepage {
                 }
                 Thread.sleep(100);
                 this.updateProgress(1, 1);
-                if (flag[0] || this.isCancelled())
+                if (flag[0] || this.isCancelled()) {
+                    Logger.info("Checker", "Model repo check finished (not integral)");
                     return false;
+                }
                 dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS);
                 dialogHeader[0] = "模型资源是完整的。";
                 dialogContent[0] = "这只能说明本地的模型资源是完整的，但不一定是最新的。";
+                Logger.info("Checker", "Model repo check finished (okay)");
                 return true;
             }
         };
@@ -753,9 +794,13 @@ public class Homepage {
         }
         String queryStr = "?type=queryVersion&cliVer=" + appVersionStr + "&source=" + $sourceStr;
         Task<Boolean> task = createDownloadTask(PathConfig.urlApi + queryStr, PathConfig.tempQueryVersionCachePath);
-        JFXDialog dialog = foregroundTask(task, "正在下载软件版本信息...", "", true);
+        JFXDialog dialog = null;
+        if ($popNotice)
+            dialog = foregroundTask(task, "正在下载软件版本信息...", "", true);
+        JFXDialog finalDialog = dialog;
         task.setOnSucceeded(e -> {
-            DialogUtil.disposeDialog(dialog, root);
+            if ($popNotice && finalDialog != null)
+                DialogUtil.disposeDialog(finalDialog, root);
             try {
                 JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath))));
                 // TODO show in-test version
@@ -770,16 +815,24 @@ public class Homepage {
                         popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
                                 "当前版本：" + appVersionStr, null).show();
                     }
+                    Logger.info("Checker", "Application version check finished");
                 } else {
+                    Logger.warn("Checker", "Application version check failed (reason 1)");
                     if ($popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
                                 "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
+                Logger.warn("Checker", "Application version check failed (reason 2)");
                 if ($popNotice)
                     popError(ex).show();
             }
         });
+        task.setOnFailed(e -> Logger.warn("Checker", "Application version check failed (reason 3)"));
+        if (!$popNotice) {
+            Thread thread = new Thread(task);
+            thread.start();
+        }
     }
 
     public Task<Boolean> createDownloadTask(boolean $isArchive, String $remotePathSuffix, String $localPath) {
@@ -972,6 +1025,11 @@ public class Homepage {
                 });
                 if (!hasDataset[0])
                     throw new FileNotFoundException("The file " + $modelsDataPath + " not found.");
+                try {
+                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsUnzipDirPath).toPath(), true);
+                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), true);
+                } catch (IOException ignored) {
+                }
                 return true;
             }
         };
@@ -1004,12 +1062,15 @@ public class Homepage {
     }
 
     private void dealModelReload() {
-        initModelAssets(true);
-        loadFailureTip.setVisible(foundModelItems.length == 0);
-        startBtn.setDisable(foundModelItems.length == 0);
-        dealModelSearch("");
-        System.gc();
-        Logger.info("ModelList", "Reloaded");
+        popLoading(e -> {
+            initModelAssets(true);
+            initModelSearch();
+            loadFailureTip.setVisible(foundModelItems.length == 0);
+            startBtn.setDisable(foundModelItems.length == 0);
+            dealModelSearch("");
+            System.gc();
+            Logger.info("ModelList", "Reloaded");
+        });
     }
 
     private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<JFXListCell<AssetCtrl>> $container) {
@@ -1060,9 +1121,8 @@ public class Homepage {
         selectedModelAppellation.setTooltip(selectedModelAppellationTip);
         selectedModelSkinGroupName.setTooltip(selectedModelSkinGroupNameTip);
         selectedModelType.setTooltip(selectedModelTypeTip);
-        // Apply to config
+        // Apply to config, but not to save
         config.character_recent = $asset.getAssetFilePath("");
-        config.saveConfig();
     }
 
     private boolean assertModelLoaded(boolean $doPopNotice) {
@@ -1081,5 +1141,27 @@ public class Homepage {
     private static int[] getDefaultMonitorInfo() {
         Graphics.DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
         return new int[] {displayMode.width, displayMode.height, displayMode.refreshRate, displayMode.bitsPerPixel};
+    }
+
+    private static void fadeInNode(Node $node, Duration $duration, EventHandler<ActionEvent> $onFinished) {
+        FadeTransition fadeT = new FadeTransition($duration, $node);
+        $node.setVisible(true);
+        if ($onFinished != null)
+            fadeT.setOnFinished($onFinished);
+        fadeT.setFromValue(0.025);
+        fadeT.setToValue(1);
+        fadeT.playFromStart();
+    }
+
+    private static void fadeOutNode(Node $node, Duration $duration, EventHandler<ActionEvent> $onFinished) {
+        FadeTransition fadeT = new FadeTransition($duration, $node);
+        fadeT.setOnFinished(e -> {
+            $node.setVisible(false);
+            if ($onFinished != null)
+                $onFinished.handle(e);
+        });
+        fadeT.setFromValue(0.975);
+        fadeT.setToValue(0);
+        fadeT.playFromStart();
     }
 }

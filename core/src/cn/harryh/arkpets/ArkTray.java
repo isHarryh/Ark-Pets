@@ -50,7 +50,7 @@ public class ArkTray {
         }
 
         // Load tray icon image.
-        Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource("icon.png"));
+        Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource(iconFilePng));
         icon = new TrayIcon(image,  name + " - " + coreTitle);
         icon.setImageAutoSize(true);
 
