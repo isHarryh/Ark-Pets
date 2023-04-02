@@ -26,7 +26,7 @@ allprojects {
         // Dependencies Version
         gdxVersion = '1.11.0'
         jnaVersion = '5.12.1'
-        javaFXVersion = '20-ea+4'
+        javaFXVersion = '20-ea+19'
     }
 
     repositories {
@@ -65,7 +65,7 @@ project(":core") {
         // JFoenix
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
-        api "com.alibaba:fastjson:2.0.8"
+        api "com.alibaba:fastjson:2.0.26"
         // Log4j
         api "apache-log4j:log4j:1.2.15"
     }

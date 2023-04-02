@@ -45,7 +45,7 @@ ext {
     jarLibName = "${project.name}-${project.version}"
     jlinkRuntimeDir = "${buildDir}/jlink"
     jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
-    jlinkModuleList = "java.base,java.desktop,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
+    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = "${buildDir}/jpackage"
     issFileRel = "docs/dist/ExePacking.iss"
