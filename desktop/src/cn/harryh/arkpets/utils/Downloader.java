@@ -166,11 +166,9 @@ public class Downloader {
                 s.testDelay();
             ArrayList<GitHubSource> sources = new ArrayList<>(Arrays.stream($sources).toList());
             sources.sort((o1, o2) -> {
-                if (o1.delay < 0 && o2.delay >= 0)
-                    return 1;
-                if (o1.delay != o2.delay)
-                    return o1.delay > o2.delay ? 1 : -1;
-                return 0;
+                if (o1.delay == o2.delay)
+                    return 0;
+                return (o1.delay > o2.delay || o1.delay < 0) ? 1 : -1;
             });
             return sources.toArray(new GitHubSource[0]);
         }

@@ -68,7 +68,7 @@ public class EmbeddedLauncher {
 			// Instantiate the App
 			Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
 		} catch (Exception e) {
-			Logger.error("Application", "An fatal error occurs in the runtime, details see below.", e);
+			Logger.error("App", "An fatal error occurs in the runtime, details see below.", e);
 			System.exit(-1);
 		}
 		System.exit(0);

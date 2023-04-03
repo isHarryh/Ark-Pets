@@ -48,8 +48,6 @@ public class ArkChar {
 
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
-    private final int MAX_CANVAS_SIZE = 720;
-    private final int DEFAULT_RESERVED = 100;
     private SkeletonData skeletonData;
     private AnimationState animationState;
 
@@ -69,8 +67,8 @@ public class ArkChar {
         // Graphic
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
-        fbo = new FrameBuffer(Format.RGBA8888, MAX_CANVAS_SIZE, MAX_CANVAS_SIZE, false);
-        flexibleLayout = new CroppingCtrl(new Vector2(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE), 0);
+        fbo = new FrameBuffer(Format.RGBA8888, canvasMaxSize, canvasMaxSize, false);
+        flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
 
         // Layout
         positionEas = new EasingLinearVector3(new EasingLinear(0, 1, linearEasingDuration));
@@ -87,7 +85,7 @@ public class ArkChar {
         animationState.apply(skeleton);
         skeleton.updateWorldTransform();
         for (int i = 0; i < anim_list.length; i++)
-            adjustCanvas(Math.round(DEFAULT_RESERVED * $anim_scale), anim_list[i], i == 0);
+            adjustCanvas(Math.round(canvasReserveLength * $anim_scale), anim_list[i], i == 0);
         Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
         updateCanvas();
     }
@@ -142,10 +140,10 @@ public class ArkChar {
         // Transfer params
         anim_fps = $anim_fps;
         // Set position (center)
-        setPositionTar(MAX_CANVAS_SIZE >> 1, 0, 1);
+        setPositionTar(canvasMaxSize >> 1, 0, 1);
         updateCanvas();
         // Set background image
-        Pixmap pixmap = new Pixmap(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE, Format.RGBA8888);
+        Pixmap pixmap = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         pixmap.setColor($bgColor);
         pixmap.fill();
         bgTexture = new Texture(pixmap);
@@ -155,7 +153,7 @@ public class ArkChar {
      */
     public void updateCanvas() {
         camera.setToOrtho(false, flexibleLayout.getWidth(), flexibleLayout.getHeight());
-        camera.translate((MAX_CANVAS_SIZE - flexibleLayout.getWidth()) >> 1, 0);
+        camera.translate((canvasMaxSize - flexibleLayout.getWidth()) >> 1, 0);
         camera.update();
         batch.getProjectionMatrix().set(camera.combined);
     }
@@ -169,7 +167,7 @@ public class ArkChar {
         setPositionCur(Float.MAX_VALUE);
         changeAnimation();
         animationState.update(anim_frame.F_TIME / 2); // Take the middle frame as sample
-        Pixmap snapshot = new Pixmap(MAX_CANVAS_SIZE, MAX_CANVAS_SIZE, Format.RGBA8888);
+        Pixmap snapshot = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         renderToPixmap(snapshot);
         flexibleLayout.fitToBestCroppedSize(
                 snapshot,

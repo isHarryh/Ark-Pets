@@ -19,6 +19,9 @@ public final class Const {
     public static final int fpsDefault          = 30;
     public static final int coreWidthDefault    = 150;
     public static final int coreHeightDefault   = 150;
+    public static final int canvasReserveLength = 100;
+    public static final int canvasMaxSize       = 720;
+    public static final int windowLongDefault   = 0x80088;
 
     public static final float skelBaseScale         = 0.33333f;
     public static final float linearEasingDuration  = 0.2f;
@@ -36,7 +39,7 @@ public final class Const {
     public static final String iconFilePng  = "icon.png";
 
     public static final String charsetDefault   = "UTF-8";
-    public static final String charsetVBS       = "GB2312";
+    public static final String charsetVBS       = "GBK";
 
     public static final String startupTarget    = "ArkPets.exe";
     public static final String startUpScript    = "ArkPetsStartupService.vbs";
