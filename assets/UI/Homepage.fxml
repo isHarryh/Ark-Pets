@@ -356,7 +356,8 @@
                                                 </styleClass>
                                             </JFXButton>
                                             <JFXButton fx:id="manageModelVerify" mnemonicParsing="false"
-                                                       prefHeight="35.0" prefWidth="100.0" text="  验证完整性">
+                                                       prefHeight="35.0" prefWidth="100.0" text="  验证完整性"
+                                                       visible="false">
                                                 <graphic>
                                                     <AnchorPane prefHeight="25.0" prefWidth="16.0"
                                                                 styleClass="btn-icon">

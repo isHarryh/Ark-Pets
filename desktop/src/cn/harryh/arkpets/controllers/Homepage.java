@@ -228,9 +228,9 @@ public class Homepage {
         searchModelFilter.getItems().setAll("全部");
         searchModelFilter.getSelectionModel().select(0);
         if (initModelAssets(false)) {
-            Set<String> filterTags = modelsDatasetFull.getJSONObject("storageDirectory").keySet();
+            Set<String> filterTags = modelsDatasetFull.getJSONObject("sortTags").keySet();
             for (String s : filterTags) {
-                searchModelFilter.getItems().add(s);
+                searchModelFilter.getItems().add(modelsDatasetFull.getJSONObject("sortTags").getString(s));
             }
         }
         searchModelFilter.valueProperty().addListener(observable -> {
@@ -749,7 +749,7 @@ public class Homepage {
                     }
                 });
                 if (flag[0] || this.isCancelled()) {
-                    Logger.info("Checker", "Model repo check finished (may modified)");
+                    Logger.info("Checker", "Model repo check finished (may modified or lost)");
                     return false;
                 }
                 Thread.sleep(100);
@@ -768,7 +768,7 @@ public class Homepage {
                 Thread.sleep(100);
                 this.updateProgress(1, 1);
                 if (flag[0] || this.isCancelled()) {
-                    Logger.info("Checker", "Model repo check finished (not integral)");
+                    Logger.info("Checker", "Model repo check finished (not integral or cancelled)");
                     return false;
                 }
                 dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS);
@@ -1017,7 +1017,6 @@ public class Homepage {
                             if (Files.exists(dir.getFileName()))
                                 IOUtils.FileUtil.delete(dir.getFileName(), false);
                             Files.move(dir, dir.getFileName(), StandardCopyOption.REPLACE_EXISTING);
-                            //System.out.println("Moved:" + dir.getFileName());
                             return FileVisitResult.SKIP_SUBTREE;
                         }
                         return FileVisitResult.CONTINUE;
@@ -1039,10 +1038,14 @@ public class Homepage {
         searchModelList.getItems().clear();
         AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
         String[] assetIdList = AssetCtrl.getAssetIdList(result);
+        String tag = "";
+        for (String s : modelsDatasetFull.getJSONObject("sortTags").keySet())
+            if (searchModelFilter.getValue().equals(modelsDatasetFull.getJSONObject("sortTags").getString(s)))
+                tag = s;
         for (JFXListCell<AssetCtrl> item : foundModelItems) {
             for (String assetId : assetIdList) {
                 if (item.getId().equals(assetId) &&
-                        (isNoFilter || searchModelFilter.getValue().equals(item.getItem().type))) {
+                        (isNoFilter || (item.getItem().sortTags != null && item.getItem().sortTags.contains(tag)))) {
                     searchModelList.getItems().add(item);
                     break;
                 }

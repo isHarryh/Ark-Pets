@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.utils;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
@@ -21,6 +22,7 @@ public class AssetCtrl {
     public String appellation;
     public String skinGroupId;
     public String skinGroupName;
+    public JSONArray sortTags;
     public JSONObject checksum;
     static final String separator = File.separator;
     static final String[] extensions = {".atlas", ".png", ".skel"};

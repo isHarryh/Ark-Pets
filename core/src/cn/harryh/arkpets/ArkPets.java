@@ -48,7 +48,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	public Vector2 WD_poscur; // Window Current Position
 	public Vector2 WD_postar; // Window Target Position
-	public EasingLinearVector2 WD_poseas; // Window Postion Easing
+	public EasingLinear WD_alpha; // Window Opacity Easing
+	public EasingLinearVector2 WD_poseas; // Window Position Easing
 	private int OFFSET_Y = 0;
 
 	public ArkPets(String $title) {
@@ -73,6 +74,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
 		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, linearEasingDuration));
+		WD_alpha = new EasingLinear(0, 1, linearEasingDuration);
 		WD_SCALE = config.display_scale;
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
@@ -146,6 +148,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			newAnim = tray.keepAnim;
 		}
 		changeAnimation(newAnim); // Apply the new anim.
+		setWindowAlphaCur(Gdx.graphics.getDeltaTime());
 	}
 
 	@Override
@@ -255,8 +258,29 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				x, y, WD_W, WD_H,
 				WinUser.SWP_SHOWWINDOW | WinUser.SWP_NOACTIVATE
 		);
+		setWindowTransparent(false);
+	}
+
+	public void setWindowTransparent(boolean $transparent) {
 		Logger.debug("Window", "JNA SetWindowLong returns " +
-				Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE, 0x00000088)));
+				Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE,
+						windowLongDefault | ($transparent ? WinUser.WS_EX_TRANSPARENT : 0))));
+	}
+
+	private void setWindowAlpha(float $alpha) {
+		$alpha = Math.max(0, Math.min(1, $alpha));
+		User32.INSTANCE.SetLayeredWindowAttributes(HWND_MINE, 0, (byte)((int)($alpha * 255) & 0xFF), User32.LWA_ALPHA);
+	}
+
+	public void setWindowAlphaTar(float $alpha) {
+		WD_alpha.update($alpha);
+	}
+
+	private void setWindowAlphaCur(float $deltaTime) {
+		if (WD_alpha.curValue == WD_alpha.TO)
+			return;
+		WD_alpha.step($deltaTime);
+		setWindowAlpha(WD_alpha.curValue);
 	}
 
 	private void setWindowPos(int x, int y, boolean override) {

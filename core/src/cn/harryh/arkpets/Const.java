@@ -26,8 +26,9 @@ public final class Const {
     public static final float skelBaseScale         = 0.33333f;
     public static final float linearEasingDuration  = 0.2f;
 
-    public static final String coreTitle    = "ArkPets";
-    public static final String desktopTitle = coreTitle + " Launcher " + appVersionStr;
+    public static final String appName      = "ArkPets";
+    public static final String coreTitle    = "ArkPets Core";
+    public static final String desktopTitle = "ArkPets Launcher " + appVersionStr;
 
     public static final Duration durationFast   = new Duration(150);
     public static final Duration durationNormal = new Duration(300);
@@ -53,8 +54,8 @@ public final class Const {
         public static final String tempDirPath      = "temp/";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
         public static final String tempModelsZipCachePath       = tempDirPath + "ArkModels.zip";
-        public static final String fileModelsDataPath           = "models_data.json";
         public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
+        public static final String fileModelsDataPath           = "models_data.json";
     }
 
 

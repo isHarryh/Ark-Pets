@@ -29,6 +29,7 @@ public class ArkTray {
     private final TrayIcon icon;
     private final JDialog popWindow;
     private final JPopupMenu pop;
+    private boolean isDisplaying = false;
     public String name;
     public AnimData keepAnim;
 
@@ -51,7 +52,7 @@ public class ArkTray {
 
         // Load tray icon image.
         Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource(iconFilePng));
-        icon = new TrayIcon(image,  name + " - " + coreTitle);
+        icon = new TrayIcon(image,  name + " - " + appName);
         icon.setImageAutoSize(true);
 
         popWindow = new JDialog(); // JDialog is the container of JPopupMenu.
@@ -67,7 +68,9 @@ public class ArkTray {
 
         // Menu options:
         JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
-        JMenuItem optKeepAnimDis = new JMenuItem("解除保持");
+        JMenuItem optKeepAnimDis = new JMenuItem("取消保持");
+        JMenuItem optTransparentEn = new JMenuItem("透明模式");
+        JMenuItem optTransparentDis = new JMenuItem("取消透明");
         JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
@@ -81,11 +84,32 @@ public class ArkTray {
             pop.remove(optKeepAnimDis);
             pop.add(optKeepAnimEn, 0);
         });
+        optTransparentEn.addActionListener(e -> {
+            Logger.info("Tray", "Transparent enabled");
+            arkPets.setWindowAlphaTar(0.618f);
+            arkPets.setWindowTransparent(true);
+            pop.remove(optTransparentEn);
+            pop.add(optTransparentDis, 1);
+        });
+        optTransparentDis.addActionListener(e -> {
+            Logger.info("Tray", "Transparent disabled");
+            arkPets.setWindowAlphaTar(1);
+            arkPets.setWindowTransparent(false);
+            pop.remove(optTransparentDis);
+            pop.add(optTransparentEn, 1);
+        });
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");
-            Gdx.app.exit();
+            arkPets.setWindowAlphaTar(0);
+            remove();
+            try {
+                Thread.sleep((long)(linearEasingDuration * 1000));
+                Gdx.app.exit();
+            } catch (InterruptedException ignored) {
+            }
         });
         pop.add(optKeepAnimEn);
+        pop.add(optTransparentEn);
         pop.add(optExit);
         pop.setSize(100, 24 * pop.getSubElements().length);
 
@@ -113,16 +137,20 @@ public class ArkTray {
         // Add the icon to system tray.
         try {
             tray.add(icon);
+            isDisplaying = true;
         } catch (AWTException e) {
-            Logger.error("Tray", "Unable to apply tray icon.", e);
+            Logger.error("Tray", "Unable to apply tray icon, details see below", e);
         }
     }
 
     /** Remove the icon from system tray.
      */
     public void remove() {
-        tray.remove(icon);
-        pop.removeAll();
-        popWindow.dispose();
+        if (isDisplaying) {
+            tray.remove(icon);
+            pop.removeAll();
+            popWindow.dispose();
+        }
+        isDisplaying = false;
     }
 }
