@@ -14,7 +14,7 @@ AppCopyright        = Copyright (C) 2022-2023 {#MyAppPublisher}
 AppId               ={{213DB689-8F8A-4DEA-BE79-545FAD7769A6}
 AppName             ={#MyAppName}
 AppVersion          ={#MyAppVersion}
-AppVerName          ="{#MyAppName} v{#MyAppVersion}"
+AppVerName          ="{#MyAppName} {#MyAppVersion}"
 AppPublisher        ={#MyAppPublisher}
 AppPublisherURL     ={#MyAppURL}
 AppSupportURL       ={#MyAppURL}
@@ -54,8 +54,10 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppName}.exe"; Tasks: d
 Filename: "{app}\{#MyAppName}.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
-Type: files; Name: "{app}\ArkPetsCustom.config"
+Type: files; Name: "{app}\ArkPetsConfig.json"
 Type: files; Name: "{app}\models_data.json"
+Type: filesandordirs; Name: "{app}\logs"
 Type: filesandordirs; Name: "{app}\temp"
 Type: filesandordirs; Name: "{app}\models"
 Type: filesandordirs; Name: "{app}\models_enemies"
+Type: files; Name: "{userstartup}\ArkPetsStartupService.vbs"
