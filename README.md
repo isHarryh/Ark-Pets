@@ -3,7 +3,7 @@
 
 <div align="center">
    <h1> Ark-Pets </h1>
-   <img height="64" src="https://github.com/isHarryh/Ark-Pets/raw/v2.x/assets/icon.png" title="Icon" width="64"/>
+   <img height="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" title="Icon" width="64"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <code><b> v2.0 </b></code> <br>
@@ -54,7 +54,7 @@
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
 ### 快速上手
-1. 请[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 ArkPets-Setup.exe 安装包。
+1. 请[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 **ArkPets-Setup.exe** 安装包。
 2. 下载完成后，请运行所下载的安装包，根据安装向导的提示进行软件安装。（如果需要更新软件，无需手动卸载后再安装，直接运行安装包即可更新软件）
 3. 安装完成后，请通过桌面快捷方式等途径，打开 ArkPets 启动器。
 4. 打开启动器后，首次使用需要下载模型文件。请进入启动器“选项”页面，在“模型下载“处点击”全部下载“。（下载过程可能持续数分钟，下载总大小约为120+MB）
@@ -71,6 +71,7 @@
 - 您还可以下载 `zip` 版的程序压缩包解压，实现免安装使用。
 - 如果您的电脑上存在 `JDK18+` 的 [Java](https://www.java.com) 运行环境，您还可以下载 `jar` 版的程序文件直接运行（但无法使用开机自启动功能）。
 - 如果您想用命令行方式启动桌宠，[点击查看](docs/CmdLine.md)说明。
+
 
 ## 许可证 <sub>License</sub>
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。

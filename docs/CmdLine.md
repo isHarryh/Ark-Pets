@@ -4,22 +4,35 @@ ArkPets附加说明文档
 ArkPets的命令行启动方法，目前只支持一个命令行参数。
 
 ### 前提
-必须正确安装Java运行环境(JRE)，且正确地配置到了`PATH`环境变量中。  
-必须将命令行工作目录(cd)设置为`.jar`文件所在的目录，否则可能找不到模型。
+必须将命令行工作目录 (cd) 设置为程序文件所在的目录，否则可能发生各种奇怪的错误。
 
 ### 用法
+`ArkPets.exe`：
 ```
-[java -jar] <.jar程序文件的完整名称> [--direct-start]
+ArkPets [--direct-start] [--quiet|--warn|--info|--debug]
 ```
-* `java -jar`     使用此前缀运行将会打印调试信息。
-* `--direct-start`  直接启动桌宠而不打开启动器。(v1.5.1+)
+
+| 选项               | 描述                                 |
+|:-----------------|:-----------------------------------|
+| `--direct-start` | 直接启动桌宠而不打开启动器。(v1.5.1+)            |
+| `--quiet`        | 以`ERROR`日志等级运行，只记录错误信息。(v2.0.0+)   |
+| `--warn`         | 以`WARN`日志等级运行，记录日志和警告信息。(v2.0.0+)  |
+| `--info`         | 以`INFO`日志等级运行，此为默认日志等级。(v2.0.0+)   |
+| `--debug`        | 以`DEBUG`日志等级运行，记录完整的调试信息。(v2.0.0+) |
 
 ### 用例
 ```shell
 cd /d D:\MyArkPets
-java -jar ArkPets-v1.5.1.jar --direct-start
+ArkPets --direct-start --debug
 ```
+
+### 提示
+如果您使用的程序文件是 `ArkPets.jar` ，命令行应该以
 ```shell
-cd /d D:\MyArkPets
-ArkPets-v1.5.1.jar --direct-start
+java -jar ArkPets.jar
 ```
+或者以
+```shell
+ArkPets.jar
+```
+开头。注意写完整文件名。
