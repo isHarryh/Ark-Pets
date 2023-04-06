@@ -10,16 +10,32 @@ import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class Downloader {
+    private static final int k = 1024;
+    private static final DecimalFormat df = new DecimalFormat("0.0");
+
     public static GitHubSource[] ghSources = new GitHubSource[] {
             new GitHubSource("GitHub", "https://raw.githubusercontent.com/", "https://github.com/"),
             new GitHubSource("FastGit", "https://raw.fastgit.org/", "https://download.fastgit.org/"),
             new GitHubSource("GHProxy", "https://ghproxy.com/?q=https://github.com/")
     };
+    public static final Map<Long, String> sizeMap;
+
+    static {
+        sizeMap = new HashMap<>();
+        sizeMap.put(1L, "B");
+        sizeMap.put((long)k, "KB");
+        sizeMap.put((long)k * k, "MB");
+        sizeMap.put((long)k * k * k, "GB");
+        sizeMap.put((long)k * k * k * k, "TB");
+    }
 
     public void httpsDownload(String $fromPath, String $toPath, int $timeoutMillis, int $bufferSize, boolean $insecure) {
         URL urlFile;
@@ -108,6 +124,20 @@ public class Downloader {
         } catch (IOException ignored) {
         }
         return delayMillis;
+    }
+
+    /** Get a formatted size string, e.g."{@code 114.5 MB}".
+     * @param byteSize The size value in Byte.
+     * @return The formatted string. Returns "{@code Unknown size}" if conversion failed.
+     */
+    public static String getFormattedSizeString(long byteSize) {
+        if (byteSize == 0)
+            return "0";
+        for (Long unitSize : sizeMap.keySet()) {
+            if (unitSize <= byteSize && byteSize < unitSize * k * 10)
+                return df.format((double)byteSize / unitSize) + " " + sizeMap.get(unitSize);
+        }
+        return "Unknown size";
     }
 
 

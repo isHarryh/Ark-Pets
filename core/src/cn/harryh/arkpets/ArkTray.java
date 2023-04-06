@@ -86,7 +86,7 @@ public class ArkTray {
         });
         optTransparentEn.addActionListener(e -> {
             Logger.info("Tray", "Transparent enabled");
-            arkPets.setWindowAlphaTar(0.618f);
+            arkPets.setWindowAlphaTar(0.75f);
             arkPets.setWindowTransparent(true);
             pop.remove(optTransparentEn);
             pop.add(optTransparentDis, 1);
@@ -138,6 +138,7 @@ public class ArkTray {
         try {
             tray.add(icon);
             isDisplaying = true;
+            Logger.info("Tray", "Tray icon applied, named \"" + name + "\"");
         } catch (AWTException e) {
             Logger.error("Tray", "Unable to apply tray icon, details see below", e);
         }

@@ -68,19 +68,22 @@ public class ArkConfig {
         if (!configCustom.isFile()) {
             try {
                 Files.copy(configDefault, configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Logger.info("Config", "Default config was copied successfully.");
             } catch (IOException e) {
-                Logger.error("Config", "Config copying failed, details see below.", e);
+                Logger.error("Config", "Default config copying failed, details see below.", e);
             }
         }
         try {
             return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, charsetDefault), ArkConfig.class);
         } catch (IOException e) {
-            Logger.error("Config", "Config reading failed, details see below.", e);
+            Logger.error("Config", "Default config reading failed, details see below.", e);
             return null;
         }
     }
 
 
+    /** Only available in Windows OS.
+     */
     public static class StartupConfig {
         public static File startupDir;
         public static File startupFile;
@@ -115,6 +118,7 @@ public class ArkConfig {
         public static void removeStartup() {
             try {
                 IOUtils.FileUtil.delete(startupFile.toPath(), false);
+                Logger.info("Config", "Auto-startup was removed: " + startupFile.getAbsolutePath());
             } catch (IOException e) {
                 Logger.error("Config", "Auto-startup removing failed, details see below.", e);
             }
@@ -135,6 +139,9 @@ public class ArkConfig {
             }
         }
 
+        /** Get a content of a VBS script which can start ArkPets.
+         * @return The script's content.
+         */
         public static String generateScript() {
             if (!Files.exists(new File(startupTarget).toPath()))
                 return null;

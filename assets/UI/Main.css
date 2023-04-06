@@ -207,8 +207,13 @@ Button:focused {
 -fx-background-color: #F4F4F4E0;
 }
 
-#Loading-failure-tip > *, #Loading-waiting-tip > * {
+#Loading-failure-tip > * {
 -fx-fill: #505050;
+}
+
+#Loading-waiting-tip > * {
+-fx-fill: #505050;
+-fx-font-weight: bold;
 }
 
 #Search-models-bar {

@@ -417,7 +417,7 @@ public class Homepage {
                                 "无法确认目标程序的位置，其原因和相关解决方案如下：", "为确保自启动服务的稳定性，直接打开的ArkPets的\".jar\"版启动器，是不支持配置自启动的。请使用exe版的安装包安装ArkPets后运行，或使用zip版的压缩包解压程序文件后运行。另外，当您使用错误的工作目录运行启动器时也可能出现此情况。").show();
                     else
                         popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "开机自启动", "开机自启动设置失败。",
-                                "无法写入系统的启动目录，其原因可参见日志文件。", "这有可能是由于权限不足导致的，请尝试关闭反病毒软件，并以管理员权限运行启动器。").show();
+                                "无法写入系统的启动目录，其原因可参见日志文件。", "这有可能是由于权限不足导致的。请尝试关闭反病毒软件，并以管理员权限运行启动器。").show();
                     configAutoStartup.setSelected(false);
                 }
             } else {
@@ -603,7 +603,7 @@ public class Homepage {
             layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
         }
         if ($e instanceof ZipException) {
-            h3.setText("压缩文件相关错误。推测可能是下载源问题。");
+            h3.setText("压缩文件相关错误。推测可能是下载源问题，请再次重试。");
         }
         //dialog.show();
         return dialog;
@@ -817,18 +817,17 @@ public class Homepage {
                     }
                     Logger.info("Checker", "Application version check finished");
                 } else {
-                    Logger.warn("Checker", "Application version check failed (reason 1)");
+                    Logger.warn("Checker", "Application version check failed (api failed)");
                     if ($popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
                                 "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
-                Logger.warn("Checker", "Application version check failed (reason 2)");
+                Logger.warn("Checker", "Application version check failed (parsing failed)");
                 if ($popNotice)
                     popError(ex).show();
             }
         });
-        task.setOnFailed(e -> Logger.warn("Checker", "Application version check failed (reason 3)"));
         if (!$popNotice) {
             Thread thread = new Thread(task);
             thread.start();
@@ -871,8 +870,6 @@ public class Homepage {
                     throw e;
                 }
                 int len = httpBufferSizeDefault;
-                int unit_KB = 1024;
-                int unit_MB = unit_KB * 1024;
                 long sum = 0;
                 long max = connection.getContentLengthLong();
                 byte[] bytes = new byte[len];
@@ -880,7 +877,7 @@ public class Homepage {
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         sum += len;
-                        this.updateMessage("当前已下载：" + (sum / unit_KB) + " KB");
+                        this.updateMessage("当前已下载：" + Downloader.getFormattedSizeString(sum));
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
@@ -938,8 +935,6 @@ public class Homepage {
                     throw e;
                 }
                 int len = httpBufferSizeDefault;
-                int unit_KB = 1024;
-                int unit_MB = unit_KB * 1024;
                 long sum = 0;
                 long max = connection.getContentLengthLong();
                 byte[] bytes = new byte[len];
@@ -947,7 +942,7 @@ public class Homepage {
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         sum += len;
-                        this.updateMessage("当前已下载：" + (sum / unit_KB) + " KB");
+                        this.updateMessage("当前已下载：" + Downloader.getFormattedSizeString(sum));
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
@@ -1112,10 +1107,10 @@ public class Homepage {
         selectedModelAppellation.setText($asset.appellation);
         selectedModelSkinGroupName.setText($asset.skinGroupName);
         selectedModelType.setText($asset.type);
-        Tooltip selectedModelNameTip = new Tooltip("文件编号：" + $asset.assetId);
-        Tooltip selectedModelAppellationTip = new Tooltip("角色代号：" + $asset.appellation);
-        Tooltip selectedModelSkinGroupNameTip = new Tooltip("皮肤识别码：" + $asset.skinGroupId);
-        Tooltip selectedModelTypeTip = new Tooltip("角色类型：" + $asset.type);
+        Tooltip selectedModelNameTip = new Tooltip("ID: " + $asset.assetId);
+        Tooltip selectedModelAppellationTip = new Tooltip($asset.appellation);
+        Tooltip selectedModelSkinGroupNameTip = new Tooltip($asset.skinGroupName);
+        Tooltip selectedModelTypeTip = new Tooltip($asset.type);
         selectedModelNameTip.setStyle(tooltipStyle);
         selectedModelAppellationTip.setStyle(tooltipStyle);
         selectedModelSkinGroupNameTip.setStyle(tooltipStyle);
