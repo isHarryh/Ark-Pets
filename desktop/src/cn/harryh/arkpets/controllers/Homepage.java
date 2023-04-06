@@ -11,9 +11,9 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.utils.PopupUtils.*;
 
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import org.apache.log4j.Level;
@@ -165,15 +165,9 @@ public class Homepage {
             config.saveConfig();
             menuBtn1.getStyleClass().add("menu-btn-active");
             Platform.runLater(() -> {
+                // Load models
                 initModelAssets(false);
                 dealModelSearch("");
-                if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
-                    // Scroll to recent selected model
-                    int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
-                    searchModelList.scrollTo(character_recent_idx);
-                    searchModelList.getSelectionModel().select(character_recent_idx);
-                    searchModelList.refresh();
-                }
                 // Judge if no model available
                 loadFailureTip.setVisible(foundModelItems.length == 0);
                 startBtn.setDisable(foundModelItems.length == 0);
@@ -209,6 +203,17 @@ public class Homepage {
         }
     }
 
+    private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
+        if (searchModelFilter.getValue() != null) {
+            popLoading(e -> {
+                isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
+                Logger.info("ModelManager", "Filter \"" + searchModelFilter.getValue() + "\"");
+                dealModelSearch(searchModelInput.getText());
+                searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
+            });
+        }
+    };
+
     private void initModelSearch() {
         searchModelInput.setPromptText("输入关键字");
         searchModelInput.setOnKeyPressed(e -> {
@@ -225,86 +230,86 @@ public class Homepage {
         searchModelRandom.setOnAction(e -> dealModelRandom());
         searchModelReload.setOnAction(e -> dealModelReload());
 
+        searchModelFilter.valueProperty().removeListener(filterListener);
         searchModelFilter.getItems().setAll("全部");
         searchModelFilter.getSelectionModel().select(0);
-        if (initModelAssets(false)) {
+        if (assertModelLoaded(false)) {
             Set<String> filterTags = modelsDatasetFull.getJSONObject("sortTags").keySet();
-            for (String s : filterTags) {
+            for (String s : filterTags)
                 searchModelFilter.getItems().add(modelsDatasetFull.getJSONObject("sortTags").getString(s));
-            }
         }
-        searchModelFilter.valueProperty().addListener(observable -> {
-            if (searchModelFilter.getValue() != null) {
-                popLoading(e -> {
-                    isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
-                    Logger.info("ModelList", "Filter \"" + searchModelFilter.getValue() + "\"");
-                    dealModelSearch(searchModelInput.getText());
-                    searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
-                });
-            }
-        });
+        searchModelFilter.valueProperty().addListener(filterListener);
     }
 
     private boolean initModelDataset(boolean $doPopNotice) {
         try {
             try {
+                // Read dataset file
                 modelsDatasetFull = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), charsetDefault)));
+                // Assert keys existed
                 if (!modelsDatasetFull.containsKey("data"))
-                    throw new JSONException("The key 'data' may not in the dataset.");
+                    throw new DatasetException("The key 'data' may not in the dataset.");
                 if (!modelsDatasetFull.containsKey("storageDirectory"))
-                    throw new JSONException("The key 'storageDirectory' may not in the dataset.");
-                // TODO check dataset capability
+                    throw new DatasetException("The key 'storageDirectory' may not in the dataset.");
+                if (!modelsDatasetFull.containsKey("sortTags"))
+                    throw new DatasetException("The key 'sortTags' may not in the dataset.");
+                // TODO check dataset compatibility
+                Logger.debug("ModelManager", "Initialized model dataset successfully.");
                 return true;
             } catch (Exception e) {
                 modelsDatasetFull = null;
                 throw e;
             }
         } catch (FileNotFoundException e) {
+            Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到模型数据集。",
-                        "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往[选项]进行模型下载。", null).show();
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到数据集。",
+                        "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。", null).show();
+        } catch (DatasetException e) {
+            Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
+            if ($doPopNotice)
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：数据集解析失败。",
+                        "模型数据集可能不完整，或无法被启动器正确识别。请尝试更新模型或更新软件。", null).show();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error("ModelManager", "Failed to initialize model dataset due to unknown reasons, details see below.", e);
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未知原因。",
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：发生意外错误。",
                         "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
     }
 
     private boolean initModelAssets(boolean $doPopNotice) {
+        if (!initModelDataset($doPopNotice))
+            return false;
         try {
-            try {
-                if (!initModelDataset($doPopNotice))
-                    return false;
-                // Find every model.
-                ArrayList<AssetCtrl> foundModelAssetsL = new ArrayList<>();
-                for (String key : modelsDatasetFull.getJSONObject("storageDirectory").keySet())
-                    foundModelAssetsL.addAll(Arrays.asList(
-                            AssetCtrl.getAssetList(new File(modelsDatasetFull.getJSONObject("storageDirectory").getString(key)), modelsDatasetFull.getJSONObject("data"))
-                    ));
-                foundModelAssets = AssetCtrl.sortAssetList(foundModelAssetsL.toArray(new AssetCtrl[0]));
-                if (foundModelAssets.length == 0)
-                    throw new RuntimeException("Found no assets in the target directories.");
-                // Models to menu items.
-                ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
-                searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)(observable -> {
-                    observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> selectModel(cell.getItem(), cell));
-                }));
-                searchModelList.setFixedCellSize(30);
-                for (AssetCtrl asset : foundModelAssets)
-                    foundModelItemsL.add(getMenuItem(asset, searchModelList));
-                foundModelItems = foundModelItemsL.toArray(new JFXListCell[0]);
-                return true;
-            } catch (Exception e) {
-                foundModelAssets = new AssetCtrl[0];
-                foundModelItems = new JFXListCell[0];
-                throw e;
-            }
-        } catch (RuntimeException e) {
+            // Find every model assets.
+            ArrayList<AssetCtrl> foundModelAssetsL = new ArrayList<>();
+            for (String key : modelsDatasetFull.getJSONObject("storageDirectory").keySet())
+                foundModelAssetsL.addAll(Arrays.asList(
+                        AssetCtrl.getAssetList(new File(modelsDatasetFull.getJSONObject("storageDirectory").getString(key)), modelsDatasetFull.getJSONObject("data"))
+                ));
+            foundModelAssets = AssetCtrl.sortAssetList(foundModelAssetsL.toArray(new AssetCtrl[0]));
+            if (foundModelAssets.length == 0)
+                throw new IOException("Found no assets in the target directories.");
+            // Write models to menu items.
+            ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
+            searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)(observable -> {
+                observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> selectModel(cell.getItem(), cell));
+            }));
+            searchModelList.setFixedCellSize(30);
+            for (AssetCtrl asset : foundModelAssets)
+                foundModelItemsL.add(getMenuItem(asset, searchModelList));
+            foundModelItems = foundModelItemsL.toArray(new JFXListCell[0]);
+            Logger.debug("ModelManager", "Initialized model assets successfully.");
+            return true;
+        } catch (IOException e) {
+            foundModelAssets = new AssetCtrl[0];
+            foundModelItems = new JFXListCell[0];
+            Logger.error("ModelManager", "Failed to initialize model assets due to unknown reasons, details see below.", e);
             if ($doPopNotice)
-                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未能成功解析模型数据集。",
-                        "可能是数据集损坏、版本不兼容或模型存放位置错误。\n失败原因概要：" + e.getLocalizedMessage(), null).show();
+                popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：读取模型列表失败。",
+                        "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
     }
@@ -1034,19 +1039,21 @@ public class Homepage {
         AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
         String[] assetIdList = AssetCtrl.getAssetIdList(result);
         String tag = "";
-        for (String s : modelsDatasetFull.getJSONObject("sortTags").keySet())
-            if (searchModelFilter.getValue().equals(modelsDatasetFull.getJSONObject("sortTags").getString(s)))
-                tag = s;
+        if (assertModelLoaded(false))
+            for (String s : modelsDatasetFull.getJSONObject("sortTags").keySet())
+                if (searchModelFilter.getValue().equals(modelsDatasetFull.getJSONObject("sortTags").getString(s)))
+                    tag = s;
         for (JFXListCell<AssetCtrl> item : foundModelItems) {
+            // Search by keywords and tags
             for (String assetId : assetIdList) {
                 if (item.getId().equals(assetId) &&
-                        (isNoFilter || (item.getItem().sortTags != null && item.getItem().sortTags.contains(tag)))) {
+                        (isNoFilter || tag.isEmpty() || item.getItem().sortTags == null || item.getItem().sortTags.contains(tag))) {
                     searchModelList.getItems().add(item);
                     break;
                 }
             }
         }
-        Logger.info("ModelList", "Search \"" + $keyWords + "\" (" + searchModelList.getItems().size() + ")");
+        Logger.info("ModelManager", "Search \"" + $keyWords + "\" (" + searchModelList.getItems().size() + ")");
         searchModelList.refresh();
     }
 
@@ -1066,8 +1073,14 @@ public class Homepage {
             loadFailureTip.setVisible(foundModelItems.length == 0);
             startBtn.setDisable(foundModelItems.length == 0);
             dealModelSearch("");
+            if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
+                // Scroll to recent selected model
+                int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
+                searchModelList.scrollTo(character_recent_idx);
+                searchModelList.getSelectionModel().select(character_recent_idx);
+            }
             System.gc();
-            Logger.info("ModelList", "Reloaded");
+            Logger.info("ModelManager", "Reloaded");
         });
     }
 
@@ -1161,5 +1174,12 @@ public class Homepage {
         fadeT.setFromValue(0.975);
         fadeT.setToValue(0);
         fadeT.playFromStart();
+    }
+
+
+    public static class DatasetException extends IOException {
+        public DatasetException(String msg) {
+            super(msg);
+        }
     }
 }

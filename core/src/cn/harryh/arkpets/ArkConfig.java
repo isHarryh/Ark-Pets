@@ -147,13 +147,18 @@ public class ArkConfig {
                 return null;
             String cd = System.getProperty("user.dir");
             cd = cd.replaceAll("\"", "\"\"");
+            cd = cd + (cd.endsWith("\\") ? "" : "\\");
             String run = startupTarget + " --direct-start";
             run = run.replaceAll("\"", "\"\"");
-            String cmd = "rem *** This is an auto-startup script, you can delete it if you want. ***\n" +
-                    "set ws = WScript.CreateObject(\"WScript.shell\")\n" +
-                    "ws.CurrentDirectory = \"" + cd + "\"\n" +
-                    "ws.run \"" + run + "\"\n";
-            return cmd;
+            return "rem *** This is an auto-startup script, you can delete it if you want. ***\n" +
+                    "const cd = \"" + cd + "\"\n" +
+                    "const ex = \"" + startupTarget + "\"\n" +
+                    "set fso=WScript.CreateObject(\"Scripting.FileSystemObject\")\n" +
+                    "if fso.FileExists(cd & ex) then\n" +
+                    "  set s = WScript.CreateObject(\"WScript.shell\")\n" +
+                    "  s.CurrentDirectory = cd\n" +
+                    "  s.Run \"" + run + "\"\n" +
+                    "end if\n";
         }
     }
 }
