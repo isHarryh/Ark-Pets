@@ -8,6 +8,8 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.utils.AnimData.AnimAutoData;
 
+import static cn.harryh.arkpets.Const.*;
+
 
 public class BehaviorOperBuild3 extends Behavior {
 
@@ -15,11 +17,11 @@ public class BehaviorOperBuild3 extends Behavior {
         super($config, $animList);
         action_list = new AnimAutoData[] {
             new AnimAutoData(new AnimData("Relax", true, true, 0, 0),
-                    4f, (int) (256 / Math.sqrt(config.behavior_ai_activation))),
+                    behaviorMinTimeLv2, (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))),
             new AnimAutoData(new AnimData("Move", true, true, 0, 1),
-                    2f, 32*(config.behavior_allow_walk?1:0)),
+                    behaviorMinTimeLv1, behaviorWeightLv1 * (config.behavior_allow_walk?1:0)),
             new AnimAutoData(new AnimData("Move", true, true, 0, -1),
-                    2f, 32*(config.behavior_allow_walk?1:0))
+                    behaviorMinTimeLv1, behaviorWeightLv1 * (config.behavior_allow_walk?1:0))
         };
     }
 

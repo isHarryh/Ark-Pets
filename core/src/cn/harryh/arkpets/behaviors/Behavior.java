@@ -3,11 +3,11 @@
  */
 package cn.harryh.arkpets.behaviors;
 
-import java.lang.reflect.InvocationTargetException;
-
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.utils.AnimData.AnimAutoData;
+
+import java.lang.reflect.InvocationTargetException;
 
 
 abstract public class Behavior {
@@ -62,7 +62,7 @@ abstract public class Behavior {
             weight_sum += i.WEIGHT;
         }
         // Random select a weight
-        int weight_select = (int) Math.round((Math.random() * weight_sum) + 0.5);
+        int weight_select = (int)Math.ceil(Math.random() * weight_sum);
         // Figure out which action the weight referred
         weight_sum = 0;
         for (int j = 0; j < action_list.length; j++) {

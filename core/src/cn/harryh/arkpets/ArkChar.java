@@ -31,8 +31,6 @@ import com.esotericsoftware.spine.AnimationState;
 import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
-import cn.harryh.arkpets.utils.FrameCtrl;
-
 import static cn.harryh.arkpets.Const.*;
 
 
@@ -286,7 +284,8 @@ public class ArkChar {
             if (anim_queue[0].ANIM_NEXT != null) {
                 anim_queue[1] = anim_queue[0].ANIM_NEXT;
                 changeAnimation();
-                anim_frame.next();
+            } else if (anim_queue[1] != null) {
+                changeAnimation();
             } else {
                 return;
             }
@@ -308,5 +307,35 @@ public class ArkChar {
         Animation animation = skeletonData.findAnimation(anim_queue[0].ANIM_NAME);
         anim_frame = new FrameCtrl(animation.getDuration(), anim_fps);
         animationState.setAnimation(0, anim_queue[0].ANIM_NAME, anim_queue[0].LOOP);
+    }
+
+
+    public static class FrameCtrl {
+        public int F_MAX;
+        public int F_CUR;
+        public float F_TIME;
+        public boolean LOOPED;
+
+        /** Frame Data Controller instance.
+         * @param $duration The time(seconds) that the animation plays once.
+         * @param $fps Frame per second.
+         */
+        public FrameCtrl(float $duration, int $fps) {
+            LOOPED = false;
+            F_TIME = (float) 1 / $fps;
+            F_CUR = 0;
+            F_MAX = (int) Math.floor($duration / F_TIME) + 2;
+        }
+
+        /** Step to the next frame.
+         */
+        public void next() {
+            if (F_CUR >= F_MAX) {
+                LOOPED = true;
+                F_CUR = 1;
+            } else {
+                F_CUR++;
+            }
+        }
     }
 }

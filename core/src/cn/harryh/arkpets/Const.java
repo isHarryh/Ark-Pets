@@ -23,6 +23,14 @@ public final class Const {
     public static final int canvasMaxSize       = 720;
     public static final int windowLongDefault   = 0x80088;
 
+    public static final int behaviorBaseWeight  = 320;
+    public static final int behaviorWeightLv1   = 32;
+    public static final int behaviorWeightLv2   = 64;
+
+    public static final float behaviorMinTimeLv1    = 2.5f;
+    public static final float behaviorMinTimeLv2    = 5.0f;
+    public static final float behaviorMinTimeLv3    = 7.5f;
+
     public static final float skelBaseScale         = 0.33333f;
     public static final float linearEasingDuration  = 0.2f;
 

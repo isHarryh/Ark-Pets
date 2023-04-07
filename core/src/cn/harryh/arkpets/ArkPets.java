@@ -99,6 +99,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				new BehaviorBattleGeneral(config, cha.anim_list),
 				new BehaviorBattleGeneral2(config, cha.anim_list),
 				new BehaviorBattleGeneral3(config, cha.anim_list),
+				new BehaviorBattleGeneral4(config, cha.anim_list),
 		});
 		if (behavior == null) {
 			Logger.error("App", "No suitable ArkPets behavior instance found, you can contact the developer, details see below.");

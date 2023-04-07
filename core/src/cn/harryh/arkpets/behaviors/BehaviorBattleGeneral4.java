@@ -3,15 +3,15 @@
  */
 package cn.harryh.arkpets.behaviors;
 
-import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.ArkConfig;
+import cn.harryh.arkpets.utils.AnimData;
 
 import static cn.harryh.arkpets.Const.*;
 
 
-public class BehaviorBattleGeneral3 extends Behavior {
+public class BehaviorBattleGeneral4 extends Behavior {
 
-    public BehaviorBattleGeneral3(ArkConfig $config, String[] $animList) {
+    public BehaviorBattleGeneral4(ArkConfig $config, String[] $animList) {
         super($config, $animList);
         action_list = new AnimData.AnimAutoData[] {
             new AnimData.AnimAutoData(new AnimData(getProperAnimName("Idle"), true, true, 0, 0),
@@ -33,13 +33,11 @@ public class BehaviorBattleGeneral3 extends Behavior {
     }
 
     public static boolean match(String[] animList) {
-        int flag = 0b11;
+        int flag = 0b1;
         for (String s : animList) {
             if (s != null) {
                 if (s.contains("Idle"))
-                    flag &= 0b01;
-                if (s.contains("Attack"))
-                    flag &= 0b10;
+                    flag &= 0b0;
             }
         }
         return flag == 0;
@@ -50,8 +48,7 @@ public class BehaviorBattleGeneral3 extends Behavior {
     }
 
     public AnimData clickEnd() {
-        return config.behavior_allow_interact?new AnimData(getProperAnimName("Attack"), false, false,
-                action_list[0].ANIM) : null;
+        return action_list[0].ANIM;
     }
 
     public AnimData dragStart() {
