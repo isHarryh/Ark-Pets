@@ -155,24 +155,18 @@ public class Homepage {
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
             initWrapper(1);
-            initModelSearch();
             initModelManage();
             initConfigBehavior();
             initConfigDisplay();
             initConfigAdvanced();
             initAbout();
             initLaunchingStatusListener();
+
+            dealModelReload(false);
+            initModelSearch();
             config.saveConfig();
             menuBtn1.getStyleClass().add("menu-btn-active");
-            Platform.runLater(() -> {
-                // Load models
-                initModelAssets(false);
-                dealModelSearch("");
-                // Judge if no model available
-                loadFailureTip.setVisible(foundModelItems.length == 0);
-                startBtn.setDisable(foundModelItems.length == 0);
-                foregroundCheckUpdate(false, "auto");
-            });
+            foregroundCheckUpdate(false, "auto");
         });
         Logger.info("Launcher", "Initialized");
     }
@@ -228,7 +222,7 @@ public class Homepage {
             dealModelSearch("");
         }));
         searchModelRandom.setOnAction(e -> dealModelRandom());
-        searchModelReload.setOnAction(e -> dealModelReload());
+        searchModelReload.setOnAction(e -> dealModelReload(true));
 
         searchModelFilter.valueProperty().removeListener(filterListener);
         searchModelFilter.getItems().setAll("全部");
@@ -534,7 +528,7 @@ public class Homepage {
 
         VBox content = new VBox();
         Label h2 = (Label)DialogUtil.getPrefabsH2("啊哦~ ArkPets启动器抛出了一个异常。");
-        Label h3 = (Label)DialogUtil.getPrefabsH3("请重试操作，或查看帮助文档。如需联系开发者，请提供下述信息：");
+        Label h3 = (Label)DialogUtil.getPrefabsH3("请重试操作，或查看帮助文档与日志。如需联系开发者，请提供下述信息：");
         content.setSpacing(5);
         content.getChildren().add(h2);
         content.getChildren().add(new Separator());
@@ -665,7 +659,7 @@ public class Homepage {
                 // TODO do judgment more precisely
                 if (IOUtils.FileUtil.getMD5(new File(PathConfig.fileModelsDataPath)).equals(IOUtils.FileUtil.getMD5(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath)))) {
                     popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
-                            "提示：远程仓库的版本不一定和游戏同步更新。", "模型仓库版本描述：\n" + versionDescription).show();
+                            "无需进行模型仓库更新。", "提示：远程模型仓库的版本不一定和游戏官方是同步更新的。\n模型仓库版本描述：\n" + versionDescription).show();
                     Logger.info("Checker", "Model repo version check finished (up-to-dated)");
                 } else {
                     String oldVersionDescription;
@@ -675,8 +669,8 @@ public class Homepage {
                     } catch (Exception ex) {
                         oldVersionDescription = "unknown";
                     }
-                    popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查模型更新", "当前模型版本与远程仓库有差异。",
-                            "可以重新下载模型，以进行更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n当前模型仓库版本描述：\n" + oldVersionDescription).show();
+                    popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查模型更新", "本地模型版本与远程仓库有差异。",
+                            "可以重新下载模型，即可更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n本地模型仓库版本描述：\n" + oldVersionDescription).show();
                     Logger.info("Checker", "Model repo version check finished (not up-to-dated)");
                 }
             } catch (IOException ex) {
@@ -708,7 +702,7 @@ public class Homepage {
                 JFXDialog task3dialog = foregroundTask(task3, "正在应用模型更新...", "即将完成", false);
                 task3.setOnSucceeded(e3 -> {
                     DialogUtil.disposeDialog(task3dialog, root);
-                    dealModelReload();
+                    dealModelReload(true);
                 });
             });
         });
@@ -814,18 +808,20 @@ public class Homepage {
                     if (stableVersionResult[0] > appVersion[0] ||
                             (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] > appVersion[1]) ||
                             (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] == appVersion[1] && stableVersionResult[2] > appVersion[2])) {
-                        popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "恭喜，检测到软件有新的版本。",
-                                appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问官网或GitHub下载新的版本。", null).show();
+                        if ($popNotice)
+                            popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "检测到软件有新的版本！",
+                                    appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问ArkPets官网或GitHub下载新的安装包。", null).show();
                     } else {
-                        popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的稳定版本。",
-                                "当前版本：" + appVersionStr, null).show();
+                        if ($popNotice)
+                            popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的正式版本。",
+                                    "当前版本 " + appVersionStr + " 已是最新", null).show();
                     }
                     Logger.info("Checker", "Application version check finished");
                 } else {
                     Logger.warn("Checker", "Application version check failed (api failed)");
                     if ($popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
-                                "可能是兼容性问题或服务器不可用。\n您可以访问官网或GitHub，手动查看是否有新版本。", null).show();
+                                "可能是兼容性问题或服务器不可用。\n您可以访问ArkPets官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
                 Logger.warn("Checker", "Application version check failed (parsing failed)");
@@ -1001,6 +997,8 @@ public class Homepage {
                 Path rootPath = new File($rootPath).toPath();
                 int rootPathCount = rootPath.getNameCount();
                 final boolean[] hasDataset = {false};
+
+                Logger.info("Move", "Moving required files from unzipped files");
                 Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
@@ -1025,10 +1023,12 @@ public class Homepage {
                 if (!hasDataset[0])
                     throw new FileNotFoundException("The file " + $modelsDataPath + " not found.");
                 try {
-                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsUnzipDirPath).toPath(), true);
-                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), true);
-                } catch (IOException ignored) {
+                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsUnzipDirPath).toPath(), false);
+                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), false);
+                } catch (IOException e) {
+                    Logger.warn("Cache", "The cache file or directory cannot be removed, because " + e.getMessage());
                 }
+                Logger.info("Move", "Moved required files from unzipped files, finished");
                 return true;
             }
         };
@@ -1066,12 +1066,10 @@ public class Homepage {
         searchModelList.requestFocus();
     }
 
-    private void dealModelReload() {
+    private void dealModelReload(boolean $doPopNotice) {
         popLoading(e -> {
-            initModelAssets(true);
+            initModelAssets($doPopNotice);
             initModelSearch();
-            loadFailureTip.setVisible(foundModelItems.length == 0);
-            startBtn.setDisable(foundModelItems.length == 0);
             dealModelSearch("");
             if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
                 // Scroll to recent selected model
@@ -1079,6 +1077,8 @@ public class Homepage {
                 searchModelList.scrollTo(character_recent_idx);
                 searchModelList.getSelectionModel().select(character_recent_idx);
             }
+            loadFailureTip.setVisible(foundModelItems.length == 0);
+            startBtn.setDisable(foundModelItems.length == 0);
             System.gc();
             Logger.info("ModelManager", "Reloaded");
         });
@@ -1089,7 +1089,7 @@ public class Homepage {
         width -= $container.getPadding().getLeft() + $container.getPadding().getRight();
         width *= 0.75;
         double height = 30;
-        double divide = 0.5;
+        double divide = 0.618;
         JFXListCell<AssetCtrl> item = new JFXListCell<>();
         item.getStyleClass().addAll("Search-models-item", "scroll-v");
         Label name = new Label($assetCtrl.toString());
@@ -1099,7 +1099,7 @@ public class Homepage {
         Label alias1 = new Label($assetCtrl.skinGroupName);
         alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
         alias1.setPrefSize(width * (1 - divide), height);
-        alias1.setLayoutX($assetCtrl.skinGroupName == null ? 0 : width * (1 - divide));
+        alias1.setLayoutX($assetCtrl.skinGroupName == null ? 0 : width * divide);
 
         item.setPrefSize(width, height);
         item.setGraphic(new Group(name, alias1));
