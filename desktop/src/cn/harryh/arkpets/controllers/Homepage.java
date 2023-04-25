@@ -487,6 +487,8 @@ public class Homepage {
                 DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(cancel);
+        } else {
+            layout.setActions(List.of());
         }
         dialog.show();
 

@@ -39,16 +39,20 @@ public class ArkHomeFX extends Application {
         Parent root = fxml.load();
         // Set handler for internal start button.
         Button startBtn = (Button)root.lookup("#Start-btn");
-        startBtn.setOnAction(e -> ctrl.popLoading(ev -> {
+        startBtn.setOnAction(e -> {
             // When request to launch ArkPets:
-            try {
-                ctrl.config.saveConfig();
-                Thread.sleep(100);
-                startArkPets();
-                Thread.sleep(1200);
-            } catch (InterruptedException ignored) {
+            ctrl.config.saveConfig();
+            if (ctrl.config.character_recent != null && !ctrl.config.character_recent.isEmpty()) {
+                ctrl.popLoading(ev -> {
+                    try {
+                        Thread.sleep(100);
+                        startArkPets();
+                        Thread.sleep(1200);
+                    } catch (InterruptedException ignored) {
+                    }
+                });
             }
-        }));
+        });
         // Setup scene and show primary stage.
         Scene scene = new Scene(root);
         stage.getIcons().setAll(new Image(Objects.requireNonNull(getClass().getResource("/" + iconFilePng)).toExternalForm()));
