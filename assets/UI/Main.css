@@ -341,7 +341,7 @@ Button:focused {
 }
 
 .config-field HBox JFXCheckBox, .config-field HBox Label {
--fx-pref-width: 180px;
+-fx-pref-width: 175px;
 }
 
 .config-field HBox ChoiceBox {

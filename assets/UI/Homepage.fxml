@@ -385,6 +385,8 @@
                                         <children>
                                             <Label text="日志级别"/>
                                             <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
+                                            <Label fx:id="exploreLogDir" styleClass="config-hyper-link"
+                                                   text="浏览日志"/>
                                         </children>
                                     </HBox>
                                     <Separator/>

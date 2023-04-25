@@ -129,6 +129,8 @@ public class Homepage {
     @FXML
     private JFXComboBox<String> configLoggingLevel;
     @FXML
+    private Label exploreLogDir;
+    @FXML
     private JFXCheckBox configAutoStartup;
     @FXML
     private Label aboutQueryUpdate;
@@ -403,6 +405,16 @@ public class Homepage {
         else if (args.contains(LogLevels.debugArg))
             level = LogLevels.debug;
         configLoggingLevel.getSelectionModel().select(level);
+
+        exploreLogDir.setOnMouseClicked(e -> {
+            // Only available in Windows OS
+            try {
+                Logger.debug("Config", "Request to explore the log dir");
+                Runtime.getRuntime().exec("explorer logs");
+            } catch (IOException ex) {
+                Logger.warn("Config", "Exploring log dir failed");
+            }
+        });
 
         configAutoStartup.setSelected(ArkConfig.StartupConfig.isSetStartup());
         configAutoStartup.setOnAction(e -> {
