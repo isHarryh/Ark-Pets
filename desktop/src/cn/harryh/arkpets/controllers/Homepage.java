@@ -647,27 +647,41 @@ public class Homepage {
         Task<Boolean> task = createDownloadTask(false, PathConfig.urlModelsData, PathConfig.tempDirPath + PathConfig.fileModelsDataPath);
         JFXDialog dialog = foregroundTask(task, "正在下载模型版本信息...", "", true);
         task.setOnSucceeded(e -> {
+            // When finished downloading the remote repo ver-info:
             DialogUtil.disposeDialog(dialog, root);
             try {
                 String versionDescription;
                 try {
+                    // Try to parse the remote repo ver-info
                     JSONObject newModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath), charsetDefault));
                     versionDescription = newModelsDataset.getString("gameDataVersionDescription");
                 } catch (Exception ex) {
+                    // When failed to parse the remote repo ver-info
                     versionDescription = "unknown";
+                    popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "检查模型更新", "无法判断模型仓库版本。",
+                            "因发生错误，无法判断远程模型仓库版本。", null).show();
+                    Logger.error("Checker", "Unable to parse remote model repo version, details see below.", ex);
                 }
+                // When finished parsing the remote ver-info:
                 // TODO do judgment more precisely
+                // Compare the remote ver-info and the local ver-info by MD5
                 if (IOUtils.FileUtil.getMD5(new File(PathConfig.fileModelsDataPath)).equals(IOUtils.FileUtil.getMD5(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath)))) {
                     popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查模型更新", "当前模型版本与远程仓库一致。",
                             "无需进行模型仓库更新。", "提示：远程模型仓库的版本不一定和游戏官方是同步更新的。\n模型仓库版本描述：\n" + versionDescription).show();
                     Logger.info("Checker", "Model repo version check finished (up-to-dated)");
                 } else {
+                    // If the result of comparison is "not the same"
                     String oldVersionDescription;
                     try {
+                        // Try to parse the local repo ver-info
                         JSONObject oldModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), charsetDefault));
                         oldVersionDescription = oldModelsDataset.getString("gameDataVersionDescription");
                     } catch (Exception ex) {
+                        // When failed to parse the remote local ver-info
                         oldVersionDescription = "unknown";
+                        popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "检查模型更新", "无法判断模型仓库版本。",
+                                "因发生错误，无法判断本地模型仓库版本。", null).show();
+                        Logger.error("Checker", "Unable to parse local model repo version, details see below.", ex);
                     }
                     popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查模型更新", "本地模型版本与远程仓库有差异。",
                             "可以重新下载模型，即可更新模型版本。", "远程模型仓库版本描述：\n" + versionDescription + "\n\n本地模型仓库版本描述：\n" + oldVersionDescription).show();
@@ -687,7 +701,6 @@ public class Homepage {
             throw new RuntimeException(e);
         }
         //1
-        // TODO change download source
         Task<Boolean> task1 = createDownloadTask(true, PathConfig.urlModelsZip, PathConfig.tempModelsZipCachePath);
         JFXDialog task1dialog = foregroundTask(task1, "正在下载模型资源文件...", "", true);
         task1.setOnSucceeded(e1 -> {
@@ -708,6 +721,7 @@ public class Homepage {
         });
     }
 
+    @Deprecated
     private void foregroundVerifyModels() {
         if (!initModelDataset(true))
             return;
@@ -798,12 +812,15 @@ public class Homepage {
             dialog = foregroundTask(task, "正在下载软件版本信息...", "", true);
         JFXDialog finalDialog = dialog;
         task.setOnSucceeded(e -> {
+            // When finished downloading the latest app ver-info:
             if ($popNotice && finalDialog != null)
                 DialogUtil.disposeDialog(finalDialog, root);
             try {
+                // Try to parse the latest app ver-info
                 JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath))));
                 // TODO show in-test version
                 if (queryVersionResult.getString("msg").equals("success")) {
+                    // If the response status is "success"
                     int[] stableVersionResult = queryVersionResult.getJSONObject("data").getObject("stableVersion", int[].class);
                     if (stableVersionResult[0] > appVersion[0] ||
                             (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] > appVersion[1]) ||
@@ -818,6 +835,7 @@ public class Homepage {
                     }
                     Logger.info("Checker", "Application version check finished");
                 } else {
+                    // If the response status isn't "success"
                     Logger.warn("Checker", "Application version check failed (api failed)");
                     if ($popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
@@ -840,12 +858,12 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在选择最佳线路");
-                Logger.info("Downloader", "Testing real delay");
+                Logger.info("Network", "Testing real delay");
                 Downloader.GitHubSource[] sources = Downloader.GitHubSource.sortByDelay(Downloader.ghSources);
                 Downloader.GitHubSource source = sources[0];
-                Logger.info("Downloader", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
+                Logger.info("Network", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
                 String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
-                Logger.info("Downloader", "Downloading " + remotePath + " to " + $localPath);
+                Logger.info("Network", "Downloading " + remotePath + " to " + $localPath);
                 this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
 
                 URL urlFile;
@@ -900,7 +918,7 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Downloader", "Downloaded " + $localPath + " , file size: " + sum);
+                Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -911,7 +929,7 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在尝试建立连接");
-                Logger.info("Downloader", "Downloading " + $remotePath + " to " + $localPath);
+                Logger.info("Network", "Downloading " + $remotePath + " to " + $localPath);
 
                 URL urlFile;
                 HttpsURLConnection connection = null;
@@ -965,7 +983,7 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Downloader", "Downloaded " + $localPath + " , file size: " + sum);
+                Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };

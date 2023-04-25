@@ -212,7 +212,7 @@ Button:focused {
 }
 
 #Loading-waiting-tip > * {
--fx-fill: #505050;
+-fx-fill: #204880DD;
 -fx-font-weight: bold;
 }
 

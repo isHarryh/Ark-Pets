@@ -157,7 +157,7 @@ public class Downloader {
 
         public int testDelay(int $port, int $timeoutMillis) {
             delay = Downloader.testDelay(preUrl, $port, $timeoutMillis);
-            Logger.debug("Downloader", "Real delay for \"" + tag + "\" is " + delay + "ms");
+            Logger.debug("Network", "Real delay for \"" + tag + "\" is " + delay + "ms");
             return delay;
         }
 
