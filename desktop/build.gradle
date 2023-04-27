@@ -8,6 +8,8 @@ eclipse.project.name = appName + "-desktop"
 
 import org.gradle.internal.os.OperatingSystem
 
+import java.lang.Exception
+
 // Runs the app without debug.
 task run(dependsOn: classes, type: JavaExec, group: 'execute') {
     main = project.mainClassName
@@ -133,8 +135,8 @@ task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
 task distZip(dependsOn: jpackage, type: Zip, group: 'dist') {
     from(jpackageDir) { include("**") }
     from(project.rootDir) { include("README.md") }
-    archiveName "${distName}.zip"
-    destinationDir file(distDir)
+    archiveFileName = "${distName}.zip"
+    destinationDirectory = file(distDir)
 }
 
 // Generates a distributable EXE file for the app, using Inno Setup.
@@ -157,7 +159,7 @@ task distAll(dependsOn: [distJar, distZip, distExe], group: 'dist') {
             delete "${buildDir}/tmp"
             delete jpackageDir
             delete jarLibDir
-        } catch (IOException e) {
+        } catch (Exception e) {
             print("\tUnable to delete temp files.")
         }
     }
