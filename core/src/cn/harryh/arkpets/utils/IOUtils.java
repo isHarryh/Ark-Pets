@@ -3,19 +3,14 @@
  */
 package cn.harryh.arkpets.utils;
 
-import javax.net.ssl.*;
 import java.io.*;
-import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.KeyManagementException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -161,109 +156,6 @@ public class IOUtils {
             } catch (IOException e) {
                 if (!ignoreError)
                     throw e;
-            }
-        }
-    }
-
-
-    public static class NetUtil {
-        public static HttpsURLConnection createHttpsConnection(URL url, int connectTimeout, int readTimeout, boolean trustAll)
-                throws IOException {
-            HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
-            if (trustAll) {
-                connection.setSSLSocketFactory(NetUtil.getTrustAnySSLSocketFactory());
-                connection.setHostnameVerifier(NetUtil.getTrustAnyHostnameVerifier());
-            }
-            connection.setConnectTimeout(connectTimeout);
-            connection.setReadTimeout(readTimeout);
-            connection.connect();
-            int code = connection.getResponseCode();
-            if (200 > code || code >= 300 )
-                throw new HttpResponseCodeException(code, connection.getResponseMessage());
-            return connection;
-        }
-
-        /**
-         * Get Socket Factory which trusts all.
-         * @return SocketFactory instance.
-         */
-        public static SSLSocketFactory getTrustAnySSLSocketFactory() {
-            try {
-                SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, new TrustManager[]{new TrustAnyTrustManager()}, new SecureRandom());
-                return sslContext.getSocketFactory();
-            } catch (NoSuchAlgorithmException | KeyManagementException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        /**
-         * Get Hostname Verifier which trusts all.
-         * @return HostnameVerifier instance.
-         */
-        public static HostnameVerifier getTrustAnyHostnameVerifier() {
-            return new TrustAnyHostnameVerifier();
-        }
-
-        private static class TrustAnyTrustManager implements X509TrustManager {
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) {
-            }
-
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return new X509Certificate[]{};
-            }
-        }
-
-        private static class TrustAnyHostnameVerifier implements HostnameVerifier {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        }
-
-        public static class HttpResponseCodeException extends IOException {
-            private final int code;
-            private final String message;
-
-            public HttpResponseCodeException(int code, String message) {
-                this.code = code;
-                this.message = message;
-            }
-
-            public int getCode() {
-                return code;
-            }
-
-            @Override
-            public String getMessage() {
-                return code + ": " + message;
-            }
-
-            public boolean isInformation() {
-                return code >= 100 && code < 200;
-            }
-
-            public boolean isSuccess() {
-                return code >= 200 && code < 300;
-            }
-
-            public boolean isRedirection() {
-                return code >= 300 && code < 400;
-            }
-
-            public boolean isClientError() {
-                return code >= 400 && code < 500;
-            }
-
-            public boolean isServerError() {
-                return code >= 500 && code < 600;
             }
         }
     }

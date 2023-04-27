@@ -19,7 +19,6 @@ import javafx.event.EventHandler;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
-import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -185,7 +184,7 @@ public class Homepage {
     }
 
     private void initWrapper(int $activeIdx) {
-        List<Node> wrappers = Arrays.asList(null, wrapper1, wrapper2, wrapper3);
+        List<Pane> wrappers = Arrays.asList(null, wrapper1, wrapper2, wrapper3);
         for (short i = 0; i < wrappers.size(); i++) {
             if (wrappers.get(i) != null) {
                 if ($activeIdx == i) {
@@ -572,23 +571,23 @@ public class Homepage {
         if ($e instanceof FileNotFoundException) {
             h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
         }
-        if ($e instanceof IOUtils.NetUtil.HttpResponseCodeException) {
+        if ($e instanceof NetUtils.HttpResponseCodeException) {
             h2.setText("神经递质接收异常");
-            if (((IOUtils.NetUtil.HttpResponseCodeException)$e).isRedirection()) {
+            if (((NetUtils.HttpResponseCodeException)$e).isRedirection()) {
                 h3.setText("请求的网络地址被重定向转移。详细信息：");
             }
-            if (((IOUtils.NetUtil.HttpResponseCodeException)$e).isClientError()) {
+            if (((NetUtils.HttpResponseCodeException)$e).isClientError()) {
                 h3.setText("可能是客户端引发的网络错误，详细信息：");
-                if (((IOUtils.NetUtil.HttpResponseCodeException)$e).getCode() == 403) {
+                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 403) {
                     h3.setText("(403)访问被拒绝。详细信息：");
                 }
-                if (((IOUtils.NetUtil.HttpResponseCodeException)$e).getCode() == 404) {
+                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 404) {
                     h3.setText("(404)找不到要访问的目标。详细信息：");
                 }
             }
-            if (((IOUtils.NetUtil.HttpResponseCodeException)$e).isServerError()) {
+            if (((NetUtils.HttpResponseCodeException)$e).isServerError()) {
                 h3.setText("可能是服务器引发的网络错误，详细信息：");
-                if (((IOUtils.NetUtil.HttpResponseCodeException)$e).getCode() == 500) {
+                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 500) {
                     h3.setText("(500)服务器发生故障，请稍后重试。详细信息");
                 }
             }
@@ -873,44 +872,30 @@ public class Homepage {
             protected Boolean call() throws Exception {
                 this.updateMessage("正在选择最佳线路");
                 Logger.info("Network", "Testing real delay");
-                Downloader.GitHubSource[] sources = Downloader.GitHubSource.sortByDelay(Downloader.ghSources);
-                Downloader.GitHubSource source = sources[0];
+                NetUtils.GitHubSource[] sources = NetUtils.GitHubSource.sortByDelay(NetUtils.ghSources);
+                NetUtils.GitHubSource source = sources[0];
                 Logger.info("Network", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
                 String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
                 Logger.info("Network", "Downloading " + remotePath + " to " + $localPath);
                 this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
 
-                URL urlFile;
-                HttpsURLConnection connection = null;
                 BufferedInputStream bis = null;
                 BufferedOutputStream bos = null;
                 File file = new File($localPath);
+                URL urlFile = new URL(remotePath);
+                HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
+
                 try {
-                    urlFile = new URL(remotePath);
-                    connection = IOUtils.NetUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
                     bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
                     bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
-                } catch (IOException e) {
-                    try {
-                        if (connection != null && connection.getInputStream() != null)
-                            connection.getInputStream().close();
-                        if (bis != null)
-                            bis.close();
-                        if (bos != null)
-                            bos.close();
-                    } catch (Exception ignored){
-                    }
-                    throw e;
-                }
-                int len = httpBufferSizeDefault;
-                long sum = 0;
-                long max = connection.getContentLengthLong();
-                byte[] bytes = new byte[len];
-                try {
+                    int len = httpBufferSizeDefault;
+                    long sum = 0;
+                    long max = connection.getContentLengthLong();
+                    byte[] bytes = new byte[len];
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         sum += len;
-                        this.updateMessage("当前已下载：" + Downloader.getFormattedSizeString(sum));
+                        this.updateMessage("当前已下载：" + NetUtils.getFormattedSizeString(sum));
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
@@ -919,12 +904,10 @@ public class Homepage {
                     }
                     this.updateProgress(max, max);
                     bos.flush();
-                } catch (IOException e) {
-                    throw e;
+                    Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 } finally {
                     try {
-                        if (connection != null && connection.getInputStream() != null)
-                            connection.getInputStream().close();
+                        connection.getInputStream().close();
                         if (bis != null)
                             bis.close();
                         if (bos != null)
@@ -932,7 +915,6 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -945,37 +927,23 @@ public class Homepage {
                 this.updateMessage("正在尝试建立连接");
                 Logger.info("Network", "Downloading " + $remotePath + " to " + $localPath);
 
-                URL urlFile;
-                HttpsURLConnection connection = null;
                 BufferedInputStream bis = null;
                 BufferedOutputStream bos = null;
                 File file = new File($localPath);
+                URL urlFile = new URL($remotePath);
+                HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
+
                 try {
-                    urlFile = new URL($remotePath);
-                    connection = IOUtils.NetUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
                     bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
                     bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
-                } catch (IOException e) {
-                    try {
-                        if (connection != null && connection.getInputStream() != null)
-                            connection.getInputStream().close();
-                        if (bis != null)
-                            bis.close();
-                        if (bos != null)
-                            bos.close();
-                    } catch (Exception ignored){
-                    }
-                    throw e;
-                }
-                int len = httpBufferSizeDefault;
-                long sum = 0;
-                long max = connection.getContentLengthLong();
-                byte[] bytes = new byte[len];
-                try {
+                    int len = httpBufferSizeDefault;
+                    long sum = 0;
+                    long max = connection.getContentLengthLong();
+                    byte[] bytes = new byte[len];
                     while ((len = bis.read(bytes)) != -1) {
                         bos.write(bytes, 0, len);
                         sum += len;
-                        this.updateMessage("当前已下载：" + Downloader.getFormattedSizeString(sum));
+                        this.updateMessage("当前已下载：" + NetUtils.getFormattedSizeString(sum));
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
@@ -984,12 +952,10 @@ public class Homepage {
                     }
                     this.updateProgress(max, max);
                     bos.flush();
-                } catch (IOException e) {
-                    throw e;
+                    Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 } finally {
                     try {
-                        if (connection != null && connection.getInputStream() != null)
-                            connection.getInputStream().close();
+                        connection.getInputStream().close();
                         if (bis != null)
                             bis.close();
                         if (bos != null)
@@ -997,7 +963,6 @@ public class Homepage {
                     } catch (Exception ignored){
                     }
                 }
-                Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
                 return this.isDone() && !this.isCancelled();
             }
         };
@@ -1123,7 +1088,7 @@ public class Homepage {
         double height = 30;
         double divide = 0.618;
         JFXListCell<AssetCtrl> item = new JFXListCell<>();
-        item.getStyleClass().addAll("Search-models-item", "scroll-v");
+        item.getStyleClass().addAll("Search-models-item");
         Label name = new Label($assetCtrl.toString());
         name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
         name.setPrefSize($assetCtrl.skinGroupName == null ? width : width * divide, height);

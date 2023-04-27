@@ -25,6 +25,7 @@ public class EmbeddedLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/core", 32);
+		Logger.info("System", "Entering the app of EmbeddedLauncher");
 		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
@@ -68,9 +69,10 @@ public class EmbeddedLauncher {
 			// Instantiate the App
 			Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
 		} catch (Exception e) {
-			Logger.error("App", "An fatal error occurs in the runtime, details see below.", e);
+			Logger.error("System", "An fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);
 			System.exit(-1);
 		}
+		Logger.info("System", "Exited from EmbeddedLauncher successfully");
 		System.exit(0);
 	}
 

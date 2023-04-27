@@ -18,6 +18,7 @@ public class DesktopLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/desktop", 8);
+		Logger.info("System", "Entering the app of DesktopLauncher");
 		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
@@ -48,6 +49,7 @@ public class DesktopLauncher {
 		};
 		// Java FX bootstrap
 		Application.launch(ArkHomeFX.class, args);
+		Logger.info("System", "Exited from DesktopLauncher successfully");
 		System.exit(0);
 	}
 }

@@ -2,14 +2,14 @@
  * At GPL-3.0 License
  */
 
+/* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/18/javafx.graphics/javafx/scene/doc-files/cssref.html */
+/* JFoenix Wiki: https://github.com/sshahine/JFoenix/wiki */
+
 /*******************************************************************************
  *                                                                             *
  * 1. Global Styles and Common Controllers                                     *
  *                                                                             *
  ******************************************************************************/
-
-/* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/18/javafx.graphics/javafx/scene/doc-files/cssref.html */
-/* JFoenix Wiki: https://github.com/sshahine/JFoenix/wiki */
 
 * {
 /* Font anti-aliasing */
@@ -32,28 +32,6 @@
 -fx-stroke: #80DFFF;
 -fx-stroke-type: outside;
 -fx-stroke-width: 0.382px;
-}
-
-.popup-detail-field {
-/* Expandable text area for Popup dialogs */
--fx-alignment: top-left;
--fx-font-size: 12px;
--fx-text-fill: #666;
--fx-pref-row-count: 12;
-}
-
-ProgressBar > .track{
-/* Progress bar's outer track */
--fx-background-color: #DDDDDDDD;
--fx-background-radius: 2.5px;
--fx-background-insets: 0;
-}
-
-ProgressBar > .bar, ProgressBar:indeterminate > .bar{
-/* Progress bar's inner bar */
--fx-background-color: #204880DD;
--fx-background-radius: 2.5px;
--fx-background-insets: 0;
 }
 
 .btn-icon {
@@ -187,7 +165,7 @@ Button:focused {
 
 /*******************************************************************************
  *                                                                             *
- * 3. Wrappers                                                                 *
+ * 3. Contents in wrappers                                                     *
  *                                                                             *
  ******************************************************************************/
 
@@ -201,19 +179,6 @@ Button:focused {
 
 .wrapper-title:hover {
 -fx-text-fill: #F03030;
-}
-
-#Loading-failure-tip, #Loading-waiting-tip {
--fx-background-color: #F4F4F4E0;
-}
-
-#Loading-failure-tip > * {
--fx-fill: #505050;
-}
-
-#Loading-waiting-tip > * {
--fx-fill: #204880DD;
--fx-font-weight: bold;
 }
 
 #Search-models-bar {
@@ -254,23 +219,23 @@ Button:focused {
 -fx-text-fill: #606060;
 }
 
-.Search-models-list .Search-models-item-active .Search-models-label-primary {
--fx-font-size: 13px;
+#Search-models-list .Search-models-item-active .Search-models-label-primary {
+-fx-font-size: 12.5px;
 -fx-text-fill: #303030;
 }
 
-.Search-models-list .Search-models-item-active .Search-models-label-secondary {
--fx-font-size: 12px;
+#Search-models-list .Search-models-item-active .Search-models-label-secondary {
+-fx-font-size: 11.5px;
 -fx-text-fill: #606060;
 }
 
-.Search-models-list:focused .Search-models-item-active .Search-models-label-primary {
--fx-font-size: 13px;
+#Search-models-list:focused .Search-models-item-active .Search-models-label-primary {
+-fx-font-size: 12.5px;
 -fx-text-fill: #FFFFFF;
 }
 
-.Search-models-list:focused .Search-models-item-active .Search-models-label-secondary {
--fx-font-size: 12px;
+#Search-models-list:focused .Search-models-item-active .Search-models-label-secondary {
+-fx-font-size: 11.5px;
 -fx-text-fill: #FFFFFF;
 }
 
@@ -369,7 +334,48 @@ Button:focused {
 
 /*******************************************************************************
  *                                                                             *
- * 4. ScrollBar and ScrollPane                                                 *
+ * 4. Other components                                                         *
+ *                                                                             *
+ ******************************************************************************/
+
+.popup-detail-field {
+/* Expandable text area for Popup dialogs */
+-fx-alignment: top-left;
+-fx-font-size: 12px;
+-fx-text-fill: #666;
+-fx-pref-row-count: 12;
+}
+
+ProgressBar > .track{
+/* Progress bar's outer track */
+-fx-background-color: #DDDDDDDD;
+-fx-background-radius: 2.5px;
+-fx-background-insets: 0;
+}
+
+ProgressBar > .bar, ProgressBar:indeterminate > .bar{
+/* Progress bar's inner bar */
+-fx-background-color: #204880DD;
+-fx-background-radius: 2.5px;
+-fx-background-insets: 0;
+}
+
+#Loading-failure-tip, #Loading-waiting-tip {
+-fx-background-color: #F4F4F4E0;
+}
+
+#Loading-failure-tip > * {
+-fx-fill: #505050;
+}
+
+#Loading-waiting-tip > * {
+-fx-fill: #204880DD;
+-fx-font-weight: bold;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 5. ScrollBar and ScrollPane                                                 *
  *                                                                             *
  ******************************************************************************/
 
