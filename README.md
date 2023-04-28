@@ -1,9 +1,9 @@
 <!-- 欢迎阅读 Ark-Pets 说明文档 -->
 <!-- 仓库：https://github.com/isHarryh/Ark-Pets -->
 
-<div style="text-align:center">
+<div align="center" style="text-align:center">
    <h1> Ark-Pets </h1>
-   <img alt="ArkPets icon" height="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" width="64"/>
+   <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <code><b> v2.0 </b></code> <br>
@@ -37,10 +37,12 @@
    3. 托盘菜单可以用于退出桌宠
 - 支持[开机自启动](#额外说明)
 
+### 效果预览图
 <table style="margin-left: auto; margin-right: auto;">
     <tr>
-        <td> <img alt="demo" width="200" height="200" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_1.png"> </td>
-        <td> <img alt="demo" width="200" height="200" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_2.png"> </td>
+        <td> <img alt="demo1" width="250" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_1.png"> </td>
+        <td> <img alt="demo2" width="250" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_2.png"> </td>
+        <td> <img alt="demo3" width="250" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_3.png"> </td>
     </tr>
 </table>
 
