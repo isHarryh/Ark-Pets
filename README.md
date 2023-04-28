@@ -1,9 +1,9 @@
 <!-- 欢迎阅读 Ark-Pets 说明文档 -->
 <!-- 仓库：https://github.com/isHarryh/Ark-Pets -->
 
-<div align="center">
+<div style="text-align:center">
    <h1> Ark-Pets </h1>
-   <img height="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" title="Icon" width="64"/>
+   <img alt="ArkPets icon" height="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png" width="64"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <code><b> v2.0 </b></code> <br>
@@ -13,7 +13,7 @@
    </p>
 </div>
 
-## 介绍 <sub>Intro</sub>
+## 介 绍 <sub>Intro</sub>
 ### 实现的功能
 - 支持自定义选择、按关键词搜索明日方舟小人模型
 - 支持在启动器中显示模型的详细信息，调整缩放和帧率等设置
@@ -37,28 +37,37 @@
    3. 托盘菜单可以用于退出桌宠
 - 支持[开机自启动](#额外说明)
 
+<table style="margin-left: auto; margin-right: auto;">
+    <tr>
+        <td> <img alt="demo" width="200" height="200" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_1.png"> </td>
+        <td> <img alt="demo" width="200" height="200" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/docs/imgs/demo_2.png"> </td>
+    </tr>
+</table>
+
 ### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
 - 支持部分敌方首领的阶段形态切换
+- 支持一键关闭所有已被启动的桌宠
 
 ### 相关文档
 - 更新日志 > [点击查看](CHANGELOG.md)
 - 常见疑问解答 > [点击查看](docs/FAQ.md)
-- 命令行启动方法 > [点击查看](docs/CmdLine.md)
 
 
 ## 使用方法 <sub>Usage</sub>
-> 由于程序中部分API不具备跨平台兼容性，本项目当前只支持在`Windows`系统上运行。
-
-目前最新可用版本：
+**目前最新可用版本：**
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
 ### 快速上手
-1. 请[前往页面](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 **ArkPets-Setup.exe** 安装包。
-2. 下载完成后，请运行所下载的安装包，根据安装向导的提示进行软件安装。（如果需要更新软件，无需手动卸载后再安装，直接运行安装包即可更新软件）
+1. 请[**前往此页面**](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 **ArkPets-Setup.exe** 安装包。
+2. 下载完成后，请运行所下载的安装包以进行软件的安装。
 3. 安装完成后，请通过桌面快捷方式等途径，打开 ArkPets 启动器。
-4. 打开启动器后，首次使用需要下载模型文件。请进入启动器“选项”页面，在“模型下载“处点击”全部下载“。（下载过程可能持续数分钟，下载总大小约为120+MB）
-5. 最后，进入启动器“模型”页面即可检索并选中想要作为桌宠启动的角色，然后点击左下角“启动”按钮即可。
+4. 打开启动器后，首次使用需要 **下载模型文件** 。请进入启动器“选项”页面，在“模型下载“处点击”全部下载“。（下载过程可能持续1~2分钟，下载总大小约为120MB）
+5. 最后，进入启动器“模型”页面即可检索并选中想要作为桌宠启动的角色，然后点击左下角“启动”按钮即可。  
+> 提示：
+> - 如需更新软件，无需手动卸载后再安装，直接运行安装包即可。
+> - 如需关闭已启动的桌宠，请右键点击系统托盘中的 ArkPets 图标，然后选择“退出”。
+> - 由于程序中部分API不具备跨平台兼容性，本程序当前只支持在`Windows`系统上运行。
 
 ### 额外说明
 - *检查模型库更新* ：我们的模型库不定时更新，如果您想体验新实装进游戏的模型，可以进入启动器“选项“页面，在“模型下载“处点击”检查更新“。如果提示有更新，点击”全部下载“就能完成模型库更新。
@@ -73,11 +82,11 @@
 - 如果您想用命令行方式启动桌宠，[点击查看](docs/CmdLine.md)说明。
 
 
-## 关于 <sub>About</sub>
+## 关 于 <sub>About</sub>
 
 ### 鸣谢
 感谢所有曾经为 ArkPets 的开发提供过各种形式的帮助的个人和组织。  
-[点击查看鸣谢页面](docs/Thanks.md)
+- [点击查看鸣谢页面](docs/Thanks.md)
 
 ### 许可证
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
@@ -86,4 +95,4 @@
 您可以通过提交Issues、PR、CodeReview等方式参与本项目的贡献。
 - 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
 - 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
-<!--- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki) -->
+- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)
