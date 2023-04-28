@@ -28,4 +28,4 @@ test*/
 # Special files
 .idea/uiDesigner.xml
 .idea/inspectionProfiles
-!/docs/dist/
+!/docs/scripts/

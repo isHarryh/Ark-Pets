@@ -6,13 +6,12 @@ project.ext.mainClassName = "cn.harryh.arkpets.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 eclipse.project.name = appName + "-desktop"
 
-import org.gradle.internal.os.OperatingSystem
-
 import java.lang.Exception
+import org.gradle.internal.os.OperatingSystem
 
 // Runs the app without debug.
 task run(dependsOn: classes, type: JavaExec, group: 'execute') {
-    main = project.mainClassName
+    mainClass = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
@@ -25,7 +24,7 @@ task run(dependsOn: classes, type: JavaExec, group: 'execute') {
 
 // Runs the app within debug.
 task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
-    main = project.mainClassName
+    mainClass = project.mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
@@ -50,7 +49,7 @@ ext {
     jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.unsupported,jdk.localedata,jdk.crypto.ec"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = "${buildDir}/jpackage"
-    issFileRel = "docs/dist/ExePacking.iss"
+    issFileRel = "docs/scripts/ExePacking.iss"
     distDir = "${buildDir}/dist"
     distName = "${project.ext.appName}-v${project.version}"
 }
