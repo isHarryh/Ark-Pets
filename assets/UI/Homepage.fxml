@@ -391,7 +391,7 @@
                                     </HBox>
                                     <Separator/>
                                     <Label styleClass="config-group-title" text="关于软件"/>
-                                    <HBox spacing="20.0">
+                                    <HBox spacing="22.5">
                                         <children>
                                             <Label fx:id="aboutQueryUpdate" styleClass="config-hyper-link"
                                                    text="检查软件更新"/>
@@ -399,6 +399,15 @@
                                                    text="ArkPets官网"/>
                                         </children>
                                     </HBox>
+                                    <HBox spacing="22.5">
+                                        <children>
+                                            <Label fx:id="aboutReadme" styleClass="config-hyper-link"
+                                                   text="使用指南"/>
+                                            <Label fx:id="aboutLicense" styleClass="config-hyper-link"
+                                                   text="开源信息"/>
+                                        </children>
+                                    </HBox>
+                                    <Separator/>
                                 </children>
                             </VBox>
                         </children>

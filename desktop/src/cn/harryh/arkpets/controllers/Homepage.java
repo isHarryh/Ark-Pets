@@ -46,7 +46,6 @@ import javax.net.ssl.SSLException;
 
 public class Homepage {
     private boolean isHttpsTrustAll = false;
-    private boolean isDelayTested = false;
     private boolean isNoFilter = true;
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
 
@@ -135,6 +134,10 @@ public class Homepage {
     private Label aboutQueryUpdate;
     @FXML
     private Label aboutVisitWebsite;
+    @FXML
+    private Label aboutReadme;
+    @FXML
+    private Label aboutLicense;
 
     private ListCell<AssetCtrl> selectedModelItem;
     private AssetCtrl[] foundModelAssets = {};
@@ -437,14 +440,10 @@ public class Homepage {
     }
 
     private void initAbout() {
-        aboutQueryUpdate.setOnMouseClicked(e -> foregroundCheckUpdate(true, "manual"));
-        aboutVisitWebsite.setOnMouseClicked(e -> {
-            try {
-                Desktop.getDesktop().browse(URI.create(PathConfig.urlOfficial));
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
+        aboutQueryUpdate.setOnMouseClicked  (e -> foregroundCheckUpdate(true, "manual"));
+        aboutVisitWebsite.setOnMouseClicked (e -> NetUtils.browseWebpage(PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlReadme));
+        aboutLicense.setOnMouseClicked      (e -> NetUtils.browseWebpage(PathConfig.urlLicense));
     }
 
     private void initLaunchingStatusListener() {
@@ -973,12 +972,7 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 Logger.info("Unzip", "Unzipping " + $zipPath + " to " + $destPath);
-                try {
-                    IOUtils.ZipUtil.unzip($zipPath, $destPath, true);
-                } catch (IOException e) {
-                    //e.printStackTrace();
-                    throw e;
-                }
+                IOUtils.ZipUtil.unzip($zipPath, $destPath, true);
                 Logger.info("Unzip", "Unzipped to " + $destPath + " , finished");
                 return this.isDone() && !this.isCancelled();
             }

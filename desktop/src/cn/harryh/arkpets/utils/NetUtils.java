@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.utils;
 
 import javax.net.ssl.*;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.net.*;
 import java.security.KeyManagementException;
@@ -50,6 +51,21 @@ public class NetUtils {
                 return df.format((double)byteSize / unitSize) + " " + sizeMap.get(unitSize);
         }
         return "Unknown size";
+    }
+
+    /** Open the given URL in the browser.
+     * @param url The URL to browse.
+     * @return true if success, otherwise false.
+     */
+    public static boolean browseWebpage(String url) {
+        try {
+            Logger.debug("Network", "Opening the URL " + url + " in the browser");
+            Desktop.getDesktop().browse(URI.create(url));
+            return true;
+        } catch (IOException e) {
+            Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
+            return false;
+        }
     }
 
 
