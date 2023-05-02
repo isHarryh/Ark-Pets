@@ -11,22 +11,22 @@ ArkPets附加说明文档
 
 ### 2.
 小人背景是黑色的怎么办？
-> [Issue #7](https://github.com/isHarryh/Ark-Pets/issues/7) 的调查显示，该问题与`NVIDIA GeForce`系列显卡的显卡驱动有关。目前有三种方法可以解决：
+> [Issue #7](https://github.com/isHarryh/Ark-Pets/issues/7) 的调查显示，该问题与`NVIDIA GeForce`系列显卡的显卡驱动有关。 **目前有三种方法可以解决：**
 > 
-> **方法一** (建议)  
+> **方法一** (推荐)  
 > 1. 进入 *Windows的设置 - 系统 - 屏幕 - 图形设置* 。
-> 2. 点击“浏览”，添加 ArkPets的主程序 为 [节能]模式。
+> 2. 点击“浏览”，添加 ArkPets程序目录中的`ArkPets.exe`**和**`runtime/bin/java.exe` 为 [节能] 模式。
 > 
-> **方法二**  
-> 1. 右键桌面，进入 *NVIDIA控制面板*。在 NVIDIA控制面板 中，进入 “管理3D设置”。
-> 2. 将 “首选图形处理器” 从 [高性能] 更改为 [集成图形]。
->    <img alt="Example" width="250" src="https://user-images.githubusercontent.com/107977864/221762110-4055576b-d809-4510-bf95-aab914f095de.png">
+> **方法二** (推荐)  
+> 1. 右键桌面，进入 *NVIDIA控制面板*。在面板中，进入 “管理3D设置”。
+> 2. 在“程序设置”选项卡的自定义程序处，点击“添加”，添加 ArkPets程序目录中的`ArkPets.exe`**和**`runtime/bin/java.exe`，将其 “首选图形处理器” 更改为 [集成图形]。
 > 
 > **方法三**
 > 1. 下载`NVIDIA GeForce`的`517.48`版本的旧版显卡驱动：[前往下载](http://www.nvidia.cn/Download/driverResults.aspx/193319/cn)。
 > 2. 安装所下载的显卡驱动即可。
 
-### 3. 无法下载模型文件怎么办？
+### 3.
+无法下载模型文件怎么办？
 > 目前发现使用代理软件（例如VPN、Steam++等）的用户，在下载模型文件时有小概率出现各种奇怪的错误。关闭此类软件重试即可。
 
 ### 4.
