@@ -7,6 +7,8 @@ import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
+import java.util.Objects;
+
 import static cn.harryh.arkpets.Const.*;
 
 
@@ -18,7 +20,10 @@ public class DesktopLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/desktop", 8);
-		Logger.info("System", "Entering the app of DesktopLauncher");
+		try {
+			Logger.setLevel(Objects.requireNonNull(ArkConfig.getConfig()).logging_level);
+		} catch (Exception ignored) {
+		}
 		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
@@ -39,6 +44,7 @@ public class DesktopLauncher {
 				Logger.setLevel(Logger.DEBUG);
 			}
 		};
+		Logger.info("System", "Entering the app of DesktopLauncher");
 
 		// If requested to start the core app directly
 		new ArgPending("--direct-start", args) {

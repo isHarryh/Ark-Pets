@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef.HWND;
 
+import java.util.Objects;
+
 import static cn.harryh.arkpets.Const.*;
 
 
@@ -25,7 +27,10 @@ public class EmbeddedLauncher {
 		ArgPending.argCache = args;
 		// Logger
 		Logger.initialize("logs/core", 32);
-		Logger.info("System", "Entering the app of EmbeddedLauncher");
+		try {
+			Logger.setLevel(Objects.requireNonNull(ArkConfig.getConfig()).logging_level);
+		} catch (Exception ignored) {
+		}
 		new ArgPending(LogLevels.errorArg, args) {
 			protected void process(String command, String addition) {
 				Logger.setLevel(Logger.ERROR);
@@ -46,6 +51,7 @@ public class EmbeddedLauncher {
 				Logger.setLevel(Logger.DEBUG);
 			}
 		};
+		Logger.info("System", "Entering the app of EmbeddedLauncher");
 
 
 		try {

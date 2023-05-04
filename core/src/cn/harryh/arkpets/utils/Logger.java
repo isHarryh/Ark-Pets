@@ -36,6 +36,10 @@ public class Logger {
      *                     overmuch logs will be deleted.
      */
     public static void initialize(String logPrefix, int maxFileCount) {
+        // Reset log appender
+        rootLogger.removeAllAppenders();
+
+        // Generate log header
         final String header = "ArkPets Log - " + new File(logPrefix).getName() + " (PID" + pid + ")";
         PatternLayout fileLayout = new PatternLayout("%d{ABSOLUTE} [%p] %m%n") {
             @Override
@@ -50,6 +54,7 @@ public class Logger {
         };
         PatternLayout consoleLayout = new PatternLayout("[%p] %m%n");
 
+        // Initialize log appender
         Logger.maxFileCount = Math.max(1, maxFileCount);
         try {
             Cleaner.cleanByModifiedTime(logPrefix, Logger.maxFileCount - 1);
@@ -64,6 +69,7 @@ public class Logger {
         ConsoleAppender consoleAppender = new ConsoleAppender(consoleLayout);
         rootLogger.addAppender(consoleAppender);
 
+        // Reset log level
         setLevel(level);
         isInitialized = true;
     }
@@ -84,6 +90,13 @@ public class Logger {
         Logger.level = Level.toLevel(level);
         rootLogger.setLevel(Logger.level);
         currentLogger.setLevel(Logger.level);
+    }
+
+    /** Set a new log level.
+     * @param level The new level in string format.
+     */
+    public static void setLevel(String level) {
+        setLevel(Level.toLevel(level));
     }
 
     /** Get the level of root logger.

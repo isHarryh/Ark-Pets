@@ -35,7 +35,7 @@ public class CroppingCtrl {
      */
     public void fitToBestCroppedSize(Pixmap pixmap, int extended, int reserved, boolean flipX, boolean flipY, boolean initialize) {
         Insert insert = curInsert.clone();
-        final int alphaThreshold = 128;
+        final int alphaThreshold = 255;
         final int edgeWidth = pixmap.getWidth() - 1;
         final int edgeHeight = pixmap.getHeight() - 1;
         //PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);

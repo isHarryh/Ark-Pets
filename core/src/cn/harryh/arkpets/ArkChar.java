@@ -164,7 +164,7 @@ public class ArkChar {
         setAnimation(new AnimData($anim_name, false, true));
         setPositionCur(Float.MAX_VALUE);
         changeAnimation();
-        animationState.update(anim_frame.F_TIME / 2); // Take the middle frame as sample
+        animationState.update(anim_frame.getDuration() / 2); // Take the middle frame as sample
         Pixmap snapshot = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         renderToPixmap(snapshot);
         flexibleLayout.fitToBestCroppedSize(
@@ -280,7 +280,7 @@ public class ArkChar {
         // Try the next frame
         anim_frame.next();
         // End the animation if it only needs to play once
-        if (anim_frame.LOOPED && !anim_queue[0].LOOP) {
+        if (anim_frame.hasLooped() && !anim_queue[0].LOOP) {
             if (anim_queue[0].ANIM_NEXT != null) {
                 anim_queue[1] = anim_queue[0].ANIM_NEXT;
                 changeAnimation();
@@ -311,10 +311,10 @@ public class ArkChar {
 
 
     public static class FrameCtrl {
-        public int F_MAX;
-        public int F_CUR;
-        public float F_TIME;
-        public boolean LOOPED;
+        private int F_CUR;
+        private boolean LOOPED;
+        private final int F_MAX;
+        private final float DURATION;
 
         /** Frame Data Controller instance.
          * @param $duration The time(seconds) that the animation plays once.
@@ -322,9 +322,10 @@ public class ArkChar {
          */
         public FrameCtrl(float $duration, int $fps) {
             LOOPED = false;
-            F_TIME = (float) 1 / $fps;
+            DURATION = $duration;
+            float f_TIME = (float) 1 / $fps;
             F_CUR = 0;
-            F_MAX = (int) Math.floor($duration / F_TIME) + 2;
+            F_MAX = (int) Math.floor($duration / f_TIME) + 2;
         }
 
         /** Step to the next frame.
@@ -336,6 +337,27 @@ public class ArkChar {
             } else {
                 F_CUR++;
             }
+        }
+
+        /** Get the duration of each loop.
+         * @return The time(seconds) that the animation plays once.
+         */
+        public float getDuration() {
+            return DURATION;
+        }
+
+        /** Whether the animation has looped before.
+         * @return true if satisfied.
+         */
+        public boolean hasLooped() {
+            return LOOPED;
+        }
+
+        /** Whether the current frame is the final frame of one loop.
+         * @return true if satisfied.
+         */
+        public boolean isLoopEnd() {
+            return F_CUR == F_MAX;
         }
     }
 }

@@ -118,7 +118,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void render() {
 		// 1.Render the next frame.
 		cha.next();
-		if (cha.anim_frame.F_CUR == cha.anim_frame.F_MAX) {
+		if (cha.anim_frame.isLoopEnd()) {
 			// When an animation's loop ends:
 			Logger.debug("Monitor", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int)Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
 		}
