@@ -27,6 +27,11 @@
 | [`bf904b7`](https://github.com/isHarryh/Ark-Pets/commit/bf904b7614c3005d68dd746dcbb4c0c461cbd938)<br>                                                                                                                                                                                                           | 微调了干员基建小人和敌方小人切换动作的随机触发权重。                                                                                                                                                                                                           |
 | [`c9866a1`](https://github.com/isHarryh/Ark-Pets/commit/c9866a16b7ea95b63a44c1d1fc41fce72e81ff27)<br>                                                                                                                                                                                                           | 将 Java 版本从 JDK18 升级到 JDK20 ；将 Gradle 版本从 7.5 升级到 8.1 。                                                                                                                                                                               |
 
+| **补丁**                                                                                                            |                                                |
+|:------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------|
+| `v2.0.1`<br>[`21f2eba`](https://github.com/isHarryh/Ark-Pets/commit/21f2eba1a775816aae4bcf44a9cbc35d68c8f35e)<br> | 进一步缓解了角色的渲染超出窗口边界的问题。<br>修复了特定情况下日志系统逻辑不正确的问题。 |
+| `v2.0.1`<br>[`f6e87f9`](https://github.com/isHarryh/Ark-Pets/commit/f6e87f9231664d040f51051ad5eaafc8ace82297)<br> | 优化了托盘图标标题，现在标题包含角色名称。<br>变更了配置文件中的部分字段。        |
+
 -----
 > 以下是`v1.x`版本的更新日志。这些版本已不再维护，请使用最新版本。
 
@@ -46,12 +51,6 @@
 3. 微调了悬空状态和落地状态触发相关动作的判定阈值。
 
 ## v1.5
-#### 补丁
-1. `v1.5.1` [`#12`](https://github.com/isHarryh/Ark-Pets/issues/12) [`d5f0bf0`](https://github.com/isHarryh/Ark-Pets/commit/d5f0bf0bae3f1589de5f71aeeb0b5aad82a234b0) 新增了命令行启动参数 `--direct-start` 用于直接启动桌宠而不打开启动器。
-2. `v1.5.1` [`c996b38`](https://github.com/isHarryh/Ark-Pets/commit/c996b383e4fddda0acf2362774ec0ecc2a1cb8a6) 修复了不支持一星小车的基建小人模型的问题。
-3. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`76e6883`](https://github.com/isHarryh/Ark-Pets/commit/76e68832d6987ef2cb4fd65ad28dc754ef5e4b56) 新增了小人自动行走至窗口边缘后翻转朝向的特性。
-4. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`a7eba09`](https://github.com/isHarryh/Ark-Pets/commit/a7eba09b35b320ec24816eccf5d4413e175cc6ba) 新增了抛出小人后，使小人立即面向抛掷方向的特性。
-
 #### 修复
 1. [`#15`](https://github.com/isHarryh/Ark-Pets/issues/15) [`afa7bb9`](https://github.com/isHarryh/Ark-Pets/commit/afa7bb94cd46c1d51725f4bb58b7ac462d729bdc) 修复了小人在窗口上缘与屏幕上缘距离小于应用高度时显示异常的问题。
 2. [`#13`](https://github.com/isHarryh/Ark-Pets/issues/13) [`61908a0`](https://github.com/isHarryh/Ark-Pets/commit/61908a0023980a7ff6affee3b8814a77c92585cf) 修复了在部分设备上由内存抖动引发的卡顿问题，大幅度降低了性能消耗。
@@ -61,6 +60,12 @@
 2. [`67a0c66`](https://github.com/isHarryh/Ark-Pets/commit/67a0c66b9ec0f713d581d5062e9c0098226b39d0) 不再在非必要时重设窗口的位置，一定程度降低了性能消耗。
 3. 微调了小人的缩放相关常量，略微缓解了小人图像超出窗口边界的问题。
 4. 微调了小人的自定义缩放设置项，已额外支持 0.75/1.25/1.5 倍的图像缩放。
+
+#### 补丁
+1. `v1.5.1` [`#12`](https://github.com/isHarryh/Ark-Pets/issues/12) [`d5f0bf0`](https://github.com/isHarryh/Ark-Pets/commit/d5f0bf0bae3f1589de5f71aeeb0b5aad82a234b0) 新增了命令行启动参数 `--direct-start` 用于直接启动桌宠而不打开启动器。
+2. `v1.5.1` [`c996b38`](https://github.com/isHarryh/Ark-Pets/commit/c996b383e4fddda0acf2362774ec0ecc2a1cb8a6) 修复了不支持一星小车的基建小人模型的问题。
+3. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`76e6883`](https://github.com/isHarryh/Ark-Pets/commit/76e68832d6987ef2cb4fd65ad28dc754ef5e4b56) 新增了小人自动行走至窗口边缘后翻转朝向的特性。
+4. `v1.5.2` [`#19`](https://github.com/isHarryh/Ark-Pets/issues/19) [`a7eba09`](https://github.com/isHarryh/Ark-Pets/commit/a7eba09b35b320ec24816eccf5d4413e175cc6ba) 新增了抛出小人后，使小人立即面向抛掷方向的特性。
 
 ## v1.4
 #### 新增
