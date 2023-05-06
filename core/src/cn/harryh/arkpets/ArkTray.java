@@ -40,19 +40,12 @@ public class ArkTray {
     public ArkTray(ArkPets boundArkPets) {
         arkPets = boundArkPets;
         tray = SystemTray.getSystemTray();
-        try {
-            name = arkPets.config.character_recent;
-            name = name.substring(name.lastIndexOf(File.separator) + 1);
-            name = name.substring(name.indexOf("_") + 1);
-            name = name.substring(name.indexOf("_") + 1);
-            name = name.substring(0, 1).toUpperCase() + name.substring(1);
-        } catch (Exception e) {
-            name = "Unknown";
-        }
+        name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
+        name = name + " - " + appName;
 
         // Load tray icon image.
         Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource(iconFilePng));
-        icon = new TrayIcon(image,  name + " - " + appName);
+        icon = new TrayIcon(image,  name);
         icon.setImageAutoSize(true);
 
         popWindow = new JDialog(); // JDialog is the container of JPopupMenu.

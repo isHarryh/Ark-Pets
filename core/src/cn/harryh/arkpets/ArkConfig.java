@@ -32,7 +32,8 @@ public class ArkConfig {
     public int   display_fps;
     public int   display_margin_bottom;
     public int[] display_monitor_info;
-    public String  character_recent;
+    public String  character_asset;
+    public String  character_label;
     public int     behavior_ai_activation;
     public boolean behavior_allow_sleep;
     public boolean behavior_allow_walk;

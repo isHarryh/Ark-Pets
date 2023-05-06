@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.controllers;
 
+import cn.harryh.arkpets.ArkPets;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.ArkConfig;
 import com.badlogic.gdx.Graphics;
@@ -504,7 +505,7 @@ public class Homepage {
 
         final double[] cachedProgress = {-1};
         $task.progressProperty().addListener((observable, oldValue, newValue) -> {
-            if (Math.abs((double)newValue - cachedProgress[0]) >= 0.005) {
+            if (Math.abs((double)newValue - cachedProgress[0]) >= 0.001) {
                 cachedProgress[0] = (double)newValue;
                 bar.setProgress((double)newValue);
             }
@@ -1062,11 +1063,11 @@ public class Homepage {
             initModelAssets($doPopNotice);
             initModelSearch();
             dealModelSearch("");
-            if (foundModelItems.length != 0 && !config.character_recent.isEmpty()) {
+            if (foundModelItems.length != 0 && config.character_asset != null && !config.character_asset.isEmpty()) {
                 // Scroll to recent selected model
-                int character_recent_idx = AssetCtrl.searchByAssetRelPath(config.character_recent, foundModelAssets);
-                searchModelList.scrollTo(character_recent_idx);
-                searchModelList.getSelectionModel().select(character_recent_idx);
+                int character_asset_idx = AssetCtrl.searchByAssetRelPath(config.character_asset, foundModelAssets);
+                searchModelList.scrollTo(character_asset_idx);
+                searchModelList.getSelectionModel().select(character_asset_idx);
             }
             loadFailureTip.setVisible(foundModelItems.length == 0);
             startBtn.setDisable(foundModelItems.length == 0);
@@ -1124,7 +1125,8 @@ public class Homepage {
         selectedModelSkinGroupName.setTooltip(selectedModelSkinGroupNameTip);
         selectedModelType.setTooltip(selectedModelTypeTip);
         // Apply to config, but not to save
-        config.character_recent = $asset.getAssetFilePath("");
+        config.character_asset = $asset.getAssetFilePath("");
+        config.character_label = $asset.name;
     }
 
     private boolean assertModelLoaded(boolean $doPopNotice) {

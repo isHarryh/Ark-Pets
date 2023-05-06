@@ -5,7 +5,8 @@
     "behavior_allow_sleep":false,
     "behavior_allow_walk":true,
     "behavior_do_peer_repulsion":true,
-    "character_recent":"",
+    "character_asset":"",
+    "character_label":"",
     "display_fps":30,
     "display_margin_bottom":0,
     "display_monitor_info":[

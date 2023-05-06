@@ -15,7 +15,6 @@ import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 
 
 public class HWndCtrl {
-    static ArrayList<HWndCtrl> windowList;
     final public HWND hWnd;
     final public String windowText;
     final public Pointer windowPointer;
@@ -86,7 +85,7 @@ public class HWndCtrl {
      * @return An ArrayList consists of HWndCtrls.
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible) {
-        windowList = new ArrayList<>();
+        ArrayList<HWndCtrl> windowList = new ArrayList<>();
         User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
             @Override
             public boolean callback(HWND hWnd, Pointer arg1) {
@@ -104,7 +103,7 @@ public class HWndCtrl {
      * @return An ArrayList consists of HWndCtrls.
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible, long $exclude_ws_ex) {
-        windowList = new ArrayList<>();
+        ArrayList<HWndCtrl> windowList = new ArrayList<>();
         User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
             @Override
             public boolean callback(HWND hWnd, Pointer arg1) {
@@ -117,7 +116,7 @@ public class HWndCtrl {
         return windowList;
     }
 
-    static private boolean isVisible(HWND $hWnd) {
+    private static boolean isVisible(HWND $hWnd) {
         try {
             if (!User32.INSTANCE.IsWindowVisible($hWnd) || !User32.INSTANCE.IsWindowEnabled($hWnd))
                 return false;
@@ -134,17 +133,17 @@ public class HWndCtrl {
         return true;
     }
 
-    static private Pointer getWindowIdx(HWND $hWnd) {
+    private static Pointer getWindowIdx(HWND $hWnd) {
         return $hWnd.getPointer();
     }
 
-    static private String getWindowText(HWND $hWnd) {
-        char[] text = new char[512];
+    private static String getWindowText(HWND $hWnd) {
+        char[] text = new char[1024];
 		User32.INSTANCE.GetWindowText($hWnd, text, 512);
 		return Native.toString(text);
     }
 
-    static private RECT getWindowRect(HWND $hWnd) {
+    private static  RECT getWindowRect(HWND $hWnd) {
         RECT rect = new RECT();
 		User32.INSTANCE.GetWindowRect($hWnd, rect);
         return rect;

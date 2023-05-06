@@ -42,7 +42,7 @@ public class ArkHomeFX extends Application {
         startBtn.setOnAction(e -> {
             // When request to launch ArkPets:
             ctrl.config.saveConfig();
-            if (ctrl.config.character_recent != null && !ctrl.config.character_recent.isEmpty()) {
+            if (ctrl.config.character_asset != null && !ctrl.config.character_asset.isEmpty()) {
                 ctrl.popLoading(ev -> {
                     try {
                         Thread.sleep(100);
@@ -87,16 +87,15 @@ public class ArkHomeFX extends Application {
                     case LogLevels.warn  -> LogLevels.warnArg;
                     case LogLevels.info  -> LogLevels.infoArg;
                     case LogLevels.debug -> LogLevels.debugArg;
-                    default      -> "";
+                    default -> "";
                 };
                 args.add(temp);
                 // Start ArkPets core.
-                Logger.info("Launcher", "Launching " + ctrl.config.character_recent);
+                Logger.info("Launcher", "Launching " + ctrl.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
                 int code = JavaProcess.exec(
                         EmbeddedLauncher.class, true,
-                        List.of(),
-                        args
+                        List.of(), args
                 );
                 // ArkPets core finalized.
                 if (code != 0) {
