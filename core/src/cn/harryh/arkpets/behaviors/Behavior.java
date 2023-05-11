@@ -7,8 +7,6 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.utils.AnimData.AnimAutoData;
 
-import java.lang.reflect.InvocationTargetException;
-
 
 abstract public class Behavior {
     public AnimAutoData[] action_list;
@@ -37,7 +35,7 @@ abstract public class Behavior {
      * @param $deltaTime The delta time.
      * @return AnimData object.
      */
-    public AnimData autoCtrl(float $deltaTime) {
+    public final AnimData autoCtrl(float $deltaTime) {
         duraRec += $deltaTime;
         timeRec += $deltaTime;
         if (timeRec >= deltaMin) {
@@ -77,9 +75,7 @@ abstract public class Behavior {
      * @param animList The animation name list.
      * @return true=match, false=mismatch.
      */
-    public static boolean match(String[] animList) {
-        return false;
-    }
+    abstract boolean match(String[] animList);
 
     /** Select a matched behavior object from a behavior-list.
      * @param $animList A list contains the name of animations.
@@ -87,15 +83,9 @@ abstract public class Behavior {
      * @return Behavior object.
      */
     public static Behavior selectBehavior(String[] $animList, Behavior[] $candidateBehaviors) {
-        for (Behavior $candidateBehavior : $candidateBehaviors) {
-            try {
-                if ($candidateBehavior.getClass().getMethod("match", String[].class)
-                        .invoke(null, (Object) $animList).equals(true))
-                    return $candidateBehavior;
-            } catch (IllegalAccessException | SecurityException | NoSuchMethodException |
-                     InvocationTargetException ignored) {
-            }
-        }
+        for (Behavior $candidateBehavior : $candidateBehaviors)
+            if ($candidateBehavior.match($animList))
+                return $candidateBehavior;
         return null;
     }
 

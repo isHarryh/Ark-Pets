@@ -32,7 +32,7 @@ public class BehaviorBattleGeneral4 extends Behavior {
         return "";
     }
 
-    public static boolean match(String[] animList) {
+    public boolean match(String[] animList) {
         int flag = 0b1;
         for (String s : animList) {
             if (s != null) {

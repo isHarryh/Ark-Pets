@@ -24,6 +24,12 @@ abstract public class Easing {
         curValue = $from;
     }
 
+    /** Directly get a specific value.
+     * @param $curDuration The x-position of the process.
+     * @return The y-position of the process.
+     */
+    abstract float get(float $curDuration);
+
     /** Update the end value.
      * @param $to The new end value.
      */
@@ -55,16 +61,6 @@ abstract public class Easing {
     public float step(float $deltaTime) {
         curDuration += $deltaTime;
         curValue = get(curDuration);
-        return curValue;
-    }
-
-    /** Directly get a specific value.
-     * @param $curDuration The x-position of the process.
-     * @return The y-position of the process.
-     */
-    public float get(float $curDuration) {
-        if ($curDuration >= DURATION)
-            return TO;
         return curValue;
     }
 
