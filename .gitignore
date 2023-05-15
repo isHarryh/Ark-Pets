@@ -1,4 +1,4 @@
-# Exclude all non-repository files
+# Keep repository files
 /*/
 !/.idea/
 !/assets/
@@ -6,6 +6,8 @@
 !/desktop/
 !/docs/
 !/gradle/
+
+# Exclude generated files
 bin/
 build/
 cache/
@@ -16,16 +18,9 @@ out/
 tmp*/
 temp*/
 test*/
-
-# Exclude generated program files
 *.class
 *.config
 *.exe
 *.jar
 *.log
 *.zip
-
-# Special files
-.idea/uiDesigner.xml
-.idea/inspectionProfiles
-!/docs/scripts/

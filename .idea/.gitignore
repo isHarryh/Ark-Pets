@@ -1,3 +1,4 @@
-# 默认忽略的文件
+/inspectionProfiles/
 /shelf/
+/uiDesigner.xml
 /workspace.xml

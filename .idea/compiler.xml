@@ -2,6 +2,6 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <option name="BUILD_PROCESS_ADDITIONAL_VM_OPTIONS" value="-Dfile.encoding=UTF-8" />
-    <bytecodeTargetLevel target="20" />
+    <bytecodeTargetLevel target="17" />
   </component>
 </project>

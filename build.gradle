@@ -52,7 +52,7 @@ project(":core") {
     dependencies {
         // Spine Runtime
         api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
-        // libGDX Core
+        // libGDX
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
