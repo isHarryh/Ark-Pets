@@ -25,6 +25,6 @@
         }
     ],
     "display_multi_monitors":true,
-    "display_scale":1.25,
+    "display_scale":1.0,
     "logging_level":"INFO"
 }

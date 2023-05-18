@@ -9,7 +9,7 @@ import javafx.util.Duration;
 public final class Const {
     // Constants list
 
-    public static final int[] appVersion        = {2, 0, 1};
+    public static final int[] appVersion        = {2, 1, 0};
     public static final String appVersionStr    = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
 
     public static final int zipBufferSizeDefault    = 8 * 1024;

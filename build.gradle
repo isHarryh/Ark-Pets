@@ -17,7 +17,7 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = '2.0.1'
+    version = '2.1.0'
     ext {
         // App Metadata
         appName = "ArkPets"
@@ -41,7 +41,6 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         // libGDX Desktop
-        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
     }
@@ -54,6 +53,7 @@ project(":core") {
         api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
         // libGDX
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
