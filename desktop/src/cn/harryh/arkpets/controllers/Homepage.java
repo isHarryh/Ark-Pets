@@ -47,6 +47,8 @@ import static cn.harryh.arkpets.utils.PopupUtils.*;
 public class Homepage {
     private boolean isHttpsTrustAll = false;
     private boolean isNoFilter = true;
+    public boolean isNewcomer = false;
+    public Handbook trayExitHandbook = new TrayExitHandBook();
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
 
     @FXML
@@ -161,6 +163,7 @@ public class Homepage {
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
+            isNewcomer = config.isNewcomer();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
@@ -1205,6 +1208,23 @@ public class Homepage {
     public static class DatasetException extends IOException {
         public DatasetException(String msg) {
             super(msg);
+        }
+    }
+
+    public static class TrayExitHandBook extends Handbook {
+        @Override
+        public String getTitle() {
+            return "使用提示";
+        }
+
+        @Override
+        public String getHeader() {
+            return "如需关闭桌宠，请右键系统托盘图标后选择退出。";
+        }
+
+        @Override
+        public String getContent() {
+            return "看来你已经启动了你的第一个 ArkPets 桌宠！尽情享受 ArkPets 吧！";
         }
     }
 }

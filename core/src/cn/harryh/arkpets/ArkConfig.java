@@ -30,6 +30,7 @@ public class ArkConfig {
             new File(configCustomPath);
     private static final InputStream configDefault =
             Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
+    private static boolean isNewcomer = false;
 
     // The following is the config items
     public int       behavior_ai_activation;
@@ -50,29 +51,14 @@ public class ArkConfig {
     private ArkConfig() {
     }
 
-    /** Get the config in String format.
-     * @return All the content in the config file.
-     */
-    public String readConfig() {
-        return JSON.toJSONString(this, true);
-    }
-
     /** Save the config into the custom file.
      */
     public void saveConfig() {
         try {
-            IOUtils.FileUtil.writeString(configCustom, charsetDefault, readConfig(), false);
+            IOUtils.FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, true), false);
         } catch (IOException e) {
             Logger.error("Config", "Config saving failed, details see below.", e);
         }
-    }
-
-    /** Update the monitors' config.
-     * @return The count of detected monitors.
-     */
-    public int updateMonitorsConfig() {
-        display_monitors_data = Monitor.toJSONArray(Monitor.getMonitors());
-        return display_monitors_data.size();
     }
 
     /** Instantiate an ArkConfig object.
@@ -82,6 +68,7 @@ public class ArkConfig {
         if (!configCustom.isFile()) {
             try {
                 Files.copy(configDefault, configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                isNewcomer = true;
                 Logger.info("Config", "Default config was copied successfully.");
             } catch (IOException e) {
                 Logger.error("Config", "Default config copying failed, details see below.", e);
@@ -93,6 +80,20 @@ public class ArkConfig {
             Logger.error("Config", "Default config reading failed, details see below.", e);
             return null;
         }
+    }
+
+    /** Update the monitors' config.
+     * @return The count of detected monitors.
+     */
+    public int updateMonitorsConfig() {
+        display_monitors_data = Monitor.toJSONArray(Monitor.getMonitors());
+        return display_monitors_data.size();
+    }
+
+    /** @return Whether the config file was generated newly.
+     */
+    public boolean isNewcomer() {
+        return isNewcomer;
     }
 
 

@@ -5,6 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Homepage;
 import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.Handbook;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.JavaProcess;
 import javafx.application.Application;
@@ -45,9 +46,16 @@ public class ArkHomeFX extends Application {
             if (ctrl.config.character_asset != null && !ctrl.config.character_asset.isEmpty()) {
                 ctrl.popLoading(ev -> {
                     try {
+                        // Do launch ArkPets core.
                         Thread.sleep(100);
                         startArkPets();
                         Thread.sleep(1200);
+                        if (ctrl.isNewcomer && !ctrl.trayExitHandbook.hasShown()) {
+                            // Show handbook.
+                            Handbook b = ctrl.trayExitHandbook;
+                            ctrl.popNotice(b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
+                            b.setShown();
+                        }
                     } catch (InterruptedException ignored) {
                     }
                 });
