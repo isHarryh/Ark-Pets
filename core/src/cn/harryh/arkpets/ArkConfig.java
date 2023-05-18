@@ -6,7 +6,10 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.badlogic.gdx.Graphics;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
@@ -28,19 +32,20 @@ public class ArkConfig {
             Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
 
     // The following is the config items
-    public float display_scale;
-    public int   display_fps;
-    public int   display_margin_bottom;
-    public int[] display_monitor_info;
-    public String  character_asset;
-    public String  character_label;
-    public int     behavior_ai_activation;
-    public boolean behavior_allow_sleep;
-    public boolean behavior_allow_walk;
-    public boolean behavior_allow_sit;
-    public boolean behavior_allow_interact;
-    public boolean behavior_do_peer_repulsion;
-    public String  logging_level;
+    public int       behavior_ai_activation;
+    public boolean   behavior_allow_interact;
+    public boolean   behavior_allow_sit;
+    public boolean   behavior_allow_sleep;
+    public boolean   behavior_allow_walk;
+    public boolean   behavior_do_peer_repulsion;
+    public String    character_asset;
+    public String    character_label;
+    public int       display_fps;
+    public int       display_margin_bottom;
+    public JSONArray display_monitors_data;
+    public boolean   display_multi_monitors;
+    public float     display_scale;
+    public String    logging_level;
 
     private ArkConfig() {
     }
@@ -60,6 +65,14 @@ public class ArkConfig {
         } catch (IOException e) {
             Logger.error("Config", "Config saving failed, details see below.", e);
         }
+    }
+
+    /** Update the monitors' config.
+     * @return The count of detected monitors.
+     */
+    public int updateMonitorsConfig() {
+        display_monitors_data = Monitor.toJSONArray(Monitor.getMonitors());
+        return display_monitors_data.size();
     }
 
     /** Instantiate an ArkConfig object.
@@ -160,6 +173,68 @@ public class ArkConfig {
                     "  s.CurrentDirectory = cd\n" +
                     "  s.Run \"" + run + "\"\n" +
                     "end if\n";
+        }
+    }
+
+
+    public static class Monitor {
+        public String name;
+        public int[]  size;
+        public int[]  virtual;
+        public int    hz;
+        public int    bbp;
+
+        private Monitor() {
+        }
+
+        /** Get the information of all the existing monitors.
+         * @return A list of Monitor objects.
+         */
+        public static Monitor[] getMonitors() {
+            ArrayList<Monitor> list = new ArrayList<>();
+            Graphics.Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();
+            for (Graphics.Monitor m : monitors) {
+                Monitor monitor = new Monitor();
+                monitor.name = m.name;
+                Graphics.DisplayMode dm = Lwjgl3ApplicationConfiguration.getDisplayMode(m);
+                monitor.size = new int[]{dm.width, dm.height};
+                monitor.virtual = new int[]{m.virtualX, m.virtualY};
+                monitor.hz = dm.refreshRate;
+                monitor.bbp = dm.bitsPerPixel;
+                list.add(monitor);
+            }
+            return list.toArray(new Monitor[0]);
+        }
+
+        public static int[] getVirtualOrigin(Monitor[] monitors) {
+            int left = 0;
+            int top = 0;
+            for (Monitor m : monitors) {
+            }
+            return new int[0];
+        }
+
+        public static Monitor fromJSONObject(JSONObject object) {
+            return object.toJavaObject(Monitor.class);
+        }
+
+        public static Monitor[] fromJSONArray(JSONArray array) {
+            ArrayList<Monitor> list = new ArrayList<>();
+            for (Object o : array)
+                if (o instanceof JSONObject)
+                    list.add(fromJSONObject((JSONObject)o));
+            return list.toArray(new Monitor[0]);
+        }
+        
+        public static JSONObject toJSONObject(Monitor monitor) {
+            return (JSONObject)JSON.toJSON(monitor);
+        }
+        
+        public static JSONArray toJSONArray(Monitor[] monitors) {
+            JSONArray array = new JSONArray();
+            for (Monitor m : monitors)
+                array.add(toJSONObject(m));
+            return array;
         }
     }
 }

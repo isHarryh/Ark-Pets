@@ -16,9 +16,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
@@ -43,8 +41,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
-	private int SCR_W; // Screen Width
-	private int SCR_H; // Screen Height
 
 	public Vector2 WD_poscur; // Window Current Position
 	public Vector2 WD_postar; // Window Target Position
@@ -78,19 +74,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_SCALE = config.display_scale;
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
-		SCR_W = config.display_monitor_info[0];
-		SCR_H = config.display_monitor_info[1];
-		int x = (int)(SCR_W * 0.05f);
-		int y = SCR_H - WD_H;
-		intiWindow(x, y);
-		setWindowPosTar(x, y);
 		// 4.Plane setup
-		plane = new Plane(SCR_W, config.display_margin_bottom-SCR_H, SCR_H * 0.75f);
-		plane.setFrict(SCR_W * 0.05f, SCR_W * 0.25f);
+        ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
+		plane = new Plane(new ArrayList<>(), primaryMonitor.size[1] * 0.75f);
+		plane.setFrict(primaryMonitor.size[0] * 0.05f, primaryMonitor.size[0] * 0.25f);
 		plane.setBounce(0);
-		plane.setObjSize(WD_W, -WD_H);
-		plane.setSpeedLimit(SCR_W * 0.5f, SCR_H * 1.0f);
-		plane.changePosition(0, WD_postar.x, -WD_postar.y);
+		plane.setObjSize(WD_W, WD_H);
+		plane.setSpeedLimit(primaryMonitor.size[0] * 0.5f, primaryMonitor.size[1] * 1.0f);
+		intiWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		// 5.Behavior setup
 		behavior = Behavior.selectBehavior(cha.anim_list, new Behavior[] {
 				new BehaviorOperBuild2(config, cha.anim_list),
@@ -127,8 +118,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
 		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
-			setWindowPosTar(plane.getX(), -plane.getY());
-			setWindowPosCur(Gdx.graphics.getDeltaTime());
 			if (cha.anim_queue[0].MOBILITY != 0) {
 				if (willReachBorder(cha.anim_queue[0].MOBILITY)) {
 					// Turn around if auto-walk cause the collision from screen border.
@@ -149,6 +138,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			newAnim = tray.keepAnim;
 		}
 		changeAnimation(newAnim); // Apply the new anim.
+
+		// 3.Window activities.
+		setWindowPosTar(plane.getX(), - (WD_H + plane.getY()));
+		setWindowPosCur(Gdx.graphics.getDeltaTime());
 		setWindowAlphaCur(Gdx.graphics.getDeltaTime());
 	}
 
@@ -179,33 +172,37 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		mouse_pos.set(screenX, screenY);
-		if (button != Input.Buttons.LEFT || pointer > 0)
-			return false;
 		Logger.debug("Input", "Click+ @ " + screenX + ", " + screenY);
-		cha.setAnimation(behavior.clickStart());
-		return true;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
+		mouse_pos.set(screenX, screenY);
+		if (pointer <= 0) {
+			if (button == Input.Buttons.RIGHT) {
+				Logger.debug("Plane Debug Message", plane.getDebugMsg());
+				return true;
+			}
+			if (button == Input.Buttons.LEFT) {
+				cha.setAnimation(behavior.clickStart());
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		// Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
 		mouse_drag = true;
 		int t = (int)Math.signum(screenX - mouse_pos.x);
 		mouse_intention_x = t == 0 ? mouse_intention_x : t;
 		int x = (int)(WD_poscur.x + screenX - mouse_pos.x);
 		int y = (int)(WD_poscur.y + screenY - mouse_pos.y);
-		setWindowPos(x, y, true);
-		plane.changePosition(Gdx.graphics.getDeltaTime(), x, -y);
+		plane.changePosition(Gdx.graphics.getDeltaTime(), x, - (WD_H + y));
+		setWindowPos((int)plane.getX(),  - (WD_H + (int)plane.getY()), true);
 		return true;
 	}
 
 	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {	
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		Logger.debug("Input", "Click- @ " + screenX + ", " + screenY);
 		if (!mouse_drag)
 			changeAnimation(behavior.clickEnd());
 		else {
@@ -217,26 +214,28 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			}
 		}
 		mouse_drag = false;
-		if (button != Input.Buttons.LEFT || pointer > 0)
-			return false;
-		Logger.debug("Input", "Click- @ " + screenX + ", " + screenY);
 		return true;
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
 		Logger.debug("Input", "Key+ @ " + keycode);
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
 		Logger.debug("Input", "Key- @ " + keycode);
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
 		return false;
 	}
 
@@ -252,13 +251,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void intiWindow(int x, int y) {
 		if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
-		if (HWND_MINE == null)
-			return;
+        refreshMonitorInfo();
 		HWND_TOPMOST = refreshWindowIdx();
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
-				x, y, WD_W, WD_H,
-				WinUser.SWP_SHOWWINDOW | WinUser.SWP_NOACTIVATE
-		);
+		setWindowPos(x, y, true);
+		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
 		setWindowTransparent(false);
 	}
 
@@ -273,21 +269,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		User32.INSTANCE.SetLayeredWindowAttributes(HWND_MINE, 0, (byte)((int)($alpha * 255) & 0xFF), User32.LWA_ALPHA);
 	}
 
-	public void setWindowAlphaTar(float $alpha) {
-		WD_alpha.update($alpha);
-	}
-
-	private void setWindowAlphaCur(float $deltaTime) {
-		if (WD_alpha.curValue == WD_alpha.TO)
-			return;
-		WD_alpha.step($deltaTime);
-		setWindowAlpha(WD_alpha.curValue);
-	}
-
 	private void setWindowPos(int x, int y, boolean override) {
-		if (HWND_MINE == null)
-			return;
+		if (HWND_MINE == null) return;
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
+			refreshMonitorInfo();
 			HWND new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != HWND_TOPMOST) {
 				HWND_TOPMOST = new_hwnd_topmost;
@@ -295,14 +280,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					return;
 			}
 		}
-		WD_poscur.set(
-				x > 0 ? Math.min(x, SCR_W - WD_W) : 0,
-				y > 0 ? Math.min(y, SCR_H - WD_H + OFFSET_Y) : 0
-		);
 		if (override) {
-			setWindowPosTar(WD_poscur.x, WD_poscur.y);
-			WD_poseas.eX.curValue = WD_poscur.x;
-			WD_poseas.eY.curValue = WD_poscur.y;
+			setWindowPosTar(x, y);
+			WD_poscur.x = WD_postar.x;
+			WD_poscur.y = WD_postar.y;
 			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
@@ -314,8 +295,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	private HWND refreshWindowIdx() {
 		ArrayList<HWndCtrl> windowList = HWndCtrl.getWindowList(true);
+		//Logger.debug("HWND", windowList.toString());
 		HWND minWindow = null;
-		HWndCtrl[] line = new HWndCtrl[SCR_H];
+		HashMap<Integer, HWndCtrl> line = new HashMap<>();
 		int myPos = (int)(WD_poscur.x + WD_W / 2);
 		int minNum = 2048;
 		int myNum = getArkPetsWindowNum(APP_TITLE);
@@ -330,21 +312,22 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			// Distinguish non-peer windows from peers.
 			if (wndNum == -1){
 				if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
-					// This window "is" in the vertical line that the app lies.
-					if (hWndCtrl.posBottom > 0 && hWndCtrl.posTop < SCR_H) {
+					// This window and the app are share the same vertical line.
+					if (-hWndCtrl.posBottom < plane.borderTop() && -hWndCtrl.posTop > plane.borderBottom()) {
 						// This window is "under" the app.
-						for (int h = Math.max(hWndCtrl.posTop, 0); h < Math.min(hWndCtrl.posBottom, SCR_H); h++) {
-							if (line[h] == null)
-								line[h] = (h == hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl(); // Record this window.
+						for (int h = -hWndCtrl.posTop; h > -hWndCtrl.posBottom; h--) {
+							// Mark the window's y-position in the vertical line.
+							if (!line.containsKey(h))
+								line.put(h, (h == -hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl()); // Record this window.
 						}
 					}
 				}
 			} else {
 				if (config.behavior_do_peer_repulsion && wndNum != myNum && plane != null) {
-					// Set point charges.
+					// This window is peer window, set as point charges.
 					plane.setPointCharge(-hWndCtrl.getCenterY(), hWndCtrl.getCenterX(), quantityProduct);
 				}
-				// Find the last peer window.
+				// Find the last peer window to handle the z-index.
 				if (wndNum > myNum && wndNum < minNum) {
 					minNum = getArkPetsWindowNum(hWndCtrl.windowText);
 					minWindow = hWndCtrl.hWnd;
@@ -357,19 +340,38 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			minWindow = new HWND(Pointer.createConstant(-1));
 		}
 		if (plane != null) {
-			// Set barriers.
-			for (int h = WD_H; h < SCR_H; h++) {
-				HWndCtrl temp = line[h];
-				if (temp != null && temp.hWnd != null) {
-					plane.setBarrier(-temp.posTop, 0, SCR_W, false);
-					//System.out.println("Barrier at "+(-temp.posTop)+" is "+temp.windowText+" pos "+temp.posLeft+","+temp.posRight);
+			// Set barriers according to the vertical line.
+			for (int h = (int)plane.borderTop(); h > plane.borderBottom(); h--) {
+				if (line.containsKey(h)) {
+					HWndCtrl temp = line.get(h);
+					if (temp != null && temp.hWnd != null)
+						plane.setBarrier(-temp.posTop, temp.posLeft, temp.windowWidth, false);
 				}
 			}
 		}
 		return minWindow; // Return the last peer window.
 	}
 
-	private int getArkPetsWindowNum(String title) {
+	private void refreshMonitorInfo() {
+		ArkConfig.Monitor[] monitors = ArkConfig.Monitor.getMonitors();
+		if (monitors.length == 0) {
+			Logger.error("App", "Failed to get monitors information");
+			throw new RuntimeException("Launch ArkPets failed due to monitors config error.");
+		}
+		plane.world.clear();
+		boolean flag = true;
+		for (ArkConfig.Monitor i : ArkConfig.Monitor.getMonitors()) {
+			if (!flag) break;
+			flag = config.display_multi_monitors;
+			float left = i.virtual[0];
+			float right = left + i.size[0];
+			float top = -i.virtual[1];
+			float bottom = top - i.size[1] + config.display_margin_bottom;
+			plane.world.add(new Plane.RectArea(left, right, top, bottom));
+		}
+	}
+
+	public static int getArkPetsWindowNum(String title) {
 		final String prefix = coreTitle;
 		final String prefix2 = " (";
 		final String suffix = ")";
@@ -387,14 +389,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				return -1;
 			}
 		}
-		return -1;
+		return -1; // Not ArkPets window
 	}
 
 	/* WINDOW OPERATION RELATED */
 	private void walkWindow(float len) {
-		float expectedLen = len * WD_SCALE * (30.0f / APP_FPS);
+		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
-		plane.changePosition(Gdx.graphics.getDeltaTime(), WD_postar.x + realLen, -WD_postar.y);
+		plane.changePosition(Gdx.graphics.getDeltaTime(), WD_postar.x + realLen, - (WD_postar.y + WD_H));
 	}
 
 	private int randomRound(float val) {
@@ -406,7 +408,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	private boolean willReachBorder(float len) {
 		if (plane == null) return false;
-		return (plane.getX() >= SCR_W-WD_W && len > 0) || (plane.getX() <= 0 && len < 0);
+		return (plane.getX() >= plane.borderRight() - WD_W && len > 0) || (plane.getX() <= plane.borderLeft() && len < 0);
 	}
 
 	private void setWindowPosTar(float $pos_x, float $pos_y) {
@@ -418,6 +420,16 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void setWindowPosCur(float $deltaTime) {
 		WD_poscur.set(WD_poseas.eX.step($deltaTime), WD_poseas.eY.step($deltaTime));
 		setWindowPos((int)WD_poscur.x, (int)WD_poscur.y, false);
+	}
+
+	public void setWindowAlphaTar(float $alpha) {
+		WD_alpha.update($alpha);
+	}
+
+	private void setWindowAlphaCur(float $deltaTime) {
+		if (WD_alpha.curValue == WD_alpha.TO) return;
+		WD_alpha.step($deltaTime);
+		setWindowAlpha(WD_alpha.curValue);
 	}
 
 

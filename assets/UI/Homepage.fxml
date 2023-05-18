@@ -265,6 +265,22 @@
                                         </children>
                                     </HBox>
                                     <Separator/>
+                                    <Label styleClass="config-group-title" text="位置"/>
+                                    <HBox>
+                                        <children>
+                                            <JFXCheckBox fx:id="configDeployMultiMonitors" mnemonicParsing="false"
+                                                         text="启用多显示屏"/>
+                                            <Label fx:id="configDeployMultiMonitorsStatus" text="-"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox>
+                                        <children>
+                                            <Label text="任务栏高度（下边界距离）"/>
+                                            <JFXSlider fx:id="configDeployMarginBottom"/>
+                                            <Label fx:id="configDeployMarginBottomValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <Separator/>
                                 </children>
                             </VBox>
                         </children>
@@ -296,13 +312,6 @@
                                         <children>
                                             <Label text="最大帧率"/>
                                             <JFXComboBox fx:id="configDisplayFps" prefWidth="100.0"/>
-                                        </children>
-                                    </HBox>
-                                    <HBox>
-                                        <children>
-                                            <Label text="下边界距离"/>
-                                            <JFXSlider fx:id="configDisplayMarginBottom"/>
-                                            <Label fx:id="configDisplayMarginBottomValue" text="0"/>
                                         </children>
                                     </HBox>
                                     <Separator/>

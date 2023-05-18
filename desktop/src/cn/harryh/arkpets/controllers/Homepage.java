@@ -109,15 +109,19 @@ public class Homepage {
     private JFXCheckBox configBehaviorAllowInteract;
     @FXML
     private JFXCheckBox configBehaviorDoPeerRepulsion;
+    @FXML
+    private JFXCheckBox configDeployMultiMonitors;
+    @FXML
+    private Label configDeployMultiMonitorsStatus;
+    @FXML
+    private JFXSlider configDeployMarginBottom;
+    @FXML
+    private Label configDeployMarginBottomValue;
 
     @FXML
     private JFXComboBox<Float> configDisplayScale;
     @FXML
     private JFXComboBox<Integer> configDisplayFps;
-    @FXML
-    private JFXSlider configDisplayMarginBottom;
-    @FXML
-    private Label configDisplayMarginBottomValue;
     @FXML
     private JFXButton manageModelCheck;
     @FXML
@@ -157,7 +161,6 @@ public class Homepage {
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
-            config.display_monitor_info = getDefaultMonitorInfo();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
@@ -202,6 +205,8 @@ public class Homepage {
                 }
             }
         }
+        // Special
+        configDeployMultiMonitorsStatus.setText("检测到 " + config.updateMonitorsConfig() + " 个显示屏");
     }
 
     private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
@@ -351,6 +356,24 @@ public class Homepage {
             config.behavior_do_peer_repulsion = configBehaviorDoPeerRepulsion.isSelected();
             config.saveConfig();
         });
+
+        configDeployMultiMonitors.setSelected(config.display_multi_monitors);
+        configDeployMultiMonitors.setOnAction(e -> {
+            config.display_multi_monitors = configDeployMultiMonitors.isSelected();
+            config.saveConfig();
+        });
+        configDeployMarginBottom.setMax(120);
+        configDeployMarginBottom.setMin(0);
+        configDeployMarginBottom.setMajorTickUnit(10);
+        configDeployMarginBottom.setMinorTickCount(5);
+        configDeployMarginBottom.setValue(config.display_margin_bottom);
+        configDeployMarginBottom.valueProperty().addListener(((observable, oldValue, newValue) -> {
+            int value = (int)Math.round((double)newValue);
+            configDeployMarginBottomValue.setText(String.valueOf(value));
+            config.display_margin_bottom = value;
+            config.saveConfig();
+        }));
+        configDeployMarginBottomValue.setText(String.valueOf(config.display_margin_bottom));
     }
 
     private void initConfigDisplay() {
@@ -370,19 +393,6 @@ public class Homepage {
                 config.saveConfig();
             }
         });
-        configDisplayMarginBottom.setMax(120);
-        configDisplayMarginBottom.setMin(0);
-        configDisplayMarginBottom.setMajorTickUnit(10);
-        configDisplayMarginBottom.setMinorTickCount(5);
-        configDisplayMarginBottom.setValue(config.display_margin_bottom);
-        configDisplayMarginBottom.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            int value = (int)Math.round((double)newValue);
-            //configDisplayMarginBottom.setValue(value);
-            configDisplayMarginBottomValue.setText(String.valueOf(value));
-            config.display_margin_bottom = value;
-            config.saveConfig();
-        }));
-        configDisplayMarginBottomValue.setText(String.valueOf(config.display_margin_bottom));
     }
 
     private void initModelManage() {
@@ -657,6 +667,14 @@ public class Homepage {
     }
 
     private void foregroundCheckModels() {
+        ArrayList<HWndCtrl> list = HWndCtrl.getWindowList(true);
+        for (HWndCtrl hWndCtrl : list) {
+            if (ArkPets.getArkPetsWindowNum(hWndCtrl.windowText) >= 0) {
+                Logger.debug("Launcher", "Kill " + hWndCtrl.windowText);
+                hWndCtrl.close(100);
+            }
+        }
+        Logger.debug("Launcher", "done");
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {

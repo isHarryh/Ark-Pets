@@ -3,17 +3,17 @@
  */
 package cn.harryh.arkpets.utils;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+
+import java.util.ArrayList;
 
 
 public class Plane {
     public ArrayList<Vector3> barriers;
     public ArrayList<Vector3> pointCharges;
+    public ArrayList<RectArea> world;
     private final Vector2 obj;
-    private final Vector2 world;
     private final Vector2 position;
     private final Vector2 speed;
     private final Vector2 speedLimit;
@@ -23,26 +23,23 @@ public class Plane {
     private float staticFrict;
     private boolean dropped = false;
     private float droppedHeight = 0;
-    static float droppedThreshold = 10f;
+    static float droppedThreshold = 10f; // TODO set as const
 
     /** Initialize a plane with gravity field.
-     * The origin of coordinates (0,0) is the left-bottom point.
-     * Minus(-) are allowed, but may not be compatible.
-     * @param $worldWidth The width of the plane (px).
-     * @param $worldHeight The height of the plane (px).
+     * @param $world The collection of all available areas.
      * @param $gravity The acceleration of gravity (px/s^2).
      */
-    public Plane(int $worldWidth, int $worldHeight, float $gravity) {
-        position = new Vector2(0, 0);
-        speed = new Vector2(0, 0);
-        speedLimit = new Vector2(0, 0);
-        barriers = new ArrayList<>();
-        pointCharges = new ArrayList<>();
-        world = new Vector2($worldWidth, $worldHeight);
-        obj = new Vector2(0, 0);
-        bounce = 0;
-        gravity = $gravity;
-        airFrict = 0;
+    public Plane(ArrayList<RectArea> $world, float $gravity) {
+        barriers        = new ArrayList<>();
+        pointCharges    = new ArrayList<>();
+        world       = $world;
+        obj         = new Vector2(0, 0);
+        position    = new Vector2(0, 0);
+        speed       = new Vector2(0, 0);
+        speedLimit  = new Vector2(0, 0);
+        bounce      = 0;
+        gravity     = $gravity;
+        airFrict    = 0;
         staticFrict = 0;
     }
 
@@ -58,12 +55,11 @@ public class Plane {
      * @param $staticFrict The acceleration of static friction provided by the groud (px/s^2).
      */
     public void setFrict(float $airFrict, float $staticFrict) {
-        airFrict = $airFrict;
+        airFrict    = $airFrict;
         staticFrict = $staticFrict;
     }
 
     /** Set the size of the object.
-     * Minus(-) are allowed, but may not be compatible.
      * @param $objWidth The width of the object (px).
      * @param $objHeight The height of the object (px).
      */
@@ -72,8 +68,8 @@ public class Plane {
     }
 
     /** Set the limitation of speed, 0=unlimited.
-     * @param $x Max speed in x-direction (px/s).
-     * @param $y Max speed in y-direction (px/s).
+     * @param $x Max speed in x-axis (px/s).
+     * @param $y Max speed in y-axis (px/s).
      */
     public void setSpeedLimit(float $x, float $y) {
         speedLimit.set($x, $y);
@@ -86,7 +82,7 @@ public class Plane {
      * @param $y New y-position (px).
      */
     public void changePosition(float $deltaTime, float $x, float $y) {
-        speed.set(($x-position.x)/$deltaTime, ($y-position.y)/$deltaTime);
+        speed.set(($x - position.x) / $deltaTime, ($y - position.y) / $deltaTime);
         position.set($x, $y);
         position.set(limitX($x), limitY($y));
     }
@@ -98,11 +94,11 @@ public class Plane {
         updateVelocity($deltaTime);
         float deltaX = speed.x * $deltaTime;
         float deltaY = speed.y * $deltaTime;
-        final float borderBottom = borderBottom();
-        droppedHeight = Math.max(Math.signum(gravity) * (position.y - borderBottom), droppedHeight);
-        if (position.y != borderBottom && limitY(deltaY + position.y) == borderBottom) {
+        final float bottom = borderBottom();
+        droppedHeight = Math.max(Math.signum(gravity) * (position.y - bottom), droppedHeight);
+        if (position.y != bottom && limitY(deltaY + position.y) == bottom) {
             // When it fell to the ground.
-            if (Math.signum(gravity) * (position.y - borderBottom) > 0)
+            if (Math.signum(gravity) * (position.y - bottom) > 0)
                 dropped = true;
             speed.y = 0;
         }
@@ -167,18 +163,32 @@ public class Plane {
         return Math.abs(position.y - borderBottom()) > droppedThreshold;
     }
 
+    /** Get the debug message.
+     * @return Debug message string.
+     */
+    public String getDebugMsg() {
+        String msg = this + "\n";
+        msg += "Position:\t" + Math.round(position.x) + "\t" + Math.round(position.y) + (getDropping() ? "\t(dropping)" : "") + "\n";
+        msg += "Velocity:\t" + Math.round(speed.x) + "\t" + Math.round(speed.y) + "\n";
+        msg += "Borders:\t^" + Math.round(borderTop()) + "\t>" + Math.round(borderRight()) + "\tv" + Math.round(borderBottom()) + "\t<" + Math.round(borderLeft()) + "\n";
+        msg += "Areas:\t" + world.size() + "\n";
+        for (RectArea i : world)
+            msg += "- " + i.toString() + "\n";
+        msg += "Barriers:\t" + barriers.size() + "\n";
+        for (Vector3 i : barriers)
+            msg += "- Y = " + i.y +  ", X range = (" + i.x + "," + (i.x + i.z) + ")\n";
+        return msg;
+    }
+
     /** Update the velocity of the object.
      * @param $deltaTime Delta time (s).
      */
     private void updateVelocity(float $deltaTime) {
-        final float BOTTOM = borderBottom();
-        final float TOP = borderTop();
+        final float top = borderTop();
+        final float bottom = borderBottom();
         // Gravity
         speed.y -= gravity * $deltaTime;
-        if (position.y == BOTTOM) {
-            speed.y = 0;
-        }
-        else if (position.y == TOP && speed.y > 0)
+        if (position.y == bottom || (position.y + obj.y >= top && speed.y > 0))
             speed.y = 0;
         // Electrostatic forces
         for (Vector3 pc : pointCharges) {
@@ -189,7 +199,7 @@ public class Plane {
             speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , $deltaTime);
         }
         // Ground friction
-        if (position.y == BOTTOM)
+        if (position.y == bottom)
             speed.x = applyFriction(speed.x, staticFrict, $deltaTime);
         // Air friction
         speed.x = applyFriction(speed.x, airFrict, $deltaTime);
@@ -225,11 +235,10 @@ public class Plane {
      * @return New velocity (px/s).
      */
     private float applyElectrostaticEffect(float $speed, float $quantityProduct, float $distance, float $cosine, float $deltaTime){
-        final float k = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
-        final float dm = 20; // Min distance
+        final float k   = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
+        final float dm  = 20; // Min distance
         $distance = Math.max(Math.abs($distance), dm); // Limit the distance
         float delta = k * $quantityProduct / $distance / $distance * $cosine * $deltaTime;
-        //System.out.println("speed+="+delta);
         return $speed + delta;
     }
 
@@ -238,7 +247,7 @@ public class Plane {
      * @return New x (px).
      */
     private float limitX(float $x) {
-        return $x<borderLeft() ? borderLeft() : Math.min($x, borderRight());
+        return Math.max(borderLeft(), Math.min($x, borderRight() - obj.x));
     }
 
     /** Limit the y-position to avoid overstepping.
@@ -246,51 +255,103 @@ public class Plane {
      * @return New y (px).
      */
     private float limitY(float $y) {
-        return $y<borderBottom() ? borderBottom() : Math.min($y, borderTop());
+        return Math.max(borderBottom(), Math.min($y, borderTop() - obj.y));
     }
 
-    /** Get the border position of the top.
+    /** Get the position of the top border.
      * @return Y (px).
      */
-    private float borderTop() {
-        if (world.y > 0)
-            return obj.y < 0 ? world.y : world.y - obj.y;
-        else
-            return obj.y < 0 ? 0 : -obj.y;
+    public float borderTop() {
+        float t = -Float.MAX_VALUE;
+        for (RectArea a : world)
+            if (a.top > t)
+                t = a.top;
+        return t;
     }
 
-    /** Get the border position of the bottom.
+    /** Get the position of the bottom border.
      * @return Y (px).
      */
-    private float borderBottom() {
-        for (Vector3 i : barriers) {
-            if (i.x <= position.x+obj.x && position.x <= i.x+i.z)
-                if (Math.abs(position.y) <= Math.abs(i.y))
-                    return obj.y < 0 ? i.y - obj.y : i.y;
+    public float borderBottom() {
+        for (Vector3 i : barriers)
+            if (i.x <= position.x + obj.x && position.x <= i.x + i.z)
+                if (position.y + obj.y > i.y && borderTop() - obj.y > i.y)
+                    return i.y;
+
+        float t = Float.MAX_VALUE;
+        for (RectArea a : world)
+            if (a.bottom < t)
+                t = a.bottom;
+        return t;
+    }
+
+    /** Get the position of the right border.
+     * @return X (px).W
+     */
+    public float borderRight() {
+        float t = -Float.MAX_VALUE;
+        for (RectArea a : world)
+            if (a.right > t)
+                t = a.right;
+        return t;
+    }
+
+    /** Get the position of the left border.
+     * @return X (px).
+     */
+    public float borderLeft() {
+        float t = Float.MAX_VALUE;
+        for (RectArea a : world)
+            if (a.left < t)
+                t = a.left;
+        return t;
+    }
+
+    @Override
+    public String toString() {
+        return "Plane ^" + borderTop() + " >" + borderRight() + " v" + borderBottom() + " <" + borderLeft();
+    }
+
+
+    public static class RectArea {
+        public float left;
+        public float right;
+        public float top;
+        public float bottom;
+
+        public RectArea(float $left, float $right, float $top, float $bottom) {
+            left     = $left;
+            right    = $right;
+            top      = $top;
+            bottom   = $bottom;
         }
-        if (world.y > 0)
-            return obj.y < 0 ? -obj.y : 0;
-        else
-            return obj.y < 0 ? world.y - obj.y : world.y;
-    }
 
-    /** Get the border position of the right.
-     * @return X (px).
-     */
-    private float borderRight() {
-        if (world.x > 0)
-            return obj.x < 0 ? world.x : world.x - obj.x;
-        else
-            return obj.x < 0 ? 0 : -obj.x;
-    }
+        public float getWidth() {
+            return Math.abs(left - right);
+        }
 
-    /** Get the border position of the left.
-     * @return X (px).
-     */
-    private float borderLeft() {
-        if (world.x > 0)
-            return obj.x < 0 ? -obj.x : 0;
-        else
-            return obj.x < 0 ? world.x - obj.x : world.x;
+        public float getHeight() {
+            return Math.abs(top - bottom);
+        }
+
+        public boolean isInArea(float $x, float $y) {
+            return isInArea(this, $x, $y);
+        }
+
+        public static boolean isInArea(RectArea $area, float $x, float $y) {
+            return $x < $area.left || $x > $area.right || $y < $area.bottom || $y > $area.top;
+        }
+
+        public static boolean isInAreas(RectArea[] $areas, float $x, float $y) {
+            for (RectArea a : $areas)
+                if (isInArea(a, $x, $y))
+                    return true;
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "RectArea ^" + top + " >" + right + " v" + bottom + " <" + left;
+        }
     }
 }

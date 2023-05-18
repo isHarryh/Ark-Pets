@@ -59,11 +59,7 @@ public class HWndCtrl {
      * @return true=visible, false=invisible.
      */
     public boolean isVisible() {
-        if (!User32.INSTANCE.IsWindowVisible(hWnd) || !User32.INSTANCE.IsWindowEnabled(hWnd))
-            return false;
-        if (windowWidth <= 0 || windowHeight <= 0|| posBottom < 0 || posRight < 0)
-            return false;
-        return true;
+        return isVisible(hWnd);
     }
 
     /** Get the center X position.
@@ -80,6 +76,14 @@ public class HWndCtrl {
         return posTop + windowHeight / 2f;
     }
 
+    /** Request to close the window.
+     * @param $timeout Timeout for waiting response (ms).
+     * @return true=success, false=failure.
+     */
+    public boolean close(int $timeout) {
+        return User32.INSTANCE.SendMessageTimeout(hWnd, 0x10, null, null, $timeout, WinUser.SMTO_NORMAL, null).intValue() == 0;
+    }
+
     /** Get the current list of windows.
      * @param $only_visible Whether exclude the invisible window.
      * @return An ArrayList consists of HWndCtrls.
@@ -94,7 +98,7 @@ public class HWndCtrl {
                 return true;
             }
         }, null);
-		return windowList;
+        return windowList;
     }
 
     /** Get the current list of windows. (Advanced)
@@ -121,11 +125,7 @@ public class HWndCtrl {
             if (!User32.INSTANCE.IsWindowVisible($hWnd) || !User32.INSTANCE.IsWindowEnabled($hWnd))
                 return false;
             RECT rect = getWindowRect($hWnd);
-            int posTop = rect.top;
-            int posBottom = rect.bottom;
-            int posLeft = rect.left;
-            int posRight = rect.right;
-            if (posRight <= posLeft || posBottom <= posTop || posBottom < 0 || posRight < 0)
+            if (rect.top == rect.bottom || rect.left == rect.right)
                 return false;
         } catch(Exception e) {
             return false;
@@ -139,13 +139,18 @@ public class HWndCtrl {
 
     private static String getWindowText(HWND $hWnd) {
         char[] text = new char[1024];
-		User32.INSTANCE.GetWindowText($hWnd, text, 512);
-		return Native.toString(text);
+        User32.INSTANCE.GetWindowText($hWnd, text, 512);
+        return Native.toString(text);
     }
 
     private static  RECT getWindowRect(HWND $hWnd) {
         RECT rect = new RECT();
-		User32.INSTANCE.GetWindowRect($hWnd, rect);
+        User32.INSTANCE.GetWindowRect($hWnd, rect);
         return rect;
+    }
+
+    @Override
+    public String toString() {
+        return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight;
     }
 }
