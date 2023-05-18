@@ -110,7 +110,7 @@ public class ArkConfig {
                 IOUtils.FileUtil.writeString(startupFile, charsetVBS, script, false);
                 Logger.info("Config", "Auto-startup was added: " + startupFile.getAbsolutePath());
                 return true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Logger.error("Config", "Auto-startup adding failed, details see below.", e);
                 return false;
             }
@@ -120,7 +120,7 @@ public class ArkConfig {
             try {
                 IOUtils.FileUtil.delete(startupFile.toPath(), false);
                 Logger.info("Config", "Auto-startup was removed: " + startupFile.getAbsolutePath());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Logger.error("Config", "Auto-startup removing failed, details see below.", e);
             }
         }
@@ -135,7 +135,7 @@ public class ArkConfig {
                 String checksum1 = IOUtils.FileUtil.getMD5(Objects.requireNonNull(script).getBytes(charsetVBS));
                 String checksum2 = IOUtils.FileUtil.getMD5(startupFile);
                 return checksum1.equals(checksum2);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 return false;
             }
         }

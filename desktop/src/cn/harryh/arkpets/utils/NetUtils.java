@@ -26,7 +26,6 @@ public class NetUtils {
 
     public static GitHubSource[] ghSources = new GitHubSource[] {
             new GitHubSource("GitHub", "https://raw.githubusercontent.com/", "https://github.com/"),
-            // new GitHubSource("FastGit", "https://raw.fastgit.org/", "https://download.fastgit.org/"),
             new GitHubSource("GHProxy", "https://ghproxy.com/https://raw.githubusercontent.com/", "https://ghproxy.com/https://github.com/")
     };
     public static final Map<Long, String> sizeMap;
@@ -218,10 +217,16 @@ public class NetUtils {
         public final String tag;
         public final String preUrl;
         public int delay = -1;
+        public long lastErrorTime = -1;
 
         public Source(String $tag, String $preUrl) {
             tag= $tag;
             preUrl = $preUrl;
+        }
+
+        public void receiveError() {
+            lastErrorTime = System.currentTimeMillis();
+            Logger.debug("Network", "Marked source \"" + tag + "\" as historical unavailable with timestamp " + lastErrorTime);
         }
 
         public int testDelay() {
@@ -239,6 +244,24 @@ public class NetUtils {
                 s.testDelay();
             ArrayList<Source> sources = new ArrayList<>(Arrays.stream($sources).toList());
             sources.sort((o1, o2) -> {
+                if (o1.delay == o2.delay)
+                    return 0;
+                if (o1.delay < 0 && o2.delay >= 0)
+                    return 1;
+                if (o1.delay >= 0 && o2.delay < 0)
+                    return -1;
+                return (o1.delay > o2.delay) ? 1 : -1;
+            });
+            return sources.toArray(new Source[0]);
+        }
+
+        public static Source[] sortByOverallAvailability(Source[] $sources) {
+            for (Source s : $sources)
+                s.testDelay();
+            ArrayList<Source> sources = new ArrayList<>(Arrays.stream($sources).toList());
+            sources.sort((o1, o2) -> {
+                if (o1.lastErrorTime != o2.lastErrorTime)
+                    return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
                 if (o1.delay == o2.delay)
                     return 0;
                 if (o1.delay < 0 && o2.delay >= 0)
@@ -273,6 +296,24 @@ public class NetUtils {
                 s.testDelay();
             ArrayList<GitHubSource> sources = new ArrayList<>(Arrays.stream($sources).toList());
             sources.sort((o1, o2) -> {
+                if (o1.delay == o2.delay)
+                    return 0;
+                if (o1.delay < 0 && o2.delay >= 0)
+                    return 1;
+                if (o1.delay >= 0 && o2.delay < 0)
+                    return -1;
+                return (o1.delay > o2.delay) ? 1 : -1;
+            });
+            return sources.toArray(new GitHubSource[0]);
+        }
+
+        public static GitHubSource[] sortByOverallAvailability(GitHubSource[] $sources) {
+            for (GitHubSource s : $sources)
+                s.testDelay();
+            ArrayList<GitHubSource> sources = new ArrayList<>(Arrays.stream($sources).toList());
+            sources.sort((o1, o2) -> {
+                if (o1.lastErrorTime != o2.lastErrorTime)
+                    return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
                 if (o1.delay == o2.delay)
                     return 0;
                 if (o1.delay < 0 && o2.delay >= 0)

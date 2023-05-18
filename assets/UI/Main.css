@@ -12,8 +12,9 @@
  ******************************************************************************/
 
 * {
-/* Font anti-aliasing */
+/* Fonts */
 -fx-font-smoothing-type: gray;
+-fx-font-family: "Microsoft YaHei" "SimHei" "SimSun";
 }
 
 .scroll-v {
@@ -113,6 +114,7 @@ Button:focused {
 /* Regular */
 -fx-cursor: hand;
 -fx-padding: 0 0 0 20px;
+-fx-font-size: 18px;
 -fx-text-fill: #204880;
 -fx-text-alignment: left;
 -fx-background-color: #FFFFFF;
@@ -143,6 +145,7 @@ Button:focused {
 /* Regular */
 -fx-cursor: hand;
 -fx-padding: 0 0 0 20px;
+-fx-font-size: 18px;
 -fx-text-fill: #FFFFFF;
 -fx-text-alignment: left;
 -fx-background-color: #204880;

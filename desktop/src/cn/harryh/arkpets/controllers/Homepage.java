@@ -6,24 +6,20 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkPets;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.ArkConfig;
+import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-
-import static cn.harryh.arkpets.Const.*;
-import static cn.harryh.arkpets.utils.PopupUtils.*;
-
-import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
-import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.util.Duration;
 import javafx.scene.Group;
@@ -33,9 +29,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 
-import java.awt.Desktop;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -43,6 +39,9 @@ import java.util.function.Consumer;
 import java.util.zip.ZipException;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
+
+import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 public class Homepage {
@@ -152,6 +151,9 @@ public class Homepage {
 
     public void initialize() {
         Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
+        Logger.debug("Launcher", "Property file.encoding = " + System.getProperty("file.encoding"));
+        Logger.debug("Launcher", "Property sun.jnu.encoding = " + System.getProperty("sun.jnu.encoding"));
+        Logger.debug("Launcher", "Default charset = " + Charset.defaultCharset());
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
@@ -324,6 +326,7 @@ public class Homepage {
             config.behavior_allow_sit = configBehaviorAllowSit.isSelected();
             config.saveConfig();
         });
+
         configBehaviorAiActivation.setMax(8);
         configBehaviorAiActivation.setMin(0);
         configBehaviorAiActivation.setMajorTickUnit(1);
@@ -512,16 +515,16 @@ public class Homepage {
         });
         $task.messageProperty().addListener(((observable, oldValue, newValue) -> h3.setText(newValue)));
         $task.setOnCancelled(e -> {
-            Logger.info("Task", "Foreground task was cancelled.");
+            Logger.info("Task", "Foreground dialog task was cancelled.");
             DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnFailed(e -> {
-            Logger.error("Task", "Foreground task failed, details see below.", $task.getException());
+            Logger.error("Task", "Foreground dialog task failed, details see below.", $task.getException());
             popError($task.getException()).show();
             DialogUtil.disposeDialog(dialog, root);
         });
         $task.setOnSucceeded(e -> {
-            Logger.info("Task", "Foreground task completed.");
+            Logger.info("Task", "Foreground dialog task completed.");
             DialogUtil.disposeDialog(dialog, root);
         });
         Thread thread = new Thread($task);
@@ -531,7 +534,11 @@ public class Homepage {
 
     public void popLoading(EventHandler<ActionEvent> $onLoading) {
         fadeInNode(wrapper0, durationFast, e -> {
-            $onLoading.handle(e);
+            try {
+                $onLoading.handle(e);
+            } catch (Exception ex) {
+                Logger.error("Task", "Foreground loading task failed, details see below.", ex);
+            }
             fadeOutNode(wrapper0, durationFast, null);
         });
     }
@@ -872,48 +879,55 @@ public class Homepage {
             protected Boolean call() throws Exception {
                 this.updateMessage("正在选择最佳线路");
                 Logger.info("Network", "Testing real delay");
-                NetUtils.GitHubSource[] sources = NetUtils.GitHubSource.sortByDelay(NetUtils.ghSources);
+                NetUtils.GitHubSource[] sources = NetUtils.GitHubSource.sortByOverallAvailability(NetUtils.ghSources);
                 NetUtils.GitHubSource source = sources[0];
-                Logger.info("Network", "Selected the shortest delayed source \"" + source.tag + "\" (" + source.delay + "ms)");
-                String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
-                Logger.info("Network", "Downloading " + remotePath + " to " + $localPath);
-                this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
-
-                BufferedInputStream bis = null;
-                BufferedOutputStream bos = null;
-                File file = new File($localPath);
-                URL urlFile = new URL(remotePath);
-                HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
 
                 try {
-                    bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
-                    bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
-                    int len = httpBufferSizeDefault;
-                    long sum = 0;
-                    long max = connection.getContentLengthLong();
-                    byte[] bytes = new byte[len];
-                    while ((len = bis.read(bytes)) != -1) {
-                        bos.write(bytes, 0, len);
-                        sum += len;
-                        this.updateMessage("当前已下载：" + NetUtils.getFormattedSizeString(sum));
-                        this.updateProgress(sum, max);
-                        if (this.isCancelled()) {
-                            this.updateMessage("下载进程已被取消");
-                            break;
+                    Logger.info("Network", "Selected the most available source \"" + source.tag + "\" (" + source.delay + "ms)");
+                    String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
+                    Logger.info("Network", "Fetching " + remotePath + " to " + $localPath);
+                    this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
+
+                    BufferedInputStream bis = null;
+                    BufferedOutputStream bos = null;
+                    File file = new File($localPath);
+                    URL urlFile = new URL(remotePath);
+                    HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
+
+                    try {
+                        bis = new BufferedInputStream(connection.getInputStream(), httpBufferSizeDefault);
+                        bos = new BufferedOutputStream(Files.newOutputStream(file.toPath()), httpBufferSizeDefault);
+                        int len = httpBufferSizeDefault;
+                        long sum = 0;
+                        long max = connection.getContentLengthLong();
+                        byte[] bytes = new byte[len];
+                        while ((len = bis.read(bytes)) != -1) {
+                            bos.write(bytes, 0, len);
+                            sum += len;
+                            this.updateMessage("当前已下载：" + NetUtils.getFormattedSizeString(sum));
+                            this.updateProgress(sum, max);
+                            if (this.isCancelled()) {
+                                this.updateMessage("下载进程已被取消");
+                                break;
+                            }
+                        }
+                        this.updateProgress(max, max);
+                        bos.flush();
+                        Logger.info("Network", "Fetched " + $localPath + " , size: " + sum);
+                    } finally {
+                        try {
+                            connection.getInputStream().close();
+                            if (bis != null)
+                                bis.close();
+                            if (bos != null)
+                                bos.close();
+                        } catch (Exception ignored) {
                         }
                     }
-                    this.updateProgress(max, max);
-                    bos.flush();
-                    Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
-                } finally {
-                    try {
-                        connection.getInputStream().close();
-                        if (bis != null)
-                            bis.close();
-                        if (bos != null)
-                            bos.close();
-                    } catch (Exception ignored){
-                    }
+                } catch (Exception e) {
+                    if (!(e instanceof SSLException))
+                        source.receiveError();
+                    throw e;
                 }
                 return this.isDone() && !this.isCancelled();
             }
@@ -925,7 +939,7 @@ public class Homepage {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在尝试建立连接");
-                Logger.info("Network", "Downloading " + $remotePath + " to " + $localPath);
+                Logger.info("Network", "Fetching " + $remotePath + " to " + $localPath);
 
                 BufferedInputStream bis = null;
                 BufferedOutputStream bos = null;
@@ -952,7 +966,7 @@ public class Homepage {
                     }
                     this.updateProgress(max, max);
                     bos.flush();
-                    Logger.info("Network", "Downloaded " + $localPath + " , file size: " + sum);
+                    Logger.info("Network", "Fetched " + $localPath + " , size: " + sum);
                 } finally {
                     try {
                         connection.getInputStream().close();
