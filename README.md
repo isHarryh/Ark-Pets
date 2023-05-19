@@ -82,7 +82,8 @@
 在[快速上手](#快速上手)中介绍的是最简单和普遍的使用方法。除此之外：
 - 您还可以下载 `zip` 版的程序压缩包解压，实现免安装使用。
 - 如果您的电脑上存在 `JDK17+` 的 [Java](https://www.java.com) 运行环境，您还可以下载 `jar` 版的程序文件直接运行（但无法使用开机自启动功能）。
-- 如果您想用命令行方式启动桌宠，[点击查看](docs/CmdLine.md)说明。
+- 如果您想用命令行启动桌宠，[点击查看](docs/CmdLine.md)说明。
+- 如果您想添加自定义的模型，[点击查看](docs/CustomModel.md)说明。
 
 
 ## 关 于 <sub>About</sub>
@@ -95,7 +96,6 @@
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
 
 ### 参与贡献
-您可以通过提交Issues、PR、CodeReview等方式参与本项目的贡献。
-- 已有Issues摘要 > [点击查看](docs/Issues.md#已有议题)
-- 提交Issues必看 > [点击查看](docs/Issues.md#议题规范)
-- 开发者Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)
+您可以通过提交 Issues 等各种方式参与本项目的贡献。
+- 提交 Issues 必看 > [点击查看](docs/Issues.md)
+- 开发者 Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)

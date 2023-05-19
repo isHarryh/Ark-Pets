@@ -1,10 +1,10 @@
 ArkPets附加说明文档
 # 命令行启动
 
-ArkPets的命令行启动方法，目前只支持一个命令行参数。
+ArkPets 的命令行启动方法。
 
 ### 前提
-必须将命令行工作目录 (cd) 设置为程序文件所在的目录，否则可能发生各种奇怪的错误。
+必须将命令行工作目录设置为程序文件所在的目录，否则可能发生各种奇怪的错误。
 
 ### 用法
 `ArkPets.exe`：
@@ -27,12 +27,5 @@ ArkPets --direct-start --debug
 ```
 
 ### 提示
-如果您使用的程序文件是 `ArkPets.jar` ，命令行应该以
-```shell
-java -jar ArkPets.jar
-```
-或者以
-```shell
-ArkPets.jar
-```
-开头。注意写完整文件名。
+如果您使用的程序文件是 `.jar` 版本 ，命令行应该以形如 `java -jar ArkPets.jar` 或者 `ArkPets.jar` 开头。  
+注意写完整文件名。

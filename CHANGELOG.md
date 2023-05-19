@@ -1,6 +1,7 @@
 # 更新日志 / CHANGELOG
 
-以下内容记录了每个版本分支所新增、修复、优化的条目。
+**目前最新可用版本：**
+[<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
 
 ## v2.1
@@ -9,14 +10,14 @@
 | [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4)<br>[`5d024f9`](https://github.com/isHarryh/Ark-Pets/commit/5d024f911c033d6c94dba3c57652d11cfd83db5f)<br> | 新增了对多显示屏的支持，现在可以将桌宠拖拽到扩展显示屏上。<br>重构了重力场系统。 |
 | [`627d16d`](https://github.com/isHarryh/Ark-Pets/commit/627d16d6978a30b711726d53febc45195cc3f946)<br> | 新增了首次使用软件时的一个提示弹窗。                         |
 
-| **修复**                                                                                                |                                                                                 |
-|:------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------|
-| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 修复了在[特定情况下](https://github.com/libgdx/libgdx/issues/7142)打开启动器卡在 Loading 界面的问题。 |
+| **修复**                                                                                                |                                                                                |
+|:------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|
+| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 修复了在特定情况下打开启动器卡在 Loading 界面的问题。                                                |
 
-| **优化**                                                                                                |                                                      |
-|:------------------------------------------------------------------------------------------------------|:-----------------------------------------------------|
-| [`86a5450`](https://github.com/isHarryh/Ark-Pets/commit/86a5450983a1f5b2487b407201b3f6a08cbdf1e1)<br> | 将 Java 版本从 JDK20 降级到 JDK17，以防止在特定情况下发生 JVM crash。    |
-| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 优化了模型下载源选择的逻辑，现在会将发生过错误的下载源列入低优先级。<br>显式指定了启动器界面的字体。 |
+| **优化**                                                                                                |                                                                                                   |
+|:------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------|
+| [`86a5450`](https://github.com/isHarryh/Ark-Pets/commit/86a5450983a1f5b2487b407201b3f6a08cbdf1e1)<br> | 将 Java 版本从 JDK20 降级到 JDK17，以防止在[特定情况下](https://github.com/libgdx/libgdx/issues/7142)发生 JVM crash。 |
+| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 优化了模型下载源选择的逻辑，现在会将发生过错误的下载源列入低优先级。<br>显式指定了启动器界面的字体。                                              |
 
 
 ## v2.0
