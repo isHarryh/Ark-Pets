@@ -5,10 +5,11 @@
 
 
 ## v2.1
-| **新增**                                                                                                |                                            |
-|:------------------------------------------------------------------------------------------------------|:-------------------------------------------|
-| [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4)<br>[`5d024f9`](https://github.com/isHarryh/Ark-Pets/commit/5d024f911c033d6c94dba3c57652d11cfd83db5f)<br> | 新增了对多显示屏的支持，现在可以将桌宠拖拽到扩展显示屏上。<br>重构了重力场系统。 |
-| [`627d16d`](https://github.com/isHarryh/Ark-Pets/commit/627d16d6978a30b711726d53febc45195cc3f946)<br> | 新增了首次使用软件时的一个提示弹窗。                         |
+| **新增**                                                                                                                                                         |                                                                                                 |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------|
+| [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4)<br>[`5d024f9`](https://github.com/isHarryh/Ark-Pets/commit/5d024f911c033d6c94dba3c57652d11cfd83db5f)<br> | 新增了对多显示屏的支持，现在可以将桌宠拖拽到扩展显示屏上。<br>重构了重力场系统。                                                      |
+| [`627d16d`](https://github.com/isHarryh/Ark-Pets/commit/627d16d6978a30b711726d53febc45195cc3f946)<br>                                                          | 新增了首次使用软件时的一个提示弹窗。                                                                              |
+| [`04a459c`](https://github.com/isHarryh/Ark-Pets/commit/04a459cb05709919aa5ab368716067a97327132b)<br>                                                          | 新增了[思源黑体](https://github.com/adobe-fonts/source-han-sans)作为启动器界面的字体，不再使用系统默认字体，解决了部分设备上的字体渲染问题。 |
 
 | **修复**                                                                                                |                                                                                |
 |:------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|
@@ -17,7 +18,7 @@
 | **优化**                                                                                                |                                                                                                   |
 |:------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------|
 | [`86a5450`](https://github.com/isHarryh/Ark-Pets/commit/86a5450983a1f5b2487b407201b3f6a08cbdf1e1)<br> | 将 Java 版本从 JDK20 降级到 JDK17，以防止在[特定情况下](https://github.com/libgdx/libgdx/issues/7142)发生 JVM crash。 |
-| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 优化了模型下载源选择的逻辑，现在会将发生过错误的下载源列入低优先级。<br>显式指定了启动器界面的字体。                                              |
+| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 优化了模型下载源选择的逻辑，现在会将发生过错误的下载源列入低优先级。                                                                |
 
 
 ## v2.0
@@ -43,7 +44,7 @@
 | [`afa9b03`](https://github.com/isHarryh/Ark-Pets/commit/afa9b0311eecc5938cf25b1bdd1143c18a8bb5af)<br>[`a134dd4`](https://github.com/isHarryh/Ark-Pets/commit/a134dd4b15862fa83fceeda93c3528e1303356c5)<br>[`abc3cad`](https://github.com/isHarryh/Ark-Pets/commit/abc3cadf5374e5a656715cbccf1c1bb704ef8df0)<br> | 优化了软件分发与自动化构建，现在分发的二进制文件包括 `exe` `zip` `jar` 。运行时映像的打包方式从 exe4j 更改为 [jlink](https://docs.oracle.com/en/java/javase/18/docs/specs/man/jlink.html)+[jpackage](https://docs.oracle.com/en/java/javase/18/docs/specs/man/jpackage.html)。 |
 | [`fa866d1`](https://github.com/isHarryh/Ark-Pets/commit/fa866d11911c10072ecd733828778efbbfc7024a)<br>[`8860930`](https://github.com/isHarryh/Ark-Pets/commit/88609305cfd61672238896b7ede87ee7377873b9)<br>                                                                                                      | 优化了日志系统，现在会自动写入日志到文件中，并且可记录日志等级。                                                                                                                                                                                                     |
 | [`bf904b7`](https://github.com/isHarryh/Ark-Pets/commit/bf904b7614c3005d68dd746dcbb4c0c461cbd938)<br>                                                                                                                                                                                                           | 微调了干员基建小人和敌方小人切换动作的随机触发权重。                                                                                                                                                                                                           |
-| [`c9866a1`](https://github.com/isHarryh/Ark-Pets/commit/c9866a16b7ea95b63a44c1d1fc41fce72e81ff27)<br>                                                                                                                                                                                                           | 将 Java 版本从 JDK18 升级到 JDK20 ；将 Gradle 版本从 7.5 升级到 8.1 。                                                                                                                                                                               |
+| [`c9866a1`](https://github.com/isHarryh/Ark-Pets/commit/c9866a16b7ea95b63a44c1d1fc41fce72e81ff27)<br>                                                                                                                                                                                                           | ~~将 Java 版本从 JDK18 升级到 JDK20 ；~~ 将 Gradle 版本从 7.5 升级到 8.1 。                                                                                                                                                                          |
 
 | **补丁**                                                                                                            |                                                |
 |:------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------|
