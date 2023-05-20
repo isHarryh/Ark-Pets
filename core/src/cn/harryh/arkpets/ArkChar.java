@@ -157,7 +157,6 @@ public class ArkChar {
     }
 
     /** Adjust the canvas to fit the character's size.
-     * @param $reserved_length The reserved length of the canvas (px).
      */
     public void adjustCanvas(int $reserved_length, String $anim_name, boolean $initialize) {
         setCanvas(fpsDefault);

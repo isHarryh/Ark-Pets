@@ -615,6 +615,10 @@ public class Homepage {
             h2.setText("无法建立神经连接");
             h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
+        if ($e instanceof SocketException) {
+            h2.setText("无法建立神经连接");
+            h3.setText("在访问套接字时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
+        }
         if ($e instanceof SocketTimeoutException) {
             h2.setText("神经递质接收异常");
             h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
