@@ -18,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.AWTException;
-import java.io.File;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -44,8 +43,8 @@ public class ArkTray {
         name = name + " - " + appName;
 
         // Load tray icon image.
-        Image image = Toolkit.getDefaultToolkit().createImage(ClassLoader.getSystemResource(iconFilePng));
-        icon = new TrayIcon(image,  name);
+        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
+        icon = new TrayIcon(image, name);
         icon.setImageAutoSize(true);
 
         popWindow = new JDialog(); // JDialog is the container of JPopupMenu.

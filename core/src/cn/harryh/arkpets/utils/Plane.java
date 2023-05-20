@@ -5,8 +5,9 @@ package cn.harryh.arkpets.utils;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-
 import java.util.ArrayList;
+
+import static cn.harryh.arkpets.Const.*;
 
 
 public class Plane {
@@ -23,7 +24,6 @@ public class Plane {
     private float staticFrict;
     private boolean dropped = false;
     private float droppedHeight = 0;
-    static float droppedThreshold = 10f; // TODO set as const
 
     /** Initialize a plane with gravity field.
      * @param $world The collection of all available areas.

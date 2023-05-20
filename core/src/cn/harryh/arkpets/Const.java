@@ -6,50 +6,57 @@ package cn.harryh.arkpets;
 import javafx.util.Duration;
 
 
+/** Constants definition class.
+ */
 public final class Const {
-    // Constants list
-
+    // App version
     public static final int[] appVersion        = {2, 1, 0};
     public static final String appVersionStr    = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
 
+    // App name
+    public static final String appName      = "ArkPets";
+    public static final String coreTitle    = "ArkPets Core";
+    public static final String desktopTitle = "ArkPets Launcher " + appVersionStr;
+
+    // IO presets
     public static final int zipBufferSizeDefault    = 8 * 1024;
     public static final int httpBufferSizeDefault   = 8 * 1024;
     public static final int httpTimeoutDefault      = 30 * 1000;
 
+    // Graphics presets
     public static final int fpsDefault          = 30;
     public static final int coreWidthDefault    = 150;
     public static final int coreHeightDefault   = 150;
     public static final int canvasReserveLength = 100;
     public static final int canvasMaxSize       = 720;
     public static final int windowLongDefault   = 0x80088;
+    public static final float skelBaseScale     = 0.33333f;
 
-    public static final int behaviorBaseWeight  = 320;
-    public static final int behaviorWeightLv1   = 32;
-    public static final int behaviorWeightLv2   = 64;
-
+    // Behavior presets
+    public static final int behaviorBaseWeight      = 320;
+    public static final int behaviorWeightLv1       = 32;
+    public static final int behaviorWeightLv2       = 64;
     public static final float behaviorMinTimeLv1    = 2.5f;
     public static final float behaviorMinTimeLv2    = 5.0f;
     public static final float behaviorMinTimeLv3    = 7.5f;
+    public static final float droppedThreshold      = 10f;
 
-    public static final float skelBaseScale         = 0.33333f;
+    // Duration presets
     public static final float linearEasingDuration  = 0.2f;
-
-    public static final String appName      = "ArkPets";
-    public static final String coreTitle    = "ArkPets Core";
-    public static final String desktopTitle = "ArkPets Launcher " + appVersionStr;
-
     public static final Duration durationFast   = new Duration(150);
     public static final Duration durationNormal = new Duration(300);
 
-    public static final String configExternal   = "ArkPetsConfig.json";
-    public static final String configInternal   = "/ArkPetsConfigDefault.json";
-
-    public static final String iconFileIco  = "icon.ico";
-    public static final String iconFilePng  = "icon.png";
-
+    // Encoding presets
     public static final String charsetDefault   = "UTF-8";
     public static final String charsetVBS       = "GBK";
 
+    // Paths of static files
+    public static final String configExternal   = "ArkPetsConfig.json";
+    public static final String configInternal   = "/ArkPetsConfigDefault.json";
+    public static final String iconFileIco      = "/icons/icon.ico";
+    public static final String iconFilePng      = "/icons/icon.png";
+    public static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
+    public static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
     public static final String startupTarget    = "ArkPets.exe";
     public static final String startUpScript    = "ArkPetsStartupService.vbs";
 

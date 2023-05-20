@@ -119,10 +119,10 @@ task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
     ]
     if (osName.contains('windows')) {
         commands << '--icon'
-        commands << "${project.assetsDir}/icon.ico"
+        commands << "${project.assetsDir}/icons/icon.ico"
     } else if (osName.contains('linux')) {
         commands << '--icon'
-        commands << "${project.assetsDir}/icon.png"
+        commands << "${project.assetsDir}/icons/icon.png"
     } else if (osName.contains('mac')) {
         commands << '--java-options'
         commands << "-XstartOnFirstThread"

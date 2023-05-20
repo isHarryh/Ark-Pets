@@ -3,7 +3,7 @@
 
 <div align="center" style="text-align:center">
    <h1> Ark-Pets </h1>
-   <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icon.png"/>
+   <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <code><b> v2.1 </b></code> <br>

@@ -127,12 +127,12 @@
                 <JFXComboBox id="Info-filter-box" fx:id="searchModelFilter" prefWidth="95.0"/>
             </children>
         </HBox>
-        <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="36.0" prefWidth="430.0">
-            <JFXTextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="7.0"
+        <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="38.0" prefWidth="430.0">
+            <JFXTextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="6.0"
                           prefHeight="23.0" prefWidth="170.0"/>
-            <JFXButton id="Search-models-btn" fx:id="searchModelConfirm" layoutX="8.0" layoutY="6.0"
+            <JFXButton fx:id="searchModelConfirm" layoutX="8.0" layoutY="5.0"
                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="搜索">
+                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="搜索">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -149,9 +149,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton id="Search-models-btn" fx:id="searchModelReset" layoutX="248.0" layoutY="6.0"
+            <JFXButton fx:id="searchModelReset" layoutX="248.0" layoutY="5.0"
                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="清空">
+                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="清空">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -168,9 +168,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton id="Search-models-btn" fx:id="searchModelRandom" layoutX="308.0" layoutY="6.0"
+            <JFXButton fx:id="searchModelRandom" layoutX="308.0" layoutY="5.0"
                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="随机">
+                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="随机">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -187,9 +187,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton id="Search-models-btn" fx:id="searchModelReload" layoutX="368.0" layoutY="6.0"
+            <JFXButton fx:id="searchModelReload" layoutX="368.0" layoutY="5.0"
                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="25.0" prefWidth="55.0" text="重载">
+                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="重载">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -215,10 +215,10 @@
                 <SVGPath
                         content="M11.5 23l-8.5-4.535v-3.953l5.4 3.122 3.1-3.406v8.772zm1-.001v-8.806l3.162 3.343 5.338-2.958v3.887l-8.5 4.534zm-10.339-10.125l-2.161-1.244 3-3.302-3-2.823 8.718-4.505 3.215 2.385 3.325-2.385 8.742 4.561-2.995 2.771 2.995 3.443-2.242 1.241v-.001l-5.903 3.27-3.348-3.541 7.416-3.962-7.922-4.372-7.923 4.372 7.422 3.937v.024l-3.297 3.622-5.203-3.008-.16-.092-.679-.393v.002z"
                         scaleX="1.5" scaleY="1.5" translateY="-10.0"/>
-                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="未能载入模型" textAlignment="CENTER"
-                      translateY="-5.0" wrappingWidth="200.0">
+                <Text id="Loading-failure-tip-text" strokeType="OUTSIDE" strokeWidth="0.0" text="未能载入模型"
+                      textAlignment="CENTER" translateY="-5.0" wrappingWidth="200.0">
                     <font>
-                        <Font name="System Bold" size="16.0"/>
+                        <Font size="16.0"/>
                     </font>
                 </Text>
                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [选项] 中进行模型下载"/>
@@ -319,7 +319,7 @@
                                     <HBox spacing="20.0">
                                         <children>
                                             <JFXButton fx:id="manageModelCheck" mnemonicParsing="false"
-                                                       prefHeight="35.0" prefWidth="80.0" text=" 检查更新">
+                                                       prefHeight="35.0" prefWidth="82.0" text=" 检查更新">
                                                 <graphic>
                                                     <AnchorPane prefHeight="25.0" prefWidth="16.0"
                                                                 styleClass="btn-icon">
@@ -336,7 +336,7 @@
                                                 </styleClass>
                                             </JFXButton>
                                             <JFXButton fx:id="manageModelFetch" mnemonicParsing="false"
-                                                       prefHeight="35.0" prefWidth="80.0" text=" 全部下载">
+                                                       prefHeight="35.0" prefWidth="82.0" text=" 全部下载">
                                                 <graphic>
                                                     <AnchorPane prefHeight="25.0" prefWidth="16.0"
                                                                 styleClass="btn-icon">
@@ -353,7 +353,7 @@
                                                 </styleClass>
                                             </JFXButton>
                                             <JFXButton fx:id="manageModelVerify" mnemonicParsing="false"
-                                                       prefHeight="35.0" prefWidth="100.0" text="  验证完整性"
+                                                       prefHeight="35.0" prefWidth="102.0" text="  验证完整性"
                                                        visible="false">
                                                 <graphic>
                                                     <AnchorPane prefHeight="25.0" prefWidth="16.0"
@@ -398,10 +398,8 @@
                                     </HBox>
                                     <HBox spacing="22.5">
                                         <children>
-                                            <Label fx:id="aboutReadme" styleClass="config-hyper-link"
-                                                   text="使用指南"/>
-                                            <Label fx:id="aboutLicense" styleClass="config-hyper-link"
-                                                   text="开源信息"/>
+                                            <Label fx:id="aboutReadme" styleClass="config-hyper-link" text="使用指南"/>
+                                            <Label fx:id="aboutLicense" styleClass="config-hyper-link" text="开源信息"/>
                                         </children>
                                     </HBox>
                                     <Separator/>
@@ -415,7 +413,8 @@
     </Pane>
 
     <!-- ** Wrapper for loading mask ** -->
-    <Pane id="wrapper-0" fx:id="wrapper0" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper">
+    <Pane id="wrapper-0" fx:id="wrapper0" layoutX="140.0" prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
+          visible="false">
         <children>
             <VBox id="Loading-waiting-tip" alignment="CENTER" layoutX="1.0" prefHeight="370.0" prefWidth="458.0"
                   spacing="5.0">

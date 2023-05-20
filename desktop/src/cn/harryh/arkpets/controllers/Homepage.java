@@ -31,7 +31,6 @@ import javafx.scene.layout.*;
 
 import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -156,10 +155,7 @@ public class Homepage {
     }
 
     public void initialize() {
-        Logger.info("Launcher", "Initializing (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
-        Logger.debug("Launcher", "Property file.encoding = " + System.getProperty("file.encoding"));
-        Logger.debug("Launcher", "Property sun.jnu.encoding = " + System.getProperty("sun.jnu.encoding"));
-        Logger.debug("Launcher", "Default charset = " + Charset.defaultCharset());
+        Logger.info("Launcher", "Initializing Homepage");
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
@@ -181,7 +177,6 @@ public class Homepage {
             menuBtn1.getStyleClass().add("menu-btn-active");
             foregroundCheckUpdate(false, "auto");
         });
-        Logger.info("Launcher", "Initialized");
     }
 
     private void initMenuBtn(Button $menuBtn, int $boundIdx) {

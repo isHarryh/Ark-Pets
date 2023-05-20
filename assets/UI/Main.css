@@ -13,8 +13,9 @@
 
 * {
 /* Fonts */
+/* Note: Use `Font.loadFont()` in the `Application` to load additional font file */
+-fx-font-family: "Source Han Sans CN";
 -fx-font-smoothing-type: gray;
--fx-font-family: "Microsoft YaHei" "SimHei" "SimSun";
 }
 
 .scroll-v {
@@ -39,10 +40,10 @@
 /* Anchor-pane that contains an SVG-path */
 -fx-pref-width: 0;
 -fx-pref-height: 0;
--fx-scale-x: 0.5;
--fx-scale-y: 0.5;
--fx-translate-x: -20px;
--fx-translate-y: 0;
+-fx-scale-x: 0.525;
+-fx-scale-y: 0.525;
+-fx-translate-x: -21px;
+-fx-translate-y: 0.5px;
 }
 
 .btn-icon SVGPath {
@@ -51,13 +52,8 @@
 
 .btn-with-icon {
 /* Button that contains a btn-icon on the left */
--fx-label-padding: 0 0 0 8px;
+-fx-label-padding: 0 0 0 10px;
 -fx-content-display: center;
-}
-
-Button:focused {
-/* Focused */
--fx-effect: dropshadow(three-pass-box, #80DFFF, 8, 0.5, 0, 0);
 }
 
 .btn-primary, .btn-secondary {
@@ -174,14 +170,6 @@ Button:focused {
 
 .wrapper {
 -fx-padding: 5px 10px 5px 10px;
-}
-
-.wrapper-title {
--fx-text-fill: #606060;
-}
-
-.wrapper-title:hover {
--fx-text-fill: #F03030;
 }
 
 #Search-models-bar {
@@ -365,6 +353,10 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 
 #Loading-failure-tip, #Loading-waiting-tip {
 -fx-background-color: #F4F4F4E0;
+}
+
+#Loading-failure-tip-text {
+-fx-font-weight: bold;
 }
 
 #Loading-failure-tip > * {

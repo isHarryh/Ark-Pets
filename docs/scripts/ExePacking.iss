@@ -27,7 +27,7 @@ AllowNoIcons        =yes
 PrivilegesRequired  =lowest
 OutputBaseFilename  ={#MyAppName}-v{#MyAppVersion}-Setup
 OutputDir           =..\..\desktop\build\dist
-SetupIconFile       =..\..\assets\icon.ico
+SetupIconFile       =..\..\assets\icons\icon.ico
 SolidCompression    =yes
 WizardStyle         =modern
 

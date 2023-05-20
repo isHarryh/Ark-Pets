@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -35,9 +36,15 @@ public class ArkHomeFX extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Load FXML for Homepage.
+        Logger.info("Launcher", "Starting (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
         FXMLLoader fxml = new FXMLLoader();
         fxml.setLocation(getClass().getResource("/UI/Homepage.fxml"));
         Parent root = fxml.load();
+
+        // Load fonts.
+        Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());
+        Font.loadFont(getClass().getResourceAsStream(fontFileBold), Font.getDefault().getSize());
+
         // Set handler for internal start button.
         Button startBtn = (Button)root.lookup("#Start-btn");
         startBtn.setOnAction(e -> {
@@ -61,14 +68,17 @@ public class ArkHomeFX extends Application {
                 });
             }
         });
+
         // Setup scene and show primary stage.
         Scene scene = new Scene(root);
-        stage.getIcons().setAll(new Image(Objects.requireNonNull(getClass().getResource("/" + iconFilePng)).toExternalForm()));
+        stage.getIcons().setAll(new Image(Objects.requireNonNull(getClass().getResource(iconFilePng)).toExternalForm()));
         scene.getStylesheets().setAll(urlStyleSheet);
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setTitle(desktopTitle);
         stage.show();
+
+        // Finish.
         startBtn.requestFocus();
         ctrl = fxml.getController();
     }
