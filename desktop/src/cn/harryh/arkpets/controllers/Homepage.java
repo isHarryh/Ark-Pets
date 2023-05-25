@@ -44,8 +44,9 @@ import static cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 public class Homepage {
-    private boolean isHttpsTrustAll = false;
     private boolean isNoFilter = true;
+    private boolean isHttpsTrustAll = false;
+    private boolean isUpdateAvailable = false;
     public boolean isNewcomer = false;
     public Handbook trayExitHandbook = new TrayExitHandBook();
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
@@ -170,6 +171,7 @@ public class Homepage {
             initConfigAdvanced();
             initAbout();
             initLaunchingStatusListener();
+            initScheduledListener();
 
             dealModelReload(false);
             initModelSearch();
@@ -203,8 +205,6 @@ public class Homepage {
                 }
             }
         }
-        // Special
-        configDeployMultiMonitorsStatus.setText("检测到 " + config.updateMonitorsConfig() + " 个显示屏");
     }
 
     private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
@@ -479,6 +479,33 @@ public class Homepage {
         };
         ss.setDelay(new Duration(1000));
         ss.setPeriod(new Duration(500));
+        ss.setRestartOnFailure(true);
+        ss.start();
+    }
+
+    private void initScheduledListener() {
+        ScheduledService<Boolean> ss = new ScheduledService<>() {
+            @Override
+            protected Task<Boolean> createTask() {
+                Task<Boolean> task = new Task<>() {
+                    @Override
+                    protected Boolean call() {
+                            return true;
+                    }
+                };
+                task.setOnSucceeded(e -> {
+                    if (isUpdateAvailable) {
+                        aboutQueryUpdate.setStyle("-fx-text-fill:" + COLOR_DANGER);
+                    } else {
+                        aboutQueryUpdate.setStyle("");
+                    }
+                    configDeployMultiMonitorsStatus.setText("检测到 " + config.updateMonitorsConfig() + " 个显示屏");
+                });
+                return task;
+            }
+        };
+        ss.setDelay(new Duration(2000));
+        ss.setPeriod(new Duration(1000));
         ss.setRestartOnFailure(true);
         ss.start();
     }
@@ -845,6 +872,7 @@ public class Homepage {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        isUpdateAvailable = false;
         String queryStr = "?type=queryVersion&cliVer=" + appVersionStr + "&source=" + $sourceStr;
         Task<Boolean> task = createDownloadTask(PathConfig.urlApi + queryStr, PathConfig.tempQueryVersionCachePath);
         JFXDialog dialog = null;
@@ -865,6 +893,7 @@ public class Homepage {
                     if (stableVersionResult[0] > appVersion[0] ||
                             (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] > appVersion[1]) ||
                             (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] == appVersion[1] && stableVersionResult[2] > appVersion[2])) {
+                        isUpdateAvailable = true;
                         if ($popNotice)
                             popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "检测到软件有新的版本！",
                                     appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问ArkPets官网或GitHub下载新的安装包。", null).show();
