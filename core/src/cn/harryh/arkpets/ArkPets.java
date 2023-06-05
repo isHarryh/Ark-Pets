@@ -318,7 +318,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 						for (int h = -hWndCtrl.posTop; h > -hWndCtrl.posBottom; h--) {
 							// Mark the window's y-position in the vertical line.
 							if (!line.containsKey(h))
-								line.put(h, (h == -hWndCtrl.posTop) ? hWndCtrl : new HWndCtrl()); // Record this window.
+								line.put(h, (h == -hWndCtrl.posTop) ? hWndCtrl : HWndCtrl.EMPTY); // Record this window.
 						}
 					}
 				}

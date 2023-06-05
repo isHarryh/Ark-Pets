@@ -10,26 +10,14 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class BehaviorBattleGeneral3 extends Behavior {
+    private final String[] notWantedList = {"Begin", "End", "Die"};
 
     public BehaviorBattleGeneral3(ArkConfig $config, String[] $animList) {
         super($config, $animList);
         action_list = new AnimData.AnimAutoData[] {
-            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Idle"), true, true, 0, 0),
+            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Idle", notWantedList), true, true, 0, 0),
                     behaviorMinTimeLv2, (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation)))
         };
-    }
-
-    private String getProperAnimName(String $wanted) {
-        for (String s : anim_list)
-            if (s.contains($wanted) && s.contains("Loop"))
-                return s;
-        for (String s : anim_list)
-            if (s.contains($wanted) && !s.contains("End") && !s.contains("Begin"))
-                return s;
-        for (String s : anim_list)
-            if (s.contains($wanted))
-                return s;
-        return "";
     }
 
     public boolean match(String[] animList) {
@@ -46,11 +34,11 @@ public class BehaviorBattleGeneral3 extends Behavior {
     }
 
     public AnimData defaultAnim() {
-        return new AnimData(getProperAnimName("Idle"), true, true);
+        return new AnimData(getProperAnimName("Idle", notWantedList), true, true);
     }
 
     public AnimData clickEnd() {
-        return config.behavior_allow_interact?new AnimData(getProperAnimName("Attack"), false, false,
+        return config.behavior_allow_interact?new AnimData(getProperAnimName("Attack", notWantedList), false, false,
                 action_list[0].ANIM) : null;
     }
 

@@ -8,22 +8,25 @@ import java.util.ArrayList;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser;
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
+import com.sun.jna.win32.W32APIOptions;
 
 
 public class HWndCtrl {
-    final public HWND hWnd;
-    final public String windowText;
-    final public Pointer windowPointer;
-    final public int posTop;
-    final public int posBottom;
-    final public int posLeft;
-    final public int posRight;
-    final public int windowWidth;
-    final public int windowHeight;
+    public final HWND hWnd;
+    public final String windowText;
+    public final Pointer windowPointer;
+    public final int posTop;
+    public final int posBottom;
+    public final int posLeft;
+    public final int posRight;
+    public final int windowWidth;
+    public final int windowHeight;
+    public static final HWndCtrl EMPTY = new HWndCtrl();
 
     /** HWnd Controller instance.
      * @param $hWnd The handle of the window.
@@ -74,6 +77,21 @@ public class HWndCtrl {
      */
     public float getCenterY() {
         return posTop + windowHeight / 2f;
+    }
+
+    /** Get the RGB color value at the specified position of the window.
+     * @param $x The X-axis coordinate, related to the left border of the window.
+     * @param $y The Y-axis coordinate, related to the top border of the window.
+     * @return The color array (R,G,B).
+     */
+    public int[] getPixel(int $x, int $y) {
+        WinDef.HDC hdc = User32.INSTANCE.GetDC(hWnd);
+        int color = GDI32Extended.INSTANCE.GetPixel(hdc, $x, $y);
+        int r = (color) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = (color >> 16) & 0xFF;
+        User32.INSTANCE.ReleaseDC(hWnd, hdc);
+        return new int[] {r, g, b};
     }
 
     /** Request to close the window.
@@ -152,5 +170,12 @@ public class HWndCtrl {
     @Override
     public String toString() {
         return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight;
+    }
+
+
+    private interface GDI32Extended extends com.sun.jna.platform.win32.GDI32 {
+        GDI32Extended INSTANCE = Native.load("gdi32", GDI32Extended.class, W32APIOptions.DEFAULT_OPTIONS);
+
+        int GetPixel(WinDef.HDC hdc, int x, int y);
     }
 }

@@ -10,30 +10,18 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class BehaviorBattleGeneral extends Behavior {
+    private final String[] notWantedList = {"Begin", "End", "Die"};
 
     public BehaviorBattleGeneral(ArkConfig $config, String[] $animList) {
         super($config, $animList);
         action_list = new AnimData.AnimAutoData[] {
-            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Idle"), true, true, 0, 0),
+            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Idle", notWantedList), true, true, 0, 0),
                     behaviorMinTimeLv2, (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))),
-            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Move"), true, true, 0, 1),
+            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Move", notWantedList), true, true, 0, 1),
                     behaviorMinTimeLv1, behaviorWeightLv1 * (config.behavior_allow_walk?1:0)),
-            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Move"), true, true, 0, -1),
+            new AnimData.AnimAutoData(new AnimData(getProperAnimName("Move", notWantedList), true, true, 0, -1),
                     behaviorMinTimeLv1, behaviorWeightLv1 * (config.behavior_allow_walk?1:0))
         };
-    }
-
-    private String getProperAnimName(String $wanted) {
-        for (String s : anim_list)
-            if (s.contains($wanted) && s.contains("Loop"))
-                return s;
-        for (String s : anim_list)
-            if (s.contains($wanted) && !s.contains("End") && !s.contains("Begin"))
-                return s;
-        for (String s : anim_list)
-            if (s.contains($wanted))
-                return s;
-        return "";
     }
 
     public boolean match(String[] animList) {
@@ -52,11 +40,11 @@ public class BehaviorBattleGeneral extends Behavior {
     }
 
     public AnimData defaultAnim() {
-        return new AnimData(getProperAnimName("Idle"), true, true);
+        return new AnimData(getProperAnimName("Idle", notWantedList), true, true);
     }
 
     public AnimData clickEnd() {
-        return config.behavior_allow_interact?new AnimData(getProperAnimName("Attack"), false, false,
+        return config.behavior_allow_interact?new AnimData(getProperAnimName("Attack", notWantedList), false, false,
                 action_list[0].ANIM) : null;
     }
 

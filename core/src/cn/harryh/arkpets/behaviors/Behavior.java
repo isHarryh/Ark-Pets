@@ -7,6 +7,8 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.utils.AnimData.AnimAutoData;
 
+import java.util.HashMap;
+
 
 abstract public class Behavior {
     public AnimAutoData[] action_list;
@@ -53,7 +55,7 @@ abstract public class Behavior {
     /** Randomly select an action to play.
      * @return The index of the action.
      */
-    private int getRandomAction() {
+    int getRandomAction() {
         // Calculate the sum of all action's weight
         int weight_sum = 0;
         for (AnimAutoData i: action_list) {
@@ -69,6 +71,31 @@ abstract public class Behavior {
                 return j;
         }
         return -1;
+    }
+
+    /** Search the most possible animation name.
+     */
+    String getProperAnimName(String $wanted, String[] $notWanted) {
+        HashMap<String, Integer> map = new HashMap<>();
+        for (String s : anim_list) {
+            if (s.contains($wanted)) {
+                Integer i = 0;
+                map.put(s, i);
+                for (String t : $notWanted)
+                    if (s.contains(t))
+                        i += 1;
+            }
+        }
+        String minK = "";
+        Integer minV = Integer.MAX_VALUE;
+        for (HashMap.Entry<String, Integer> entry : map.entrySet()) {
+            Integer value = entry.getValue();
+            if (value < minV) {
+                minV = value;
+                minK = entry.getKey();
+            }
+        }
+        return minK;
     }
 
     /** Whether the provided animation list match this behavior class.
