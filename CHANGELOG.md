@@ -1,6 +1,6 @@
 # 更新日志 / CHANGELOG
 
-**目前最新可用版本：**
+***目前最新可用版本：***
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
 
@@ -10,10 +10,12 @@
 | [`#4`](https://github.com/isHarryh/Ark-Pets/issues/4)<br>[`5d024f9`](https://github.com/isHarryh/Ark-Pets/commit/5d024f911c033d6c94dba3c57652d11cfd83db5f)<br> | 新增了对多显示屏的支持，现在可以将桌宠拖拽到扩展显示屏上。<br>重构了重力场系统。                                                      |
 | [`627d16d`](https://github.com/isHarryh/Ark-Pets/commit/627d16d6978a30b711726d53febc45195cc3f946)<br>                                                          | 新增了首次使用软件时的一个提示弹窗。                                                                              |
 | [`04a459c`](https://github.com/isHarryh/Ark-Pets/commit/04a459cb05709919aa5ab368716067a97327132b)<br>                                                          | 新增了[思源黑体](https://github.com/adobe-fonts/source-han-sans)作为启动器界面的字体，不再使用系统默认字体，解决了部分设备上的字体渲染问题。 |
+| [`2aef47e`](https://github.com/isHarryh/Ark-Pets/commit/2aef47e4a48c23bbeaeb4501b79d54936aaf332e)<br>                                                          | 新增了当软件有可用更新时，自动高亮显示“检查更新”按钮的特性。                                                                 |
 
-| **修复**                                                                                                |                                                                                |
-|:------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|
-| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 修复了在特定情况下打开启动器卡在 Loading 界面的问题。                                                |
+| **修复**                                                                                                |                                 |
+|:------------------------------------------------------------------------------------------------------|:--------------------------------|
+| [`352eca6`](https://github.com/isHarryh/Ark-Pets/commit/352eca6a35340b4ee08c2b37c04a077249583af9)<br> | 修复了在特定情况下打开启动器卡在 Loading 界面的问题。 |
+| [`86d7227`](https://github.com/isHarryh/Ark-Pets/commit/86d722719b8183d30a23c52998d5073ac582e84a)<br> | 修复了个别敌方角色的部分动作的选择逻辑异常的问题。       |
 
 | **优化**                                                                                                |                                                                                                   |
 |:------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------|

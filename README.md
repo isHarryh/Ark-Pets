@@ -58,7 +58,7 @@
 
 
 ## 使用方法 <sub>Usage</sub>
-**目前最新可用版本：**
+***目前最新可用版本：***
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
 ### 快速上手
@@ -82,7 +82,7 @@
 ### 高级用法
 在[快速上手](#快速上手)中介绍的是最简单和普遍的使用方法。除此之外：
 - 您还可以下载 `zip` 版的程序压缩包解压，实现免安装使用。
-- 如果您的电脑上存在 `JDK17+` 的 [Java](https://www.java.com) 运行环境，您还可以下载 `jar` 版的程序文件直接运行（但无法使用开机自启动功能）。
+- 如果您的电脑上存在 `JDK17` 的 [Java](https://www.java.com) 运行环境，您还可以下载 `jar` 版的程序文件直接运行（但无法使用开机自启动功能）。
 - 如果您想用命令行启动桌宠，[点击查看](docs/CmdLine.md)说明。
 - 如果您想添加自定义的模型，[点击查看](docs/CustomModel.md)说明。
 
