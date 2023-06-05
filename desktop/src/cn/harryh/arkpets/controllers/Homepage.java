@@ -7,8 +7,6 @@ import cn.harryh.arkpets.ArkPets;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.ArkConfig;
 import com.alibaba.fastjson.JSONObject;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.jfoenix.controls.*;
 import org.apache.log4j.Level;
 
@@ -400,7 +398,7 @@ public class Homepage {
     }
 
     private void initConfigAdvanced() {
-        configLoggingLevel.getItems().setAll(LogLevels.debug, LogLevels.info, LogLevels.warn, LogLevels.error);
+        configLoggingLevel.getItems().setAll(LogConfig.debug, LogConfig.info, LogConfig.warn, LogConfig.error);
         configLoggingLevel.valueProperty().addListener(observable -> {
             if (configLoggingLevel.getValue() != null) {
                 Logger.setLevel(Level.toLevel(configLoggingLevel.getValue(), Level.INFO));
@@ -410,14 +408,14 @@ public class Homepage {
         });
         String level = config.logging_level;
         List<String> args = Arrays.asList(ArgPending.argCache);
-        if (args.contains(LogLevels.errorArg))
-            level = LogLevels.error;
-        else if (args.contains(LogLevels.warnArg))
-            level = LogLevels.warn;
-        else if (args.contains(LogLevels.infoArg))
-            level = LogLevels.info;
-        else if (args.contains(LogLevels.debugArg))
-            level = LogLevels.debug;
+        if (args.contains(LogConfig.errorArg))
+            level = LogConfig.error;
+        else if (args.contains(LogConfig.warnArg))
+            level = LogConfig.warn;
+        else if (args.contains(LogConfig.infoArg))
+            level = LogConfig.info;
+        else if (args.contains(LogConfig.debugArg))
+            level = LogConfig.debug;
         configLoggingLevel.getSelectionModel().select(level);
 
         exploreLogDir.setOnMouseClicked(e -> {
@@ -1203,11 +1201,6 @@ public class Homepage {
             // Loaded:
             return true;
         }
-    }
-
-    private static int[] getDefaultMonitorInfo() {
-        Graphics.DisplayMode displayMode = Lwjgl3ApplicationConfiguration.getDisplayMode();
-        return new int[] {displayMode.width, displayMode.height, displayMode.refreshRate, displayMode.bitsPerPixel};
     }
 
     private static void fadeInNode(Node $node, Duration $duration, EventHandler<ActionEvent> $onFinished) {

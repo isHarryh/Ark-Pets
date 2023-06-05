@@ -50,7 +50,7 @@ public final class Const {
     public static final String charsetDefault   = "UTF-8";
     public static final String charsetVBS       = "GBK";
 
-    // Paths of static files
+    // Paths of static files and internal files
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFileIco      = "/icons/icon.ico";
@@ -61,6 +61,8 @@ public final class Const {
     public static final String startUpScript    = "ArkPetsStartupService.vbs";
 
 
+    /** Paths presets definition class.
+     */
     public static class PathConfig {
         public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
         public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
@@ -76,7 +78,15 @@ public final class Const {
     }
 
 
-    public static class LogLevels {
+    /** Logging preset definition class.
+     */
+    public static class LogConfig {
+        public static final int logCoreMaxKeep      = 32;
+        public static final int logDesktopMaxKeep   = 8;
+
+        public static final String logCorePath      = "logs/core";
+        public static final String logDesktopPath   = "logs/desktop";
+
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";
         public static final String info     = "INFO";

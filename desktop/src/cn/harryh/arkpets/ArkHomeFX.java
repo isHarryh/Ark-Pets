@@ -96,15 +96,15 @@ public class ArkHomeFX extends Application {
             protected Boolean call() throws IOException, InterruptedException {
                 // Renew the logging level arg to match the custom value of the Launcher.
                 ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
-                args.remove(LogLevels.errorArg);
-                args.remove(LogLevels.warnArg);
-                args.remove(LogLevels.infoArg);
-                args.remove(LogLevels.debugArg);
+                args.remove(LogConfig.errorArg);
+                args.remove(LogConfig.warnArg);
+                args.remove(LogConfig.infoArg);
+                args.remove(LogConfig.debugArg);
                 String temp = switch (ctrl.config.logging_level) {
-                    case LogLevels.error -> LogLevels.errorArg;
-                    case LogLevels.warn  -> LogLevels.warnArg;
-                    case LogLevels.info  -> LogLevels.infoArg;
-                    case LogLevels.debug -> LogLevels.debugArg;
+                    case LogConfig.error -> LogConfig.errorArg;
+                    case LogConfig.warn  -> LogConfig.warnArg;
+                    case LogConfig.info  -> LogConfig.infoArg;
+                    case LogConfig.debug -> LogConfig.debugArg;
                     default -> "";
                 };
                 args.add(temp);

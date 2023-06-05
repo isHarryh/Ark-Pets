@@ -19,27 +19,27 @@ public class DesktopLauncher {
     public static void main (String[] args) {
         ArgPending.argCache = args;
         // Logger
-        Logger.initialize("logs/desktop", 8);
+        Logger.initialize(LogConfig.logDesktopPath, LogConfig.logDesktopMaxKeep);
         try {
             Logger.setLevel(Objects.requireNonNull(ArkConfig.getConfig()).logging_level);
         } catch (Exception ignored) {
         }
-        new ArgPending(LogLevels.errorArg, args) {
+        new ArgPending(LogConfig.errorArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.ERROR);
             }
         };
-        new ArgPending(LogLevels.warnArg, args) {
+        new ArgPending(LogConfig.warnArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.WARN);
             }
         };
-        new ArgPending(LogLevels.infoArg, args) {
+        new ArgPending(LogConfig.infoArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.INFO);
             }
         };
-        new ArgPending(LogLevels.debugArg, args) {
+        new ArgPending(LogConfig.debugArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.DEBUG);
             }
