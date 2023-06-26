@@ -45,6 +45,7 @@ public class DesktopLauncher {
             }
         };
         Logger.info("System", "Entering the app of DesktopLauncher");
+        Logger.info("System", "ArkPets version is " + appVersionStr);
 
         // If requested to start the core app directly
         new ArgPending("--direct-start", args) {
@@ -53,6 +54,7 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
+
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, args);
         Logger.info("System", "Exited from DesktopLauncher successfully");

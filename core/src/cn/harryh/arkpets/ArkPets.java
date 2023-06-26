@@ -175,10 +175,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.debug("Input", "Click+ @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
-			if (button == Input.Buttons.RIGHT) {
-				Logger.debug("Plane Debug Message", plane.getDebugMsg());
-				return true;
-			}
 			if (button == Input.Buttons.LEFT) {
 				cha.setAnimation(behavior.clickStart());
 				return true;
@@ -203,6 +199,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 		Logger.debug("Input", "Click- @ " + screenX + ", " + screenY);
+		Logger.debug("Plane Debug Message", plane.getDebugMsg());
 		if (!mouse_drag)
 			changeAnimation(behavior.clickEnd());
 		else {

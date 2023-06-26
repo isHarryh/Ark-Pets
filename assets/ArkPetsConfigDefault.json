@@ -2,7 +2,6 @@
     "behavior_ai_activation":8,
     "behavior_allow_interact":true,
     "behavior_allow_sit":true,
-    "behavior_allow_sleep":false,
     "behavior_allow_walk":true,
     "behavior_do_peer_repulsion":true,
     "character_asset":"",

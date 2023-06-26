@@ -36,7 +36,7 @@ public class ArkHomeFX extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         // Load FXML for Homepage.
-        Logger.info("Launcher", "Starting (JavaFX " + System.getProperty("javafx.version") + ", " + "ArkPets " + appVersionStr + ")");
+        Logger.info("Launcher", "Starting");
         FXMLLoader fxml = new FXMLLoader();
         fxml.setLocation(getClass().getResource("/UI/Homepage.fxml"));
         Parent root = fxml.load();

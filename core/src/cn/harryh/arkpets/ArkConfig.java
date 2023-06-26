@@ -8,6 +8,7 @@ import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 
@@ -36,7 +37,6 @@ public class ArkConfig {
     public int       behavior_ai_activation;
     public boolean   behavior_allow_interact;
     public boolean   behavior_allow_sit;
-    public boolean   behavior_allow_sleep;
     public boolean   behavior_allow_walk;
     public boolean   behavior_do_peer_repulsion;
     public String    character_asset;
@@ -53,6 +53,7 @@ public class ArkConfig {
 
     /** Save the config into the custom file.
      */
+    @JSONField(serialize = false)
     public void saveConfig() {
         try {
             IOUtils.FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, true), false);
@@ -62,8 +63,9 @@ public class ArkConfig {
     }
 
     /** Instantiate an ArkConfig object.
-     * @return ArkConfig object.
+     * @return ArkConfig object. null if failed.
      */
+    @JSONField(serialize = false)
     public static ArkConfig getConfig() {
         if (!configCustom.isFile()) {
             try {
@@ -83,8 +85,9 @@ public class ArkConfig {
     }
 
     /** Update the monitors' config.
-     * @return The count of detected monitors.
+     * @return The number of detected monitors.
      */
+    @JSONField(serialize = false)
     public int updateMonitorsConfig() {
         display_monitors_data = Monitor.toJSONArray(Monitor.getMonitors());
         return display_monitors_data.size();
@@ -92,6 +95,7 @@ public class ArkConfig {
 
     /** @return Whether the config file was generated newly.
      */
+    @JSONField(serialize = false)
     public boolean isNewcomer() {
         return isNewcomer;
     }

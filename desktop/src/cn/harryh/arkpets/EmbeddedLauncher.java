@@ -54,6 +54,7 @@ public class EmbeddedLauncher {
             }
         };
         Logger.info("System", "Entering the app of EmbeddedLauncher");
+        Logger.info("System", "ArkPets version is " + appVersionStr);
 
 
         try {
