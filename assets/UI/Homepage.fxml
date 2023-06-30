@@ -399,7 +399,8 @@
                                     <HBox spacing="22.5">
                                         <children>
                                             <Label fx:id="aboutReadme" styleClass="config-hyper-link" text="使用指南"/>
-                                            <Label fx:id="aboutLicense" styleClass="config-hyper-link" text="开源信息"/>
+                                            <Label fx:id="aboutGitHub" styleClass="config-hyper-link"
+                                                   text="GitHub 项目仓库"/>
                                         </children>
                                     </HBox>
                                     <Separator/>

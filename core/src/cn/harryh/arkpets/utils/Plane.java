@@ -83,7 +83,6 @@ public class Plane {
      */
     public void changePosition(float $deltaTime, float $x, float $y) {
         speed.set(($x - position.x) / $deltaTime, ($y - position.y) / $deltaTime);
-        position.set($x, $y);
         position.set(limitX($x), limitY($y));
     }
 

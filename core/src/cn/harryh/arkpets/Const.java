@@ -67,7 +67,7 @@ public final class Const {
         public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
         public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
         public static final String urlReadme        = "https://github.com/isHarryh/Ark-Pets#readme";
-        public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets/blob/v2.x/LICENSE";
+        public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
         public static final String urlModelsZip     = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
         public static final String urlModelsData    = "isHarryh/Ark-Models/main/models_data.json";
         public static final String tempDirPath      = "temp/";

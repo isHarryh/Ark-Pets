@@ -141,7 +141,7 @@ public class Homepage {
     @FXML
     private Label aboutReadme;
     @FXML
-    private Label aboutLicense;
+    private Label aboutGitHub;
 
     private ListCell<AssetCtrl> selectedModelItem;
     private AssetCtrl[] foundModelAssets = {};
@@ -453,7 +453,7 @@ public class Homepage {
         aboutQueryUpdate.setOnMouseClicked  (e -> foregroundCheckUpdate(true, "manual"));
         aboutVisitWebsite.setOnMouseClicked (e -> NetUtils.browseWebpage(PathConfig.urlOfficial));
         aboutReadme.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlReadme));
-        aboutLicense.setOnMouseClicked      (e -> NetUtils.browseWebpage(PathConfig.urlLicense));
+        aboutGitHub.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlLicense));
     }
 
     private void initLaunchingStatusListener() {
@@ -694,14 +694,6 @@ public class Homepage {
     }
 
     private void foregroundCheckModels() {
-        ArrayList<HWndCtrl> list = HWndCtrl.getWindowList(true);
-        for (HWndCtrl hWndCtrl : list) {
-            if (ArkPets.getArkPetsWindowNum(hWndCtrl.windowText) >= 0) {
-                Logger.debug("Launcher", "Kill " + hWndCtrl.windowText);
-                hWndCtrl.close(100);
-            }
-        }
-        Logger.debug("Launcher", "done");
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {
