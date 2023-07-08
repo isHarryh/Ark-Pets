@@ -54,7 +54,7 @@
 
 ### 相关文档
 - 更新日志 > [点击查看](CHANGELOG.md)
-- 常见疑问解答 > [点击查看](docs/FAQ.md)
+- 常见问题解答 > [点击查看](docs/FAQ.md)
 
 
 ## 使用方法 <sub>Usage</sub>
@@ -91,12 +91,12 @@
 
 ### 鸣谢
 感谢所有曾经为 ArkPets 的开发提供过各种形式的帮助的个人和组织。  
-- [点击查看鸣谢页面](docs/Thanks.md)
+- 另见 [鸣谢和第三方库说明](docs/Thanks.md)
 
 ### 许可证
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
 
 ### 参与贡献
 您可以通过提交 Issues 等各种方式参与本项目的贡献。
-- 提交 Issues 必看 > [点击查看](docs/Issues.md)
-- 开发者 Wiki > [点击查看](https://github.com/isHarryh/Ark-Pets/wiki)
+- 另见 [提交 Issues 必看指引](docs/Issues.md)
+- 另见 [开发者 Wiki](https://github.com/isHarryh/Ark-Pets/wiki)
