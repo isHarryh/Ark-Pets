@@ -251,8 +251,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         refreshMonitorInfo();
 		HWND_TOPMOST = refreshWindowIdx();
 		setWindowPos(x, y, true);
-		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
 		setWindowTransparent(false);
+		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
 	}
 
 	public void setWindowTransparent(boolean $transparent) {

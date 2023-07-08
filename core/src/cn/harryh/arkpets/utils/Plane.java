@@ -55,8 +55,8 @@ public class Plane {
      * @param $staticFrict The acceleration of static friction provided by the groud (px/s^2).
      */
     public void setFrict(float $airFrict, float $staticFrict) {
-        airFrict    = $airFrict;
-        staticFrict = $staticFrict;
+        airFrict    = Math.max(0, $airFrict);
+        staticFrict = Math.max(0, $staticFrict);
     }
 
     /** Set the size of the object.
@@ -72,17 +72,19 @@ public class Plane {
      * @param $y Max speed in y-axis (px/s).
      */
     public void setSpeedLimit(float $x, float $y) {
-        speedLimit.set($x, $y);
+        speedLimit.set(Math.max(0, $x), Math.max(0, $y));
     }
 
     /** Forcibly change the position of the object,
      * which will cause velocity change.
-     * @param $deltaTime Delta time (s).
+     * @param $deltaTime Delta time (s), set to 0 to avoid changing the velocity.
      * @param $x New x-position (px).
      * @param $y New y-position (px).
      */
     public void changePosition(float $deltaTime, float $x, float $y) {
-        speed.set(($x - position.x) / $deltaTime, ($y - position.y) / $deltaTime);
+        if ($deltaTime > 0)
+            speed.set(($x - position.x) / $deltaTime, ($y - position.y) / $deltaTime);
+        position.set($x, $y);
         position.set(limitX($x), limitY($y));
     }
 
@@ -222,7 +224,8 @@ public class Plane {
      */
     private float applyFriction(float $speed, float $frict, float $deltaTime) {
         float delta = Math.signum($speed) * $frict * $deltaTime;
-        return Math.signum($speed - delta) == Math.signum(delta) ? $speed - delta : 0;
+        float estimated = $speed - delta;
+        return delta * estimated < 0 ? 0 : estimated;
     }
 
     /** Apply the electrostatic effect of a point charge to a velocity.
@@ -263,8 +266,9 @@ public class Plane {
     public float borderTop() {
         float t = -Float.MAX_VALUE;
         for (RectArea a : world)
-            if (a.top > t)
-                t = a.top;
+            if (a.isXInOrthographic(position.x, obj.x))
+                if (a.top > t)
+                    t = a.top;
         return t;
     }
 
@@ -279,8 +283,9 @@ public class Plane {
 
         float t = Float.MAX_VALUE;
         for (RectArea a : world)
-            if (a.bottom < t)
-                t = a.bottom;
+            if (a.isXInOrthographic(position.x, obj.x))
+                if (a.bottom < t)
+                    t = a.bottom;
         return t;
     }
 
@@ -290,8 +295,9 @@ public class Plane {
     public float borderRight() {
         float t = -Float.MAX_VALUE;
         for (RectArea a : world)
-            if (a.right > t)
-                t = a.right;
+            if (a.isYInOrthographic(position.y, obj.y))
+                if (a.right > t)
+                    t = a.right;
         return t;
     }
 
@@ -301,8 +307,9 @@ public class Plane {
     public float borderLeft() {
         float t = Float.MAX_VALUE;
         for (RectArea a : world)
-            if (a.left < t)
-                t = a.left;
+            if (a.isYInOrthographic(position.y, obj.y))
+                if (a.left < t)
+                    t = a.left;
         return t;
     }
 
@@ -334,18 +341,27 @@ public class Plane {
         }
 
         public boolean isInArea(float $x, float $y) {
-            return isInArea(this, $x, $y);
+            return isXInOrthographic($x) && isYInOrthographic($y);
         }
 
-        public static boolean isInArea(RectArea $area, float $x, float $y) {
-            return $x < $area.left || $x > $area.right || $y < $area.bottom || $y > $area.top;
+        public boolean isInArea(float $x, float $y, float $allowanceX, float $allowanceY) {
+            return isXInOrthographic($x, $allowanceX) && isYInOrthographic($y, $allowanceY);
         }
 
-        public static boolean isInAreas(RectArea[] $areas, float $x, float $y) {
-            for (RectArea a : $areas)
-                if (isInArea(a, $x, $y))
-                    return true;
-            return false;
+        public boolean isXInOrthographic(float $x) {
+            return $x >= left && $x <= right;
+        }
+
+        public boolean isYInOrthographic(float $y) {
+            return $y >= bottom && $y <= top;
+        }
+
+        public boolean isXInOrthographic(float $x, float $allowance) {
+            return $x >= left - $allowance && $x <= right + $allowance;
+        }
+
+        public boolean isYInOrthographic(float $y, float $allowance) {
+            return $y >= bottom - $allowance && $y <= top + $allowance;
         }
 
         @Override
