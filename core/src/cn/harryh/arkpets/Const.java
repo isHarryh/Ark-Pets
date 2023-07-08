@@ -10,7 +10,7 @@ import javafx.util.Duration;
  */
 public final class Const {
     // App version
-    public static final int[] appVersion        = {2, 1, 0};
+    public static final int[] appVersion        = {2, 1, 1};
     public static final String appVersionStr    = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
 
     // App name
