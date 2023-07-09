@@ -7,6 +7,7 @@ import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.ArkConfig;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.scene.input.MouseEvent;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
@@ -37,6 +38,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 
 import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.utils.ControlUtils.*;
 import static cn.harryh.arkpets.utils.PopupUtils.*;
 
 
@@ -116,6 +118,28 @@ public class Homepage {
     private JFXSlider configDeployMarginBottom;
     @FXML
     private Label configDeployMarginBottomValue;
+    @FXML
+    private JFXSlider configPhysicGravity;
+    @FXML
+    private Label configPhysicGravityValue;
+    @FXML
+    private JFXSlider configPhysicAirFriction;
+    @FXML
+    private Label configPhysicAirFrictionValue;
+    @FXML
+    private JFXSlider configPhysicStaticFriction;
+    @FXML
+    private Label configPhysicStaticFrictionValue;
+    @FXML
+    private JFXSlider configPhysicSpeedLimitX;
+    @FXML
+    private Label configPhysicSpeedLimitXValue;
+    @FXML
+    private JFXSlider configPhysicSpeedLimitY;
+    @FXML
+    private Label configPhysicSpeedLimitYValue;
+    @FXML
+    private Label configPhysicRestore;
 
     @FXML
     private JFXComboBox<Float> configDisplayScale;
@@ -148,6 +172,7 @@ public class Homepage {
 
     public ArkConfig config;
     public JSONObject modelsDatasetFull;
+    private Logger.RealtimeInspector inspector = new Logger.RealtimeInspector(Logger.getCurrentLogFilePath());
 
     public Homepage() {
     }
@@ -157,6 +182,8 @@ public class Homepage {
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
+            if (config.isAllPhysicConfigZeroed())
+
             isNewcomer = config.isNewcomer();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
@@ -326,20 +353,17 @@ public class Homepage {
             config.saveConfig();
         });
 
-        configBehaviorAiActivation.setMax(8);
-        configBehaviorAiActivation.setMin(0);
-        configBehaviorAiActivation.setMajorTickUnit(1);
-        configBehaviorAiActivation.setMinorTickCount(0);
-        configBehaviorAiActivation.setShowTickLabels(false);
-        configBehaviorAiActivation.setValue(config.behavior_ai_activation);
-        configBehaviorAiActivation.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            long value = Math.round((double)newValue);
-            configBehaviorAiActivation.setValue(value);
-            configBehaviorAiActivationValue.setText(String.valueOf(value));
-            config.behavior_ai_activation = (int)value;
-            config.saveConfig();
-        }));
-        configBehaviorAiActivationValue.setText(String.valueOf(config.behavior_ai_activation));
+        SliderUtil.SliderSetup<Integer> setupBehaviorAiActivation = new SliderUtil.SimpleIntegerSliderSetup(configBehaviorAiActivation);
+        setupBehaviorAiActivation
+                .setDisplay(configBehaviorAiActivationValue, "%d 级", "活跃级别 (activation level)")
+                .setRange(0, 8)
+                .setTicks(1, 0)
+                .setSliderValue(config.behavior_ai_activation)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.behavior_ai_activation = setupBehaviorAiActivation.getValidatedValue();
+                    config.saveConfig();
+                });
+
         configBehaviorAllowInteract.setSelected(config.behavior_allow_interact);
         configBehaviorAllowInteract.setOnAction(e -> {
             config.behavior_allow_interact = configBehaviorAllowInteract.isSelected();
@@ -356,18 +380,82 @@ public class Homepage {
             config.display_multi_monitors = configDeployMultiMonitors.isSelected();
             config.saveConfig();
         });
-        configDeployMarginBottom.setMax(120);
-        configDeployMarginBottom.setMin(0);
-        configDeployMarginBottom.setMajorTickUnit(10);
-        configDeployMarginBottom.setMinorTickCount(5);
-        configDeployMarginBottom.setValue(config.display_margin_bottom);
-        configDeployMarginBottom.valueProperty().addListener(((observable, oldValue, newValue) -> {
-            int value = (int)Math.round((double)newValue);
-            configDeployMarginBottomValue.setText(String.valueOf(value));
-            config.display_margin_bottom = value;
-            config.saveConfig();
-        }));
-        configDeployMarginBottomValue.setText(String.valueOf(config.display_margin_bottom));
+
+        SliderUtil.SliderSetup<Integer> setupDeployMarginBottom = new SliderUtil.SimpleIntegerSliderSetup(configDeployMarginBottom);
+        setupDeployMarginBottom
+                .setDisplay(configDeployMarginBottomValue, "%d px", "像素 (pixel)")
+                .setRange(0, 120)
+                .setTicks(10, 10)
+                .setSliderValue(config.display_margin_bottom)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.display_margin_bottom = setupDeployMarginBottom.getValidatedValue();
+                    config.saveConfig();
+                });
+        SliderUtil.SliderSetup<Integer> setupPhysicGravity = new SliderUtil.SimpleMultipleIntegerSliderSetup(configPhysicGravity, 10);
+        setupPhysicGravity
+                .setDisplay(configPhysicGravityValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
+                .setRange(0, 1000)
+                .setTicks(100, 10)
+                .setSliderValue(config.physic_gravity_acc)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.physic_gravity_acc = setupPhysicGravity.getValidatedValue();
+                    config.saveConfig();
+                });
+        SliderUtil.SliderSetup<Integer> setupPhysicAirFriction = new SliderUtil.SimpleMultipleIntegerSliderSetup(configPhysicAirFriction, 10);
+        setupPhysicAirFriction
+                .setDisplay(configPhysicAirFrictionValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
+                .setRange(0, 1000)
+                .setTicks(100, 10)
+                .setSliderValue(config.physic_air_friction_acc)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.physic_air_friction_acc = setupPhysicAirFriction.getValidatedValue();
+                    config.saveConfig();
+                });
+        SliderUtil.SliderSetup<Integer> setupPhysicStaticFriction = new SliderUtil.SimpleMultipleIntegerSliderSetup(configPhysicStaticFriction, 10);
+        setupPhysicStaticFriction
+                .setDisplay(configPhysicStaticFrictionValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
+                .setRange(0, 1000)
+                .setTicks(100, 10)
+                .setSliderValue(config.physic_static_friction_acc)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.physic_static_friction_acc = setupPhysicStaticFriction.getValidatedValue();
+                    config.saveConfig();
+                });
+        SliderUtil.SliderSetup<Integer> setupPhysicSpeedLimitX = new SliderUtil.SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitX, 10);
+        setupPhysicSpeedLimitX
+                .setDisplay(configPhysicSpeedLimitXValue, "%d px/s", "像素每秒 (pixel/s)")
+                .setRange(0, 1000)
+                .setTicks(100, 10)
+                .setSliderValue(config.physic_speed_limit_x)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.physic_speed_limit_x = setupPhysicSpeedLimitX.getValidatedValue();
+                    config.saveConfig();
+                });
+        SliderUtil.SliderSetup<Integer> setupPhysicSpeedLimitY = new SliderUtil.SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitY, 10);
+        setupPhysicSpeedLimitY
+                .setDisplay(configPhysicSpeedLimitYValue, "%d px/s", "像素每秒 (pixel/s)")
+                .setRange(0, 1000)
+                .setTicks(100, 10)
+                .setSliderValue(config.physic_speed_limit_y)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    config.physic_speed_limit_y = setupPhysicSpeedLimitY.getValidatedValue();
+                    config.saveConfig();
+                });
+        EventHandler<MouseEvent> configPhysicRestoreEvent = e -> {
+            ArkConfig defaults = ArkConfig.defaultConfig;
+            setupPhysicGravity.setSliderValue(defaults.physic_gravity_acc);
+            setupPhysicAirFriction.setSliderValue(defaults.physic_air_friction_acc);
+            setupPhysicStaticFriction.setSliderValue(defaults.physic_static_friction_acc);
+            setupPhysicSpeedLimitX.setSliderValue(defaults.physic_speed_limit_x);
+            setupPhysicSpeedLimitY.setSliderValue(defaults.physic_speed_limit_y);
+            Logger.info("Config", "Physic params restored");
+        };
+        configPhysicRestore.setOnMouseClicked(e -> {
+            configPhysicRestoreEvent.handle(e);
+            initWrapper(2);
+        });
+        if (config.isAllPhysicConfigZeroed())
+            configPhysicRestoreEvent.handle(null);
     }
 
     private void initConfigDisplay() {
@@ -417,6 +505,27 @@ public class Homepage {
         configLoggingLevel.getSelectionModel().select(level);
 
         exploreLogDir.setOnMouseClicked(e -> {
+            JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+            VBox content = new VBox();
+            content.setSpacing(5);
+            content.getChildren().add(new Separator());
+
+            JFXDialogLayout layout = new JFXDialogLayout();
+            layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "日志信息", COLOR_LIGHT_GRAY));
+            layout.setBody(content);
+            layout.setActions(DialogUtil.getOkayButton(dialog, root));
+            dialog.setContent(layout);
+
+            JFXTextArea textArea = new JFXTextArea();
+            textArea.setEditable(false);
+            textArea.setScrollTop(0);
+            textArea.getStyleClass().add("popup-detail-field");
+            content.getChildren().add(textArea);
+            dialog.show();
+            for (String t : inspector.getNewLines()) {
+                textArea.appendText(t + "\n");
+            }
+            if (true) return;
             // Only available in Windows OS
             try {
                 Logger.debug("Config", "Request to explore the log dir");
@@ -1149,7 +1258,6 @@ public class Homepage {
         selectedModelItem = $item;
         selectedModelItem.getStyleClass().add("Search-models-item-active");
         // Display details
-        final String tooltipStyle = "-fx-font-size:10px;-fx-font-weight:normal;";
         selectedModelName.setText($asset.name);
         selectedModelAppellation.setText($asset.appellation);
         selectedModelSkinGroupName.setText($asset.skinGroupName);
@@ -1204,6 +1312,23 @@ public class Homepage {
         fadeT.setFromValue(0.975);
         fadeT.setToValue(0);
         fadeT.playFromStart();
+    }
+
+    private static void setupSlider(Slider $slider, Label $valueLabel, String $valueSuffix, String $valueType,
+                                    double $max, double $min, double $majorTickUnit, int $minorTickCount) {
+        $slider.setMax($max);
+        $slider.setMin($min);
+        $slider.setMajorTickUnit($majorTickUnit);
+        $slider.setMinorTickCount($minorTickCount);
+
+        $slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null)
+                switch ($valueType) {
+                    case "int"              -> $valueLabel.setText(newValue.intValue() + $valueSuffix);
+                    case "float", "double"  -> $valueLabel.setText(newValue.doubleValue() + $valueSuffix);
+                    default                 -> Logger.warn("?", "wtf?!");
+                }
+        });
     }
 
 

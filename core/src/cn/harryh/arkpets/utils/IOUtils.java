@@ -46,6 +46,17 @@ public class IOUtils {
             return new String(readByte(file), charsetName);
         }
 
+        /** Read the entire stream into a string using the specified charset.
+         * @param inputStream The stream to be read.
+         * @param charsetName The name of the specified charset.
+         * @return A String.
+         * @throws IOException If I/O error occurs. It may be FileNotFoundException, UnsupportedEncodingException, etc.
+         */
+        public static String readString(InputStream inputStream, String charsetName)
+                throws IOException {
+            return new String(inputStream.readAllBytes(), charsetName);
+        }
+
         /** Write a byte array into a file.
          * @param file The file to be written.
          * @param content The specified bytes.

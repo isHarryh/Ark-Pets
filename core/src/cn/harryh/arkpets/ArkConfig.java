@@ -27,11 +27,22 @@ import static cn.harryh.arkpets.Const.*;
 public class ArkConfig {
     public static final String configCustomPath = configExternal;
     public static final String configDefaultPath = configInternal;
+    public static final ArkConfig defaultConfig;
     private static final File configCustom =
             new File(configCustomPath);
     private static final InputStream configDefault =
             Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
     private static boolean isNewcomer = false;
+
+    static {
+        ArkConfig defaultConfig_ = null;
+        try {
+            defaultConfig_ = JSONObject.parseObject(IOUtils.FileUtil.readString(configDefault, charsetDefault), ArkConfig.class);
+        } catch (IOException e) {
+            Logger.error("Config", "Default config parsing failed, details see below.", e);
+        }
+        defaultConfig = defaultConfig_;
+    }
 
     // The following is the config items
     public int       behavior_ai_activation;
@@ -47,6 +58,11 @@ public class ArkConfig {
     public boolean   display_multi_monitors;
     public float     display_scale;
     public String    logging_level;
+    public float     physic_gravity_acc;
+    public float     physic_air_friction_acc;
+    public float     physic_static_friction_acc;
+    public float     physic_speed_limit_x;
+    public float     physic_speed_limit_y;
 
     private ArkConfig() {
     }
@@ -98,6 +114,19 @@ public class ArkConfig {
     @JSONField(serialize = false)
     public boolean isNewcomer() {
         return isNewcomer;
+    }
+
+    /** Note: Once users upgraded ArkPets to v2.2+ where physic params can be modified manually,
+     * the physic params will be initialized to 0, which will cause bad behaviors.
+     * @return Whether all the physic params are set to 0.
+     */
+    @JSONField(serialize = false)
+    public boolean isAllPhysicConfigZeroed() {
+        return physic_gravity_acc == 0 &&
+                physic_air_friction_acc == 0 &&
+                physic_static_friction_acc == 0 &&
+                physic_speed_limit_x == 0 &&
+                physic_speed_limit_y == 0;
     }
 
 

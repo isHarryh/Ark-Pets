@@ -281,6 +281,50 @@
                                         </children>
                                     </HBox>
                                     <Separator/>
+                                    <Label styleClass="config-group-title" text="物理（Beta）"/>
+                                    <HBox>
+                                        <children>
+                                            <Label text="重力加速度"/>
+                                            <JFXSlider fx:id="configPhysicGravity"/>
+                                            <Label fx:id="configPhysicGravityValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox>
+                                        <children>
+                                            <Label text="空气阻力系加速度"/>
+                                            <JFXSlider fx:id="configPhysicAirFriction"/>
+                                            <Label fx:id="configPhysicAirFrictionValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox>
+                                        <children>
+                                            <Label text="地面摩擦系加速度"/>
+                                            <JFXSlider fx:id="configPhysicStaticFriction"/>
+                                            <Label fx:id="configPhysicStaticFrictionValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox>
+                                        <children>
+                                            <Label text="最大水平运动速率"/>
+                                            <JFXSlider fx:id="configPhysicSpeedLimitX"/>
+                                            <Label fx:id="configPhysicSpeedLimitXValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <HBox>
+                                        <children>
+                                            <Label text="最大垂直运动速率"/>
+                                            <JFXSlider fx:id="configPhysicSpeedLimitY"/>
+                                            <Label fx:id="configPhysicSpeedLimitYValue" text="0"/>
+                                        </children>
+                                    </HBox>
+                                    <Separator/>
+                                    <HBox spacing="22.5">
+                                        <children>
+                                            <Label fx:id="configPhysicRestore" styleClass="config-hyper-link"
+                                                   text="恢复默认物理设置"/>
+                                        </children>
+                                    </HBox>
+                                    <Separator/>
                                 </children>
                             </VBox>
                         </children>
