@@ -143,8 +143,8 @@ public class Homepage {
     private Label aboutGitHub;
 
     private ListCell<AssetCtrl> selectedModelItem;
-    private AssetCtrl[] foundModelAssets = {};
-    private JFXListCell[] foundModelItems = {};
+    private ArrayList<AssetCtrl> foundModelAssets = new ArrayList<>();
+    private ArrayList<JFXListCell<AssetCtrl>> foundModelItems = new ArrayList<>();
 
     public ArkConfig config;
     public JSONObject modelsDatasetFull;
@@ -285,28 +285,27 @@ public class Homepage {
             return false;
         try {
             // Find every model assets.
-            ArrayList<AssetCtrl> foundModelAssetsL = new ArrayList<>();
-            for (String key : modelsDatasetFull.getJSONObject("storageDirectory").keySet())
-                foundModelAssetsL.addAll(Arrays.asList(
-                        AssetCtrl.getAssetList(new File(modelsDatasetFull.getJSONObject("storageDirectory").getString(key)), modelsDatasetFull.getJSONObject("data"))
-                ));
-            foundModelAssets = AssetCtrl.sortAssetList(foundModelAssetsL.toArray(new AssetCtrl[0]));
-            if (foundModelAssets.length == 0)
+            ArrayList<AssetCtrl> foundModelAssets = new ArrayList<>();
+            JSONObject modelsDatasetStorageDirectory = modelsDatasetFull.getJSONObject("storageDirectory");
+            JSONObject modelsDatasetData = modelsDatasetFull.getJSONObject("data");
+            for (String key : modelsDatasetStorageDirectory.keySet())
+                foundModelAssets.addAll(AssetCtrl.getAssetList(new File(modelsDatasetStorageDirectory.getString(key)), modelsDatasetData));
+            this.foundModelAssets = AssetCtrl.sortAssetList(foundModelAssets);
+            if (this.foundModelAssets.size() == 0)
                 throw new IOException("Found no assets in the target directories.");
             // Write models to menu items.
-            ArrayList<JFXListCell<AssetCtrl>> foundModelItemsL = new ArrayList<>();
-            searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)(observable -> {
-                observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>) cell -> selectModel(cell.getItem(), cell));
-            }));
+            ArrayList<JFXListCell<AssetCtrl>> foundModelItems = new ArrayList<>();
+            searchModelList.getSelectionModel().getSelectedItems().addListener((ListChangeListener<JFXListCell<AssetCtrl>>)
+                    (observable -> observable.getList().forEach((Consumer<JFXListCell<AssetCtrl>>)cell -> selectModel(cell.getItem(), cell))));
             searchModelList.setFixedCellSize(30);
-            for (AssetCtrl asset : foundModelAssets)
-                foundModelItemsL.add(getMenuItem(asset, searchModelList));
-            foundModelItems = foundModelItemsL.toArray(new JFXListCell[0]);
+            for (AssetCtrl asset : this.foundModelAssets)
+                foundModelItems.add(getMenuItem(asset, searchModelList));
+            this.foundModelItems = foundModelItems;
             Logger.debug("ModelManager", "Initialized model assets successfully.");
             return true;
         } catch (IOException e) {
-            foundModelAssets = new AssetCtrl[0];
-            foundModelItems = new JFXListCell[0];
+            foundModelAssets = new ArrayList<>();
+            foundModelItems = new ArrayList<>();
             Logger.error("ModelManager", "Failed to initialize model assets due to unknown reasons, details see below.", e);
             if ($doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：读取模型列表失败。",
@@ -507,7 +506,7 @@ public class Homepage {
         ss.start();
     }
 
-    public JFXDialog foregroundTask(Task $task, String $header, String $defaultContent, Boolean $cancelable) {
+    public JFXDialog foregroundTask(Task<Boolean> $task, String $header, String $defaultContent, Boolean $cancelable) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
         ProgressBar bar = new ProgressBar(-1);
         bar.setPrefSize(root.getWidth() * 0.6, 10);
@@ -1080,8 +1079,8 @@ public class Homepage {
 
     private void dealModelSearch(String $keyWords) {
         searchModelList.getItems().clear();
-        AssetCtrl[] result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
-        String[] assetIdList = AssetCtrl.getAssetIdList(result);
+        ArrayList<AssetCtrl> result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
+        ArrayList<String> assetIdList = AssetCtrl.getAssetIdList(result);
         String tag = "";
         if (assertModelLoaded(false))
             for (String s : modelsDatasetFull.getJSONObject("sortTags").keySet())
@@ -1115,14 +1114,14 @@ public class Homepage {
             initModelAssets($doPopNotice);
             initModelSearch();
             dealModelSearch("");
-            if (foundModelItems.length != 0 && config.character_asset != null && !config.character_asset.isEmpty()) {
+            if (foundModelItems.size() != 0 && config.character_asset != null && !config.character_asset.isEmpty()) {
                 // Scroll to recent selected model
                 int character_asset_idx = AssetCtrl.searchByAssetRelPath(config.character_asset, foundModelAssets);
                 searchModelList.scrollTo(character_asset_idx);
                 searchModelList.getSelectionModel().select(character_asset_idx);
             }
-            loadFailureTip.setVisible(foundModelItems.length == 0);
-            startBtn.setDisable(foundModelItems.length == 0);
+            loadFailureTip.setVisible(foundModelItems.size() == 0);
+            startBtn.setDisable(foundModelItems.size() == 0);
             System.gc();
             Logger.info("ModelManager", "Reloaded");
         });

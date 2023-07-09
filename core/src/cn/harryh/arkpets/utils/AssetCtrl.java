@@ -38,14 +38,6 @@ public class AssetCtrl {
         return assetDir + separator + assetId + $fileExt;
     }
 
-    /** Get the asset file name with the given extension.
-     * @param $fileExt The specified file extension.
-     * @return The file name.
-     */
-    public String getAssetFileName(String $fileExt) {
-        return assetId + $fileExt;
-    }
-
     /** Get the asset file path with the given extension.
      * @param $assetDir File instance of the asset directory.
      * @param $modelsDataset JSONObject of the models' dataset.
