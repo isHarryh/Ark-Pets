@@ -776,7 +776,6 @@ public class Homepage {
         });
     }
 
-    @Deprecated
     private void foregroundVerifyModels() {
         if (!initModelDataset(true))
             return;
@@ -786,63 +785,55 @@ public class Homepage {
         Task<Boolean> task = new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                this.updateProgress(0.1, 1);
-                Path rootPath = new File("").toPath();
-                int rootPathCount = rootPath.getNameCount();
-                JSONObject cachedMDSD = (JSONObject) modelsDatasetFull.getJSONObject("storageDirectory").clone();
-                JSONObject cachedMDD = (JSONObject) modelsDatasetFull.getJSONObject("data").clone();
-                Thread.sleep(100);
-                this.updateProgress(0.2, 1);
-                final boolean[] flag = {false};
-                Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
-                    @Override
-                    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                        if (dir.getNameCount() == (rootPathCount) && !rootPath.equals(dir))
-                            return cachedMDSD.containsValue(dir.getFileName().toString()) ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
-                        if (dir.getNameCount() == (rootPathCount + 1) && cachedMDD.containsKey(dir.getFileName().toString())) {
-                            if (AssetCtrl.isVerifiedAsset(dir.toFile(), cachedMDD)) {
-                                cachedMDD.remove(dir.getFileName().toString());
-                                return FileVisitResult.CONTINUE;
-                            } else if (!AssetCtrl.isValidAsset(dir.toFile(), cachedMDD)) {
-                                return FileVisitResult.CONTINUE;
-                            } else {
-                                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
-                                dialogHeader[0] = "已发现问题，模型资源可能不完整。";
-                                dialogContent[0] = "位于 " + dir + " 的模型资源，可能" + (AssetCtrl.isIntegralAsset(dir.toFile(), cachedMDD) ? "已被修改" : "缺少关键文件") + "。\n请尝试重新下载模型。";
-                                flag[0] = true;
-                                return FileVisitResult.TERMINATE;
-                            }
-                        }
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
-                if (flag[0] || this.isCancelled()) {
-                    Logger.info("Checker", "Model repo check finished (may modified or lost)");
-                    return false;
-                }
-                Thread.sleep(100);
-                this.updateProgress(0.7, 1);
-                for (String key : cachedMDD.keySet()) {
+                ArrayList<File> pendingDirs = new ArrayList<>();
+                JSONObject modelsDatasetData = modelsDatasetFull.getJSONObject("data");
+                JSONObject modelsDatasetStorageDirectory = modelsDatasetFull.getJSONObject("storageDirectory");
+                for (String key : modelsDatasetData.keySet()) {
                     try {
-                        if (!cachedMDD.getJSONObject("key").getJSONObject("checksum").isEmpty()) {
-                            dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
-                            dialogHeader[0] = "已发现问题，模型资源可能不完整。";
-                            dialogContent[0] = "没有找到 " + key + " 的模型资源。\n请尝试重新下载模型。";
-                            flag[0] = true;
-                        }
-                    } catch (Exception ignored) {
+                        JSONObject value = modelsDatasetData.getJSONObject(key);
+                        JSONObject checksum = Objects.requireNonNull(value.getJSONObject("checksum"));
+                        if (checksum.isEmpty())
+                            continue;
+                        String type = Objects.requireNonNull(value.getString("type"));
+                        String directory = Objects.requireNonNull(modelsDatasetStorageDirectory.getString(type));
+                        pendingDirs.add(new File(directory + File.separator + key));
+                    } catch (NullPointerException ignored) {
                     }
                 }
+
                 Thread.sleep(100);
-                this.updateProgress(1, 1);
-                if (flag[0] || this.isCancelled()) {
-                    Logger.info("Checker", "Model repo check finished (not integral or cancelled)");
-                    return false;
+                boolean flag = false;
+                AssetCtrl.AssetVerifier assetVerifier = new AssetCtrl.AssetVerifier(modelsDatasetData);
+                for (int i = 0; i < pendingDirs.size(); i++) {
+                    this.updateProgress(i, pendingDirs.size());
+                    File file = pendingDirs.get(i);
+                    int result = assetVerifier.verify(file);
+                    if ((result & AssetCtrl.AssetVerifier.INTEGRAL) == 0) {
+                        Logger.info("Checker", "Model repo check finished (not integral)");
+                        dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
+                        dialogHeader[0] = "已发现问题，模型资源可能不完整";
+                        dialogContent[0] = "资源 " + file.getPath() + " 可能不存在或缺少相关文件，重新下载模型文件可能解决此问题。";
+                        flag = true;
+                        break;
+                    } else if ((result & AssetCtrl.AssetVerifier.CHECKED) == 0) {
+                        Logger.info("Checker", "Model repo check finished (checksum mismatch)");
+                        dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
+                        dialogHeader[0] = "已发现问题，模型资源可能不完整";
+                        dialogContent[0] = "资源 " + file.getPath() + " 可能已被意外修改，重新下载模型文件可能解决此问题。";
+                        flag = true;
+                        break;
+                    } else if (this.isCancelled()) {
+                        Logger.info("Checker", "Model repo check was cancelled in verification stage.");
+                        return false;
+                    }
                 }
-                dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS);
-                dialogHeader[0] = "模型资源是完整的。";
-                dialogContent[0] = "这只能说明本地的模型资源是完整的，但不一定是最新的。";
-                Logger.info("Checker", "Model repo check finished (okay)");
+
+                if (!flag) {
+                    Logger.info("Checker", "Model repo check finished (okay)");
+                    dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS);
+                    dialogHeader[0] = "模型资源是完整的。";
+                    dialogContent[0] = "这只能说明本地的模型资源是完整的，但不一定是最新的。";
+                }
                 return true;
             }
         };
@@ -851,7 +842,7 @@ public class Homepage {
                 if (dialogGraphic[0] != null && dialogHeader[0] != null && dialogContent[0] != null)
                     popNotice(dialogGraphic[0], "验证资源完整性", dialogHeader[0], dialogContent[0], null).show();
         });
-        foregroundTask(task, "正在检验模型资源完整性...", "这可能需要数秒", true);
+        foregroundTask(task, "正在验证模型资源完整性...", "这可能需要数秒钟", true);
     }
 
     private void foregroundCheckUpdate(boolean $popNotice, String $sourceStr) {
