@@ -505,27 +505,6 @@ public class Homepage {
         configLoggingLevel.getSelectionModel().select(level);
 
         exploreLogDir.setOnMouseClicked(e -> {
-            JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
-            VBox content = new VBox();
-            content.setSpacing(5);
-            content.getChildren().add(new Separator());
-
-            JFXDialogLayout layout = new JFXDialogLayout();
-            layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "日志信息", COLOR_LIGHT_GRAY));
-            layout.setBody(content);
-            layout.setActions(DialogUtil.getOkayButton(dialog, root));
-            dialog.setContent(layout);
-
-            JFXTextArea textArea = new JFXTextArea();
-            textArea.setEditable(false);
-            textArea.setScrollTop(0);
-            textArea.getStyleClass().add("popup-detail-field");
-            content.getChildren().add(textArea);
-            dialog.show();
-            for (String t : inspector.getNewLines()) {
-                textArea.appendText(t + "\n");
-            }
-            if (true) return;
             // Only available in Windows OS
             try {
                 Logger.debug("Config", "Request to explore the log dir");

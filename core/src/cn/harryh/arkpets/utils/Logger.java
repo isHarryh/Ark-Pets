@@ -6,8 +6,7 @@ package cn.harryh.arkpets.utils;
 import org.apache.log4j.*;
 import org.apache.log4j.helpers.LogLog;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -16,13 +15,14 @@ import java.util.*;
 
 
 public class Logger {
-    private static org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-    private static org.apache.log4j.Logger currentLogger = rootLogger;
-    private static final long pid = ProcessHandle.current().pid();
-    private static boolean isFileLoggerAvailable = false;
-    private static boolean isInitialized = false;
-    private static int maxFileCount = 256;
-    private static Level level = Level.INFO;
+    protected static org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+    protected static org.apache.log4j.Logger currentLogger = rootLogger;
+    protected static final long pid = ProcessHandle.current().pid();
+    protected static boolean isFileLoggerAvailable = false;
+    protected static boolean isInitialized = false;
+    protected static int maxFileCount = 256;
+    protected static Level level = Level.INFO;
+    protected static String logFilePath = null;
 
     public static final int ERROR = 40000;
     public static final int WARN  = 30000;
@@ -56,10 +56,11 @@ public class Logger {
 
         // Initialize log appender
         Logger.maxFileCount = Math.max(1, maxFileCount);
+        logFilePath = logPrefix + "." + pid + ".log";
         try {
             Cleaner.cleanByModifiedTime(logPrefix, Logger.maxFileCount - 1);
             FileAppender fileAppender = new FileAppender(
-                    fileLayout, logPrefix + "." + pid + ".log", false, false, 0
+                    fileLayout, logFilePath, false, false, 0
             );
             currentLogger.addAppender(fileAppender);
             isFileLoggerAvailable = true;
@@ -72,6 +73,10 @@ public class Logger {
         // Reset log level
         setLevel(level);
         isInitialized = true;
+    }
+
+    public static String getCurrentLogFilePath() {
+        return logFilePath;
     }
 
     /** Set a new log level.
@@ -142,11 +147,54 @@ public class Logger {
             currentLogger.error(combine(tag, message), error);
     }
 
-    private static String combine(String tag, String message) {
+    protected static String combine(String tag, String message) {
         return tag + ": " + message;
     }
 
-    public static class Cleaner {
+
+    public static class RealtimeInspector {
+        private BufferedReader reader;
+        private long fileLengthCache;
+
+        public RealtimeInspector(File file) {
+            initialize(file);
+        }
+
+        public RealtimeInspector(String filePath) {
+            initialize(new File(filePath));
+        }
+
+        public String[] getNewLines() {
+            ArrayList<String> newLines = new ArrayList<>();
+            if (isAvailable()) {
+                String line;
+                try {
+                    while ((line = reader.readLine()) != null)
+                        newLines.add(line);
+                } catch (IOException ignored) {
+                }
+            }
+            return newLines.toArray(new String[0]);
+        }
+
+        public boolean isAvailable() {
+            return reader != null;
+        }
+
+        private void initialize(File file) {
+            try {
+                if (file.exists() && file.canRead()) {
+                    reader = new BufferedReader(new FileReader(file));
+                    return;
+                }
+            } catch (IOException ignored) {
+            }
+            reader = null;
+        }
+    }
+
+
+    protected static class Cleaner {
         private static final SimpleDateFormat sdf = new SimpleDateFormat();
 
         public static void cleanByModifiedTime(String logPrefixName, int maxFileCount) {
