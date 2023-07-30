@@ -3,8 +3,8 @@
  */
 package cn.harryh.arkpets.controllers;
 
-import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.ArkConfig;
+import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import javafx.scene.input.MouseEvent;
@@ -183,8 +183,7 @@ public class Homepage {
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
             if (config.isAllPhysicConfigZeroed())
-
-            isNewcomer = config.isNewcomer();
+                isNewcomer = config.isNewcomer();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
@@ -583,7 +582,7 @@ public class Homepage {
                     } else {
                         aboutQueryUpdate.setStyle("");
                     }
-                    configDeployMultiMonitorsStatus.setText("检测到 " + config.updateMonitorsConfig() + " 个显示屏");
+                    configDeployMultiMonitorsStatus.setText("检测到 " + ArkConfig.Monitor.getMonitors().length + " 个显示屏");
                 });
                 return task;
             }
@@ -1241,7 +1240,7 @@ public class Homepage {
         selectedModelAppellation.setText($asset.appellation);
         selectedModelSkinGroupName.setText($asset.skinGroupName);
         selectedModelType.setText($asset.type);
-        Tooltip selectedModelNameTip = new Tooltip("ID: " + $asset.assetId);
+        Tooltip selectedModelNameTip = new Tooltip($asset.name);
         Tooltip selectedModelAppellationTip = new Tooltip($asset.appellation);
         Tooltip selectedModelSkinGroupNameTip = new Tooltip($asset.skinGroupName);
         Tooltip selectedModelTypeTip = new Tooltip($asset.type);
@@ -1292,24 +1291,6 @@ public class Homepage {
         fadeT.setToValue(0);
         fadeT.playFromStart();
     }
-
-    private static void setupSlider(Slider $slider, Label $valueLabel, String $valueSuffix, String $valueType,
-                                    double $max, double $min, double $majorTickUnit, int $minorTickCount) {
-        $slider.setMax($max);
-        $slider.setMin($min);
-        $slider.setMajorTickUnit($majorTickUnit);
-        $slider.setMinorTickCount($minorTickCount);
-
-        $slider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null)
-                switch ($valueType) {
-                    case "int"              -> $valueLabel.setText(newValue.intValue() + $valueSuffix);
-                    case "float", "double"  -> $valueLabel.setText(newValue.doubleValue() + $valueSuffix);
-                    default                 -> Logger.warn("?", "wtf?!");
-                }
-        });
-    }
-
 
     public static class DatasetException extends IOException {
         public DatasetException(String msg) {

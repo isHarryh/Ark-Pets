@@ -100,15 +100,6 @@ public class ArkConfig {
         }
     }
 
-    /** Update the monitors' config.
-     * @return The number of detected monitors.
-     */
-    @JSONField(serialize = false)
-    public int updateMonitorsConfig() {
-        display_monitors_data = Monitor.toJSONArray(Monitor.getMonitors());
-        return display_monitors_data.size();
-    }
-
     /** @return Whether the config file was generated newly.
      */
     @JSONField(serialize = false)
@@ -238,14 +229,6 @@ public class ArkConfig {
                 list.add(monitor);
             }
             return list.toArray(new Monitor[0]);
-        }
-
-        public static int[] getVirtualOrigin(Monitor[] monitors) {
-            int left = 0;
-            int top = 0;
-            for (Monitor m : monitors) {
-            }
-            return new int[0];
         }
 
         public static Monitor fromJSONObject(JSONObject object) {

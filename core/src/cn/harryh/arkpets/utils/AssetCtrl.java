@@ -7,12 +7,11 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
+/** The Asset Controller corresponding to a specified asset
+ */
 public class AssetCtrl {
     public File assetDir;
     public String assetId;
