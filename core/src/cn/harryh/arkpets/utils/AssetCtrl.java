@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class AssetCtrl {
     public File assetDir;
-    public String assetId;
+    @Deprecated public String assetId;
     public String type;
     public String style;
     public String name;
@@ -22,45 +22,30 @@ public class AssetCtrl {
     public String skinGroupId;
     public String skinGroupName;
     public JSONArray sortTags;
-    public JSONObject checksum;
-    static final String separator = File.separator;
-    static final String[] extensions = {".atlas", ".png", ".skel"};
+    public JSONObject assetList;
+
+    private AssetAccessor accessor;
+
+    protected static final String separator = File.separator;
+    protected static final String[] extensions = {".atlas", ".png", ".skel"};
 
     private AssetCtrl() {
     }
 
-    /** Get the asset file path with the given extension.
-     * @param $fileExt The specified file extension.
-     * @return The file path.
+    /** Get the directory where the asset files located in.
+     * @return A relative path string.
      */
-    public String getAssetFilePath(String $fileExt) {
-        return assetDir + separator + assetId + $fileExt;
+    public String getLocation() {
+        return assetDir.toString();
     }
 
-    /** Get the asset file path with the given extension.
-     * @param $assetDir File instance of the asset directory.
-     * @param $modelsDataset JSONObject of the models' dataset.
-     * @param $fileExt The specified file extension.
-     * @return The file path.
+    /** Get the Asset Accessor of this asset.
+     * @return An Asset Accessor instance.
      */
-    public static String getAssetFilePath(File $assetDir, JSONObject $modelsDataset, String $fileExt) {
-        String assetId = $modelsDataset.getJSONObject($assetDir.getName()).getObject("assetId", String.class);
-        if (assetId == null)
-            return null;
-        return $assetDir.getPath() + separator + assetId + $fileExt;
-    }
-
-    /** Get the asset file name with the given extension.
-     * @param $assetDir File instance of the asset directory.
-     * @param $modelsDataset JSONObject of the models' dataset.
-     * @param $fileExt The specified file extension.
-     * @return The file name.
-     */
-    public static String getAssetFileName(File $assetDir, JSONObject $modelsDataset, String $fileExt) {
-        String assetId = $modelsDataset.getJSONObject($assetDir.getName()).getObject("assetId", String.class);
-        if (assetId == null)
-            return null;
-        return assetId + $fileExt;
+    public AssetAccessor getAccessor() {
+        if (accessor == null)
+            accessor = new AssetAccessor(assetList);
+        return accessor;
     }
 
     /** Get a single asset controller instance using the given asset directory.
@@ -72,21 +57,28 @@ public class AssetCtrl {
         if (AssetVerifier.isValidAsset($assetDir, $modelsDataset)) {
             AssetCtrl assetCtrl = $modelsDataset.getObject($assetDir.getName(), AssetCtrl.class);
             assetCtrl.assetDir = $assetDir;
+            if (assetCtrl.assetList == null && assetCtrl.assetId != null) {
+                // Compatible to lower version
+                HashMap<String, Object> defaultFileMap = new HashMap<>();
+                for (String fileType : extensions)
+                    defaultFileMap.put(fileType, assetCtrl.assetId + fileType);
+                assetCtrl.assetList = new JSONObject(defaultFileMap);
+            }
             return assetCtrl;
         }
         return new AssetCtrl();
     }
 
-    /** Get a list of asset controller instances from the given root directory.
+    /** Get asset controller instances from the given root directory.
      * @param $rootDir File instance of the specified root directory.
      * @param $modelsDataset JSONObject of the models' dataset.
      * @return The list containing asset controller instances.
      */
-    public static ArrayList<AssetCtrl> getAssetList(File $rootDir, JSONObject $modelsDataset) {
+    public static ArrayList<AssetCtrl> getAllAssetCtrls(File $rootDir, JSONObject $modelsDataset) {
         ArrayList<AssetCtrl> list = new ArrayList<>();
         /* WorkDir
          *  +-rootDir
-         *  |-+-subDir1(as key "assetId")
+         *  |-+-subDir1(as key)
          *  | |---xxx.atlas
          *  | |---xxx.png
          *  | |---xxx.skel
@@ -99,7 +91,7 @@ public class AssetCtrl {
                 return list;
             for (File subDir : subDirs) {
                 if ($modelsDataset.containsKey(subDir.getName())) {
-                    if (!AssetVerifier.isIntegralAsset(subDir, $modelsDataset)) {
+                    if (!AssetVerifier.isExistedAsset(subDir, $modelsDataset)) {
                         //System.out.println("Not Integral: " + subDir.getName());
                         continue;
                     }
@@ -110,11 +102,11 @@ public class AssetCtrl {
         return list;
     }
 
-    /** Sort the asset controller list.
-     * @param $assetList The specified asset controller list.
+    /** Sort the asset controllers.
+     * @param $assetList The specified asset controllers.
      * @return The sorted list.
      */
-    public static ArrayList<AssetCtrl> sortAssetList(ArrayList<AssetCtrl> $assetList) {
+    public static ArrayList<AssetCtrl> sortAssetCtrls(ArrayList<AssetCtrl> $assetList) {
         ArrayList<AssetCtrl> newList = new ArrayList<>();
         for (AssetCtrl i : $assetList) {
             boolean flag = true;
@@ -130,16 +122,14 @@ public class AssetCtrl {
         return newList;
     }
 
-    /** Get a list of asset id in the given asset controller list.
-     * @param $assetList The specified asset controller list.
-     * @return The list containing asset ids.
+    /** Get all assets' locations of the given asset controllers.
+     * @param $assetList The specified asset controllers.
+     * @return The list containing asset locations.
      */
-    public static ArrayList<String> getAssetIdList(ArrayList<AssetCtrl> $assetList) {
+    public static ArrayList<String> getAssetLocations(ArrayList<AssetCtrl> $assetList) {
         ArrayList<String> result = new ArrayList<>();
-        for (AssetCtrl asset : $assetList) {
-            if (asset.assetId != null)
-                result.add(asset.assetId);
-        }
+        for (AssetCtrl asset : $assetList)
+            result.add(asset.getLocation());
         return result;
     }
 
@@ -181,16 +171,10 @@ public class AssetCtrl {
             return 0;
         String assetId = new File($assetRelPath).getName();
         for (int i = 0; i < $assetList.size(); i++) {
-            if ($assetList.get(i).assetId != null &&
-                    $assetList.get(i).assetId.equalsIgnoreCase(assetId)) {
+            if ($assetList.get(i).assetDir.getName().equalsIgnoreCase(assetId))
                 return i;
-            }
         }
         return 0;
-    }
-
-    public static JSONObject getChecksum(File $assetDir, JSONObject $modelsDataset) {
-        return $modelsDataset.getJSONObject($assetDir.getName()).getJSONObject("checksum");
     }
 
     @Override
@@ -200,70 +184,122 @@ public class AssetCtrl {
 
     @Override
     public int hashCode() {
-        return Objects.hash(assetDir, assetId);
+        return assetDir.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof AssetCtrl) {
-            return ((AssetCtrl)obj).assetDir.equals(assetDir) && ((AssetCtrl)obj).assetId.equals(assetId);
+            return ((AssetCtrl)obj).assetDir.equals(assetDir);
         }
         return false;
     }
 
-    public static class AssetVerifier {
-        /** VALID: The asset is valid in the dataset. */
-        public static final int VALID = 0x001;
-        /** INTEGRAL: The asset files are existed. */
-        public static final int INTEGRAL = 0x010;
-        /** CHECKED: The asset files are verified with checksums. */
-        public static final int CHECKED = 0x100;
-        
-        protected final JSONObject data;
+    /** The Asset Accessor providing methods to get the resource files of the asset
+     * @since 2.2
+     */
+    public static class AssetAccessor {
+        private final ArrayList<String> list;
+        private final HashMap<String, ArrayList<String>> map;
 
+        public AssetAccessor(JSONObject fileMap) {
+            ArrayList<String> list = new ArrayList<>();
+            HashMap<String, ArrayList<String>> map = new HashMap<>();
+            try {
+                if (fileMap != null && fileMap.size() != 0) {
+                    for (String fileType : fileMap.keySet()) {
+                        String oneFile;
+                        JSONArray someFiles;
+                        if ((oneFile = fileMap.getString(fileType)) != null) {
+                            list.add(oneFile);
+                            map.put(fileType, new ArrayList<>(List.of(oneFile)));
+                        } else if ((someFiles = fileMap.getJSONArray(fileType)) != null) {
+                            var temp = someFiles.toJavaList(String.class);
+                            list.addAll(temp);
+                            map.put(fileType, new ArrayList<>(temp));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                list = new ArrayList<>();
+                map = new HashMap<>();
+            }
+            this.list = list;
+            this.map = map;
+        }
+
+        public String[] getAllFiles() {
+            return list.toArray(new String[0]);
+        }
+
+        public String[] getAllFilesOf(String fileType) {
+            if (map.containsKey(fileType))
+                return map.get(fileType).toArray(new String[0]);
+            return new String[0];
+        }
+
+        public String getFirstFileOf(String fileType) {
+            String[] all = getAllFilesOf(fileType);
+            if (all != null && all.length > 0)
+                return all[0];
+            return null;
+        }
+
+        public boolean isAvailable() {
+            return !map.isEmpty() && !list.isEmpty();
+        }
+    }
+
+    public enum AssetStatus {
+        NONE, VALID, EXISTED, CHECKED
+    }
+
+    /** The Asset Verifier providing methods to verify the integrity of the asset
+     * @since 2.2
+     */
+    public static class AssetVerifier {
+        private final JSONObject data;
+
+        /** Initialize an Asset Verifier using the given dataset.
+         * @param $modelsDataset The specified dataset.
+         */
         public AssetVerifier(JSONObject $modelsDataset) {
             data = $modelsDataset;
         }
 
-        public int verify(File $assetDir) {
-            int result = 0;
+        /** Verify the integrity of the given asset.
+         * @param $assetDir The asset directory.
+         * @return Asset Status enumeration.
+         */
+        public AssetStatus verify(File $assetDir) {
+            AssetStatus result = AssetStatus.NONE;
             if (isValidAsset($assetDir, data)) {
-                result |= VALID;
-                if (isIntegralAsset($assetDir, data)) {
-                    result |= INTEGRAL;
+                result = AssetStatus.VALID;
+                if (isExistedAsset($assetDir, data)) {
+                    result = AssetStatus.EXISTED;
                     if (isCheckedAsset($assetDir, data)) {
-                        result |= CHECKED;
+                        result = AssetStatus.CHECKED;
                     }
                 }
             }
             return result;
         }
 
-        protected static boolean isValidAsset(File $assetDir, JSONObject $modelsDataset) {
+        private static boolean isValidAsset(File $assetDir, JSONObject $modelsDataset) {
             if ($assetDir == null || $modelsDataset == null)
                 return false;
             if (!$modelsDataset.containsKey($assetDir.getName())) {
                 Logger.warn("Verifier", "The asset directory " + $assetDir.getPath() + " is undefined.");
                 return false;
             }
-            if (!$assetDir.isDirectory()) {
-                Logger.warn("Verifier", "The asset directory " + $assetDir.getPath() + " is missing.");
-                return false;
-            }
             return true;
         }
 
-        protected static boolean isIntegralAsset(File $assetDir, JSONObject $modelsDataset) {
+        private static boolean isExistedAsset(File $assetDir, JSONObject $modelsDataset) {
             try {
-                if (getChecksum($assetDir, $modelsDataset) == null)
-                    return true; // Skip data-emptied asset (marked as verified)
-                List<String> assetFileList = Arrays.asList(Objects.requireNonNull($assetDir.list()));
-                for (String ext : extensions) {
-                    String path = getAssetFileName($assetDir, $modelsDataset, ext);
-                    if (!assetFileList.contains(path)) {
-                        Logger.warn("Verifier", "The asset file " + path + " is missing.");
-                        return false;
-                    }
+                if (!$assetDir.isDirectory()) {
+                    Logger.warn("Verifier", "The asset directory " + $assetDir.getPath() + " is missing.");
+                    return false;
                 }
                 return true;
             } catch (Exception e) {
@@ -272,18 +308,15 @@ public class AssetCtrl {
             }
         }
 
-        protected static boolean isCheckedAsset(File $assetDir, JSONObject $modelsDataset) {
+        private static boolean isCheckedAsset(File $assetDir, JSONObject $modelsDataset) {
             try {
-                JSONObject checksum;
-                if ((checksum = getChecksum($assetDir, $modelsDataset)) == null)
+                AssetCtrl assetCtrl = getAssetCtrl($assetDir, $modelsDataset);
+                if (!assetCtrl.getAccessor().isAvailable())
                     return true; // Skip data-emptied asset (marked as verified)
-                for (String ext : extensions) {
-                    File file = new File(Objects.requireNonNull(getAssetFilePath($assetDir, $modelsDataset, ext)));
-                    if (!checksum.getObject(ext, String.class)
-                            .equals(IOUtils.FileUtil.getMD5(file))) {
-                        Logger.warn("Verifier", "The md5 of file " + getAssetFilePath($assetDir, $modelsDataset, ext) +
-                                " is: " + IOUtils.FileUtil.getMD5(file) +
-                                " but in the dataset, it was recorded as: " + checksum.getObject(ext, String.class));
+                List<String> existed = Arrays.asList(Objects.requireNonNull($assetDir.list()));
+                for (String fileName : assetCtrl.getAccessor().getAllFiles()) {
+                    if (!existed.contains(fileName)) {
+                        Logger.warn("Verifier", "The asset file " + fileName + " (" + $assetDir + ") is missing.");
                         return false;
                     }
                 }

@@ -64,7 +64,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
-		cha = new ArkChar(config.character_asset+".atlas", config.character_asset+".skel", skelBaseScale);
+		cha = new ArkChar(config.character_asset, new AssetCtrl.AssetAccessor(config.character_files), skelBaseScale);
 		cha.setCanvas(APP_FPS);
 		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);

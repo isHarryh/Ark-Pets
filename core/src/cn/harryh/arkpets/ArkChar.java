@@ -6,6 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.easings.EasingLinear;
 import cn.harryh.arkpets.easings.EasingLinearVector3;
 import cn.harryh.arkpets.utils.AnimData;
+import cn.harryh.arkpets.utils.AssetCtrl;
 import cn.harryh.arkpets.utils.CroppingCtrl;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
@@ -23,7 +24,6 @@ import com.badlogic.gdx.math.Vector3;
 
 import com.esotericsoftware.spine.Skeleton;
 import com.esotericsoftware.spine.SkeletonData;
-import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.SkeletonBinary;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.Animation;
@@ -32,6 +32,7 @@ import com.esotericsoftware.spine.AnimationStateData;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
 import static cn.harryh.arkpets.Const.*;
+import static java.io.File.separator;
 
 
 public class ArkChar {
@@ -57,11 +58,11 @@ public class ArkChar {
 
 
     /** Initialize an ArkPets character.
-     * @param $fp_atlas The file path of the atlas file.
-     * @param $fp_skel The file path of the skel file.
+     * @param $asset_location The path string to the model's directory.
+     * @param $asset_accessor The Asset Accessor of the model.
      * @param $anim_scale The scale of the character.
      */
-    public ArkChar(String $fp_atlas, String $fp_skel, float $anim_scale) {
+    public ArkChar(String $asset_location, AssetCtrl.AssetAccessor $asset_accessor, float $anim_scale) {
         // Graphic
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
@@ -78,7 +79,7 @@ public class ArkChar {
         // Skeleton
         renderer = new SkeletonRenderer();
         renderer.setPremultipliedAlpha(true);
-        loadSkeletonData($fp_atlas, $fp_skel, $anim_scale);
+        loadSkeletonData($asset_location, $asset_accessor, $anim_scale);
         skeleton = new Skeleton(skeletonData);
         animationState.apply(skeleton);
         skeleton.updateWorldTransform();
@@ -88,23 +89,17 @@ public class ArkChar {
         updateCanvas();
     }
 
-    private void loadSkeletonData (String $fp_atlas, String $fp_skel, float $scale) {
-        // Load atlas & skel/json files to SkeletonData
+    private void loadSkeletonData(String $asset_location, AssetCtrl.AssetAccessor $asset_accessor, float $scale) {
+        // Load atlas & skel files to SkeletonData
         try {
-        TextureAtlas atlas = new TextureAtlas(Gdx.files.internal($fp_atlas));
-            switch ($fp_skel.substring($fp_skel.lastIndexOf(".")).toLowerCase()) {
-                case ".skel" -> {
-                    SkeletonBinary binary = new SkeletonBinary(atlas);
-                    binary.setScale($scale);
-                    skeletonData = binary.readSkeletonData(Gdx.files.internal($fp_skel));
-                }
-                case ".json" -> {
-                    SkeletonJson json = new SkeletonJson(atlas);
-                    json.setScale($scale);
-                    skeletonData = json.readSkeletonData(Gdx.files.internal($fp_skel));
-                }
-                // default:
-            }
+            String path2atlas = $asset_location + separator + $asset_accessor.getFirstFileOf(".atlas");
+            String path2skel = $asset_location + separator + $asset_accessor.getFirstFileOf(".skel");
+            // Load atlas
+            TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
+            // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
+            SkeletonBinary binary = new SkeletonBinary(atlas);
+            binary.setScale($scale);
+            skeletonData = binary.readSkeletonData(Gdx.files.internal(path2skel));
         } catch (SerializationException | GdxRuntimeException e) {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
             throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");

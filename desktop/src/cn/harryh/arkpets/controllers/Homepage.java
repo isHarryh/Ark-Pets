@@ -315,8 +315,8 @@ public class Homepage {
             JSONObject modelsDatasetStorageDirectory = modelsDatasetFull.getJSONObject("storageDirectory");
             JSONObject modelsDatasetData = modelsDatasetFull.getJSONObject("data");
             for (String key : modelsDatasetStorageDirectory.keySet())
-                foundModelAssets.addAll(AssetCtrl.getAssetList(new File(modelsDatasetStorageDirectory.getString(key)), modelsDatasetData));
-            this.foundModelAssets = AssetCtrl.sortAssetList(foundModelAssets);
+                foundModelAssets.addAll(AssetCtrl.getAllAssetCtrls(new File(modelsDatasetStorageDirectory.getString(key)), modelsDatasetData));
+            this.foundModelAssets = AssetCtrl.sortAssetCtrls(foundModelAssets);
             if (this.foundModelAssets.size() == 0)
                 throw new IOException("Found no assets in the target directories.");
             // Write models to menu items.
@@ -894,19 +894,19 @@ public class Homepage {
                 for (int i = 0; i < pendingDirs.size(); i++) {
                     this.updateProgress(i, pendingDirs.size());
                     File file = pendingDirs.get(i);
-                    int result = assetVerifier.verify(file);
-                    if ((result & AssetCtrl.AssetVerifier.INTEGRAL) == 0) {
+                    AssetCtrl.AssetStatus result = assetVerifier.verify(file);
+                    if (result == AssetCtrl.AssetStatus.VALID) {
                         Logger.info("Checker", "Model repo check finished (not integral)");
                         dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
                         dialogHeader[0] = "已发现问题，模型资源可能不完整";
-                        dialogContent[0] = "资源 " + file.getPath() + " 可能不存在或缺少相关文件，重新下载模型文件可能解决此问题。";
+                        dialogContent[0] = "资源 " + file.getPath() + " 可能不存在，重新下载模型文件可能解决此问题。";
                         flag = true;
                         break;
-                    } else if ((result & AssetCtrl.AssetVerifier.CHECKED) == 0) {
+                    } else if (result == AssetCtrl.AssetStatus.EXISTED) {
                         Logger.info("Checker", "Model repo check finished (checksum mismatch)");
                         dialogGraphic[0] = IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
                         dialogHeader[0] = "已发现问题，模型资源可能不完整";
-                        dialogContent[0] = "资源 " + file.getPath() + " 可能已被意外修改，重新下载模型文件可能解决此问题。";
+                        dialogContent[0] = "资源 " + file.getPath() + " 可能缺少部分文件，重新下载模型文件可能解决此问题。";
                         flag = true;
                         break;
                     } else if (this.isCancelled()) {
@@ -1158,7 +1158,7 @@ public class Homepage {
     private void dealModelSearch(String $keyWords) {
         searchModelList.getItems().clear();
         ArrayList<AssetCtrl> result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
-        ArrayList<String> assetIdList = AssetCtrl.getAssetIdList(result);
+        ArrayList<String> assetIdList = AssetCtrl.getAssetLocations(result);
         String tag = "";
         if (assertModelLoaded(false))
             for (String s : modelsDatasetFull.getJSONObject("sortTags").keySet())
@@ -1225,7 +1225,7 @@ public class Homepage {
         item.setPrefSize(width, height);
         item.setGraphic(new Group(name, alias1));
         item.setItem($assetCtrl);
-        item.setId($assetCtrl.assetId);
+        item.setId($assetCtrl.getLocation());
         return item;
     }
 
@@ -1253,7 +1253,8 @@ public class Homepage {
         selectedModelSkinGroupName.setTooltip(selectedModelSkinGroupNameTip);
         selectedModelType.setTooltip(selectedModelTypeTip);
         // Apply to config, but not to save
-        config.character_asset = $asset.getAssetFilePath("");
+        config.character_asset = $asset.getLocation();
+        config.character_files = $asset.assetList;
         config.character_label = $asset.name;
     }
 

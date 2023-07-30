@@ -45,24 +45,24 @@ public class ArkConfig {
     }
 
     // The following is the config items
-    public int       behavior_ai_activation;
-    public boolean   behavior_allow_interact;
-    public boolean   behavior_allow_sit;
-    public boolean   behavior_allow_walk;
-    public boolean   behavior_do_peer_repulsion;
-    public String    character_asset;
-    public String    character_label;
-    public int       display_fps;
-    public int       display_margin_bottom;
-    public JSONArray display_monitors_data;
-    public boolean   display_multi_monitors;
-    public float     display_scale;
-    public String    logging_level;
-    public float     physic_gravity_acc;
-    public float     physic_air_friction_acc;
-    public float     physic_static_friction_acc;
-    public float     physic_speed_limit_x;
-    public float     physic_speed_limit_y;
+    public int        behavior_ai_activation;
+    public boolean    behavior_allow_interact;
+    public boolean    behavior_allow_sit;
+    public boolean    behavior_allow_walk;
+    public boolean    behavior_do_peer_repulsion;
+    public String     character_asset;
+    public JSONObject character_files;
+    public String     character_label;
+    public int        display_fps;
+    public int        display_margin_bottom;
+    public boolean    display_multi_monitors;
+    public float      display_scale;
+    public String     logging_level;
+    public float      physic_gravity_acc;
+    public float      physic_air_friction_acc;
+    public float      physic_static_friction_acc;
+    public float      physic_speed_limit_x;
+    public float      physic_speed_limit_y;
 
     private ArkConfig() {
     }
