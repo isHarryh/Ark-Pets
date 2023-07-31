@@ -5,6 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.behaviors.*;
 import cn.harryh.arkpets.utils.AnimData;
+import cn.harryh.arkpets.utils.AssetCtrl;
 import cn.harryh.arkpets.utils.HWndCtrl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
@@ -17,7 +18,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
 import java.util.*;
-
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinUser;

@@ -28,16 +28,16 @@ public class ArkConfig {
     public static final String configCustomPath = configExternal;
     public static final String configDefaultPath = configInternal;
     public static final ArkConfig defaultConfig;
-    private static final File configCustom =
-            new File(configCustomPath);
-    private static final InputStream configDefault =
-            Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
+    private static final File configCustom = new File(configCustomPath);
     private static boolean isNewcomer = false;
 
     static {
         ArkConfig defaultConfig_ = null;
         try {
-            defaultConfig_ = JSONObject.parseObject(IOUtils.FileUtil.readString(configDefault, charsetDefault), ArkConfig.class);
+            defaultConfig_ = JSONObject.parseObject(
+                    IOUtils.FileUtil.readString(getDefaultConfigInputStream(), charsetDefault),
+                    ArkConfig.class
+            );
         } catch (IOException e) {
             Logger.error("Config", "Default config parsing failed, details see below.", e);
         }
@@ -83,21 +83,32 @@ public class ArkConfig {
      */
     @JSONField(serialize = false)
     public static ArkConfig getConfig() {
-        if (!configCustom.isFile()) {
-            try {
-                Files.copy(configDefault, configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        // Duplicate the default config file if the custom config file is not existed.
+        try {
+            if (!configCustom.isFile()) {
+                Files.copy(getDefaultConfigInputStream(), configCustom.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 isNewcomer = true;
                 Logger.info("Config", "Default config was copied successfully.");
-            } catch (IOException e) {
-                Logger.error("Config", "Default config copying failed, details see below.", e);
             }
-        }
-        try {
-            return JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, charsetDefault), ArkConfig.class);
         } catch (IOException e) {
-            Logger.error("Config", "Default config reading failed, details see below.", e);
-            return null;
+            Logger.error("Config", "Default config copying failed, details see below.", e);
         }
+        // Read and parse the custom config file.
+        try {
+            return Objects.requireNonNull(
+                    JSONObject.parseObject(IOUtils.FileUtil.readString(configCustom, charsetDefault), ArkConfig.class),
+                    "JSON parsing returns null."
+            );
+        } catch (IOException e) {
+            Logger.error("Config", "Config reading failed, details see below.", e);
+        } catch (NullPointerException e) {
+            Logger.error("Config", "Config parsing failed, details see below.", e);
+        }
+        return null;
+    }
+
+    private static InputStream getDefaultConfigInputStream() {
+        return Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
     }
 
     /** @return Whether the config file was generated newly.

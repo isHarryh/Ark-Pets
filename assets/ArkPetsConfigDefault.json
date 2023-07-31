@@ -5,24 +5,12 @@
     "behavior_allow_walk":true,
     "behavior_do_peer_repulsion":true,
     "character_asset":"",
+    "character_files":{
+
+    },
     "character_label":"",
     "display_fps":30,
     "display_margin_bottom":0,
-    "display_monitors_data":[
-        {
-            "bbp":24,
-            "hz":60,
-            "virtual":[
-                0,
-                0
-            ],
-            "size":[
-                1920,
-                1080
-            ],
-            "name":""
-        }
-    ],
     "display_multi_monitors":true,
     "display_scale":1.0,
     "logging_level":"INFO",
