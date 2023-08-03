@@ -18,9 +18,8 @@ out/
 tmp*/
 temp*/
 test*/
-*.class
-*.config
-*.exe
 *.jar
-*.log
-*.zip
+
+# Exclude runtime files
+/ArkPetsConfig.json
+/models_data.json

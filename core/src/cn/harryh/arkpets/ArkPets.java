@@ -81,7 +81,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setObjSize(WD_W, WD_H);
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
-		intiWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
+		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		// 5.Behavior setup
 		behavior = Behavior.selectBehavior(cha.anim_list, new Behavior[] {
 				new BehaviorOperBuild2(config, cha.anim_list),
@@ -245,20 +245,32 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private final String APP_TITLE;
 	public HWND HWND_MINE;
 
-	private void intiWindow(int x, int y) {
+	private void initWindow(int x, int y) {
+		// Initialize HWnd
 		if (HWND_MINE == null)
             HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
-        refreshMonitorInfo();
 		HWND_TOPMOST = refreshWindowIdx();
+		// Make sure ArkPets has been set as foreground window once
+		for (int i = 0; ; i++) {
+			if (HWND_MINE.equals(User32.INSTANCE.GetForegroundWindow())) {
+				Logger.debug("Window", "SetForegroundWindow succeeded" + (i > 0 ? " (retry #" + i + ")" : ""));
+				break;
+			} else if (i > 1000) {
+				Logger.warn("Window", "SetForegroundWindow failed because max retries exceeded (retry #" + (i - 1) + ")");
+				break;
+			}
+			User32.INSTANCE.SetForegroundWindow(HWND_MINE);
+		}
+		// Set the initial style of the window
+		refreshMonitorInfo();
 		setWindowPos(x, y, true);
 		setWindowTransparent(false);
 		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
 	}
 
 	public void setWindowTransparent(boolean $transparent) {
-		Logger.debug("Window", "JNA SetWindowLong returns " +
-				Integer.toHexString(User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE,
-						windowLongDefault | ($transparent ? WinUser.WS_EX_TRANSPARENT : 0))));
+		User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE,
+                windowLongDefault | ($transparent ? WinUser.WS_EX_TRANSPARENT : 0));
 	}
 
 	private void setWindowAlpha(float $alpha) {

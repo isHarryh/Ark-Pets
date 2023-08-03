@@ -208,19 +208,24 @@ public class AssetCtrl {
             try {
                 if (fileMap != null && fileMap.size() != 0) {
                     for (String fileType : fileMap.keySet()) {
-                        String oneFile;
-                        JSONArray someFiles;
-                        if ((oneFile = fileMap.getString(fileType)) != null) {
-                            list.add(oneFile);
-                            map.put(fileType, new ArrayList<>(List.of(oneFile)));
-                        } else if ((someFiles = fileMap.getJSONArray(fileType)) != null) {
-                            var temp = someFiles.toJavaList(String.class);
-                            list.addAll(temp);
-                            map.put(fileType, new ArrayList<>(temp));
+                        try {
+                            JSONArray someFiles; // Try to get as array
+                            if ((someFiles = fileMap.getJSONArray(fileType)) != null) {
+                                var temp = someFiles.toJavaList(String.class);
+                                list.addAll(temp);
+                                map.put(fileType, new ArrayList<>(temp));
+                            }
+                        } catch (com.alibaba.fastjson.JSONException | com.alibaba.fastjson2.JSONException ex) {
+                            String oneFile; // Try to get as string
+                            if ((oneFile = fileMap.getString(fileType)) != null) {
+                                list.add(oneFile);
+                                map.put(fileType, new ArrayList<>(List.of(oneFile)));
+                            }
                         }
                     }
                 }
             } catch (Exception e) {
+                Logger.error("AssetCtrl", "Failed to establish an asset accessor, details see below.", e);
                 list = new ArrayList<>();
                 map = new HashMap<>();
             }
@@ -235,6 +240,7 @@ public class AssetCtrl {
         public String[] getAllFilesOf(String fileType) {
             if (map.containsKey(fileType))
                 return map.get(fileType).toArray(new String[0]);
+            Logger.warn("AssetCtrl", "getAllFilesOf() Method has returned an empty list.");
             return new String[0];
         }
 
@@ -242,6 +248,7 @@ public class AssetCtrl {
             String[] all = getAllFilesOf(fileType);
             if (all != null && all.length > 0)
                 return all[0];
+            Logger.warn("AssetCtrl", "getFirstFileOf() Method has returned null.");
             return null;
         }
 
@@ -313,8 +320,10 @@ public class AssetCtrl {
                 AssetCtrl assetCtrl = getAssetCtrl($assetDir, $modelsDataset);
                 if (!assetCtrl.getAccessor().isAvailable())
                     return true; // Skip data-emptied asset (marked as verified)
-                List<String> existed = Arrays.asList(Objects.requireNonNull($assetDir.list()));
+                ArrayList<String> existed = new ArrayList<>(List.of(Objects.requireNonNull($assetDir.list())));
+                existed.replaceAll(String::toLowerCase);
                 for (String fileName : assetCtrl.getAccessor().getAllFiles()) {
+                    fileName = fileName.toLowerCase();
                     if (!existed.contains(fileName)) {
                         Logger.warn("Verifier", "The asset file " + fileName + " (" + $assetDir + ") is missing.");
                         return false;

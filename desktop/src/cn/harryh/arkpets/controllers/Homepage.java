@@ -874,19 +874,8 @@ public class Homepage {
             protected Boolean call() throws Exception {
                 ArrayList<File> pendingDirs = new ArrayList<>();
                 JSONObject modelsDatasetData = modelsDatasetFull.getJSONObject("data");
-                JSONObject modelsDatasetStorageDirectory = modelsDatasetFull.getJSONObject("storageDirectory");
-                for (String key : modelsDatasetData.keySet()) {
-                    try {
-                        JSONObject value = modelsDatasetData.getJSONObject(key);
-                        JSONObject checksum = Objects.requireNonNull(value.getJSONObject("checksum"));
-                        if (checksum.isEmpty())
-                            continue;
-                        String type = Objects.requireNonNull(value.getString("type"));
-                        String directory = Objects.requireNonNull(modelsDatasetStorageDirectory.getString(type));
-                        pendingDirs.add(new File(directory + File.separator + key));
-                    } catch (NullPointerException ignored) {
-                    }
-                }
+                for (AssetCtrl assetCtrl : foundModelAssets)
+                    pendingDirs.add(new File(assetCtrl.getLocation()));
 
                 Thread.sleep(100);
                 boolean flag = false;
