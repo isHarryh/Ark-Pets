@@ -46,6 +46,7 @@ public class Homepage {
     private boolean isNoFilter = true;
     private boolean isHttpsTrustAll = false;
     private boolean isUpdateAvailable = false;
+    private boolean isDatasetIncompatible = false;
     public boolean isNewcomer = false;
     public PopupUtils.Handbook trayExitHandbook = new TrayExitHandBook();
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
@@ -142,6 +143,8 @@ public class Homepage {
     private Label configPhysicRestore;
 
     @FXML
+    private Pane noticeBox;
+    @FXML
     private JFXComboBox<Float> configDisplayScale;
     @FXML
     private JFXComboBox<Integer> configDisplayFps;
@@ -172,6 +175,9 @@ public class Homepage {
 
     public ArkConfig config;
     public JSONObject modelsDatasetFull;
+    private NoticeBar appVersionNotice;
+    private NoticeBar diskFreeSpaceNotice;
+    private NoticeBar datasetIncompatibleNotice;
     private Logger.RealtimeInspector inspector = new Logger.RealtimeInspector(Logger.getCurrentLogFilePath());
 
     public Homepage() {
@@ -193,6 +199,7 @@ public class Homepage {
             initConfigDisplay();
             initConfigAdvanced();
             initAbout();
+            initNoticeBox();
             initLaunchingStatusListener();
             initScheduledListener();
 
@@ -280,7 +287,21 @@ public class Homepage {
                     throw new DatasetException("The key 'storageDirectory' may not in the dataset.");
                 if (!modelsDatasetFull.containsKey("sortTags"))
                     throw new DatasetException("The key 'sortTags' may not in the dataset.");
-                // TODO check dataset compatibility
+                try {
+                    // Check dataset compatibility
+                    if (!modelsDatasetFull.containsKey("arkPetsCompatibility"))
+                        throw new DatasetException("The key 'arkPetsCompatibility' may not in the dataset.");
+                    int[] acVersionResult = modelsDatasetFull.getObject("arkPetsCompatibility", int[].class);
+                    Version acVersion = new Version(acVersionResult);
+                    if (appVersion.lessThan(acVersion)) {
+                        isDatasetIncompatible = true;
+                        Logger.warn("ModelManager", "The model dataset may be incompatible (required " + acVersion + " or newer)");
+                    } else {
+                        isDatasetIncompatible = false;
+                    }
+                } catch (Exception ex) {
+                    Logger.warn("ModelManager", "Failed to get the compatibility of the model database.");
+                }
                 Logger.debug("ModelManager", "Initialized model dataset successfully.");
                 return true;
             } catch (Exception e) {
@@ -541,6 +562,83 @@ public class Homepage {
         aboutGitHub.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlLicense));
     }
 
+    private void initNoticeBox() {
+        appVersionNotice = new NoticeBar(noticeBox) {
+            @Override
+            protected boolean getActivated() {
+                return isUpdateAvailable;
+            }
+
+            @Override
+            protected String getColorString() {
+                return COLOR_INFO;
+            }
+
+            @Override
+            protected String getIconSVGPath() {
+                return IconUtil.ICON_INFO_ALT;
+            }
+
+            @Override
+            protected String getText() {
+                return "ArkPets 有新版本可用！点击此处前往下载~";
+            }
+
+            @Override
+            protected void onClick(MouseEvent event) {
+                NetUtils.browseWebpage(PathConfig.urlDownload);
+            }
+        };
+        diskFreeSpaceNotice = new NoticeBar(noticeBox) {
+            @Override
+            protected boolean getActivated() {
+                long freeSpace = new File(".").getFreeSpace();
+                return freeSpace < diskFreeSpaceRecommended && freeSpace > 0;
+            }
+
+            @Override
+            protected String getColorString() {
+                return COLOR_WARNING;
+            }
+
+            @Override
+            protected String getIconSVGPath() {
+                return IconUtil.ICON_WARNING_ALT;
+            }
+
+            @Override
+            protected String getText() {
+                return "当前磁盘存储空间不足，可能影响使用体验。";
+            }
+        };
+        datasetIncompatibleNotice = new NoticeBar(noticeBox) {
+            @Override
+            protected boolean getActivated() {
+                return isDatasetIncompatible;
+            }
+
+            @Override
+            protected String getColorString() {
+                return COLOR_WARNING;
+            }
+
+            @Override
+            protected String getIconSVGPath() {
+                return IconUtil.ICON_WARNING_ALT;
+            }
+
+            @Override
+            protected String getText() {
+                return "模型库可能不兼容当前的 ArkPets 版本，请更新软件。";
+            }
+
+            @Override
+            protected void onClick(MouseEvent event) {
+                NetUtils.browseWebpage(PathConfig.urlDownload);
+            }
+        };
+    }
+
     private void initLaunchingStatusListener() {
         ScheduledService<Boolean> ss = new ScheduledService<>() {
             @Override
@@ -577,11 +675,9 @@ public class Homepage {
                     }
                 };
                 task.setOnSucceeded(e -> {
-                    if (isUpdateAvailable) {
-                        aboutQueryUpdate.setStyle("-fx-text-fill:" + COLOR_DANGER);
-                    } else {
-                        aboutQueryUpdate.setStyle("");
-                    }
+                    appVersionNotice.refresh();
+                    diskFreeSpaceNotice.refresh();
+                    datasetIncompatibleNotice.refresh();
                     configDeployMultiMonitorsStatus.setText("检测到 " + ArkConfig.Monitor.getMonitors().length + " 个显示屏");
                 });
                 return task;

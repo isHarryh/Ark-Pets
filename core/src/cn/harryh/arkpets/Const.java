@@ -19,9 +19,10 @@ public final class Const {
     public static final String desktopTitle = "ArkPets Launcher " + appVersion;
 
     // IO presets
-    public static final int zipBufferSizeDefault    = 8 * 1024;
-    public static final int httpBufferSizeDefault   = 8 * 1024;
-    public static final int httpTimeoutDefault      = 30 * 1000;
+    public static final int zipBufferSizeDefault      = 8 * 1024;
+    public static final int httpBufferSizeDefault     = 8 * 1024;
+    public static final int httpTimeoutDefault        = 30 * 1000;
+    public static final long diskFreeSpaceRecommended = 1024 * 1024 * 1024L;
 
     // Graphics presets
     public static final int fpsDefault          = 30;
@@ -65,6 +66,7 @@ public final class Const {
      */
     public static class PathConfig {
         public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
+        public static final String urlDownload      = "https://arkpets.harryh.cn/p/arkpets/?from=client#/download";
         public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
         public static final String urlReadme        = "https://github.com/isHarryh/Ark-Pets#readme";
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";

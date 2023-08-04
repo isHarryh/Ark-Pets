@@ -130,9 +130,9 @@
         <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="38.0" prefWidth="430.0">
             <JFXTextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="6.0"
                           prefHeight="23.0" prefWidth="170.0"/>
-            <JFXButton fx:id="searchModelConfirm" layoutX="8.0" layoutY="5.0"
-                       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="搜索">
+            <JFXButton fx:id="searchModelConfirm" layoutX="8.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                       minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0"
+                       prefWidth="55.0" text="搜索">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -149,9 +149,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton fx:id="searchModelReset" layoutX="248.0" layoutY="5.0"
-                       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="清空">
+            <JFXButton fx:id="searchModelReset" layoutX="248.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                       minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0"
+                       prefWidth="55.0" text="清空">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -168,9 +168,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton fx:id="searchModelRandom" layoutX="308.0" layoutY="5.0"
-                       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="随机">
+            <JFXButton fx:id="searchModelRandom" layoutX="308.0" layoutY="5.0" maxHeight="-Infinity"
+                       maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       prefHeight="28.0" prefWidth="55.0" text="随机">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -187,9 +187,9 @@
                     <String fx:value="btn-with-icon"/>
                 </styleClass>
             </JFXButton>
-            <JFXButton fx:id="searchModelReload" layoutX="368.0" layoutY="5.0"
-                       maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                       mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0" text="重载">
+            <JFXButton fx:id="searchModelReload" layoutX="368.0" layoutY="5.0" maxHeight="-Infinity"
+                       maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       prefHeight="28.0" prefWidth="55.0" text="重载">
                 <font>
                     <Font size="12.0"/>
                 </font>
@@ -345,6 +345,7 @@
                         <children>
                             <VBox>
                                 <children>
+                                    <VBox fx:id="noticeBox"/>
                                     <Label styleClass="config-group-title" text="显示设置"/>
                                     <HBox>
                                         <children>

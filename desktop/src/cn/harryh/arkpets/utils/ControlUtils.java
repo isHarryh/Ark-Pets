@@ -3,12 +3,23 @@
  */
 package cn.harryh.arkpets.utils;
 
+import javafx.animation.ScaleTransition;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.value.ChangeListener;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Font;
+
+import cn.harryh.arkpets.Const;
 
 
 public class ControlUtils {
@@ -125,6 +136,95 @@ public class ControlUtils {
             protected Integer adjustValue(double rawValue) {
                 return Math.toIntExact(Math.round(Math.round(rawValue / commonMultiple) * commonMultiple));
             }
+        }
+    }
+
+
+    abstract public static class NoticeBar {
+        protected static final double borderRadius = 8;
+        protected static final double internalSpacing = 8;
+        protected static final double iconScale = 0.75;
+        protected static final double margin = 4;
+        protected static final double widthScale = 0.9;
+        protected final Pane container;
+        protected Pane noticeBar;
+
+        public NoticeBar(Pane root) {
+            container = root;
+        }
+
+        public final void refresh() {
+            if (getActivated() && noticeBar == null) {
+                noticeBar = getNoticeBar(getWidth(), getHeight());
+                container.getChildren().add(noticeBar);
+                ScaleTransition transition = new ScaleTransition(Const.durationFast, noticeBar);
+                transition.setFromY(0.1);
+                transition.setToY(1);
+                transition.play();
+            } else if (!getActivated() && noticeBar != null) {
+                final Pane finalNoticeBar = noticeBar;
+                noticeBar = null;
+                ScaleTransition transition = new ScaleTransition(Const.durationFast, finalNoticeBar);
+                transition.setFromY(1);
+                transition.setToY(0.1);
+                transition.setOnFinished(e -> container.getChildren().remove(finalNoticeBar));
+                transition.play();
+            }
+        }
+
+        abstract protected boolean getActivated();
+
+        abstract protected String getColorString();
+
+        abstract protected String getIconSVGPath();
+
+        abstract protected String getText();
+
+        protected double getHeight() {
+            return Font.getDefault().getSize() * 3;
+        }
+
+        protected double getWidth() {
+            Region region = (Region)container.getParent();
+            double regionWidth = region.getWidth() - region.getInsets().getLeft() - region.getInsets().getRight();
+            return regionWidth * widthScale;
+        }
+
+        protected Pane getNoticeBar(double width, double height) {
+            // Colors
+            Color color = Color.valueOf(getColorString());
+            BackgroundFill bgFill = new BackgroundFill(
+                    color.deriveColor(0, 0.62, 1.62, 0.38),
+                    new CornerRadii(borderRadius),
+                    new Insets(margin)
+            );
+            // Layouts
+            HBox bar = new HBox(internalSpacing);
+            bar.setBackground(new Background(bgFill));
+            bar.setMaxSize(width, height);
+            bar.setAlignment(Pos.CENTER_LEFT);
+            bar.setOnMouseClicked(this::onClick);
+            SVGPath icon = new SVGPath();
+            icon.setContent(getIconSVGPath());
+            icon.setFill(color);
+            icon.setScaleX(iconScale);
+            icon.setScaleY(iconScale);
+            icon.setTranslateX(margin);
+            Label label = new Label(getText());
+            label.setTextFill(color);
+            label.setMinWidth(width * widthScale * widthScale);
+            bar.getChildren().addAll(icon, label);
+            // Click event
+            try {
+                if (!NoticeBar.class.equals(getClass().getMethod("onClick").getDeclaringClass())) {
+                    bar.setOnMouseClicked(this::onClick);
+                }
+            } catch (Exception ignored) {
+            }
+            return bar;
+        }
+
+        protected void onClick(MouseEvent event) {
         }
     }
 }
