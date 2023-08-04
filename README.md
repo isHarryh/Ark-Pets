@@ -4,9 +4,9 @@
 <div align="center" style="text-align:center">
    <h1> Ark-Pets </h1>
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
-   <p>
+   <p>[README.md](README.md)
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code><b> v2.1 </b></code> <br>
+      <code><b> v2.2 </b></code> <br>
       <sub>
          <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
       </sub>
@@ -19,12 +19,12 @@
 - 支持在启动器中显示模型的详细信息，调整缩放和帧率等设置
 - 实现了在启动器中下载模型文件、检查模型库更新等联网功能
 - 支持模拟游戏内 **干员基建小人** 的行为 <details><summary>查看详情</summary>
-    1. 基建小人能够执行行走和坐下的动作
-    2. 基建小人能够被鼠标交互 (执行戳一戳动作)
-    3. 基建小人能够执行基建动作 (如有)
+    1. 能够执行行走和坐下的动作
+    2. 能够被鼠标交互 (执行戳一戳动作)
+    3. 能够执行基建动作 (如有)
 - 支持模拟游戏内 **敌方小人** 的行为 <details><summary>查看详情</summary>
-    1. 敌方小人能够执行行走动作
-    2. 敌方小人能够被鼠标交互 (执行攻击动作)
+    1. 能够执行行走动作
+    2. 能够被鼠标交互 (执行攻击动作)
 - 实现了模拟平面重力场 <details><summary>查看详情</summary>
     1. 桌宠在被拖拽到空中后能够自由落体
     2. 桌宠可以站立在打开的窗口的边缘上
@@ -49,6 +49,7 @@
 
 ### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
+- 支持将动态立绘作为桌宠启动
 - 支持部分敌方首领的阶段形态切换
 - 支持一键关闭所有已被启动的桌宠
 
