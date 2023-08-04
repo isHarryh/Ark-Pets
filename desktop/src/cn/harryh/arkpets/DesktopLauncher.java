@@ -45,7 +45,7 @@ public class DesktopLauncher {
             }
         };
         Logger.info("System", "Entering the app of DesktopLauncher");
-        Logger.info("System", "ArkPets version is " + appVersionStr);
+        Logger.info("System", "ArkPets version is " + appVersion);
 
         // If requested to start the core app directly
         new ArgPending("--direct-start", args) {

@@ -47,7 +47,7 @@ public class Homepage {
     private boolean isHttpsTrustAll = false;
     private boolean isUpdateAvailable = false;
     public boolean isNewcomer = false;
-    public Handbook trayExitHandbook = new TrayExitHandBook();
+    public PopupUtils.Handbook trayExitHandbook = new TrayExitHandBook();
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
 
     @FXML
@@ -928,7 +928,7 @@ public class Homepage {
             throw new RuntimeException(e);
         }
         isUpdateAvailable = false;
-        String queryStr = "?type=queryVersion&cliVer=" + appVersionStr + "&source=" + $sourceStr;
+        String queryStr = "?type=queryVersion&cliVer=" + appVersion + "&source=" + $sourceStr;
         Task<Boolean> task = createDownloadTask(PathConfig.urlApi + queryStr, PathConfig.tempQueryVersionCachePath);
         JFXDialog dialog = null;
         if ($popNotice)
@@ -945,19 +945,18 @@ public class Homepage {
                 if (queryVersionResult.getString("msg").equals("success")) {
                     // If the response status is "success"
                     int[] stableVersionResult = queryVersionResult.getJSONObject("data").getObject("stableVersion", int[].class);
-                    if (stableVersionResult[0] > appVersion[0] ||
-                            (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] > appVersion[1]) ||
-                            (stableVersionResult[0] == appVersion[0] && stableVersionResult[1] == appVersion[1] && stableVersionResult[2] > appVersion[2])) {
+                    Version stableVersion = new Version(stableVersionResult);
+                    if (appVersion.lessThan(stableVersion)) {
                         isUpdateAvailable = true;
                         if ($popNotice)
                             popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "检测到软件有新的版本！",
-                                    appVersionStr + " -> " + stableVersionResult[0] + "." + stableVersionResult[1] + "." +stableVersionResult[2] + "\n请访问ArkPets官网或GitHub下载新的安装包。", null).show();
+                                    "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n请访问ArkPets官网或GitHub下载新的安装包。", null).show();
                     } else {
                         if ($popNotice)
                             popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的正式版本。",
-                                    "当前版本 " + appVersionStr + " 已是最新", null).show();
+                                    "当前版本 " + appVersion + " 已是最新", null).show();
                     }
-                    Logger.info("Checker", "Application version check finished");
+                    Logger.info("Checker", "Application version check finished, newest: " + stableVersion);
                 } else {
                     // If the response status isn't "success"
                     Logger.warn("Checker", "Application version check failed (api failed)");
@@ -1282,13 +1281,13 @@ public class Homepage {
         fadeT.playFromStart();
     }
 
-    public static class DatasetException extends IOException {
+    private static class DatasetException extends IOException {
         public DatasetException(String msg) {
             super(msg);
         }
     }
 
-    public static class TrayExitHandBook extends Handbook {
+    private static class TrayExitHandBook extends PopupUtils.Handbook {
         @Override
         public String getTitle() {
             return "使用提示";

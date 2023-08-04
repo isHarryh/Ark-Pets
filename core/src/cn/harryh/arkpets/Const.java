@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.utils.Version;
 import javafx.util.Duration;
 
 
@@ -10,13 +11,12 @@ import javafx.util.Duration;
  */
 public final class Const {
     // App version
-    public static final int[] appVersion        = {2, 2, 0};
-    public static final String appVersionStr    = appVersion[0] + "." + appVersion[1] + "." + appVersion[2];
+    public static final Version appVersion  = new Version(2, 2, 0);
 
     // App name
     public static final String appName      = "ArkPets";
     public static final String coreTitle    = "ArkPets Core";
-    public static final String desktopTitle = "ArkPets Launcher " + appVersionStr;
+    public static final String desktopTitle = "ArkPets Launcher " + appVersion;
 
     // IO presets
     public static final int zipBufferSizeDefault    = 8 * 1024;

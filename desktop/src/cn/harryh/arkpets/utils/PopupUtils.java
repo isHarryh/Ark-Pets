@@ -117,4 +117,30 @@ public class PopupUtils {
             return button;
         }
     }
+
+
+    abstract public static class Handbook {
+        public boolean hasShown = false;
+
+        public Handbook() {
+        }
+
+        abstract public String getTitle();
+
+        abstract public String getHeader();
+
+        abstract public String getContent();
+
+        public SVGPath getIcon() {
+            return IconUtil.getIcon(IconUtil.ICON_HELP_ALT, COLOR_INFO);
+        }
+
+        public boolean hasShown() {
+            return hasShown;
+        }
+
+        public void setShown() {
+            hasShown = true;
+        }
+    }
 }

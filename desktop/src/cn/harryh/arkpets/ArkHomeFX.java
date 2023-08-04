@@ -4,10 +4,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Homepage;
-import cn.harryh.arkpets.utils.ArgPending;
-import cn.harryh.arkpets.utils.Handbook;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.JavaProcess;
+import cn.harryh.arkpets.utils.*;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -59,7 +56,7 @@ public class ArkHomeFX extends Application {
                         Thread.sleep(1200);
                         if (ctrl.isNewcomer && !ctrl.trayExitHandbook.hasShown()) {
                             // Show handbook.
-                            Handbook b = ctrl.trayExitHandbook;
+                            PopupUtils.Handbook b = ctrl.trayExitHandbook;
                             ctrl.popNotice(b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
                             b.setShown();
                         }
