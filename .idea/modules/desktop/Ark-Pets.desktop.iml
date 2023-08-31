@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$/../../../desktop" dumb="true">
+      <sourceFolder url="file://$MODULE_DIR$/../../../desktop/bin" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../desktop/build" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../desktop/out" isTestSource="false" generated="true" />
+    </content>
+  </component>
+</module>

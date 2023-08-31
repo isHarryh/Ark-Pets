@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Ark-Pets.iml" filepath="$PROJECT_DIR$/.idea/Ark-Pets.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Ark-Pets.core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Ark-Pets.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/Ark-Pets.core.main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/Ark-Pets.core.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/desktop/Ark-Pets.desktop.iml" filepath="$PROJECT_DIR$/.idea/modules/desktop/Ark-Pets.desktop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/desktop/Ark-Pets.desktop.main.iml" filepath="$PROJECT_DIR$/.idea/modules/desktop/Ark-Pets.desktop.main.iml" />
+    </modules>
+  </component>
+</project>
