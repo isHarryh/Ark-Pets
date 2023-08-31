@@ -576,7 +576,7 @@ public class Homepage {
 
             @Override
             protected String getIconSVGPath() {
-                return IconUtil.ICON_INFO_ALT;
+                return IconUtil.ICON_UPDATE;
             }
 
             @Override

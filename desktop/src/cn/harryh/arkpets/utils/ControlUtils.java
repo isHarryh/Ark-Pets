@@ -9,6 +9,7 @@ import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.Slider;
@@ -20,6 +21,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 
 import cn.harryh.arkpets.Const;
+import java.lang.reflect.Method;
 
 
 public class ControlUtils {
@@ -203,7 +205,6 @@ public class ControlUtils {
             bar.setBackground(new Background(bgFill));
             bar.setMaxSize(width, height);
             bar.setAlignment(Pos.CENTER_LEFT);
-            bar.setOnMouseClicked(this::onClick);
             SVGPath icon = new SVGPath();
             icon.setContent(getIconSVGPath());
             icon.setFill(color);
@@ -216,7 +217,10 @@ public class ControlUtils {
             bar.getChildren().addAll(icon, label);
             // Click event
             try {
-                if (!NoticeBar.class.equals(getClass().getMethod("onClick").getDeclaringClass())) {
+                Method onClick = getClass().getDeclaredMethod("onClick", MouseEvent.class);
+                if (!NoticeBar.class.equals(onClick.getDeclaringClass())) {
+                    // If the method "onClick" has been overridden:
+                    bar.setCursor(Cursor.HAND);
                     bar.setOnMouseClicked(this::onClick);
                 }
             } catch (Exception ignored) {
