@@ -7,37 +7,42 @@
 
 /*******************************************************************************
  *                                                                             *
- * 1. Global Styles and Common Controllers                                     *
+ * 1. Global Styles and Effects                                                *
  *                                                                             *
  ******************************************************************************/
 
+/* Global font face */
 * {
-/* Fonts */
 /* Note: Use `Font.loadFont()` in the `Application` to load additional font file */
 -fx-font-family: "Source Han Sans CN";
 -fx-font-smoothing-type: gray;
 }
 
-.scroll-v {
-/* Scroll-pane (Vertical-only) */
--fx-hbar-policy: never;
--fx-vbar-policy: as-needed;
-}
-
+/* Drop shadow for Nodes */
 .shadowed {
-/* Drop-shadow for Nodes */
 -fx-effect: dropshadow(gaussian, #00000040, 10, 0.2, 0, 1);
 }
 
-.fluorescent {
 /* Fluorescent strokes for Shapes */
+.fluorescent {
 -fx-stroke: #80DFFF;
 -fx-stroke-type: outside;
 -fx-stroke-width: 0.382px;
 }
 
+/*******************************************************************************
+ *                                                                             *
+ * 2. Common Attributes for Controllers                                        *
+ *                                                                             *
+ ******************************************************************************/
+
+/* Common buttons */
+JFXButton {
+-fx-cursor: hand;
+}
+
+/* Anchor panes that contains an SVG-path */
 .btn-icon {
-/* Anchor-pane that contains an SVG-path */
 -fx-pref-width: 0;
 -fx-pref-height: 0;
 -fx-scale-x: 0.525;
@@ -50,8 +55,8 @@
 -fx-fill: inherit;
 }
 
+/* Buttons that contains a btn-icon on the left */
 .btn-with-icon {
-/* Button that contains a btn-icon on the left */
 -fx-label-padding: 0 0 0 10px;
 -fx-content-display: center;
 }
@@ -92,7 +97,7 @@
 
 /*******************************************************************************
  *                                                                             *
- * 2. Sidebar and its Menu Buttons                                             *
+ * 3. Sidebar and its Menu Buttons                                             *
  *                                                                             *
  ******************************************************************************/
 
@@ -108,7 +113,6 @@
 
 .menu-btn {
 /* Regular */
--fx-cursor: hand;
 -fx-padding: 0 0 0 20px;
 -fx-font-size: 18px;
 -fx-text-fill: #204880;
@@ -139,7 +143,6 @@
 
 #Start-btn {
 /* Regular */
--fx-cursor: hand;
 -fx-padding: 0 0 0 20px;
 -fx-font-size: 18px;
 -fx-text-fill: #FFFFFF;
@@ -164,7 +167,7 @@
 
 /*******************************************************************************
  *                                                                             *
- * 3. Contents in wrappers                                                     *
+ * 4. Contents in wrappers                                                     *
  *                                                                             *
  ******************************************************************************/
 
@@ -325,27 +328,27 @@
 
 /*******************************************************************************
  *                                                                             *
- * 4. Other components                                                         *
+ * 5. Other components                                                         *
  *                                                                             *
  ******************************************************************************/
 
+/* Expandable text area for popup dialogs */
 .popup-detail-field {
-/* Expandable text area for Popup dialogs */
 -fx-alignment: top-left;
 -fx-font-size: 12px;
 -fx-text-fill: #666;
 -fx-pref-row-count: 12;
 }
 
-ProgressBar > .track{
 /* Progress bar's outer track */
+ProgressBar > .track{
 -fx-background-color: #DDDDDDDD;
 -fx-background-radius: 2.5px;
 -fx-background-insets: 0;
 }
 
-ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 /* Progress bar's inner bar */
+ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 -fx-background-color: #204880DD;
 -fx-background-radius: 2.5px;
 -fx-background-insets: 0;
@@ -370,20 +373,28 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 
 /*******************************************************************************
  *                                                                             *
- * 5. ScrollBar and ScrollPane                                                 *
+ * 6. ScrollBar and ScrollPane                                                 *
  *                                                                             *
  ******************************************************************************/
 
 .scroll-bar:vertical > .track-background, .scroll-bar:horizontal > .track-background {
+-fx-cursor: default;
 -fx-background-color: #F1F1F5;
 -fx-background-insets: 0;
 -fx-background-radius: 1px;
 }
 
 .scroll-bar:vertical > .thumb, .scroll-bar:horizontal > .thumb {
+-fx-cursor: hand;
 -fx-background-color: #BCBCC2;
 -fx-background-insets: 0;
 -fx-background-radius: 2px;
+}
+
+.scroll-bar > .increment-button, .scroll-bar > .decrement-button,
+.scroll-bar:hover > .increment-button, .scroll-bar:hover > .decrement-button {
+-fx-cursor: hand;
+-fx-background-color: transparent;
 }
 
 .scroll-bar:vertical > .increment-button, .scroll-bar:vertical > .decrement-button {
@@ -392,11 +403,6 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 
 .scroll-bar:horizontal > .increment-button, .scroll-bar:horizontal > .decrement-button {
 -fx-padding: 2px 5px 2px 5px;
-}
-
-.scroll-bar > .increment-button, .scroll-bar > .decrement-button,
-.scroll-bar:hover > .increment-button, .scroll-bar:hover > .decrement-button {
--fx-background-color: transparent;
 }
 
 .scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
@@ -426,6 +432,11 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 .scroll-pane {
 -fx-background-insets: 0;
 -fx-padding: 0;
+}
+
+.scroll-v {
+-fx-hbar-policy: never;
+-fx-vbar-policy: as-needed;
 }
 
 .scroll-pane:focused, .scroll-pane .corner {

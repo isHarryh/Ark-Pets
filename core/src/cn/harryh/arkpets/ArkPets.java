@@ -4,18 +4,14 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.behaviors.*;
-import cn.harryh.arkpets.utils.AnimData;
-import cn.harryh.arkpets.utils.AssetCtrl;
-import cn.harryh.arkpets.utils.HWndCtrl;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Plane;
 import cn.harryh.arkpets.easings.EasingLinear;
 import cn.harryh.arkpets.easings.EasingLinearVector2;
-import com.badlogic.gdx.Gdx;
+import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
 import com.sun.jna.Pointer;

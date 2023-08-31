@@ -7,7 +7,6 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
-import javafx.scene.input.MouseEvent;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
@@ -19,13 +18,14 @@ import javafx.concurrent.Worker;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.util.Duration;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.net.*;
