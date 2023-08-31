@@ -79,13 +79,14 @@ abstract public class Behavior {
         HashMap<String, Integer> map = new HashMap<>();
         for (String s : anim_list) {
             if (s.contains($wanted)) {
-                Integer i = 0;
-                map.put(s, i);
+                int i = 0;
                 for (String t : $notWanted)
                     if (s.contains(t))
                         i += 1;
+                map.put(s, i);
             }
         }
+        // Find the key with the min value
         String minK = "";
         Integer minV = Integer.MAX_VALUE;
         for (HashMap.Entry<String, Integer> entry : map.entrySet()) {

@@ -11,7 +11,7 @@ import javafx.util.Duration;
  */
 public final class Const {
     // App version
-    public static final Version appVersion  = new Version(2, 2, 0);
+    public static final Version appVersion  = new Version(2, 2, 1);
 
     // App name
     public static final String appName      = "ArkPets";
