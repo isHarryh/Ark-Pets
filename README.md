@@ -4,7 +4,7 @@
 <div align="center" style="text-align:center">
    <h1> Ark-Pets </h1>
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
-   <p>[README.md](README.md)
+   <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <code><b> v2.2 </b></code> <br>
       <sub>
@@ -49,7 +49,9 @@
 
 ### 下一步计划
 以下内容可能在接下来的数个版本内得到实现：
+- 支持收藏夹功能
 - 支持将动态立绘作为桌宠启动
+- 支持右键桌宠本体直接弹出菜单
 - 支持部分敌方首领的阶段形态切换
 - 支持一键关闭所有已被启动的桌宠
 

@@ -20,6 +20,12 @@
 | [`39c89a8`]                | 优化了滑动条的外观和代码逻辑，添加了数值后单位的显示。                   |
 | [`3f713ae`]<br>[`7da5bbf`] | 优化了模型资源管理的代码逻辑，适配了新版的模型库格式。<br>变更了配置文件中的部分字段。 |
 
+| **补丁**                  |                           |
+|:------------------------|:--------------------------|
+| `v2.2.1`<br>[`2d76421`] | 修复了个别敌方角色的部分动作的选择逻辑异常的问题。 |
+| `v2.2.1`<br>[`9c0edf9`] | 优化了提示条组件的外观和鼠标指针表现。       |
+| `v2.2.1`<br>[`6fbcac2`] | 优化了按钮和侧边滚动条的鼠标指针表现。       |
+
 ## v2.1
 | **新增**                |                                                                                                 |
 |:----------------------|:------------------------------------------------------------------------------------------------|
@@ -228,3 +234,6 @@
 [`7da5bbf`]: https://github.com/isHarryh/Ark-Pets/commit/7da5bbf55442b3cc357403cb83e01c8425b7534e
 [`e54c6ed`]: https://github.com/isHarryh/Ark-Pets/commit/e54c6ed556a5abe59197e0dacf7717c0bc7a0120
 [`8de6ff2`]: https://github.com/isHarryh/Ark-Pets/commit/8de6ff2ca4c9de0e59eb60380e5bfa2c7f296b82
+[`2d76421`]: https://github.com/isHarryh/Ark-Pets/commit/2d76421016d7e4629afcb9699793a24c626c274c
+[`9c0edf9`]: https://github.com/isHarryh/Ark-Pets/commit/9c0edf93dbc193b9e10f7c8caa7306d95fef873e
+[`6fbcac2`]: https://github.com/isHarryh/Ark-Pets/commit/6fbcac231fd9964c5bd61089e6307d350c825f8d
