@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.GStringImpl
+
 buildscript {
     repositories {
         maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
@@ -17,16 +19,18 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = '2.2.1'
+    version = "2.3.0"
     ext {
         // App Metadata
         appName = "ArkPets"
         appAuthor = "Harry Huang"
-        appCopyright = "Copyright (c) 2022-${new Date().format('yyyy', TimeZone.getTimeZone('GMT+0:00'))} ${appAuthor}"
-        // Dependencies Version
-        gdxVersion = '1.11.0'
-        jnaVersion = '5.12.1'
-        javaFXVersion = '20-ea+19'
+        appYearBegin = "2022"
+        appYearCurrent = new Date().format("yyyy", TimeZone.getTimeZone("GMT+0:00"))
+        appCopyright = "Copyright (c) ${appYearBegin}-${appYearCurrent} ${appAuthor}" as GStringImpl
+        // Prefabs
+        gdxVersion = "1.11.0"
+        jnaVersion = "5.12.1"
+        javaFXVersion = "17.0.8"
     }
 
     repositories {
@@ -65,7 +69,7 @@ project(":core") {
         // JFoenix
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
-        api "com.alibaba:fastjson:2.0.26"
+        api "com.alibaba:fastjson:2.0.39"
         // Log4j
         api "apache-log4j:log4j:1.2.15"
     }
