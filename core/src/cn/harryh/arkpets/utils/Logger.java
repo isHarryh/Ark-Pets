@@ -15,8 +15,8 @@ import java.util.*;
 
 
 public class Logger {
-    protected static org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
-    protected static org.apache.log4j.Logger currentLogger = rootLogger;
+    protected static final org.apache.log4j.Logger rootLogger = org.apache.log4j.Logger.getRootLogger();
+    protected static final org.apache.log4j.Logger currentLogger = rootLogger;
     protected static final long pid = ProcessHandle.current().pid();
     protected static boolean isFileLoggerAvailable = false;
     protected static boolean isInitialized = false;
@@ -40,18 +40,7 @@ public class Logger {
         rootLogger.removeAllAppenders();
 
         // Generate log header
-        final String header = "ArkPets Log - " + new File(logPrefix).getName() + " (PID" + pid + ")";
-        PatternLayout fileLayout = new PatternLayout("%d{ABSOLUTE} [%p] %m%n") {
-            @Override
-            public String getHeader() {
-                return "# *** " + header + " ***" + Layout.LINE_SEP +
-                        "# Created: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS")) + Layout.LINE_SEP +
-                        "# OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ")" + Layout.LINE_SEP +
-                        "# Java version: " + System.getProperty("java.version") + Layout.LINE_SEP +
-                        "# Working directory: " + System.getProperty("user.dir") + Layout.LINE_SEP +
-                        Layout.LINE_SEP;
-            }
-        };
+        PatternLayout fileLayout = getPatternLayout(logPrefix);
         PatternLayout consoleLayout = new PatternLayout("[%p] %m%n");
 
         // Initialize log appender
@@ -73,6 +62,21 @@ public class Logger {
         // Reset log level
         setLevel(level);
         isInitialized = true;
+    }
+
+    private static PatternLayout getPatternLayout(String logPrefix) {
+        final String header = "ArkPets Log - " + new File(logPrefix).getName() + " (PID" + pid + ")";
+        return new PatternLayout("%d{ABSOLUTE} [%p] %m%n") {
+            @Override
+            public String getHeader() {
+                return "# *** " + header + " ***" + Layout.LINE_SEP +
+                        "# Created: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS")) + Layout.LINE_SEP +
+                        "# OS: " + System.getProperty("os.name") + " (" + System.getProperty("os.arch") + ")" + Layout.LINE_SEP +
+                        "# Java version: " + System.getProperty("java.version") + Layout.LINE_SEP +
+                        "# Working directory: " + System.getProperty("user.dir") + Layout.LINE_SEP +
+                        Layout.LINE_SEP;
+            }
+        };
     }
 
     public static String getCurrentLogFilePath() {

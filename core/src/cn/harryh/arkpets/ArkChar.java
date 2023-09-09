@@ -33,9 +33,9 @@ public class ArkChar {
     private final TwoColorPolygonBatch batch;
     private final FrameBuffer fbo;
     private Texture bgTexture;
-    public Vector3 positionCur;
-    public Vector3 positionTar;
-    public EasingLinearVector3 positionEas;
+    public final Vector3 positionCur;
+    public final Vector3 positionTar;
+    public final EasingLinearVector3 positionEas;
     public int offset_y;
 
     private final Skeleton skeleton;

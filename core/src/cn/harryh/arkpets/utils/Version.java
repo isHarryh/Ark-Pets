@@ -18,7 +18,7 @@ public class Version {
     protected int major;
     protected int minor;
     protected int patch;
-    protected static int defaultNumber = 0;
+    protected static final int defaultNumber = 0;
 
     public Version(int major, int minor, int patch) {
         this.major = major;

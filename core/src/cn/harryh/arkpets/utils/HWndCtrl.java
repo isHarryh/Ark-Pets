@@ -10,7 +10,6 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser;
-import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 import com.sun.jna.win32.W32APIOptions;
 
 import java.util.ArrayList;
@@ -108,13 +107,10 @@ public class HWndCtrl {
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible) {
         ArrayList<HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
-            @Override
-            public boolean callback(HWND hWnd, Pointer arg1) {
-                if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd)))
-                    windowList.add(new HWndCtrl(hWnd));
-                return true;
-            }
+        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
+            if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd)))
+                windowList.add(new HWndCtrl(hWnd));
+            return true;
         }, null);
         return windowList;
     }
@@ -126,14 +122,11 @@ public class HWndCtrl {
      */
     public static ArrayList<HWndCtrl> getWindowList(boolean $only_visible, long $exclude_ws_ex) {
         ArrayList<HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows(new WNDENUMPROC() {
-            @Override
-            public boolean callback(HWND hWnd, Pointer arg1) {
-                if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd))
-                        && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & $exclude_ws_ex) != $exclude_ws_ex)
-                    windowList.add(new HWndCtrl(hWnd));
-                return true;
-            }
+        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
+            if (User32.INSTANCE.IsWindow(hWnd) && (!$only_visible || isVisible(hWnd))
+                    && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & $exclude_ws_ex) != $exclude_ws_ex)
+                windowList.add(new HWndCtrl(hWnd));
+            return true;
         }, null);
         return windowList;
     }

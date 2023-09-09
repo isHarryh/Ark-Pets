@@ -23,7 +23,7 @@ public class JavaProcess {
      * @throws IOException If an I/O error occurs.
      * @throws InterruptedException If the current thread is interrupted by another thread while it is waiting.
      */
-    public static int exec(Class clazz, boolean waitForExitValue, List<String> jvmArgs, List<String> args)
+    public static int exec(Class<?> clazz, boolean waitForExitValue, List<String> jvmArgs, List<String> args)
             throws IOException, InterruptedException {
         // Attributes preparation
         String javaHome = System.getProperty("java.home");
@@ -33,12 +33,12 @@ public class JavaProcess {
         // Command preparation
         List<String> command = new ArrayList<>();
         command.add(javaBin);
-        if (jvmArgs.size() > 0)
+        if (!jvmArgs.isEmpty())
             command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
         command.add(className);
-        if (args.size() > 0)
+        if (!args.isEmpty())
             command.addAll(args);
         // Process execution
         ProcessBuilder builder = new ProcessBuilder(command);
@@ -58,7 +58,7 @@ public class JavaProcess {
      * @throws IOException If an I/O error occurs.
      * @throws InterruptedException If the current thread is interrupted by another thread while it is waiting.
      */
-    public static int exec(Class clazz, boolean waitForExitValue)
+    public static int exec(Class<?> clazz, boolean waitForExitValue)
             throws IOException, InterruptedException {
         List<String> emptyList = new ArrayList<>();
         return exec(clazz, waitForExitValue, emptyList, emptyList);

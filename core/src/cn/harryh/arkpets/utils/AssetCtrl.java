@@ -206,7 +206,7 @@ public class AssetCtrl {
             ArrayList<String> list = new ArrayList<>();
             HashMap<String, ArrayList<String>> map = new HashMap<>();
             try {
-                if (fileMap != null && fileMap.size() != 0) {
+                if (fileMap != null && !fileMap.isEmpty()) {
                     for (String fileType : fileMap.keySet()) {
                         try {
                             JSONArray someFiles; // Try to get as array

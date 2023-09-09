@@ -5,9 +5,9 @@ package cn.harryh.arkpets.easings;
 
 
 public class EasingLinearVector3 {
-    public EasingLinear eX;
-    public EasingLinear eY;
-    public EasingLinear eZ;
+    public final EasingLinear eX;
+    public final EasingLinear eY;
+    public final EasingLinear eZ;
 
     public EasingLinearVector3(EasingLinear $easing) {
         eX = new EasingLinear($easing.FROM, $easing.TO, $easing.DURATION);

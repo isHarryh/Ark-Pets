@@ -11,9 +11,9 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class Plane {
-    public ArrayList<Vector3> barriers;
-    public ArrayList<Vector3> pointCharges;
-    public ArrayList<RectArea> world;
+    public final ArrayList<Vector3> barriers;
+    public final ArrayList<Vector3> pointCharges;
+    public final ArrayList<RectArea> world;
     private final Vector2 obj;
     private final Vector2 position;
     private final Vector2 speed;
@@ -168,16 +168,22 @@ public class Plane {
      * @return Debug message string.
      */
     public String getDebugMsg() {
+        // Primary debug messages:
         String msg = this + "\n";
         msg += "Position:\t" + Math.round(position.x) + "\t" + Math.round(position.y) + (getDropping() ? "\t(dropping)" : "") + "\n";
         msg += "Velocity:\t" + Math.round(speed.x) + "\t" + Math.round(speed.y) + "\n";
         msg += "Borders:\t^" + Math.round(borderTop()) + "\t>" + Math.round(borderRight()) + "\tv" + Math.round(borderBottom()) + "\t<" + Math.round(borderLeft()) + "\n";
         msg += "Areas:\t" + world.size() + "\n";
+        // Additional debug messages:
+        StringBuilder msgBuilder1 = new StringBuilder(msg);
         for (RectArea i : world)
-            msg += "- " + i.toString() + "\n";
+            msgBuilder1.append("- ").append(i.toString()).append("\n");
+        msg = msgBuilder1.toString();
         msg += "Barriers:\t" + barriers.size() + "\n";
+        StringBuilder msgBuilder2 = new StringBuilder(msg);
         for (Vector3 i : barriers)
-            msg += "- Y = " + i.y +  ", X range = (" + i.x + "," + (i.x + i.z) + ")\n";
+            msgBuilder2.append("- Y = ").append(i.y).append(", X range = (").append(i.x).append(",").append(i.x + i.z).append(")\n");
+        msg = msgBuilder2.toString();
         return msg;
     }
 
@@ -320,10 +326,10 @@ public class Plane {
 
 
     public static class RectArea {
-        public float left;
-        public float right;
-        public float top;
-        public float bottom;
+        public final float left;
+        public final float right;
+        public final float top;
+        public final float bottom;
 
         public RectArea(float $left, float $right, float $top, float $bottom) {
             left     = $left;

@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 public class CroppingCtrl {
     private final Vector2 origin;
     private final Insert maxInsert;
-    public Insert curInsert;
+    public final Insert curInsert;
 
     /** Initialize a Cropping Controller instance.
      * @param originSize      The original size of the cropper.
@@ -196,7 +196,11 @@ public class CroppingCtrl {
 
         @Override
         public Insert clone() {
-            return new Insert(top, bottom, left, right);
+            try {
+                return (Insert)super.clone();
+            } catch (CloneNotSupportedException e) {
+                return new Insert(top, bottom, left, right);
+            }
         }
 
         @Override

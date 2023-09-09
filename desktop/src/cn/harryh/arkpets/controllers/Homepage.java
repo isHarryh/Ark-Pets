@@ -338,7 +338,7 @@ public class Homepage {
             for (String key : modelsDatasetStorageDirectory.keySet())
                 foundModelAssets.addAll(AssetCtrl.getAllAssetCtrls(new File(modelsDatasetStorageDirectory.getString(key)), modelsDatasetData));
             this.foundModelAssets = AssetCtrl.sortAssetCtrls(foundModelAssets);
-            if (this.foundModelAssets.size() == 0)
+            if (this.foundModelAssets.isEmpty())
                 throw new IOException("Found no assets in the target directories.");
             // Write models to menu items.
             ArrayList<JFXListCell<AssetCtrl>> foundModelItems = new ArrayList<>();
@@ -862,7 +862,7 @@ public class Homepage {
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
 
-        if ($detail != null && $detail.length() > 0) {
+        if ($detail != null && !$detail.isEmpty()) {
             JFXTextArea textArea = new JFXTextArea();
             textArea.setEditable(false);
             textArea.setScrollTop(0);
@@ -1276,14 +1276,14 @@ public class Homepage {
             initModelAssets($doPopNotice);
             initModelSearch();
             dealModelSearch("");
-            if (foundModelItems.size() != 0 && config.character_asset != null && !config.character_asset.isEmpty()) {
+            if (!foundModelItems.isEmpty() && config.character_asset != null && !config.character_asset.isEmpty()) {
                 // Scroll to recent selected model
                 int character_asset_idx = AssetCtrl.searchByAssetRelPath(config.character_asset, foundModelAssets);
                 searchModelList.scrollTo(character_asset_idx);
                 searchModelList.getSelectionModel().select(character_asset_idx);
             }
-            loadFailureTip.setVisible(foundModelItems.size() == 0);
-            startBtn.setDisable(foundModelItems.size() == 0);
+            loadFailureTip.setVisible(foundModelItems.isEmpty());
+            startBtn.setDisable(foundModelItems.isEmpty());
             System.gc();
             Logger.info("ModelManager", "Reloaded");
         });
