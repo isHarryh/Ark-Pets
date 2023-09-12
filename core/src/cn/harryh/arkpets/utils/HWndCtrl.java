@@ -27,6 +27,11 @@ public class HWndCtrl {
     public final int windowHeight;
     public static final HWndCtrl EMPTY = new HWndCtrl();
 
+    public static final int WS_EX_TOPMOST = 0x00000008;
+    public static final int WS_EX_TRANSPARENT = 0x00000020;
+    public static final int WS_EX_TOOLWINDOW = 0x00000080;
+    public static final int WS_EX_LAYERED = 0x00080000;
+
     /** HWnd Controller instance.
      * @param $hWnd The handle of the window.
      */
@@ -43,6 +48,21 @@ public class HWndCtrl {
         windowHeight = posBottom-posTop;
     }
 
+    /** HWnd Controller instance.
+     * @param $className The class name of the window.
+     * @param $windowName The title of the window.
+     */
+    public HWndCtrl(String $className, String $windowName) {
+        this(User32.INSTANCE.FindWindow($className, $windowName));
+    }
+
+    /** HWnd Controller instance.
+     * @param $pointer The pointer.
+     */
+    public HWndCtrl(int $pointer) {
+        this(new HWND(Pointer.createConstant($pointer)));
+    }
+
     /** Empty HWnd Controller instance.
      */
     public HWndCtrl() {
@@ -57,8 +77,20 @@ public class HWndCtrl {
         windowHeight = 0;
     }
 
+    /** Judge whether the handle is empty.
+     */
+    public boolean isEmpty() {
+        return hWnd == null;
+    }
+
+    /** Judge whether the window is the foreground window.
+     */
+    public boolean isForeground() {
+        if (isEmpty()) return false;
+        return hWnd.equals(User32.INSTANCE.GetForegroundWindow());
+    }
+
     /** Judge whether the window is visible.
-     * @return true=visible, false=invisible.
      */
     public boolean isVisible() {
         return isVisible(hWnd);
@@ -99,6 +131,49 @@ public class HWndCtrl {
      */
     public boolean close(int $timeout) {
         return User32.INSTANCE.SendMessageTimeout(hWnd, 0x10, null, null, $timeout, WinUser.SMTO_NORMAL, null).intValue() == 0;
+    }
+
+    /** Get the value of the window's extended styles.
+     */
+    public int getWindowExStyle() {
+        if (isEmpty()) return 0;
+        return User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE);
+    }
+
+    /** Set the window as the foreground window.
+     */
+    public void setForeground() {
+        User32.INSTANCE.SetForegroundWindow(hWnd);
+    }
+
+    /** Set the window's transparency.
+     * @param $alpha Alpha value, from 0 to 1.
+     */
+    public void setWindowAlpha(float $alpha) {
+        if (isEmpty()) return;
+        $alpha = Math.max(0, Math.min(1, $alpha));
+        byte byteAlpha = (byte)((int)($alpha * 255) & 0xFF);
+        User32.INSTANCE.SetLayeredWindowAttributes(hWnd, 0, byteAlpha, User32.LWA_ALPHA);
+    }
+
+    /** Set the window's extended styles.
+     * @param $newLong New value.
+     */
+    public void setWindowExStyle(int $newLong) {
+        if (isEmpty()) return;
+        User32.INSTANCE.SetWindowLong(hWnd, WinUser.GWL_EXSTYLE, $newLong);
+    }
+
+    /** Set the window's position without activating the window.
+     * @param $insertAfter The window to precede the positioned window in the Z order.
+     * @param $x The new position of the left side of the window, in client coordinates.
+     * @param $y The new position of the top of the window, in client coordinates.
+     * @param $w The new width of the window, in pixels.
+     * @param $h The new height of the window, in pixels.
+     */
+    public void setWindowPosition(HWndCtrl $insertAfter, int $x, int $y, int $w, int $h) {
+        if (isEmpty()) return;
+        User32.INSTANCE.SetWindowPos(hWnd, $insertAfter.hWnd, $x, $y, $w, $h, WinUser.SWP_NOACTIVATE);
     }
 
     /** Get the current list of windows.
@@ -158,6 +233,20 @@ public class HWndCtrl {
         RECT rect = new RECT();
         User32.INSTANCE.GetWindowRect($hWnd, rect);
         return rect;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HWndCtrl hWndCtrl = (HWndCtrl)o;
+        return hWnd.equals(hWndCtrl.hWnd);
+    }
+
+    @Override
+    public int hashCode() {
+        return hWnd.hashCode();
     }
 
     @Override

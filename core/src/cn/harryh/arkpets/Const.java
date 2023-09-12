@@ -30,7 +30,6 @@ public final class Const {
     public static final int coreHeightDefault   = 150;
     public static final int canvasReserveLength = 100;
     public static final int canvasMaxSize       = 720;
-    public static final int windowLongDefault   = 0x80088;
     public static final float skelBaseScale     = 0.33333f;
 
     // Behavior presets

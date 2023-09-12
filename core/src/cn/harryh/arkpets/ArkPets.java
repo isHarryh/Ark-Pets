@@ -14,10 +14,6 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.*;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinUser;
-import com.sun.jna.platform.win32.WinDef.HWND;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -30,13 +26,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public ArkTray tray;
 	public Behavior behavior;
 
-	private HWND HWND_TOPMOST;
+	private HWndCtrl hWndTopmost;
 	private LoopCtrl getHWndLoopCtrl;
 
 	private int APP_FPS = fpsDefault;
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
+	private boolean isToolwindowStyle;
 
 	public Vector2 WD_poscur; // Window Current Position
 	public Vector2 WD_postar; // Window Target Position
@@ -78,6 +75,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
+		promiseToolwindowStyle(1000);
 		// 5.Behavior setup
 		behavior = Behavior.selectBehavior(cha.anim_list, new Behavior[] {
 				new BehaviorOperBuild2(config, cha.anim_list),
@@ -139,6 +137,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		setWindowPosTar(plane.getX(), - (WD_H + plane.getY()));
 		setWindowPosCur(Gdx.graphics.getDeltaTime());
 		setWindowAlphaCur(Gdx.graphics.getDeltaTime());
+		promiseToolwindowStyle(1);
 	}
 
 	@Override
@@ -239,25 +238,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	/* WINDOW API */
 	private final String APP_TITLE;
-	public HWND HWND_MINE;
+	public HWndCtrl hWndMine;
 
 	private void initWindow(int x, int y) {
 		// Initialize HWnd
-		if (HWND_MINE == null)
-            HWND_MINE = User32.INSTANCE.FindWindow(null, APP_TITLE);
-		HWND_TOPMOST = refreshWindowIdx();
-		// Make sure ArkPets has been set as foreground window once
-		for (int i = 0; ; i++) {
-			if (HWND_MINE.equals(User32.INSTANCE.GetForegroundWindow())) {
-				Logger.debug("Window", "SetForegroundWindow succeeded" + (i > 0 ? " (retry #" + i + ")" : ""));
-				break;
-			} else if (i > 1000) {
-				Logger.warn("Window", "SetForegroundWindow failed because max retries exceeded (retry #" + (i - 1) + ")");
-				break;
-			}
-			User32.INSTANCE.SetForegroundWindow(HWND_MINE);
-		}
+		if (hWndMine == null || hWndMine.isEmpty())
+			hWndMine = new HWndCtrl(null, APP_TITLE);
+		hWndTopmost = refreshWindowIdx();
 		// Set the initial style of the window
+		hWndMine.setWindowExStyle(HWndCtrl.WS_EX_LAYERED | HWndCtrl.WS_EX_TOPMOST);
 		refreshMonitorInfo();
 		setWindowPos(x, y, true);
 		setWindowTransparent(false);
@@ -265,22 +254,19 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	public void setWindowTransparent(boolean $transparent) {
-		User32.INSTANCE.SetWindowLong(HWND_MINE, WinUser.GWL_EXSTYLE,
-                windowLongDefault | ($transparent ? WinUser.WS_EX_TRANSPARENT : 0));
-	}
-
-	private void setWindowAlpha(float $alpha) {
-		$alpha = Math.max(0, Math.min(1, $alpha));
-		User32.INSTANCE.SetLayeredWindowAttributes(HWND_MINE, 0, (byte)((int)($alpha * 255) & 0xFF), User32.LWA_ALPHA);
+		if ($transparent)
+			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() | HWndCtrl.WS_EX_TRANSPARENT);
+		else
+			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() & ~HWndCtrl.WS_EX_TRANSPARENT);
 	}
 
 	private void setWindowPos(int x, int y, boolean override) {
-		if (HWND_MINE == null) return;
+		if (hWndMine == null) return;
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
 			refreshMonitorInfo();
-			HWND new_hwnd_topmost = refreshWindowIdx();
-			if (new_hwnd_topmost != HWND_TOPMOST) {
-				HWND_TOPMOST = new_hwnd_topmost;
+			HWndCtrl new_hwnd_topmost = refreshWindowIdx();
+			if (new_hwnd_topmost != hWndTopmost) {
+				hWndTopmost = new_hwnd_topmost;
 				if (x == WD_poscur.x && y == WD_poscur.y)
 					return;
 			}
@@ -292,16 +278,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
 			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
 		}
-		User32.INSTANCE.SetWindowPos(HWND_MINE, HWND_TOPMOST,
-				(int) WD_poscur.x, (int) WD_poscur.y,
-				WD_W, WD_H, WinUser.SWP_NOACTIVATE
-		);
+		hWndMine.setWindowPosition(hWndTopmost, (int)WD_poscur.x, (int)WD_poscur.y, WD_W, WD_H);
 	}
 
-	private HWND refreshWindowIdx() {
+	private HWndCtrl refreshWindowIdx() {
 		ArrayList<HWndCtrl> windowList = HWndCtrl.getWindowList(true);
 		//Logger.debug("HWND", windowList.toString());
-		HWND minWindow = null;
+		HWndCtrl minWindow = null;
 		HashMap<Integer, HWndCtrl> line = new HashMap<>();
 		int myPos = (int)(WD_poscur.x + WD_W / 2);
 		int minNum = 2048;
@@ -335,14 +318,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 				// Find the last peer window to handle the z-index.
 				if (wndNum > myNum && wndNum < minNum) {
 					minNum = getArkPetsWindowNum(hWndCtrl.windowText);
-					minWindow = hWndCtrl.hWnd;
+					minWindow = hWndCtrl;
 				}
 			}
 			// Window iteration end.
 		}
-		if (minWindow == null) {
+		if (minWindow == null || minWindow.isEmpty()) {
 			// Set as the top window if there is no peer.
-			minWindow = new HWND(Pointer.createConstant(-1));
+			minWindow = new HWndCtrl(-1);
 		}
 		if (plane != null) {
 			// Set barriers according to the vertical line.
@@ -373,6 +356,23 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			float top = -i.virtual[1];
 			float bottom = top - i.size[1] + config.display_margin_bottom;
 			plane.world.add(new Plane.RectArea(left, right, top, bottom));
+		}
+	}
+
+	private void promiseToolwindowStyle(int maxRetries) {
+		if (!isToolwindowStyle) {
+			// Make sure ArkPets has been set as foreground window once
+			for (int i = 0; ; i++) {
+				if (hWndMine.isForeground()) {
+					hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() | HWndCtrl.WS_EX_TOOLWINDOW);
+					Logger.info("Window", "SetForegroundWindow succeeded");
+					isToolwindowStyle = true;
+					break;
+				} else if (i > maxRetries) {
+					return;
+				}
+				hWndMine.setForeground();
+			}
 		}
 	}
 
@@ -434,7 +434,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void setWindowAlphaCur(float $deltaTime) {
 		if (WD_alpha.curValue == WD_alpha.TO) return;
 		WD_alpha.step($deltaTime);
-		setWindowAlpha(WD_alpha.curValue);
+		hWndMine.setWindowAlpha(WD_alpha.curValue);
 	}
 
 
