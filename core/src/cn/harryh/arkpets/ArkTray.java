@@ -7,13 +7,14 @@ import cn.harryh.arkpets.utils.AnimData;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
-import javax.swing.JDialog;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -23,10 +24,26 @@ public class ArkTray {
     private final SystemTray tray;
     private final TrayIcon icon;
     private final JDialog popWindow;
-    private final JPopupMenu pop;
-    private boolean isDisplaying = false;
+    private final JPopupMenu popMenu;
+    private boolean isTrayIconApplied;
     public String name;
+    public String title;
     public AnimData keepAnim;
+    public static Font font;
+
+    static {
+        try {
+            InputStream inputStream = Objects.requireNonNull(ArkTray.class.getResourceAsStream(fontFileRegular));
+            font = Font.createFont(Font.TRUETYPE_FONT, inputStream);
+            if (font != null) {
+                UIManager.put("Label.font", font.deriveFont(9f).deriveFont(Font.ITALIC));
+                UIManager.put("MenuItem.font", font.deriveFont(11f));
+            }
+        } catch (FontFormatException | IOException e) {
+            Logger.error("Tray", "Failed to load tray menu font, details see below.", e);
+            font = null;
+        }
+    }
 
     /** Initialize the ArkPets tray icon instance. <br/>
      * Must be used after Gdx.app was initialized.
@@ -36,23 +53,28 @@ public class ArkTray {
         arkPets = boundArkPets;
         tray = SystemTray.getSystemTray();
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
-        name = name + " - " + appName;
+        title = name + " - " + appName;
 
-        // Load tray icon image.
+        // Load the tray icon image.
         Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
         icon = new TrayIcon(image, name);
         icon.setImageAutoSize(true);
 
-        popWindow = new JDialog(); // JDialog is the container of JPopupMenu.
+        // This Dialog is the container (the "anchor") of the PopupMenu:
+        popWindow = new JDialog();
         popWindow.setUndecorated(true);
         popWindow.setSize(1, 1);
 
-        pop = new JPopupMenu() {
+        // PopupMenu:
+        popMenu = new JPopupMenu() {
             @Override
             public void firePopupMenuWillBecomeInvisible() {
-                popWindow.setVisible(false); // Hide the JDialog when JPopupMenu disappeared.
+                popWindow.setVisible(false); // Hide the container when the menu is invisible.
             }
         };
+        JLabel innerLabel = new JLabel(" " + name + " ");
+        innerLabel.setAlignmentX(0.5f);
+        popMenu.add(innerLabel);
 
         // Menu options:
         JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
@@ -63,28 +85,28 @@ public class ArkTray {
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
             keepAnim = arkPets.cha.anim_queue[0];
-            pop.remove(optKeepAnimEn);
-            pop.add(optKeepAnimDis, 0);
+            popMenu.remove(optKeepAnimEn);
+            popMenu.add(optKeepAnimDis, 1);
         });
         optKeepAnimDis.addActionListener(e -> {
             Logger.info("Tray","Keep-Anim disabled");
             keepAnim = null;
-            pop.remove(optKeepAnimDis);
-            pop.add(optKeepAnimEn, 0);
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
         });
         optTransparentEn.addActionListener(e -> {
             Logger.info("Tray", "Transparent enabled");
             arkPets.setWindowAlphaTar(0.75f);
             arkPets.setWindowTransparent(true);
-            pop.remove(optTransparentEn);
-            pop.add(optTransparentDis, 1);
+            popMenu.remove(optTransparentEn);
+            popMenu.add(optTransparentDis, 2);
         });
         optTransparentDis.addActionListener(e -> {
             Logger.info("Tray", "Transparent disabled");
             arkPets.setWindowAlphaTar(1);
             arkPets.setWindowTransparent(false);
-            pop.remove(optTransparentDis);
-            pop.add(optTransparentEn, 1);
+            popMenu.remove(optTransparentDis);
+            popMenu.add(optTransparentEn, 2);
         });
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");
@@ -96,10 +118,10 @@ public class ArkTray {
             } catch (InterruptedException ignored) {
             }
         });
-        pop.add(optKeepAnimEn);
-        pop.add(optTransparentEn);
-        pop.add(optExit);
-        pop.setSize(100, 24 * pop.getSubElements().length);
+        popMenu.add(optKeepAnimEn);
+        popMenu.add(optTransparentEn);
+        popMenu.add(optExit);
+        popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
         // Mouse event listener:
         icon.addMouseListener(new MouseAdapter() {
@@ -109,25 +131,18 @@ public class ArkTray {
                     // After right-click on the tray icon.
                     int x = e.getX();
                     int y = e.getY();
-                    /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
-                    Here we will adapt the coordinate for system scaling artificially. See below. */
-                    AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-                    x /= at.getScaleX();
-                    y /= at.getScaleY();
-                    // Show the JDialog together with the JPopupMenu.
-                    popWindow.setLocation(x + 5, y - pop.getHeight());
-                    popWindow.setVisible(true);
-                    pop.show(popWindow, 0, 0);
+                    showDialog(x + 5, y);
                 }
             }
         });
 
-        // Add the icon to system tray.
+        // Add the icon to the system tray.
         try {
             tray.add(icon);
-            isDisplaying = true;
-            Logger.info("Tray", "Tray icon applied, named \"" + name + "\"");
+            isTrayIconApplied = true;
+            Logger.info("Tray", "Tray icon applied, titled \"" + title + "\"");
         } catch (AWTException e) {
+            isTrayIconApplied = false;
             Logger.error("Tray", "Unable to apply tray icon, details see below", e);
         }
     }
@@ -135,11 +150,46 @@ public class ArkTray {
     /** Remove the icon from system tray.
      */
     public void remove() {
-        if (isDisplaying) {
+        if (isTrayIconApplied) {
             tray.remove(icon);
-            pop.removeAll();
+            popMenu.removeAll();
             popWindow.dispose();
         }
-        isDisplaying = false;
+        isTrayIconApplied = false;
+    }
+
+    /** Hide the menu.
+     */
+    public void hideDialog() {
+        if (popMenu.isVisible()) {
+            popMenu.setVisible(false);
+            Logger.debug("Tray", "Hidden");
+        }
+    }
+
+    /** Show the menu at the given coordinate.
+     */
+    public void showDialog(int x, int y) {
+        /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
+        Here we will adapt the coordinate for system scaling artificially. See below. */
+        AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
+        int scaledX = (int)(x / at.getScaleX());
+        int scaledY = (int)(y / at.getScaleY());
+
+        // Show the JDialog together with the JPopupMenu.
+        popWindow.setVisible(true);
+        popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
+        popMenu.show(popWindow, 0, 0);
+        Logger.debug("Tray", "Shown @ " + x + ", " + y);
+    }
+
+    /** Toggle the menu at the given coordinate.
+     */
+    public void toggleDialog(int x, int y) {
+        if (popMenu.isVisible()) {
+            hideDialog();
+        } else {
+            showDialog(x, y);
+        }
     }
 }

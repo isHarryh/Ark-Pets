@@ -167,11 +167,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		Logger.debug("Input", "Click+ @ " + screenX + ", " + screenY);
+		Logger.debug("Input", "Click+ Btn " + button +" @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
 			if (button == Input.Buttons.LEFT) {
 				cha.setAnimation(behavior.clickStart());
+				tray.hideDialog();
+				return true;
+			} else if (button == Input.Buttons.RIGHT) {
+				Logger.debug("Plane Debug Message", plane.getDebugMsg());
+				// Toggle tray dialog:
+				tray.toggleDialog((int)(plane.getX() + screenX), (int)(-plane.getY() - WD_H));
 				return true;
 			}
 		}
@@ -193,17 +199,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		Logger.debug("Input", "Click- @ " + screenX + ", " + screenY);
-		Logger.debug("Plane Debug Message", plane.getDebugMsg());
-		if (!mouse_drag)
-			changeAnimation(behavior.clickEnd());
-		else {
-			cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
-			if (tray.keepAnim != null && cha.anim_queue[0].MOBILITY != 0) {
-				AnimData newAnim = cha.anim_queue[0];
-				newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
-				tray.keepAnim = newAnim;
-			}
+		Logger.debug("Input", "Click- Btn " + button +" @ " + screenX + ", " + screenY);
+		mouse_pos.set(screenX, screenY);
+		if (pointer <= 0) {
+			if (!mouse_drag)
+				if (button == Input.Buttons.LEFT)
+					changeAnimation(behavior.clickEnd());
+				else {
+					cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
+					if (tray.keepAnim != null && cha.anim_queue[0].MOBILITY != 0) {
+						AnimData newAnim = cha.anim_queue[0];
+						newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
+						tray.keepAnim = newAnim;
+					}
+				}
 		}
 		mouse_drag = false;
 		return true;
