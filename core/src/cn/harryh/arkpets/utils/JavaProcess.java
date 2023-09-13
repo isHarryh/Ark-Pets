@@ -13,7 +13,7 @@ public class JavaProcess {
     private JavaProcess() {
     }
 
-    /** Execute the main function in a java class.
+    /** Executes the main function in a java class.
      * @param clazz The java class to execute.
      * @param waitForExitValue Whether to wait for the process to end.
      *                         If false, this method will always return 0 instead of the exit value.
@@ -50,7 +50,7 @@ public class JavaProcess {
         return 0;
     }
 
-    /** Execute the main function in a java class. (Without arguments)
+    /** Executes the main function in a java class. (Without arguments)
      * @param clazz The java class to execute.
      * @param waitForExitValue Whether to wait for the process to end.
      *                         If false, this method will always return 0 instead of the exit value.

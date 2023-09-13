@@ -37,7 +37,7 @@ public class PopupUtils {
         public static final String ICON_DANGER_ALT  = "m16.971 0h-9.942l-7.029 7.029v9.941l7.029 7.03h9.941l7.03-7.029v-9.942l-7.029-7.029zm-1.402 16.945l-3.554-3.521-3.518 3.568-1.418-1.418 3.507-3.566-3.586-3.472 1.418-1.417 3.581 3.458 3.539-3.583 1.431 1.431-3.535 3.568 3.566 3.522-1.431 1.43z";
         public static final String ICON_UPDATE      = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 15.889v-2.223s-3.78-.114-7 3.333c1.513-6.587 7-7.778 7-7.778v-2.221l5 4.425-5 4.464z";
 
-        /** Get a SVGPath Node using the given path string and color.
+        /** Gets an SVGPath Node using the given path string and color.
          * @param svg The SVG path string.
          * @param color The specified color string, e.g.#FFFFFF.
          * @return JavaFX SVGPath Node.

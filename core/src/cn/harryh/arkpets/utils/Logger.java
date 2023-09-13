@@ -29,7 +29,7 @@ public class Logger {
     public static final int INFO  = 20000;
     public static final int DEBUG = 10000;
 
-    /** Initialize the static logger for the app.
+    /** Initializes the static logger for the app.
      * The default log level is {@code INFO}.
      * @param logPrefix The prefix of the log's path-and-basename, eg.{@code "logs/myLog"}.
      * @param maxFileCount The maximum count of the logs that shares the same prefix,
@@ -83,7 +83,7 @@ public class Logger {
         return logFilePath;
     }
 
-    /** Set a new log level.
+    /** Sets a new log level.
      * @param level The new level.
      */
     public static void setLevel(Level level) {
@@ -92,7 +92,7 @@ public class Logger {
         currentLogger.setLevel(level);
     }
 
-    /** Set a new log level.
+    /** Sets a new log level.
      * @param level The new level in int format.
      */
     public static void setLevel(int level) {
@@ -101,50 +101,50 @@ public class Logger {
         currentLogger.setLevel(Logger.level);
     }
 
-    /** Set a new log level.
+    /** Sets a new log level.
      * @param level The new level in string format.
      */
     public static void setLevel(String level) {
         setLevel(Level.toLevel(level));
     }
 
-    /** Get the level of root logger.
+    /** Gets the level of root logger.
      * @return The level object.
      */
     public static Level getLevel() {
         return rootLogger.getLevel();
     }
 
-    /** Log a message that has the level {@code DEBUG}.
+    /** Logs a message with the level {@code DEBUG}.
      */
     public static void debug(String tag, String message) {
         if (isFileLoggerAvailable)
             currentLogger.log(Level.DEBUG, combine(tag, message));
     }
 
-    /** Log a message that has the level {@code INFO}.
+    /** Logs a message with the level {@code INFO}.
      */
     public static void info(String tag, String message) {
         if (isFileLoggerAvailable)
             currentLogger.log(Level.INFO, combine(tag, message));
     }
 
-    /** Log a message that has the level {@code WARN}.
+    /** Logs a message with the level {@code WARN}.
      */
     public static void warn(String tag, String message) {
         if (isFileLoggerAvailable)
             currentLogger.log(Level.WARN, combine(tag, message));
     }
 
-    /** Log a message that has the level {@code ERROR}.
+    /** Logs a message with the level {@code ERROR}.
      */
     public static void error(String tag, String message) {
         if (isFileLoggerAvailable)
             currentLogger.log(Level.ERROR, combine(tag, message));
     }
 
-    /** Log a message that has the level {@code ERROR},
-     * together with the detailed information.
+    /** Logs a message with the level {@code ERROR},
+     * together with the detailed information (such as stacktrace).
      */
     public static void error(String tag, String message, Throwable error) {
         if (isFileLoggerAvailable)

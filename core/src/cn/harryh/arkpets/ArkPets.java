@@ -459,9 +459,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			minIntervalTime = $minIntervalTime;
 		}
 
-		/** Query whether the loop is executable now.
-		 * @param $deltaTime The delta time.
-		 * @return true=okay.
+		/** Returns true if the loop is executable now.
+		 * @param $deltaTime The updated delta time.
 		 */
 		public boolean isExecutable(float $deltaTime) {
 			accumTime += $deltaTime;

@@ -11,7 +11,7 @@ abstract public class Easing {
     public float curDuration;
     public float curValue;
 
-    /** Easing tool.
+    /** Easing handler instance.
      * @param $from The start value.
      * @param $to The end value.
      * @param $duration The duration(second) of the whole easing process.
@@ -24,13 +24,13 @@ abstract public class Easing {
         curValue = $from;
     }
 
-    /** Directly get a specific value.
+    /** Gets a specific value directly.
      * @param $curDuration The x-position of the process.
      * @return The y-position of the process.
      */
     abstract float get(float $curDuration);
 
-    /** Update the end value.
+    /** Updates the end value.
      * @param $to The new end value.
      */
     public void update(float $to) {
@@ -41,7 +41,7 @@ abstract public class Easing {
         curDuration = 0;
     }
 
-    /** Update the end value and the duration.
+    /** Updates the end value and the duration.
      * @param $to The new end value.
      * @param $duration The new duration(second).
      */
@@ -54,7 +54,7 @@ abstract public class Easing {
         curDuration = 0;
     }
 
-    /** Step the easing process.
+    /** Steps the easing process.
      * @param $deltaTime The delta time.
      * @return The current value.
      */

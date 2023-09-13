@@ -25,7 +25,7 @@ public class Plane {
     private boolean dropped = false;
     private float droppedHeight = 0;
 
-    /** Initialize a plane with gravity field.
+    /** Initializes a plane with gravity field.
      * @param $world The collection of all available areas.
      * @param $gravity The acceleration of gravity (px/s^2).
      */
@@ -43,14 +43,14 @@ public class Plane {
         staticFrict = 0;
     }
 
-    /** Set the bounce coefficient.
+    /** Sets the bounce coefficient.
      * @param $bounce The ratio of Ek to be reserved after the bounce.
      */
     public void setBounce(float $bounce) {
         bounce = $bounce > 1 ? 1 : ($bounce < 0 ? 0 : $bounce);
     }
 
-    /** Set the friction params.
+    /** Sets the friction params.
      * @param $airFrict The acceleration of air friction (px/s^2).
      * @param $staticFrict The acceleration of static friction provided by the groud (px/s^2).
      */
@@ -59,7 +59,7 @@ public class Plane {
         staticFrict = Math.max(0, $staticFrict);
     }
 
-    /** Set the size of the object.
+    /** Sets the size of the object.
      * @param $objWidth The width of the object (px).
      * @param $objHeight The height of the object (px).
      */
@@ -67,7 +67,7 @@ public class Plane {
         obj.set($objWidth, $objHeight);
     }
 
-    /** Set the limitation of speed, 0=unlimited.
+    /** Sets the limitation of speed, 0=unlimited.
      * @param $x Max speed in x-axis (px/s).
      * @param $y Max speed in y-axis (px/s).
      */
@@ -75,7 +75,7 @@ public class Plane {
         speedLimit.set(Math.max(0, $x), Math.max(0, $y));
     }
 
-    /** Forcibly change the position of the object,
+    /** Changes the position of the object forcibly,
      * which will cause velocity change.
      * @param $deltaTime Delta time (s), set to 0 to avoid changing the velocity.
      * @param $x New x-position (px).
@@ -88,7 +88,7 @@ public class Plane {
         position.set(limitX($x), limitY($y));
     }
 
-    /** Update the position of the object.
+    /** Updates the position of the object.
      * @param $deltaTime Delta time (s).
      */
     public void updatePosition(float $deltaTime) {
@@ -106,7 +106,7 @@ public class Plane {
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
     }
 
-    /** Set a line barrier that can support the object.
+    /** Sets a line barrier that can support the object.
      * @param $posTop The y-position of the barrier (px).
      * @param $posLeft The x-position of the barrier's left edge (px).
      * @param $width The width of the barrier (px).
@@ -119,7 +119,7 @@ public class Plane {
             barriers.add(new Vector3($posLeft, $posTop, $width));
     }
 
-    /** Set a point charge whose excited electric field can repulse the object.
+    /** Sets a point charge whose excited electric field can repulse the object.
      * The position and quantity of the charge are fixed.
      * @param $posTop The y-position of the charge (px).
      * @param $posLeft The x-position of the charge (px).
@@ -129,22 +129,22 @@ public class Plane {
         pointCharges.add(new Vector3($posLeft, $posTop, $quantityProduct));
     }
 
-    /** Get the x-position of the object.
+    /** Gets the x-position of the object.
      * @return X (px).
      */
     public float getX() {
         return position.x;
     }
 
-    /** Get the y-position of the object.
+    /** Gets the y-position of the object.
      * @return Y (px).
      */
     public float getY() {
         return position.y;
     }
 
-    /** Get the dropped-status of the object.
-     * @return true=dropped.
+    /** Gets the dropped-status of the object.
+     * @return true=dropped once.
      */
     public boolean getDropped() {
         if (dropped) {
@@ -157,14 +157,14 @@ public class Plane {
         return false;
     }
 
-    /** Get the dropping-status of the object.
+    /** Gets the dropping-status of the object.
      * @return true=dropping.
      */
     public boolean getDropping() {
         return Math.abs(position.y - borderBottom()) > droppedThreshold;
     }
 
-    /** Get the debug message.
+    /** Gets the debug message.
      * @return Debug message string.
      */
     public String getDebugMsg() {
@@ -187,7 +187,7 @@ public class Plane {
         return msg;
     }
 
-    /** Update the velocity of the object.
+    /** Updates the velocity of the object.
      * @param $deltaTime Delta time (s).
      */
     private void updateVelocity(float $deltaTime) {
@@ -222,7 +222,7 @@ public class Plane {
         }
     }
 
-    /** Apply a friction to a velocity.
+    /** Applies a friction to a velocity.
      * @param $speed The original velocity (px/s).
      * @param $frict The acceleration of friction (px/s^2).
      * @param $deltaTime Delta time (s).
@@ -234,7 +234,7 @@ public class Plane {
         return delta * estimated < 0 ? 0 : estimated;
     }
 
-    /** Apply the electrostatic effect of a point charge to a velocity.
+    /** Applies the electrostatic effect of a point charge to a velocity.
      * @param $speed The original velocity (px/s).
      * @param $quantityProduct The product of the point's quantity and the object's quantity (C^2).
      * @param $distance The absolute distance between the point charge and the object.
@@ -250,7 +250,7 @@ public class Plane {
         return $speed + delta;
     }
 
-    /** Limit the x-position to avoid overstepping.
+    /** Limits the x-position to avoid overstepping.
      * @param $x X (px).
      * @return New x (px).
      */
@@ -258,7 +258,7 @@ public class Plane {
         return Math.max(borderLeft(), Math.min($x, borderRight() - obj.x));
     }
 
-    /** Limit the y-position to avoid overstepping.
+    /** Limits the y-position to avoid overstepping.
      * @param $y Y (px).
      * @return New y (px).
      */
@@ -266,7 +266,7 @@ public class Plane {
         return Math.max(borderBottom(), Math.min($y, borderTop() - obj.y));
     }
 
-    /** Get the position of the top border.
+    /** Gets the position of the top border.
      * @return Y (px).
      */
     public float borderTop() {
@@ -278,7 +278,7 @@ public class Plane {
         return t;
     }
 
-    /** Get the position of the bottom border.
+    /** Gets the position of the bottom border.
      * @return Y (px).
      */
     public float borderBottom() {
@@ -295,8 +295,8 @@ public class Plane {
         return t;
     }
 
-    /** Get the position of the right border.
-     * @return X (px).W
+    /** Gets the position of the right border.
+     * @return X (px).
      */
     public float borderRight() {
         float t = -Float.MAX_VALUE;
@@ -307,7 +307,7 @@ public class Plane {
         return t;
     }
 
-    /** Get the position of the left border.
+    /** Gets the position of the left border.
      * @return X (px).
      */
     public float borderLeft() {

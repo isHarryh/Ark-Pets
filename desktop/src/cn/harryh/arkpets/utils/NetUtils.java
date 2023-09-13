@@ -38,7 +38,7 @@ public class NetUtils {
         sizeMap.put((long)k * k * k * k, "TB");
     }
 
-    /** Get a formatted size string, e.g."{@code 114.5 MB}".
+    /** Gets a formatted size string, e.g."{@code 114.5 MB}".
      * @param byteSize The size value in Byte.
      * @return The formatted string. Returns "{@code Unknown size}" if conversion failed.
      */
@@ -52,7 +52,7 @@ public class NetUtils {
         return "Unknown size";
     }
 
-    /** Open the given URL in the browser.
+    /** Opens the given URL in the browser.
      * @param url The URL to browse.
      * @return true if success, otherwise false.
      */
@@ -69,7 +69,7 @@ public class NetUtils {
 
 
     public static class ConnectionUtil {
-        /** Test the real connection delay of the given URL (with a specified port).
+        /** Tests the real connection delay of the given URL (with a specified port).
          * @param $url The URL to be tested.
          * @param $port The port to connect.
          * @param $timeoutMillis Timeout (ms).
@@ -93,7 +93,7 @@ public class NetUtils {
             return delayMillis;
         }
 
-        /** Create an HTTPS connection of the given URL, and then try to connect it.
+        /** Creates an HTTPS connection of the given URL, and then try to connect it.
          * @param url The URL to connect.
          * @param connectTimeout The timeout of the connection (ms).
          * @param readTimeout The timeout of the reading operation (ms).
@@ -127,7 +127,7 @@ public class NetUtils {
             }
         }
 
-        /** Get Socket Factory which trusts all.
+        /** Gets Socket Factory which trusts all.
          * @return SocketFactory instance.
          */
         public static SSLSocketFactory getTrustAnySSLSocketFactory() {
@@ -141,7 +141,7 @@ public class NetUtils {
             }
         }
 
-        /** Get Hostname Verifier which trusts all.
+        /** Gets Hostname Verifier which trusts all.
          * @return HostnameVerifier instance.
          */
         public static HostnameVerifier getTrustAnyHostnameVerifier() {

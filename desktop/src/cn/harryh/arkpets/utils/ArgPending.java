@@ -8,14 +8,14 @@ abstract public class ArgPending {
     private static final String argPrefix = "-";
     private final String pattern;
 
-    /** Initialize an Argument Pending instance.
+    /** Initializes an Argument Pending instance.
      * @param pattern The specified argument string to be match.
      */
     public ArgPending(String pattern) {
         this.pattern = pattern;
     }
 
-    /** Initialize an Argument Pending instance and deal a given arguments list.
+    /** Initializes an Argument Pending instance and deal a given arguments list.
      * @param pattern The specified argument string to be match.
      * @param args The given arguments list to be dealt.
      */
@@ -24,7 +24,7 @@ abstract public class ArgPending {
         this.judge(args);
     }
 
-    /** Deal a given arguments list.
+    /** Handles a given arguments list.
      * If the pattern specified before matches one of the arguments, the method {@code process()} will be invoked.
      * @param args The given arguments list to be dealt.
      * @return Whether the pattern specified before matches one of the arguments.
@@ -57,9 +57,9 @@ abstract public class ArgPending {
         return false;
     }
 
-    /** To process the argument.
-     * @param command The argument string.
-     * @param addition The additional string which is nullable.
+    /** Processes an argument.
+     * @param command The argument string, e.g. "{@code -n}" in "{@code -n 10}".
+     * @param addition The additional string which is nullable, e.g. "{@code 10}" in "{@code -n 10}".
      */
     abstract protected void process(String command, String addition);
 }

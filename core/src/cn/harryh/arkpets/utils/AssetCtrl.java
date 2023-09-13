@@ -10,7 +10,7 @@ import java.io.File;
 import java.util.*;
 
 
-/** The Asset Controller corresponding to a specified asset
+/** One Asset Controller is corresponding to one certain asset.
  */
 public class AssetCtrl {
     public File assetDir;
@@ -32,14 +32,14 @@ public class AssetCtrl {
     private AssetCtrl() {
     }
 
-    /** Get the directory where the asset files located in.
+    /** Gets the directory where the asset files located in.
      * @return A relative path string.
      */
     public String getLocation() {
         return assetDir.toString();
     }
 
-    /** Get the Asset Accessor of this asset.
+    /** Gets the Asset Accessor of this asset.
      * @return An Asset Accessor instance.
      */
     public AssetAccessor getAccessor() {
@@ -48,7 +48,7 @@ public class AssetCtrl {
         return accessor;
     }
 
-    /** Get a single asset controller instance using the given asset directory.
+    /** Gets a single asset controller instance using the given asset directory.
      * @param $assetDir File instance of the specified asset directory.
      * @param $modelsDataset JSONObject of the models' dataset.
      * @return The asset controller instance.
@@ -69,7 +69,7 @@ public class AssetCtrl {
         return new AssetCtrl();
     }
 
-    /** Get asset controller instances from the given root directory.
+    /** Gets asset controller instances from the given root directory.
      * @param $rootDir File instance of the specified root directory.
      * @param $modelsDataset JSONObject of the models' dataset.
      * @return The list containing asset controller instances.
@@ -102,7 +102,7 @@ public class AssetCtrl {
         return list;
     }
 
-    /** Sort the asset controllers.
+    /** Sorts the asset controllers.
      * @param $assetList The specified asset controllers.
      * @return The sorted list.
      */
@@ -122,7 +122,7 @@ public class AssetCtrl {
         return newList;
     }
 
-    /** Get all assets' locations of the given asset controllers.
+    /** Gets all assets' locations of the given asset controllers.
      * @param $assetList The specified asset controllers.
      * @return The list containing asset locations.
      */
@@ -133,7 +133,7 @@ public class AssetCtrl {
         return result;
     }
 
-    /** Search assets by keywords in the given asset controller list.
+    /** Searches assets by keywords in the given asset controller list.
      * @param $keywords The keywords.
      * @param $assetList The specified asset controller list.
      * @return The list containing asset controller instances that matches the keywords.
@@ -161,7 +161,7 @@ public class AssetCtrl {
         return result;
     }
 
-    /** Search index by relative asset path in the given asset controller list.
+    /** Searches index by relative asset path in the given asset controller list.
      * @param $assetRelPath The relative asset path (without ext), like {@code "models\xxx_xxx"}.
      * @param $assetList The specified asset controller list.
      * @return The index of the 1st matched asset, otherwise {@code 0} will be return by default.
@@ -196,7 +196,7 @@ public class AssetCtrl {
     }
 
     /** The Asset Accessor providing methods to get the resource files of the asset
-     * @since 2.2
+     * @since ArkPets 2.2
      */
     public static class AssetAccessor {
         private final ArrayList<String> list;
@@ -262,19 +262,19 @@ public class AssetCtrl {
     }
 
     /** The Asset Verifier providing methods to verify the integrity of the asset
-     * @since 2.2
+     * @since ArkPets 2.2
      */
     public static class AssetVerifier {
         private final JSONObject data;
 
-        /** Initialize an Asset Verifier using the given dataset.
+        /** Initializes an Asset Verifier using the given dataset.
          * @param $modelsDataset The specified dataset.
          */
         public AssetVerifier(JSONObject $modelsDataset) {
             data = $modelsDataset;
         }
 
-        /** Verify the integrity of the given asset.
+        /** Verifies the integrity of the given asset.
          * @param $assetDir The asset directory.
          * @return Asset Status enumeration.
          */

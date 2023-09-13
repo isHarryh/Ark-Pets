@@ -79,7 +79,7 @@ public final class Const {
     }
 
 
-    /** Logging preset definition class.
+    /** Logging presets definition class.
      */
     public static class LogConfig {
         public static final int logCoreMaxKeep      = 32;

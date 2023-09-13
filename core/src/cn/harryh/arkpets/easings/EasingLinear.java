@@ -5,7 +5,7 @@ package cn.harryh.arkpets.easings;
 
 
 public class EasingLinear extends Easing {
-    /** Easing tool. (Linear mode)
+    /** Easing handler instance. (Linear mode)
      * @param $from The start value.
      * @param $to The end value.
      * @param $duration The duration(second) of the whole easing process.
@@ -14,10 +14,6 @@ public class EasingLinear extends Easing {
         super($from, $to, $duration);
     }
 
-    /** Directly get a specific value.
-     * @param $curDuration The x-position of the process.
-     * @return The y-position of the process.
-     */
     public float get(float $curDuration) {
         if ($curDuration >= DURATION)
             return TO;

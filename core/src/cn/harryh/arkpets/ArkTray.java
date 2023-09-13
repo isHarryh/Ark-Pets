@@ -45,7 +45,7 @@ public class ArkTray {
         }
     }
 
-    /** Initialize the ArkPets tray icon instance. <br/>
+    /** Initializes the ArkPets tray icon instance. <br/>
      * Must be used after Gdx.app was initialized.
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
      */
@@ -147,7 +147,7 @@ public class ArkTray {
         }
     }
 
-    /** Remove the icon from system tray.
+    /** Removes the icon from system tray.
      */
     public void remove() {
         if (isTrayIconApplied) {
@@ -158,7 +158,7 @@ public class ArkTray {
         isTrayIconApplied = false;
     }
 
-    /** Hide the menu.
+    /** Hides the menu.
      */
     public void hideDialog() {
         if (popMenu.isVisible()) {
@@ -167,7 +167,7 @@ public class ArkTray {
         }
     }
 
-    /** Show the menu at the given coordinate.
+    /** Shows the menu at the given coordinate.
      */
     public void showDialog(int x, int y) {
         /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
@@ -183,7 +183,7 @@ public class ArkTray {
         Logger.debug("Tray", "Shown @ " + x + ", " + y);
     }
 
-    /** Toggle the menu at the given coordinate.
+    /** Toggles the menu at the given coordinate.
      */
     public void toggleDialog(int x, int y) {
         if (popMenu.isVisible()) {

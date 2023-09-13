@@ -77,40 +77,40 @@ public class HWndCtrl {
         windowHeight = 0;
     }
 
-    /** Judge whether the handle is empty.
+    /** Returns true if the handle is empty.
      */
     public boolean isEmpty() {
         return hWnd == null;
     }
 
-    /** Judge whether the window is the foreground window.
+    /** Returns true if the window is a foreground window now.
      */
     public boolean isForeground() {
         if (isEmpty()) return false;
         return hWnd.equals(User32.INSTANCE.GetForegroundWindow());
     }
 
-    /** Judge whether the window is visible.
+    /** Returns true if the window is visible now.
      */
     public boolean isVisible() {
         return isVisible(hWnd);
     }
 
-    /** Get the center X position.
+    /** Gets the center X position.
      * @return X.
      */
     public float getCenterX() {
         return posLeft + windowWidth / 2f;
     }
 
-    /** Get the center Y position.
+    /** Gets the center Y position.
      * @return Y.
      */
     public float getCenterY() {
         return posTop + windowHeight / 2f;
     }
 
-    /** Get the RGB color value at the specified position of the window.
+    /** Gets the RGB color value at the specified position of the window.
      * @param $x The X-axis coordinate, related to the left border of the window.
      * @param $y The Y-axis coordinate, related to the top border of the window.
      * @return The color array (R,G,B).
@@ -125,7 +125,7 @@ public class HWndCtrl {
         return new int[] {r, g, b};
     }
 
-    /** Request to close the window.
+    /** Requests to close the window.
      * @param $timeout Timeout for waiting response (ms).
      * @return true=success, false=failure.
      */
@@ -133,20 +133,22 @@ public class HWndCtrl {
         return User32.INSTANCE.SendMessageTimeout(hWnd, 0x10, null, null, $timeout, WinUser.SMTO_NORMAL, null).intValue() == 0;
     }
 
-    /** Get the value of the window's extended styles.
+    /** Gets the value of the window's extended styles.
+     * @return EX_STYLE value.
+     * @see WinUser
      */
     public int getWindowExStyle() {
         if (isEmpty()) return 0;
         return User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE);
     }
 
-    /** Set the window as the foreground window.
+    /** Sets the window as the foreground window.
      */
     public void setForeground() {
         User32.INSTANCE.SetForegroundWindow(hWnd);
     }
 
-    /** Set the window's transparency.
+    /** Sets the window's transparency.
      * @param $alpha Alpha value, from 0 to 1.
      */
     public void setWindowAlpha(float $alpha) {
@@ -156,15 +158,16 @@ public class HWndCtrl {
         User32.INSTANCE.SetLayeredWindowAttributes(hWnd, 0, byteAlpha, User32.LWA_ALPHA);
     }
 
-    /** Set the window's extended styles.
-     * @param $newLong New value.
+    /** Sets the window's extended styles.
+     * @param $newLong New EX_STYLE value.
+     * @see WinUser
      */
     public void setWindowExStyle(int $newLong) {
         if (isEmpty()) return;
         User32.INSTANCE.SetWindowLong(hWnd, WinUser.GWL_EXSTYLE, $newLong);
     }
 
-    /** Set the window's position without activating the window.
+    /** Sets the window's position without activating the window.
      * @param $insertAfter The window to precede the positioned window in the Z order.
      * @param $x The new position of the left side of the window, in client coordinates.
      * @param $y The new position of the top of the window, in client coordinates.
@@ -176,7 +179,7 @@ public class HWndCtrl {
         User32.INSTANCE.SetWindowPos(hWnd, $insertAfter.hWnd, $x, $y, $w, $h, WinUser.SWP_NOACTIVATE);
     }
 
-    /** Get the current list of windows.
+    /** Gets the current list of windows.
      * @param $only_visible Whether exclude the invisible window.
      * @return An ArrayList consists of HWndCtrls.
      */
@@ -190,7 +193,7 @@ public class HWndCtrl {
         return windowList;
     }
 
-    /** Get the current list of windows. (Advanced)
+    /** Gets the current list of windows. (Advanced)
      * @param $only_visible Whether exclude the invisible window.
      * @param $exclude_ws_ex Exclude the specific window-style-extra.
      * @return An ArrayList consists of HWndCtrls.

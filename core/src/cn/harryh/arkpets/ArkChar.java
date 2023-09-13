@@ -50,7 +50,7 @@ public class ArkChar {
     public int anim_fps;
 
 
-    /** Initialize an ArkPets character.
+    /** Initializes an ArkPets character.
      * @param $asset_location The path string to the model's directory.
      * @param $asset_accessor The Asset Accessor of the model.
      * @param $anim_scale The scale of the character.
@@ -114,13 +114,13 @@ public class ArkChar {
         animationState = new AnimationState(asd);
     }
 
-    /** Set the canvas with transparent background.
+    /** Sets the canvas with transparent background.
      */
     public void setCanvas(int $anim_fps) {
         this.setCanvas($anim_fps, new Color(0, 0, 0, 0));
     }
 
-    /** Set the canvas with the specified background color.
+    /** Sets the canvas with the specified background color.
      */
     public void setCanvas(int $anim_fps, Color $bgColor) {
         // Transfer params
@@ -135,7 +135,7 @@ public class ArkChar {
         bgTexture = new Texture(pixmap);
     }
 
-    /** Update the canvas and the camera to keep the character in the center.
+    /** Updates the canvas and the camera to keep the character in the center.
      */
     public void updateCanvas() {
         camera.setToOrtho(false, flexibleLayout.getWidth(), flexibleLayout.getHeight());
@@ -144,7 +144,7 @@ public class ArkChar {
         batch.getProjectionMatrix().set(camera.combined);
     }
 
-    /** Adjust the canvas to fit the character's size.
+    /** Adjusts the canvas to fit the character's size.
      */
     public void adjustCanvas(int $reserved_length, String $anim_name, boolean $initialize) {
         setCanvas(fpsDefault);
@@ -162,7 +162,7 @@ public class ArkChar {
         snapshot.dispose();
     }
 
-    /** Set the skeleton's target position.
+    /** Sets the skeleton's target position.
      */
     public void setPositionTar(float $pos_x, float $pos_y, float $flip) {
         positionTar.set($pos_x, $pos_y, $flip);
@@ -171,7 +171,7 @@ public class ArkChar {
         positionEas.eZ.update($flip);
     }
 
-    /** Set the skeleton's current position.
+    /** Sets the skeleton's current position.
      */
     public void setPositionCur(float $deltaTime) {
         positionCur.set(
@@ -184,7 +184,7 @@ public class ArkChar {
         skeleton.updateWorldTransform();
     }
 
-    /** Request to set a new animation.
+    /** Requests to set a new animation.
      * @return true=success, false=failure.
      */
     public boolean setAnimation(AnimData $animData) {
@@ -195,7 +195,7 @@ public class ArkChar {
         return false;
     }
 
-    /** Save the current framebuffer contents as an image file. (Only test-use)
+    /** Saves the current framebuffer contents as an image file. (Only test-use)
      * Note that the image may not be flipped along the y-axis.
      * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
      */
@@ -217,7 +217,7 @@ public class ArkChar {
         pixmap.dispose();
     }
 
-    /** Render the character to the screen.
+    /** Renders the character to the screen.
      */
     public void renderToScreen() {
         // Apply Animation
@@ -236,7 +236,7 @@ public class ArkChar {
         batch.end();
     }
 
-    /** Render the character to a given Pixmap.
+    /** Renders the character to a given Pixmap.
      * Note that the mismatch of the Pixmap's size and the screen's size may cause data loss;
      * @param $pixmap The given Pixmap object.
      */
@@ -249,7 +249,7 @@ public class ArkChar {
         fbo.end();
     }
 
-    /** Render the next frame.
+    /** Renders the next frame.
      */
     public void next() {
         if (anim_queue[1] != null) {
@@ -297,13 +297,13 @@ public class ArkChar {
     }
 
 
-    public static class FrameCtrl {
+    protected static class FrameCtrl {
         private int F_CUR;
         private boolean LOOPED;
         private final int F_MAX;
         private final float DURATION;
 
-        /** Frame Data Controller instance.
+        /** Frame Data Controller object.
          * @param $duration The time(seconds) that the animation plays once.
          * @param $fps Frame per second.
          */
@@ -315,7 +315,7 @@ public class ArkChar {
             F_MAX = (int) Math.floor($duration / f_TIME) + 2;
         }
 
-        /** Step to the next frame.
+        /** Steps to the next frame.
          */
         public void next() {
             if (F_CUR >= F_MAX) {
@@ -326,22 +326,20 @@ public class ArkChar {
             }
         }
 
-        /** Get the duration of each loop.
+        /** Gets the duration of each loop.
          * @return The time(seconds) that the animation plays once.
          */
         public float getDuration() {
             return DURATION;
         }
 
-        /** Whether the animation has looped before.
-         * @return true if satisfied.
+        /** Returns true if the animation has looped before.
          */
         public boolean hasLooped() {
             return LOOPED;
         }
 
-        /** Whether the current frame is the final frame of one loop.
-         * @return true if satisfied.
+        /** Returns true if the current frame is the final frame of one loop.
          */
         public boolean isLoopEnd() {
             return F_CUR == F_MAX;

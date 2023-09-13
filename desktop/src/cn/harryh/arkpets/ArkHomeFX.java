@@ -81,7 +81,7 @@ public class ArkHomeFX extends Application {
     }
 
 
-    /** Run the EmbeddedLauncher to launch the ArkPets app.
+    /** Runs the EmbeddedLauncher to launch the ArkPets app.
      * It will run in multi-threading mode provided by JavaFX,
      * so this method must be invoked in {@code FXApplicationThread}.
      * @see EmbeddedLauncher

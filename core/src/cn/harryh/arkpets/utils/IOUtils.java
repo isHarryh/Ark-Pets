@@ -21,7 +21,7 @@ import static cn.harryh.arkpets.Const.*;
 public class IOUtils {
 
     public static class FileUtil {
-        /** Read the entire file into a byte array.
+        /** Reads the entire file into a byte array.
          * @param file The file to be read.
          * @return A byte array.
          * @throws IOException If I/O error occurs. It may be FileNotFoundException, etc.
@@ -35,7 +35,7 @@ public class IOUtils {
             return content;
         }
 
-        /** Read the entire file into a string using the specified charset.
+        /** Reads the entire file into a string using the specified charset.
          * @param file        The file to be read.
          * @param charsetName The name of the specified charset.
          * @return A String.
@@ -46,7 +46,7 @@ public class IOUtils {
             return new String(readByte(file), charsetName);
         }
 
-        /** Read the entire stream into a string using the specified charset.
+        /** Reads the entire stream into a string using the specified charset.
          * @param inputStream The stream to be read.
          * @param charsetName The name of the specified charset.
          * @return A String.
@@ -57,7 +57,7 @@ public class IOUtils {
             return new String(inputStream.readAllBytes(), charsetName);
         }
 
-        /** Write a byte array into a file.
+        /** Writes a byte array into a file.
          * @param file The file to be written.
          * @param content The specified bytes.
          * @param append If false, the existed file will be overwritten; If true, content will be appended to its end.
@@ -74,7 +74,7 @@ public class IOUtils {
             stream.close();
         }
 
-        /** Write a string into a file using the specified charset.
+        /** Writes a string into a file using the specified charset.
          * @param file The file to be written.
          * @param charsetName The name of the specified charset.
          * @param content The specified string.
@@ -86,8 +86,7 @@ public class IOUtils {
             writeByte(file, content.getBytes(charsetName), append);
         }
 
-        /**
-         * Get the MD5 hex string of the given content.
+        /** Gets the MD5 checksum of the given content.
          * @param content A byte array.
          * @return MD5 hex String.
          */
@@ -111,8 +110,7 @@ public class IOUtils {
             return sb.toString();
         }
 
-        /**
-         * Get the MD5 hex string of a file.
+        /** Gets the MD5 checksum of a file.
          * @param file The file.
          * @return MD5 hex string.
          * @throws IOException If I/O error occurs. It may be FileNotFoundException.
@@ -122,7 +120,7 @@ public class IOUtils {
             return getMD5(readByte(file));
         }
 
-        /** Delete a file or a directory.
+        /** Deletes a file or a directory.
          * @param path The path instance of the specified file or directory.
          * @param ignoreError If true, exceptions will be ignored.
          * @throws IOException If I/O error occurs.
@@ -173,7 +171,7 @@ public class IOUtils {
 
 
     public static class ZipUtil {
-        /** Unzip the entire zip file into the given directory.
+        /** Unzips the entire zip file into the given directory.
          * @param zipFilePath The path of the zip file.
          * @param destDirPath The path of the destination directory which will be created if it is not existed.
          *                    Should be ended with a path separator.

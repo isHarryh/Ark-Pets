@@ -33,7 +33,7 @@ abstract public class Behavior {
         idxRec = 0;
     }
 
-    /** Get a random animation.
+    /** Gets a random animation.
      * @param $deltaTime The delta time.
      * @return AnimData object.
      */
@@ -52,10 +52,10 @@ abstract public class Behavior {
         return null;
     }
 
-    /** Randomly select an action to play.
+    /** Selects an action to play randomly.
      * @return The index of the action.
      */
-    int getRandomAction() {
+    protected int getRandomAction() {
         // Calculate the sum of all action's weight
         int weight_sum = 0;
         for (AnimAutoData i: action_list) {
@@ -73,9 +73,10 @@ abstract public class Behavior {
         return -1;
     }
 
-    /** Search the most possible animation name.
+    /** Finds the most possible animation name.
+     * @return The name of the animation.
      */
-    String getProperAnimName(String $wanted, String[] $notWanted) {
+    protected String getProperAnimName(String $wanted, String[] $notWanted) {
         HashMap<String, Integer> map = new HashMap<>();
         for (String s : anim_list) {
             if (s.contains($wanted)) {
@@ -99,13 +100,13 @@ abstract public class Behavior {
         return minK;
     }
 
-    /** Whether the provided animation list match this behavior class.
+    /** Returns true if the given animation list matches this behavior class.
      * @param animList The animation name list.
      * @return true=match, false=mismatch.
      */
     abstract boolean match(String[] animList);
 
-    /** Select a matched behavior object from a behavior-list.
+    /** Selects a matched behavior object from a behavior-instances list.
      * @param $animList A list contains the name of animations.
      * @param $candidateBehaviors A list contains the Behavior objects to be selected.
      * @return Behavior object.
@@ -117,42 +118,42 @@ abstract public class Behavior {
         return null;
     }
 
-    /** Get the default animation.
+    /** Gets the default animation.
      * @return AnimData object.
      */
     public AnimData defaultAnim() {
         return null;
     }
 
-    /** Get the animation when mouse-down.
+    /** Gets the animation when mouse-down.
      * @return AnimData object.
      */
     public AnimData clickStart() {
         return null;
     }
 
-    /** Get the animation when mouse-up.
+    /** Gets the animation when mouse-up.
      * @return AnimData object.
      */
     public AnimData clickEnd() {
         return null;
     }
 
-    /** Get the animation when user start dragging.
+    /** Gets the animation when the user starts dragging.
      * @return AnimData object.
      */
     public AnimData dragStart() {
         return null;
     }
 
-    /** Get the animation when user end dragging.
+    /** Gets the animation when the user finished dragging.
      * @return AnimData object.
      */
     public AnimData dragEnd() {
         return null;
     }
 
-    /** Get the animation when character dropped.
+    /** Gets the animation when character dropped.
      * @return AnimData object.
      */
     public AnimData drop() {

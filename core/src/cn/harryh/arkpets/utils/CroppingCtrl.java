@@ -12,7 +12,7 @@ public class CroppingCtrl {
     private final Insert maxInsert;
     public final Insert curInsert;
 
-    /** Initialize a Cropping Controller instance.
+    /** Initializes a Cropping Controller instance.
      * @param originSize      The original size of the cropper.
      * @param maxInsertLength The max insert length of each side.
      */
@@ -25,7 +25,7 @@ public class CroppingCtrl {
         curInsert = new Insert();
     }
 
-    /** Fit the size to the best cropped size using the given parameters.
+    /** Fits the size to the best cropped size using the given parameters.
      * @param pixmap     The pixmap got from the current rendered frame of libGDX.
      * @param extended   The extension length to be added to each overflowed side (px).
      * @param reserved   The reservation length of the white space (px).
@@ -101,14 +101,14 @@ public class CroppingCtrl {
         curInsert.moderatelyModify(insert, 0);
     }
 
-    /** Get the total width.
+    /** Gets the total width.
      * @return The total width.
      */
     public int getWidth() {
         return (int) (getLeft() + getRight() + origin.x);
     }
 
-    /** Get the total height.
+    /** Gets the total height.
      * @return The total height.
      */
     public int getHeight() {

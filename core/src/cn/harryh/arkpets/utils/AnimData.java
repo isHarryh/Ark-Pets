@@ -11,7 +11,7 @@ public class AnimData {
     public final int OFFSET_Y;
     public final int MOBILITY;
 
-    /** Animation Data Object. (loop)
+    /** Animation Data object. (loop)
      * @param $anim_name The name of the animation.
      * @param $loop Allow to loop the animation.
      * @param $interruptable Allow to be interrupted by another animation.
@@ -25,7 +25,7 @@ public class AnimData {
         MOBILITY = 0;
     }
 
-    /** Animation Data Object. (usually play-once)
+    /** Animation Data object. (usually play-once)
      * @param $anim_name The name of the animation.
      * @param $loop Allow to loop the animation.
      * @param $interruptable Allow to be interrupted by another animation.
@@ -40,7 +40,7 @@ public class AnimData {
         MOBILITY = 0;
     }
 
-    /** Animation Data Object. (loop, full-version constructor)
+    /** Animation Data object. (loop, full-version constructor)
      * @param $anim_name The name of the animation.
      * @param $loop Allow to loop the animation.
      * @param $interruptable Allow to be interrupted by another animation.
@@ -62,7 +62,7 @@ public class AnimData {
         public final float DURATION_MIN;
         public final int WEIGHT;
 
-        /** Autonomic-Animation Data Object.
+        /** Autonomic-Animation Data object.
          * @param $animData The Animation Data.
          * @param $duration_min The minimal loop-action duration(seconds).
          * @param $weight The weight to call this action.

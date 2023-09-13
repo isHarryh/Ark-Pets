@@ -67,7 +67,7 @@ public class ArkConfig {
     private ArkConfig() {
     }
 
-    /** Save the config into the custom file.
+    /** Saves the config into the custom file.
      */
     @JSONField(serialize = false)
     public void saveConfig() {
@@ -78,7 +78,7 @@ public class ArkConfig {
         }
     }
 
-    /** Instantiate an ArkConfig object.
+    /** Instantiates an ArkConfig object.
      * @return ArkConfig object. null if failed.
      */
     @JSONField(serialize = false)
@@ -111,16 +111,18 @@ public class ArkConfig {
         return Objects.requireNonNull(ArkConfig.class.getResourceAsStream(configDefaultPath));
     }
 
-    /** @return Whether the config file was generated newly.
+    /** Returns true if the config file was newly-generated.
      */
     @JSONField(serialize = false)
     public boolean isNewcomer() {
         return isNewcomer;
     }
 
-    /** Note: Once users upgraded ArkPets to v2.2+ where physic params can be modified manually,
+    /** Returns true if all the physic params are set to 0.
+     * <hr>
+     * Note: Once users upgraded ArkPets to v2.2+ where physic params can be modified manually,
      * the physic params will be initialized to 0, which will cause bad behaviors.
-     * @return Whether all the physic params are set to 0.
+     * @since ArkPets 2.2
      */
     @JSONField(serialize = false)
     public boolean isAllPhysicConfigZeroed() {
@@ -189,7 +191,7 @@ public class ArkConfig {
             }
         }
 
-        /** Get a content of a VBS script which can start ArkPets.
+        /** Gets a content of a VBS script which can start ArkPets.
          * @return The script's content.
          */
         public static String generateScript() {
@@ -223,7 +225,7 @@ public class ArkConfig {
         private Monitor() {
         }
 
-        /** Get the information of all the existing monitors.
+        /** Gets the information of all the existing monitors.
          * @return A list of Monitor objects.
          */
         public static Monitor[] getMonitors() {
