@@ -3,12 +3,12 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.animations.AnimClip;
+import cn.harryh.arkpets.animations.AnimClipGroup;
+import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.easings.EasingLinear;
 import cn.harryh.arkpets.easings.EasingLinearVector3;
-import cn.harryh.arkpets.utils.AnimData;
-import cn.harryh.arkpets.utils.AssetCtrl;
-import cn.harryh.arkpets.utils.CroppingCtrl;
-import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
@@ -17,38 +17,38 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.SerializationException;
 import com.esotericsoftware.spine.*;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
+import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
 import static java.io.File.separator;
 
 
 public class ArkChar {
-    private final OrthographicCamera camera;
-    private final TwoColorPolygonBatch batch;
-    private final FrameBuffer fbo;
-    private Texture bgTexture;
+    protected final OrthographicCamera camera;
+    protected final TwoColorPolygonBatch batch;
+    protected final FrameBuffer fbo;
+    protected Texture bgTexture;
+
     public final Vector3 positionCur;
     public final Vector3 positionTar;
     public final EasingLinearVector3 positionEas;
     public int offset_y;
 
-    private final Skeleton skeleton;
-    private final SkeletonRenderer renderer;
-    private SkeletonData skeletonData;
-    private AnimationState animationState;
+    protected final Skeleton skeleton;
+    protected final SkeletonRenderer renderer;
+    protected SkeletonData skeletonData;
+    protected AnimationState animationState;
 
     public CroppingCtrl flexibleLayout;
-    public String[] anim_list;
+    public AnimClipGroup anim_list;
     public AnimData[] anim_queue;
     public FrameCtrl anim_frame;
     public int anim_fps;
-
 
     /** Initializes an ArkPets character.
      * @param $asset_location The path string to the model's directory.
@@ -61,57 +61,32 @@ public class ArkChar {
         batch = new TwoColorPolygonBatch();
         fbo = new FrameBuffer(Format.RGBA8888, canvasMaxSize, canvasMaxSize, false);
         flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
-
+        renderer = new SkeletonRenderer();
+        renderer.setPremultipliedAlpha(true);
         // Layout
         positionEas = new EasingLinearVector3(new EasingLinear(0, 1, linearEasingDuration));
         positionCur = new Vector3(0, 0, 0);
         positionTar = new Vector3(0, 0, 0);
         offset_y = 0;
         anim_queue = new AnimData[2];
-
-        // Skeleton
-        renderer = new SkeletonRenderer();
-        renderer.setPremultipliedAlpha(true);
+        // Load skeleton
         loadSkeletonData($asset_location, $asset_accessor, $anim_scale);
+        // Set animation mix
+        AnimationStateData asd = new AnimationStateData(skeletonData);
+        for (AnimClip i: anim_list)
+            for (AnimClip j: anim_list)
+                if (!i.fullName.equals(j.fullName))
+                    asd.setMix(i.fullName, j.fullName, linearEasingDuration);
+        animationState = new AnimationState(asd);
+        // Initialize skeleton
         skeleton = new Skeleton(skeletonData);
         animationState.apply(skeleton);
         skeleton.updateWorldTransform();
-        for (int i = 0; i < anim_list.length; i++)
-            adjustCanvas(Math.round(canvasReserveLength * $anim_scale), anim_list[i], i == 0);
+        // Initialize canvas
+        for (int i = 0; i < anim_list.size(); i++)
+            adjustCanvas(Math.round(canvasReserveLength * $anim_scale), anim_list.get(i), i == 0);
         Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
         updateCanvas();
-    }
-
-    private void loadSkeletonData(String $asset_location, AssetCtrl.AssetAccessor $asset_accessor, float $scale) {
-        // Load atlas & skel files to SkeletonData
-        try {
-            String path2atlas = $asset_location + separator + $asset_accessor.getFirstFileOf(".atlas");
-            String path2skel = $asset_location + separator + $asset_accessor.getFirstFileOf(".skel");
-            // Load atlas
-            TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
-            // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
-            SkeletonBinary binary = new SkeletonBinary(atlas);
-            binary.setScale($scale);
-            skeletonData = binary.readSkeletonData(Gdx.files.internal(path2skel));
-        } catch (SerializationException | GdxRuntimeException e) {
-            Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
-            throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
-        }
-
-        // Write animations' names to the array
-        Array<Animation> animations = skeletonData.getAnimations();
-        int anim_cont = animations.size;
-        anim_list = new String[anim_cont];
-        for (int i = 0; i < anim_cont; i++)
-            anim_list[i] = animations.get(i).getName();
-
-        // Set animation mix
-        AnimationStateData asd = new AnimationStateData(skeletonData);
-        for (String i: anim_list)
-            for (String j: anim_list)
-                if (!i.equals(j))
-                    asd.setMix(i, j, linearEasingDuration);
-        animationState = new AnimationState(asd);
     }
 
     /** Sets the canvas with transparent background.
@@ -146,9 +121,9 @@ public class ArkChar {
 
     /** Adjusts the canvas to fit the character's size.
      */
-    public void adjustCanvas(int $reserved_length, String $anim_name, boolean $initialize) {
+    public void adjustCanvas(int $reserved_length, AnimClip $anim_clip, boolean $initialize) {
         setCanvas(fpsDefault);
-        setAnimation(new AnimData($anim_name, false, true));
+        setAnimation(new AnimData($anim_clip, null, false, true, 0, 0));
         setPositionCur(Float.MAX_VALUE);
         changeAnimation();
         animationState.update(anim_frame.getDuration() / 2); // Take the middle frame as sample
@@ -188,11 +163,29 @@ public class ArkChar {
      * @return true=success, false=failure.
      */
     public boolean setAnimation(AnimData $animData) {
-        if ($animData != null && (anim_queue[0] == null || anim_queue[0].INTERRUPTABLE)) {
+        if ($animData != null && (anim_queue[0] == null || anim_queue[0].isEmpty() || anim_queue[0].interruptable())) {
             anim_queue[1] = $animData;
             return true;
         }
         return false;
+    }
+
+    protected void loadSkeletonData(String $asset_location, AssetCtrl.AssetAccessor $asset_accessor, float $scale) {
+        // Load atlas & skel files to SkeletonData
+        try {
+            String path2atlas = $asset_location + separator + $asset_accessor.getFirstFileOf(".atlas");
+            String path2skel = $asset_location + separator + $asset_accessor.getFirstFileOf(".skel");
+            // Load atlas
+            TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
+            // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
+            SkeletonBinary binary = new SkeletonBinary(atlas);
+            binary.setScale($scale);
+            skeletonData = binary.readSkeletonData(Gdx.files.internal(path2skel));
+        } catch (SerializationException | GdxRuntimeException e) {
+            Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
+            throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
+        }
+        anim_list = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
     }
 
     /** Saves the current framebuffer contents as an image file. (Only test-use)
@@ -200,7 +193,7 @@ public class ArkChar {
      * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
      */
     @Deprecated
-    private void saveCurrentTexture(boolean debug) {
+    protected void saveCurrentTexture(boolean debug) {
         Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, flexibleLayout.getWidth(), flexibleLayout.getHeight());
         if (debug) {
             pixmap.setColor(new Color(1, 0, 0, 0.75f));
@@ -219,7 +212,7 @@ public class ArkChar {
 
     /** Renders the character to the screen.
      */
-    public void renderToScreen() {
+    protected void renderToScreen() {
         // Apply Animation
         setPositionTar(positionTar.x, positionTar.y, positionTar.z);
         setPositionCur(Gdx.graphics.getDeltaTime());
@@ -240,7 +233,7 @@ public class ArkChar {
      * Note that the mismatch of the Pixmap's size and the screen's size may cause data loss;
      * @param $pixmap The given Pixmap object.
      */
-    private void renderToPixmap(Pixmap $pixmap) {
+    protected void renderToPixmap(Pixmap $pixmap) {
         fbo.begin();
         renderToScreen();
         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
@@ -251,27 +244,27 @@ public class ArkChar {
 
     /** Renders the next frame.
      */
-    public void next() {
-        if (anim_queue[1] != null) {
+    protected void next() {
+        if (anim_queue[1] != null && !anim_queue[1].isEmpty()) {
             // Update the animation queue if it is null
-            if (anim_queue[0] == null) {
+            if (anim_queue[0] == null || anim_queue[0].isEmpty()) {
                 changeAnimation();
             } else {
-            // Interrupt the last animation if it is interruptable
-            if (anim_queue[0].INTERRUPTABLE)
-                if (!anim_queue[1].ANIM_NAME.equals(anim_queue[0].ANIM_NAME)
-                        || anim_queue[1].MOBILITY != anim_queue[0].MOBILITY)
-                    changeAnimation();
+                // Interrupt the last animation if it is interruptable
+                if (anim_queue[0].interruptable())
+                    if (!Objects.equals(anim_queue[1].name(), anim_queue[0].name())
+                            || anim_queue[1].mobility() != anim_queue[0].mobility())
+                        changeAnimation();
             }
         }
         // Try the next frame
         anim_frame.next();
         // End the animation if it only needs to play once
-        if (anim_frame.hasLooped() && !anim_queue[0].LOOP) {
-            if (anim_queue[0].ANIM_NEXT != null) {
-                anim_queue[1] = anim_queue[0].ANIM_NEXT;
+        if (anim_frame.hasLooped() && !anim_queue[0].loop()) {
+            if (anim_queue[0].animNext() != null && !anim_queue[0].animNext().isEmpty()) {
+                anim_queue[1] = anim_queue[0].animNext();
                 changeAnimation();
-            } else if (anim_queue[1] != null) {
+            } else if (anim_queue[1] != null && !anim_queue[1].isEmpty()) {
                 changeAnimation();
             } else {
                 return;
@@ -281,27 +274,28 @@ public class ArkChar {
         renderToScreen();
     }
 
-    private void changeAnimation() {
+
+    protected void changeAnimation() {
         // Overwrite the current animation(index0) with the new one
         anim_queue[0] = anim_queue[1];
-        Logger.debug("Character", "Animation \"" + anim_queue[0].ANIM_NAME + "\"");
+        Logger.debug("Animation", "Apply " + anim_queue[0]);
         // Let the character face to the correct direction if the new animation is a moving animation
-        if (anim_queue[0].MOBILITY != 0)
-            setPositionTar(positionTar.x, positionTar.y, anim_queue[0].MOBILITY > 0 ? 1 : -1);
+        if (anim_queue[0].mobility() != 0)
+            setPositionTar(positionTar.x, positionTar.y, anim_queue[0].mobility() > 0 ? 1 : -1);
         // Let the character have the correct y-offset
-        offset_y = anim_queue[0].OFFSET_Y;
+        offset_y = anim_queue[0].offsetY();
         // Update the animation state with the new animation
-        Animation animation = skeletonData.findAnimation(anim_queue[0].ANIM_NAME);
+        Animation animation = skeletonData.findAnimation(anim_queue[0].name());
         anim_frame = new FrameCtrl(animation.getDuration(), anim_fps);
-        animationState.setAnimation(0, anim_queue[0].ANIM_NAME, anim_queue[0].LOOP);
+        animationState.setAnimation(0, anim_queue[0].name(), anim_queue[0].loop());
     }
 
 
     protected static class FrameCtrl {
-        private int F_CUR;
-        private boolean LOOPED;
-        private final int F_MAX;
-        private final float DURATION;
+        public int F_CUR;
+        public boolean LOOPED;
+        public final int F_MAX;
+        public final float DURATION;
 
         /** Frame Data Controller object.
          * @param $duration The time(seconds) that the animation plays once.

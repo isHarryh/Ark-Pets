@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.behaviors.*;
+import cn.harryh.arkpets.animations.*;
 import cn.harryh.arkpets.easings.EasingLinear;
 import cn.harryh.arkpets.easings.EasingLinearVector2;
 import cn.harryh.arkpets.utils.*;
@@ -24,7 +24,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public ArkChar cha;
 	public ArkConfig config;
 	public ArkTray tray;
-	public Behavior behavior;
+	public GeneralBehavior behavior;
 
 	private HWndCtrl hWndTopmost;
 	private LoopCtrl getHWndLoopCtrl;
@@ -35,10 +35,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private int WD_H; // Window Real Height
 	private boolean isToolwindowStyle;
 
-	public Vector2 WD_poscur; // Window Current Position
-	public Vector2 WD_postar; // Window Target Position
-	public EasingLinear WD_alpha; // Window Opacity Easing
-	public EasingLinearVector2 WD_poseas; // Window Position Easing
+	private Vector2 WD_poscur; // Window Current Position
+	private Vector2 WD_postar; // Window Target Position
+	private EasingLinear WD_alpha; // Window Opacity Easing
+	private EasingLinearVector2 WD_poseas; // Window Position Easing
 	private int OFFSET_Y = 0;
 
 	public ArkPets(String $title) {
@@ -59,6 +59,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
 		cha = new ArkChar(config.character_asset, new AssetCtrl.AssetAccessor(config.character_files), skelBaseScale);
 		cha.setCanvas(APP_FPS);
+		behavior = new GeneralBehavior(config, cha.anim_list);
+		cha.setAnimation(behavior.defaultAnim());
+		Logger.info("Animation", "Animation stages " + behavior.getStages());
 		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);
 		WD_postar = new Vector2(0, 0);
@@ -76,24 +79,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		promiseToolwindowStyle(1000);
-		// 5.Behavior setup
-		behavior = Behavior.selectBehavior(cha.anim_list, new Behavior[] {
-				new BehaviorOperBuild2(config, cha.anim_list),
-				new BehaviorOperBuild(config, cha.anim_list),
-				new BehaviorOperBuild3(config, cha.anim_list),
-				new BehaviorBattleGeneral(config, cha.anim_list),
-				new BehaviorBattleGeneral2(config, cha.anim_list),
-				new BehaviorBattleGeneral3(config, cha.anim_list),
-				new BehaviorBattleGeneral4(config, cha.anim_list),
-		});
-		if (behavior == null) {
-			Logger.error("App", "No suitable ArkPets behavior instance found, you can contact the developer, details see below.");
-			Logger.error("App", "This model only contains these animations: " + Arrays.toString(cha.anim_list));
-			throw new RuntimeException("Launch ArkPets failed due to unsupported model.");
-		}
-		Logger.info("App", "Using behavior class \"" + behavior.getClass().getSimpleName() + "\"");
-		cha.setAnimation(behavior.defaultAnim());
-		// 6.Tray icon setup
+		// 5.Tray icon setup
 		tray = new ArkTray(this);
 		// Setup complete
 		Logger.info("App", "Render");
@@ -112,22 +98,22 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
 		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
-			if (cha.anim_queue[0].MOBILITY != 0) {
-				if (willReachBorder(cha.anim_queue[0].MOBILITY)) {
+			if (cha.anim_queue[0].mobility() != 0) {
+				if (willReachBorder(cha.anim_queue[0].mobility())) {
 					// Turn around if auto-walk cause the collision from screen border.
 					newAnim = cha.anim_queue[0];
-					newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, -newAnim.MOBILITY);
+					newAnim = new AnimData(newAnim.animClip(), null, newAnim.loop(), newAnim.interruptable(), newAnim.offsetY(), -newAnim.mobility());
 					tray.keepAnim = tray.keepAnim == null ? null : newAnim;
 				}
-				walkWindow(0.85f * cha.anim_queue[0].MOBILITY);
+				walkWindow(0.85f * cha.anim_queue[0].mobility());
 			}
 		} else { // If dragging:
-			newAnim = behavior.dragStart();
+			newAnim = behavior.dragging();
 		}
 		if (plane.getDropping()) { // If dropping, do not change anim.
 			newAnim = behavior.defaultAnim();
 		} else if (plane.getDropped()) { // If dropped, play the dropped anim.
-			newAnim = behavior.drop();
+			newAnim = behavior.dropped();
 		} else if (tray.keepAnim != null) { // If keep-anim is enabled.
 			newAnim = tray.keepAnim;
 		}
@@ -151,11 +137,23 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		tray.remove();
 	}
 
+	public boolean canChangeStage() {
+		return behavior != null && behavior.getStages().size() > 1;
+	}
+
+	public void changeStage() {
+		if (canChangeStage()) {
+			behavior.nextStage();
+			Logger.info("Animation", "Changed to " + behavior.getCurrentStage());
+			changeAnimation(behavior.defaultAnim());
+		}
+	}
+
 	private void changeAnimation(AnimData animData) {
-		if (animData != null) {
+		if (animData != null && !animData.isEmpty()) {
 			// If it is needed to change animation:
 			if (cha.setAnimation(animData))
-				OFFSET_Y = (int)(animData.OFFSET_Y * config.display_scale);
+				OFFSET_Y = (int)(animData.offsetY() * config.display_scale);
 		}
 	}
 
@@ -207,9 +205,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					changeAnimation(behavior.clickEnd());
 				else {
 					cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
-					if (tray.keepAnim != null && cha.anim_queue[0].MOBILITY != 0) {
+					if (tray.keepAnim != null && cha.anim_queue[0].mobility() != 0) {
 						AnimData newAnim = cha.anim_queue[0];
-						newAnim = new AnimData(newAnim.ANIM_NAME, newAnim.LOOP, newAnim.INTERRUPTABLE, newAnim.OFFSET_Y, Math.abs(newAnim.MOBILITY) * mouse_intention_x);
+						newAnim = new AnimData(newAnim.animClip(), null, newAnim.loop(), newAnim.interruptable(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
 						tray.keepAnim = newAnim;
 					}
 				}

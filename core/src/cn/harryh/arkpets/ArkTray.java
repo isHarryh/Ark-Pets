@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.utils.AnimData;
+import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
@@ -81,6 +81,7 @@ public class ArkTray {
         JMenuItem optKeepAnimDis = new JMenuItem("取消保持");
         JMenuItem optTransparentEn = new JMenuItem("透明模式");
         JMenuItem optTransparentDis = new JMenuItem("取消透明");
+        JMenuItem optChangeStage = new JMenuItem("切换形态");
         JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
@@ -108,6 +109,10 @@ public class ArkTray {
             popMenu.remove(optTransparentDis);
             popMenu.add(optTransparentEn, 2);
         });
+        optChangeStage.addActionListener(e -> {
+            Logger.info("Tray","Request to change stage");
+            arkPets.changeStage();
+        });
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");
             arkPets.setWindowAlphaTar(0);
@@ -120,6 +125,7 @@ public class ArkTray {
         });
         popMenu.add(optKeepAnimEn);
         popMenu.add(optTransparentEn);
+        if (arkPets.canChangeStage()) popMenu.add(optChangeStage);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
