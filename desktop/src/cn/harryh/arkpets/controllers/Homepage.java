@@ -211,22 +211,22 @@ public class Homepage {
         });
     }
 
-    private void initMenuBtn(Button $menuBtn, int $boundIdx) {
-        $menuBtn.getStyleClass().setAll("menu-btn");
-        $menuBtn.setOnAction(e -> {
-            initWrapper($boundIdx);
+    private void initMenuBtn(Button menuBtn, int boundIdx) {
+        menuBtn.getStyleClass().setAll("menu-btn");
+        menuBtn.setOnAction(e -> {
+            initWrapper(boundIdx);
             menuBtn1.getStyleClass().setAll("menu-btn");
             menuBtn2.getStyleClass().setAll("menu-btn");
             menuBtn3.getStyleClass().setAll("menu-btn");
-            $menuBtn.getStyleClass().add("menu-btn-active");
+            menuBtn.getStyleClass().add("menu-btn-active");
         });
     }
 
-    private void initWrapper(int $activeIdx) {
+    private void initWrapper(int activeIdx) {
         List<Pane> wrappers = Arrays.asList(null, wrapper1, wrapper2, wrapper3);
         for (short i = 0; i < wrappers.size(); i++) {
             if (wrappers.get(i) != null) {
-                if ($activeIdx == i) {
+                if (activeIdx == i) {
                     // Show
                     fadeInNode(wrappers.get(i), durationNormal, null);
                 } else {
@@ -275,7 +275,7 @@ public class Homepage {
         searchModelFilter.valueProperty().addListener(filterListener);
     }
 
-    private boolean initModelDataset(boolean $doPopNotice) {
+    private boolean initModelDataset(boolean doPopNotice) {
         try {
             try {
                 // Read dataset file
@@ -310,25 +310,25 @@ public class Homepage {
             }
         } catch (FileNotFoundException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
-            if ($doPopNotice)
+            if (doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到数据集。",
                         "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。", null).show();
         } catch (DatasetException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
-            if ($doPopNotice)
+            if (doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：数据集解析失败。",
                         "模型数据集可能不完整，或无法被启动器正确识别。请尝试更新模型或更新软件。", null).show();
         } catch (IOException e) {
             Logger.error("ModelManager", "Failed to initialize model dataset due to unknown reasons, details see below.", e);
-            if ($doPopNotice)
+            if (doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：发生意外错误。",
                         "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
         return false;
     }
 
-    private boolean initModelAssets(boolean $doPopNotice) {
-        if (!initModelDataset($doPopNotice))
+    private boolean initModelAssets(boolean doPopNotice) {
+        if (!initModelDataset(doPopNotice))
             return false;
         try {
             // Find every model assets.
@@ -354,7 +354,7 @@ public class Homepage {
             foundModelAssets = new ArrayList<>();
             foundModelItems = new ArrayList<>();
             Logger.error("ModelManager", "Failed to initialize model assets due to unknown reasons, details see below.", e);
-            if ($doPopNotice)
+            if (doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：读取模型列表失败。",
                         "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
@@ -689,14 +689,14 @@ public class Homepage {
         ss.start();
     }
 
-    public JFXDialog foregroundTask(Task<Boolean> $task, String $header, String $defaultContent, Boolean $cancelable) {
+    public JFXDialog foregroundTask(Task<Boolean> task, String header, String defaultContent, Boolean cancelable) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
         ProgressBar bar = new ProgressBar(-1);
         bar.setPrefSize(root.getWidth() * 0.6, 10);
 
         VBox content = new VBox();
-        Label h2 = (Label)DialogUtil.getPrefabsH2($header);
-        Label h3 = (Label)DialogUtil.getPrefabsH3($defaultContent);
+        Label h2 = (Label)DialogUtil.getPrefabsH2(header);
+        Label h3 = (Label)DialogUtil.getPrefabsH3(defaultContent);
         content.setSpacing(5);
         content.getChildren().add(h2);
         content.getChildren().add(new Separator());
@@ -708,10 +708,10 @@ public class Homepage {
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
 
-        if ($cancelable) {
+        if (cancelable) {
             JFXButton cancel = DialogUtil.getCancelButton(dialog, root);
             cancel.setOnAction(e -> {
-                $task.cancel();
+                task.cancel();
                 DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(cancel);
@@ -721,35 +721,35 @@ public class Homepage {
         dialog.show();
 
         final double[] cachedProgress = {-1};
-        $task.progressProperty().addListener((observable, oldValue, newValue) -> {
+        task.progressProperty().addListener((observable, oldValue, newValue) -> {
             if (Math.abs((double)newValue - cachedProgress[0]) >= 0.001) {
                 cachedProgress[0] = (double)newValue;
                 bar.setProgress((double)newValue);
             }
         });
-        $task.messageProperty().addListener(((observable, oldValue, newValue) -> h3.setText(newValue)));
-        $task.setOnCancelled(e -> {
+        task.messageProperty().addListener(((observable, oldValue, newValue) -> h3.setText(newValue)));
+        task.setOnCancelled(e -> {
             Logger.info("Task", "Foreground dialog task was cancelled.");
             DialogUtil.disposeDialog(dialog, root);
         });
-        $task.setOnFailed(e -> {
-            Logger.error("Task", "Foreground dialog task failed, details see below.", $task.getException());
-            popError($task.getException()).show();
+        task.setOnFailed(e -> {
+            Logger.error("Task", "Foreground dialog task failed, details see below.", task.getException());
+            popError(task.getException()).show();
             DialogUtil.disposeDialog(dialog, root);
         });
-        $task.setOnSucceeded(e -> {
+        task.setOnSucceeded(e -> {
             Logger.info("Task", "Foreground dialog task completed.");
             DialogUtil.disposeDialog(dialog, root);
         });
-        Thread thread = new Thread($task);
+        Thread thread = new Thread(task);
         thread.start();
         return dialog;
     }
 
-    public void popLoading(EventHandler<ActionEvent> $onLoading) {
+    public void popLoading(EventHandler<ActionEvent> onLoading) {
         fadeInNode(wrapper0, durationFast, e -> {
             try {
-                $onLoading.handle(e);
+                onLoading.handle(e);
             } catch (Exception ex) {
                 Logger.error("Task", "Foreground loading task failed, details see below.", ex);
             }
@@ -757,7 +757,7 @@ public class Homepage {
         });
     }
 
-    public JFXDialog popError(Throwable $e) {
+    public JFXDialog popError(Throwable e) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
 
         VBox content = new VBox();
@@ -772,10 +772,10 @@ public class Homepage {
         textArea.setEditable(false);
         textArea.setScrollTop(0);
         textArea.getStyleClass().add("popup-detail-field");
-        textArea.appendText("[Exception] " + $e.getClass().getSimpleName() + "\n");
-        textArea.appendText("[Message] " + ($e.getLocalizedMessage() != null ? $e.getLocalizedMessage() : "") + "\n");
-        textArea.appendText("\n[StackTrace]\nCaused by " + $e.getClass().getCanonicalName() + ": " + $e.getMessage() + "\n");
-        for (StackTraceElement ste : $e.getStackTrace())
+        textArea.appendText("[Exception] " + e.getClass().getSimpleName() + "\n");
+        textArea.appendText("[Message] " + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "") + "\n");
+        textArea.appendText("\n[StackTrace]\nCaused by " + e.getClass().getCanonicalName() + ": " + e.getMessage() + "\n");
+        for (StackTraceElement ste : e.getStackTrace())
             textArea.appendText("  at " + ste + "\n");
         content.getChildren().add(textArea);
 
@@ -785,90 +785,90 @@ public class Homepage {
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
 
-        if ($e instanceof JavaProcess.UnexpectedExitCodeException) {
+        if (e instanceof JavaProcess.UnexpectedExitCodeException) {
             h2.setText("检测到桌宠异常退出");
             h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
         }
-        if ($e instanceof FileNotFoundException) {
+        if (e instanceof FileNotFoundException) {
             h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
         }
-        if ($e instanceof NetUtils.HttpResponseCodeException) {
+        if (e instanceof NetUtils.HttpResponseCodeException) {
             h2.setText("神经递质接收异常");
-            if (((NetUtils.HttpResponseCodeException)$e).isRedirection()) {
+            if (((NetUtils.HttpResponseCodeException)e).isRedirection()) {
                 h3.setText("请求的网络地址被重定向转移。详细信息：");
             }
-            if (((NetUtils.HttpResponseCodeException)$e).isClientError()) {
+            if (((NetUtils.HttpResponseCodeException)e).isClientError()) {
                 h3.setText("可能是客户端引发的网络错误，详细信息：");
-                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 403) {
+                if (((NetUtils.HttpResponseCodeException)e).getCode() == 403) {
                     h3.setText("(403)访问被拒绝。详细信息：");
                 }
-                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 404) {
+                if (((NetUtils.HttpResponseCodeException)e).getCode() == 404) {
                     h3.setText("(404)找不到要访问的目标。详细信息：");
                 }
             }
-            if (((NetUtils.HttpResponseCodeException)$e).isServerError()) {
+            if (((NetUtils.HttpResponseCodeException)e).isServerError()) {
                 h3.setText("可能是服务器引发的网络错误，详细信息：");
-                if (((NetUtils.HttpResponseCodeException)$e).getCode() == 500) {
+                if (((NetUtils.HttpResponseCodeException)e).getCode() == 500) {
                     h3.setText("(500)服务器发生故障，请稍后重试。详细信息");
                 }
             }
         }
-        if ($e instanceof UnknownHostException) {
+        if (e instanceof UnknownHostException) {
             h2.setText("无法建立神经连接");
             h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
         }
-        if ($e instanceof ConnectException) {
+        if (e instanceof ConnectException) {
             h2.setText("无法建立神经连接");
             h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
-        if ($e instanceof SocketException) {
+        if (e instanceof SocketException) {
             h2.setText("无法建立神经连接");
             h3.setText("在访问套接字时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
         }
-        if ($e instanceof SocketTimeoutException) {
+        if (e instanceof SocketTimeoutException) {
             h2.setText("神经递质接收异常");
             h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
         }
-        if ($e instanceof SSLException) {
+        if (e instanceof SSLException) {
             h2.setText("无法建立安全的神经连接");
             h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
             JFXButton apply = DialogUtil.getTrustButton(dialog, root);
-            apply.setOnAction(e -> {
+            apply.setOnAction(ev -> {
                 isHttpsTrustAll = true;
                 DialogUtil.disposeDialog(dialog, root);
             });
             layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
         }
-        if ($e instanceof ZipException) {
+        if (e instanceof ZipException) {
             h3.setText("压缩文件相关错误。推测可能是下载源问题，请再次重试。");
         }
         //dialog.show();
         return dialog;
     }
 
-    public JFXDialog popNotice(Node $graphic, String $title, String $header, String $content, String $detail) {
+    public JFXDialog popNotice(Node graphic, String title, String header, String content, String detail) {
         JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
-        VBox content = new VBox();
-        Label h2 = (Label)DialogUtil.getPrefabsH2($header);
-        Label h3 = (Label)DialogUtil.getPrefabsH3($content);
-        content.setSpacing(5);
-        content.getChildren().add(h2);
-        content.getChildren().add(new Separator());
-        content.getChildren().add(h3);
+        VBox body = new VBox();
+        Label h2 = (Label)DialogUtil.getPrefabsH2(header);
+        Label h3 = (Label)DialogUtil.getPrefabsH3(content);
+        body.setSpacing(5);
+        body.getChildren().add(h2);
+        body.getChildren().add(new Separator());
+        body.getChildren().add(h3);
 
         JFXDialogLayout layout = new JFXDialogLayout();
-        layout.setHeading(DialogUtil.getHeading($graphic, $title, COLOR_LIGHT_GRAY));
-        layout.setBody(content);
+        layout.setHeading(DialogUtil.getHeading(graphic, title, COLOR_LIGHT_GRAY));
+        layout.setBody(body);
         layout.setActions(DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
 
-        if ($detail != null && !$detail.isEmpty()) {
+        if (detail != null && !detail.isEmpty()) {
             JFXTextArea textArea = new JFXTextArea();
             textArea.setEditable(false);
             textArea.setScrollTop(0);
             textArea.getStyleClass().add("popup-detail-field");
-            textArea.appendText($detail);
-            content.getChildren().add(textArea);
+            textArea.appendText(detail);
+            body.getChildren().add(textArea);
         }
         //dialog.show();
         return dialog;
@@ -1017,22 +1017,22 @@ public class Homepage {
         foregroundTask(task, "正在验证模型资源完整性...", "这可能需要数秒钟", true);
     }
 
-    private void foregroundCheckUpdate(boolean $popNotice, String $sourceStr) {
+    private void foregroundCheckUpdate(boolean popNotice, String sourceStr) {
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         isUpdateAvailable = false;
-        String queryStr = "?type=queryVersion&cliVer=" + appVersion + "&source=" + $sourceStr;
+        String queryStr = "?type=queryVersion&cliVer=" + appVersion + "&source=" + sourceStr;
         Task<Boolean> task = createDownloadTask(PathConfig.urlApi + queryStr, PathConfig.tempQueryVersionCachePath);
         JFXDialog dialog = null;
-        if ($popNotice)
+        if (popNotice)
             dialog = foregroundTask(task, "正在下载软件版本信息...", "", true);
         JFXDialog finalDialog = dialog;
         task.setOnSucceeded(e -> {
             // When finished downloading the latest app ver-info:
-            if ($popNotice && finalDialog != null)
+            if (popNotice && finalDialog != null)
                 DialogUtil.disposeDialog(finalDialog, root);
             try {
                 // Try to parse the latest app ver-info
@@ -1044,11 +1044,11 @@ public class Homepage {
                     Version stableVersion = new Version(stableVersionResult);
                     if (appVersion.lessThan(stableVersion)) {
                         isUpdateAvailable = true;
-                        if ($popNotice)
+                        if (popNotice)
                             popNotice(IconUtil.getIcon(IconUtil.ICON_INFO_ALT, COLOR_INFO), "检查软件更新", "检测到软件有新的版本！",
                                     "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n请访问ArkPets官网或GitHub下载新的安装包。", null).show();
                     } else {
-                        if ($popNotice)
+                        if (popNotice)
                             popNotice(IconUtil.getIcon(IconUtil.ICON_SUCCESS_ALT, COLOR_SUCCESS), "检查软件更新", "尚未发现新的正式版本。",
                                     "当前版本 " + appVersion + " 已是最新", null).show();
                     }
@@ -1056,23 +1056,23 @@ public class Homepage {
                 } else {
                     // If the response status isn't "success"
                     Logger.warn("Checker", "Application version check failed (api failed)");
-                    if ($popNotice)
+                    if (popNotice)
                         popNotice(IconUtil.getIcon(IconUtil.ICON_DANGER_ALT, COLOR_DANGER), "检查软件更新", "服务器返回了无效的消息。",
                                 "可能是兼容性问题或服务器不可用。\n您可以访问ArkPets官网或GitHub，手动查看是否有新版本。", null).show();
                 }
             } catch (IOException ex) {
                 Logger.warn("Checker", "Application version check failed (parsing failed)");
-                if ($popNotice)
+                if (popNotice)
                     popError(ex).show();
             }
         });
-        if (!$popNotice) {
+        if (!popNotice) {
             Thread thread = new Thread(task);
             thread.start();
         }
     }
 
-    public Task<Boolean> createDownloadTask(boolean $isArchive, String $remotePathSuffix, String $localPath) {
+    public Task<Boolean> createDownloadTask(boolean isArchive, String remotePathSuffix, String localPath) {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
@@ -1083,13 +1083,13 @@ public class Homepage {
 
                 try {
                     Logger.info("Network", "Selected the most available source \"" + source.tag + "\" (" + source.delay + "ms)");
-                    String remotePath = ($isArchive ? source.archivePreUrl : source.rawPreUrl) + $remotePathSuffix;
-                    Logger.info("Network", "Fetching " + remotePath + " to " + $localPath);
+                    String remotePath = (isArchive ? source.archivePreUrl : source.rawPreUrl) + remotePathSuffix;
+                    Logger.info("Network", "Fetching " + remotePath + " to " + localPath);
                     this.updateMessage("正在尝试与 " + source.tag + " 建立连接");
 
                     BufferedInputStream bis = null;
                     BufferedOutputStream bos = null;
-                    File file = new File($localPath);
+                    File file = new File(localPath);
                     URL urlFile = new URL(remotePath);
                     HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
 
@@ -1112,7 +1112,7 @@ public class Homepage {
                         }
                         this.updateProgress(max, max);
                         bos.flush();
-                        Logger.info("Network", "Fetched " + $localPath + " , size: " + sum);
+                        Logger.info("Network", "Fetched " + localPath + " , size: " + sum);
                     } finally {
                         try {
                             connection.getInputStream().close();
@@ -1133,17 +1133,17 @@ public class Homepage {
         };
     }
 
-    public Task<Boolean> createDownloadTask(String $remotePath, String $localPath) {
+    public Task<Boolean> createDownloadTask(String remotePath, String localPath) {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
                 this.updateMessage("正在尝试建立连接");
-                Logger.info("Network", "Fetching " + $remotePath + " to " + $localPath);
+                Logger.info("Network", "Fetching " + remotePath + " to " + localPath);
 
                 BufferedInputStream bis = null;
                 BufferedOutputStream bos = null;
-                File file = new File($localPath);
-                URL urlFile = new URL($remotePath);
+                File file = new File(localPath);
+                URL urlFile = new URL(remotePath);
                 HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(urlFile, httpTimeoutDefault, httpTimeoutDefault, isHttpsTrustAll);
 
                 try {
@@ -1165,7 +1165,7 @@ public class Homepage {
                     }
                     this.updateProgress(max, max);
                     bos.flush();
-                    Logger.info("Network", "Fetched " + $localPath + " , size: " + sum);
+                    Logger.info("Network", "Fetched " + localPath + " , size: " + sum);
                 } finally {
                     try {
                         connection.getInputStream().close();
@@ -1181,33 +1181,33 @@ public class Homepage {
         };
     }
 
-    public Task<Boolean> createUnzipTask(String $zipPath, String $destPath) {
+    public Task<Boolean> createUnzipTask(String zipPath, String destPath) {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                Logger.info("Unzip", "Unzipping " + $zipPath + " to " + $destPath);
-                IOUtils.ZipUtil.unzip($zipPath, $destPath, true);
-                Logger.info("Unzip", "Unzipped to " + $destPath + " , finished");
+                Logger.info("Unzip", "Unzipping " + zipPath + " to " + destPath);
+                IOUtils.ZipUtil.unzip(zipPath, destPath, true);
+                Logger.info("Unzip", "Unzipped to " + destPath + " , finished");
                 return this.isDone() && !this.isCancelled();
             }
         };
     }
 
-    public Task<Boolean> createModelsMovingTask(String $rootPath, String $modelsDataPath) {
+    public Task<Boolean> createModelsMovingTask(String rootPath, String modelsDataPath) {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                if (!new File($rootPath).isDirectory())
-                    throw new FileNotFoundException("The directory " + $rootPath + " not found.");
-                Path rootPath = new File($rootPath).toPath();
-                int rootPathCount = rootPath.getNameCount();
+                if (!new File(rootPath).isDirectory())
+                    throw new FileNotFoundException("The directory " + rootPath + " not found.");
+                Path root = new File(rootPath).toPath();
+                int rootPathCount = root.getNameCount();
                 final boolean[] hasDataset = {false};
 
                 Logger.info("Move", "Moving required files from unzipped files");
-                Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
+                Files.walkFileTree(root, new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        if (file.getNameCount() == (rootPathCount + 2) && file.getName(rootPathCount + 1).toString().equals($modelsDataPath)) {
+                        if (file.getNameCount() == (rootPathCount + 2) && file.getName(rootPathCount + 1).toString().equals(modelsDataPath)) {
                             Files.move(file, file.getFileName(), StandardCopyOption.REPLACE_EXISTING);
                             hasDataset[0] = true;
                         }
@@ -1226,7 +1226,7 @@ public class Homepage {
                     }
                 });
                 if (!hasDataset[0])
-                    throw new FileNotFoundException("The file " + $modelsDataPath + " not found.");
+                    throw new FileNotFoundException("The file " + modelsDataPath + " not found.");
                 try {
                     IOUtils.FileUtil.delete(new File(PathConfig.tempModelsUnzipDirPath).toPath(), false);
                     IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), false);
@@ -1239,9 +1239,9 @@ public class Homepage {
         };
     }
 
-    private void dealModelSearch(String $keyWords) {
+    private void dealModelSearch(String keyWords) {
         searchModelList.getItems().clear();
-        ArrayList<AssetCtrl> result = AssetCtrl.searchByKeyWords($keyWords, foundModelAssets);
+        ArrayList<AssetCtrl> result = AssetCtrl.searchByKeyWords(keyWords, foundModelAssets);
         ArrayList<String> assetIdList = AssetCtrl.getAssetLocations(result);
         String tag = "";
         if (assertModelLoaded(false))
@@ -1258,7 +1258,7 @@ public class Homepage {
                 }
             }
         }
-        Logger.info("ModelManager", "Search \"" + $keyWords + "\" (" + searchModelList.getItems().size() + ")");
+        Logger.info("ModelManager", "Search \"" + keyWords + "\" (" + searchModelList.getItems().size() + ")");
         searchModelList.refresh();
     }
 
@@ -1271,9 +1271,9 @@ public class Homepage {
         searchModelList.requestFocus();
     }
 
-    private void dealModelReload(boolean $doPopNotice) {
+    private void dealModelReload(boolean doPopNotice) {
         popLoading(e -> {
-            initModelAssets($doPopNotice);
+            initModelAssets(doPopNotice);
             initModelSearch();
             dealModelSearch("");
             if (!foundModelItems.isEmpty() && config.character_asset != null && !config.character_asset.isEmpty()) {
@@ -1289,45 +1289,45 @@ public class Homepage {
         });
     }
 
-    private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl $assetCtrl, JFXListView<JFXListCell<AssetCtrl>> $container) {
-        double width = $container.getPrefWidth();
-        width -= $container.getPadding().getLeft() + $container.getPadding().getRight();
+    private JFXListCell<AssetCtrl> getMenuItem(AssetCtrl assetCtrl, JFXListView<JFXListCell<AssetCtrl>> container) {
+        double width = container.getPrefWidth();
+        width -= container.getPadding().getLeft() + container.getPadding().getRight();
         width *= 0.75;
         double height = 30;
         double divide = 0.618;
         JFXListCell<AssetCtrl> item = new JFXListCell<>();
         item.getStyleClass().addAll("Search-models-item");
-        Label name = new Label($assetCtrl.toString());
+        Label name = new Label(assetCtrl.toString());
         name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
-        name.setPrefSize($assetCtrl.skinGroupName == null ? width : width * divide, height);
+        name.setPrefSize(assetCtrl.skinGroupName == null ? width : width * divide, height);
         name.setLayoutX(0);
-        Label alias1 = new Label($assetCtrl.skinGroupName);
+        Label alias1 = new Label(assetCtrl.skinGroupName);
         alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
         alias1.setPrefSize(width * (1 - divide), height);
-        alias1.setLayoutX($assetCtrl.skinGroupName == null ? 0 : width * divide);
+        alias1.setLayoutX(assetCtrl.skinGroupName == null ? 0 : width * divide);
 
         item.setPrefSize(width, height);
         item.setGraphic(new Group(name, alias1));
-        item.setItem($assetCtrl);
-        item.setId($assetCtrl.getLocation());
+        item.setItem(assetCtrl);
+        item.setId(assetCtrl.getLocation());
         return item;
     }
 
-    private void selectModel(AssetCtrl $asset, ListCell<AssetCtrl> $item) {
+    private void selectModel(AssetCtrl asset, ListCell<AssetCtrl> item) {
         // Reset
         if (selectedModelItem != null)
             selectedModelItem.getStyleClass().setAll("Search-models-item");
-        selectedModelItem = $item;
+        selectedModelItem = item;
         selectedModelItem.getStyleClass().add("Search-models-item-active");
         // Display details
-        selectedModelName.setText($asset.name);
-        selectedModelAppellation.setText($asset.appellation);
-        selectedModelSkinGroupName.setText($asset.skinGroupName);
-        selectedModelType.setText($asset.type);
-        Tooltip selectedModelNameTip = new Tooltip($asset.name);
-        Tooltip selectedModelAppellationTip = new Tooltip($asset.appellation);
-        Tooltip selectedModelSkinGroupNameTip = new Tooltip($asset.skinGroupName);
-        Tooltip selectedModelTypeTip = new Tooltip($asset.type);
+        selectedModelName.setText(asset.name);
+        selectedModelAppellation.setText(asset.appellation);
+        selectedModelSkinGroupName.setText(asset.skinGroupName);
+        selectedModelType.setText(asset.type);
+        Tooltip selectedModelNameTip = new Tooltip(asset.name);
+        Tooltip selectedModelAppellationTip = new Tooltip(asset.appellation);
+        Tooltip selectedModelSkinGroupNameTip = new Tooltip(asset.skinGroupName);
+        Tooltip selectedModelTypeTip = new Tooltip(asset.type);
         selectedModelNameTip.setStyle(tooltipStyle);
         selectedModelAppellationTip.setStyle(tooltipStyle);
         selectedModelSkinGroupNameTip.setStyle(tooltipStyle);
@@ -1337,15 +1337,15 @@ public class Homepage {
         selectedModelSkinGroupName.setTooltip(selectedModelSkinGroupNameTip);
         selectedModelType.setTooltip(selectedModelTypeTip);
         // Apply to config, but not to save
-        config.character_asset = $asset.getLocation();
-        config.character_files = $asset.assetList;
-        config.character_label = $asset.name;
+        config.character_asset = asset.getLocation();
+        config.character_files = asset.assetList;
+        config.character_label = asset.name;
     }
 
-    private boolean assertModelLoaded(boolean $doPopNotice) {
+    private boolean assertModelLoaded(boolean doPopNotice) {
         if (modelsDatasetFull == null) {
             // Not loaded:
-            if ($doPopNotice)
+            if (doPopNotice)
                 popNotice(IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "未能加载模型", "请确保模型加载成功后再进行此操作。",
                         "请先在[选项]中进行模型下载。\n如您已下载模型，请尝试点击[重载]按钮。", null).show();
             return false;
@@ -1355,22 +1355,22 @@ public class Homepage {
         }
     }
 
-    private static void fadeInNode(Node $node, Duration $duration, EventHandler<ActionEvent> $onFinished) {
-        FadeTransition fadeT = new FadeTransition($duration, $node);
-        $node.setVisible(true);
-        if ($onFinished != null)
-            fadeT.setOnFinished($onFinished);
+    private static void fadeInNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
+        node.setVisible(true);
+        if (onFinished != null)
+            fadeT.setOnFinished(onFinished);
         fadeT.setFromValue(0.025);
         fadeT.setToValue(1);
         fadeT.playFromStart();
     }
 
-    private static void fadeOutNode(Node $node, Duration $duration, EventHandler<ActionEvent> $onFinished) {
-        FadeTransition fadeT = new FadeTransition($duration, $node);
+    private static void fadeOutNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
         fadeT.setOnFinished(e -> {
-            $node.setVisible(false);
-            if ($onFinished != null)
-                $onFinished.handle(e);
+            node.setVisible(false);
+            if (onFinished != null)
+                onFinished.handle(e);
         });
         fadeT.setFromValue(0.975);
         fadeT.setToValue(0);

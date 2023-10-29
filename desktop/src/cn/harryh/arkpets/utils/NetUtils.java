@@ -70,18 +70,18 @@ public class NetUtils {
 
     public static class ConnectionUtil {
         /** Tests the real connection delay of the given URL (with a specified port).
-         * @param $url The URL to be tested.
-         * @param $port The port to connect.
-         * @param $timeoutMillis Timeout (ms).
+         * @param url The URL to be tested.
+         * @param port The port to connect.
+         * @param timeoutMillis Timeout (ms).
          * @return The delay (ms). {@code -1} when connection failed or timeout.
          */
-        public static int testDelay(String $url, int $port, int $timeoutMillis) {
+        public static int testDelay(String url, int port, int timeoutMillis) {
             Socket socket = new Socket();
             int delayMillis = -1;
             try {
-                SocketAddress address = new InetSocketAddress(new URL($url).getHost(), $port);
+                SocketAddress address = new InetSocketAddress(new URL(url).getHost(), port);
                 long start = System.currentTimeMillis();
-                socket.connect(address, $timeoutMillis);
+                socket.connect(address, timeoutMillis);
                 long stop = System.currentTimeMillis();
                 delayMillis = (int)(stop - start);
             } catch (IOException ignored) {
@@ -219,9 +219,9 @@ public class NetUtils {
         public int delay = -1;
         public long lastErrorTime = -1;
 
-        public Source(String $tag, String $preUrl) {
-            tag= $tag;
-            preUrl = $preUrl;
+        public Source(String tag, String preUrl) {
+            this.tag= tag;
+            this.preUrl = preUrl;
         }
 
         public void receiveError() {
@@ -233,17 +233,17 @@ public class NetUtils {
             return testDelay(delayTestPort, delayUpThreshold);
         }
 
-        public int testDelay(int $port, int $timeoutMillis) {
-            delay = ConnectionUtil.testDelay(preUrl, $port, $timeoutMillis);
+        public int testDelay(int port, int timeoutMillis) {
+            delay = ConnectionUtil.testDelay(preUrl, port, timeoutMillis);
             Logger.debug("Network", "Real delay for \"" + tag + "\" is " + delay + "ms");
             return delay;
         }
 
-        public static Source[] sortByDelay(Source[] $sources) {
-            for (Source s : $sources)
+        public static Source[] sortByDelay(Source[] sources) {
+            for (Source s : sources)
                 s.testDelay();
-            ArrayList<Source> sources = new ArrayList<>(Arrays.stream($sources).toList());
-            sources.sort((o1, o2) -> {
+            ArrayList<Source> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
+            sourcesList.sort((o1, o2) -> {
                 if (o1.delay == o2.delay)
                     return 0;
                 if (o1.delay < 0 && o2.delay >= 0)
@@ -252,14 +252,14 @@ public class NetUtils {
                     return -1;
                 return (o1.delay > o2.delay) ? 1 : -1;
             });
-            return sources.toArray(new Source[0]);
+            return sourcesList.toArray(new Source[0]);
         }
 
-        public static Source[] sortByOverallAvailability(Source[] $sources) {
-            for (Source s : $sources)
+        public static Source[] sortByOverallAvailability(Source[] sources) {
+            for (Source s : sources)
                 s.testDelay();
-            ArrayList<Source> sources = new ArrayList<>(Arrays.stream($sources).toList());
-            sources.sort((o1, o2) -> {
+            ArrayList<Source> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
+            sourcesList.sort((o1, o2) -> {
                 if (o1.lastErrorTime != o2.lastErrorTime)
                     return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
                 if (o1.delay == o2.delay)
@@ -270,7 +270,7 @@ public class NetUtils {
                     return -1;
                 return (o1.delay > o2.delay) ? 1 : -1;
             });
-            return sources.toArray(new Source[0]);
+            return sourcesList.toArray(new Source[0]);
         }
     }
 
@@ -279,23 +279,23 @@ public class NetUtils {
         public final String rawPreUrl;
         public final String archivePreUrl;
 
-        public GitHubSource(String $tag, String $preUrl) {
-            super($tag, $preUrl);
-            rawPreUrl = $preUrl;
-            archivePreUrl = $preUrl;
+        public GitHubSource(String tag, String preUrl) {
+            super(tag, preUrl);
+            rawPreUrl = preUrl;
+            archivePreUrl = preUrl;
         }
 
-        public GitHubSource(String $tag, String $rawPreUrl, String $archivePreUrl) {
-            super($tag, $rawPreUrl);
-            rawPreUrl = $rawPreUrl;
-            archivePreUrl = $archivePreUrl;
+        public GitHubSource(String tag, String rawPreUrl, String archivePreUrl) {
+            super(tag, rawPreUrl);
+            this.rawPreUrl = rawPreUrl;
+            this.archivePreUrl = archivePreUrl;
         }
 
-        public static GitHubSource[] sortByDelay(GitHubSource[] $sources) {
-            for (GitHubSource s : $sources)
+        public static GitHubSource[] sortByDelay(GitHubSource[] sources) {
+            for (GitHubSource s : sources)
                 s.testDelay();
-            ArrayList<GitHubSource> sources = new ArrayList<>(Arrays.stream($sources).toList());
-            sources.sort((o1, o2) -> {
+            ArrayList<GitHubSource> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
+            sourcesList.sort((o1, o2) -> {
                 if (o1.delay == o2.delay)
                     return 0;
                 if (o1.delay < 0 && o2.delay >= 0)
@@ -304,14 +304,14 @@ public class NetUtils {
                     return -1;
                 return (o1.delay > o2.delay) ? 1 : -1;
             });
-            return sources.toArray(new GitHubSource[0]);
+            return sourcesList.toArray(new GitHubSource[0]);
         }
 
-        public static GitHubSource[] sortByOverallAvailability(GitHubSource[] $sources) {
-            for (GitHubSource s : $sources)
+        public static GitHubSource[] sortByOverallAvailability(GitHubSource[] sources) {
+            for (GitHubSource s : sources)
                 s.testDelay();
-            ArrayList<GitHubSource> sources = new ArrayList<>(Arrays.stream($sources).toList());
-            sources.sort((o1, o2) -> {
+            ArrayList<GitHubSource> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
+            sourcesList.sort((o1, o2) -> {
                 if (o1.lastErrorTime != o2.lastErrorTime)
                     return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
                 if (o1.delay == o2.delay)
@@ -322,7 +322,7 @@ public class NetUtils {
                     return -1;
                 return (o1.delay > o2.delay) ? 1 : -1;
             });
-            return sources.toArray(new GitHubSource[0]);
+            return sourcesList.toArray(new GitHubSource[0]);
         }
     }
 }

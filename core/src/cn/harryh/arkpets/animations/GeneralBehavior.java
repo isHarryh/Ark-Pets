@@ -18,8 +18,8 @@ public class GeneralBehavior extends Behavior {
     protected final HashMap<AnimStage, AnimClipGroup> stageAnimMap;
     protected final HashMap<AnimStage, AnimDataWeight[]> stageAnimWeightMap;
 
-    public GeneralBehavior(ArkConfig $config, AnimClipGroup $animList) {
-        super($config, $animList);
+    public GeneralBehavior(ArkConfig config, AnimClipGroup animList) {
+        super(config, animList);
 
         stageAnimMap = anim_list.clusterByStage();
         stageAnimWeightMap = new HashMap<>();
@@ -56,13 +56,13 @@ public class GeneralBehavior extends Behavior {
         return stageCur;
     }
 
-    private AnimDataWeight[] getActionList(AnimClipGroup $animList) {
+    private AnimDataWeight[] getActionList(AnimClipGroup animList) {
         ArrayList<AnimDataWeight> actionList = new ArrayList<>(List.of(
-                new AnimDataWeight($animList.getLoopAnimData(AnimType.IDLE), (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))),
-                new AnimDataWeight($animList.getLoopAnimData(AnimType.SIT ).derive(50, 0), config.behavior_allow_sit  ? behaviorWeightLv2 : 0),
-                new AnimDataWeight($animList.getLoopAnimData(AnimType.MOVE).derive(0, +1), config.behavior_allow_walk ? behaviorWeightLv1 : 0),
-                new AnimDataWeight($animList.getLoopAnimData(AnimType.MOVE).derive(0, -1), config.behavior_allow_walk ? behaviorWeightLv1 : 0),
-                new AnimDataWeight($animList.getStrictAnimData(AnimType.SPECIAL), 16)
+                new AnimDataWeight(animList.getLoopAnimData(AnimType.IDLE), (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))),
+                new AnimDataWeight(animList.getLoopAnimData(AnimType.SIT ).derive(50, 0), config.behavior_allow_sit  ? behaviorWeightLv2 : 0),
+                new AnimDataWeight(animList.getLoopAnimData(AnimType.MOVE).derive(0, +1), config.behavior_allow_walk ? behaviorWeightLv1 : 0),
+                new AnimDataWeight(animList.getLoopAnimData(AnimType.MOVE).derive(0, -1), config.behavior_allow_walk ? behaviorWeightLv1 : 0),
+                new AnimDataWeight(animList.getStrictAnimData(AnimType.SPECIAL).join(animList.getLoopAnimData(AnimType.IDLE)), 16)
         ));
         actionList.removeIf(e -> e.anim().isEmpty());
         return actionList.toArray(new AnimDataWeight[0]);
@@ -75,9 +75,9 @@ public class GeneralBehavior extends Behavior {
 
     @Override
     public AnimData clickEnd() {
-        AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK).derive(false, false);
-        AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT).derive(false, false);
-        return (a2.isEmpty() ? a1 : a2).join(defaultAnim());
+        AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
+        AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);
+        return (a2.isEmpty() ? a1 : a2).derive(false, false).join(defaultAnim());
     }
 
     @Override

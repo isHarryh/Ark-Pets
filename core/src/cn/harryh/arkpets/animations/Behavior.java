@@ -16,24 +16,24 @@ abstract public class Behavior {
     protected int idxRec;
 
     /** Character Behavior Controller Instance.
-     * @param $config ArkConfig object.
-     * @param $animList The animation name list.
+     * @param config ArkConfig object.
+     * @param animList The animation name list.
      */
-    public Behavior(ArkConfig $config, AnimClipGroup $animList) {
+    public Behavior(ArkConfig config, AnimClipGroup animList) {
         action_list = null;
-        anim_list = $animList;
-        config = $config;
+        anim_list = animList;
+        this.config = config;
         deltaMin = 0.5f;
         autoCtrlReset();
     }
 
     /** Gets a random animation.
-     * @param $deltaTime The delta time.
+     * @param deltaTime The delta time.
      * @return AnimData object.
      */
-    public final AnimData autoCtrl(float $deltaTime) {
-        duraRec += $deltaTime;
-        timeRec += $deltaTime;
+    public final AnimData autoCtrl(float deltaTime) {
+        duraRec += deltaTime;
+        timeRec += deltaTime;
         if (timeRec >= deltaMin) {
             timeRec = 0f;
             if (duraRec >= action_list[idxRec].duration()) {

@@ -139,6 +139,10 @@ public class AnimClip {
         }
     }
 
+    /** Initializes an animation clip.
+     * @param name The full name of the animation.
+     * @param duration The duration of the animation (second).
+     */
     public AnimClip(String name, float duration) {
         ArrayList<String> elements = split(name);
         RecognitionResult<AnimType> temp = recognizeType(elements);
@@ -150,6 +154,9 @@ public class AnimClip {
         this.duration = duration;
     }
 
+    /** Initializes an animation clip.
+     * @param anim The Spine {@link Animation} instance.
+     */
     public AnimClip(Animation anim) {
         this(anim.getName(), anim.getDuration());
     }

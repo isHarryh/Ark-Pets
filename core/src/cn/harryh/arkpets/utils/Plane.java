@@ -26,75 +26,75 @@ public class Plane {
     private float droppedHeight = 0;
 
     /** Initializes a plane with gravity field.
-     * @param $world The collection of all available areas.
-     * @param $gravity The acceleration of gravity (px/s^2).
+     * @param world The collection of all available areas.
+     * @param gravity The acceleration of gravity (px/s^2).
      */
-    public Plane(ArrayList<RectArea> $world, float $gravity) {
+    public Plane(ArrayList<RectArea> world, float gravity) {
         barriers        = new ArrayList<>();
         pointCharges    = new ArrayList<>();
-        world       = $world;
-        obj         = new Vector2(0, 0);
-        position    = new Vector2(0, 0);
-        speed       = new Vector2(0, 0);
-        speedLimit  = new Vector2(0, 0);
-        bounce      = 0;
-        gravity     = $gravity;
-        airFrict    = 0;
-        staticFrict = 0;
+        this.world      = world;
+        obj             = new Vector2(0, 0);
+        position        = new Vector2(0, 0);
+        speed           = new Vector2(0, 0);
+        speedLimit      = new Vector2(0, 0);
+        this.gravity    = gravity;
+        bounce          = 0;
+        airFrict        = 0;
+        staticFrict     = 0;
     }
 
     /** Sets the bounce coefficient.
-     * @param $bounce The ratio of Ek to be reserved after the bounce.
+     * @param bounce The ratio of Ek to be reserved after the bounce.
      */
-    public void setBounce(float $bounce) {
-        bounce = $bounce > 1 ? 1 : ($bounce < 0 ? 0 : $bounce);
+    public void setBounce(float bounce) {
+        this.bounce = bounce > 1 ? 1 : (bounce < 0 ? 0 : bounce);
     }
 
     /** Sets the friction params.
-     * @param $airFrict The acceleration of air friction (px/s^2).
-     * @param $staticFrict The acceleration of static friction provided by the groud (px/s^2).
+     * @param airFrict The acceleration of air friction (px/s^2).
+     * @param staticFrict The acceleration of static friction provided by the groud (px/s^2).
      */
-    public void setFrict(float $airFrict, float $staticFrict) {
-        airFrict    = Math.max(0, $airFrict);
-        staticFrict = Math.max(0, $staticFrict);
+    public void setFrict(float airFrict, float staticFrict) {
+        this.airFrict    = Math.max(0, airFrict);
+        this.staticFrict = Math.max(0, staticFrict);
     }
 
     /** Sets the size of the object.
-     * @param $objWidth The width of the object (px).
-     * @param $objHeight The height of the object (px).
+     * @param objWidth The width of the object (px).
+     * @param objHeight The height of the object (px).
      */
-    public void setObjSize(float $objWidth, float $objHeight) {
-        obj.set($objWidth, $objHeight);
+    public void setObjSize(float objWidth, float objHeight) {
+        obj.set(objWidth, objHeight);
     }
 
     /** Sets the limitation of speed, 0=unlimited.
-     * @param $x Max speed in x-axis (px/s).
-     * @param $y Max speed in y-axis (px/s).
+     * @param x Max speed in x-axis (px/s).
+     * @param y Max speed in y-axis (px/s).
      */
-    public void setSpeedLimit(float $x, float $y) {
-        speedLimit.set(Math.max(0, $x), Math.max(0, $y));
+    public void setSpeedLimit(float x, float y) {
+        speedLimit.set(Math.max(0, x), Math.max(0, y));
     }
 
     /** Changes the position of the object forcibly,
      * which will cause velocity change.
-     * @param $deltaTime Delta time (s), set to 0 to avoid changing the velocity.
-     * @param $x New x-position (px).
-     * @param $y New y-position (px).
+     * @param deltaTime Delta time (s), set to 0 to avoid changing the velocity.
+     * @param x New x-position (px).
+     * @param y New y-position (px).
      */
-    public void changePosition(float $deltaTime, float $x, float $y) {
-        if ($deltaTime > 0)
-            speed.set(($x - position.x) / $deltaTime, ($y - position.y) / $deltaTime);
-        position.set($x, $y);
-        position.set(limitX($x), limitY($y));
+    public void changePosition(float deltaTime, float x, float y) {
+        if (deltaTime > 0)
+            speed.set((x - position.x) / deltaTime, (y - position.y) / deltaTime);
+        position.set(x, y);
+        position.set(limitX(x), limitY(y));
     }
 
     /** Updates the position of the object.
-     * @param $deltaTime Delta time (s).
+     * @param deltaTime Delta time (s).
      */
-    public void updatePosition(float $deltaTime) {
-        updateVelocity($deltaTime);
-        float deltaX = speed.x * $deltaTime;
-        float deltaY = speed.y * $deltaTime;
+    public void updatePosition(float deltaTime) {
+        updateVelocity(deltaTime);
+        float deltaX = speed.x * deltaTime;
+        float deltaY = speed.y * deltaTime;
         final float bottom = borderBottom();
         droppedHeight = Math.max(Math.signum(gravity) * (position.y - bottom), droppedHeight);
         if (position.y != bottom && limitY(deltaY + position.y) == bottom) {
@@ -107,26 +107,26 @@ public class Plane {
     }
 
     /** Sets a line barrier that can support the object.
-     * @param $posTop The y-position of the barrier (px).
-     * @param $posLeft The x-position of the barrier's left edge (px).
-     * @param $width The width of the barrier (px).
-     * @param $overCover Whether to set the highest priority to this barrier.
+     * @param posTop The y-position of the barrier (px).
+     * @param posLeft The x-position of the barrier's left edge (px).
+     * @param width The width of the barrier (px).
+     * @param overCover Whether to set the highest priority to this barrier.
      */
-    public void setBarrier(float $posTop, float $posLeft, float $width, boolean $overCover) {
-        if ($overCover)
-            barriers.add(0, new Vector3($posLeft, $posTop, $width));
+    public void setBarrier(float posTop, float posLeft, float width, boolean overCover) {
+        if (overCover)
+            barriers.add(0, new Vector3(posLeft, posTop, width));
         else
-            barriers.add(new Vector3($posLeft, $posTop, $width));
+            barriers.add(new Vector3(posLeft, posTop, width));
     }
 
     /** Sets a point charge whose excited electric field can repulse the object.
      * The position and quantity of the charge are fixed.
-     * @param $posTop The y-position of the charge (px).
-     * @param $posLeft The x-position of the charge (px).
-     * @param $quantityProduct The product of the point's quantity and the object's quantity (C^2).
+     * @param posTop The y-position of the charge (px).
+     * @param posLeft The x-position of the charge (px).
+     * @param quantityProduct The product of the point's quantity and the object's quantity (C^2).
      */
-    public void setPointCharge(float $posTop, float $posLeft, float $quantityProduct) {
-        pointCharges.add(new Vector3($posLeft, $posTop, $quantityProduct));
+    public void setPointCharge(float posTop, float posLeft, float quantityProduct) {
+        pointCharges.add(new Vector3(posLeft, posTop, quantityProduct));
     }
 
     /** Gets the x-position of the object.
@@ -188,13 +188,13 @@ public class Plane {
     }
 
     /** Updates the velocity of the object.
-     * @param $deltaTime Delta time (s).
+     * @param deltaTime Delta time (s).
      */
-    private void updateVelocity(float $deltaTime) {
+    private void updateVelocity(float deltaTime) {
         final float top = borderTop();
         final float bottom = borderBottom();
         // Gravity
-        speed.y -= gravity * $deltaTime;
+        speed.y -= gravity * deltaTime;
         if (position.y == bottom || (position.y + obj.y >= top && speed.y > 0))
             speed.y = 0;
         // Electrostatic forces
@@ -202,15 +202,15 @@ public class Plane {
             float dx = position.x + obj.x / 2f - pc.x;
             float dy = position.y + obj.y / 2f - pc.y;
             float hypot = (float)Math.hypot(dx, dy);
-            speed.x = applyElectrostaticEffect(speed.x, pc.z,  hypot, dx / hypot, $deltaTime);
-            speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , $deltaTime);
+            speed.x = applyElectrostaticEffect(speed.x, pc.z,  hypot, dx / hypot, deltaTime);
+            speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , deltaTime);
         }
         // Ground friction
         if (position.y == bottom)
-            speed.x = applyFriction(speed.x, staticFrict, $deltaTime);
+            speed.x = applyFriction(speed.x, staticFrict, deltaTime);
         // Air friction
-        speed.x = applyFriction(speed.x, airFrict, $deltaTime);
-        speed.y = applyFriction(speed.y, airFrict, $deltaTime);
+        speed.x = applyFriction(speed.x, airFrict, deltaTime);
+        speed.y = applyFriction(speed.y, airFrict, deltaTime);
         // Limit
         if (speedLimit.x != 0 && Math.abs(speed.x) > speedLimit.x)
             speed.x = Math.signum(speed.x) * speedLimit.x;
@@ -223,47 +223,47 @@ public class Plane {
     }
 
     /** Applies a friction to a velocity.
-     * @param $speed The original velocity (px/s).
-     * @param $frict The acceleration of friction (px/s^2).
-     * @param $deltaTime Delta time (s).
+     * @param speed The original velocity (px/s).
+     * @param frict The acceleration of friction (px/s^2).
+     * @param deltaTime Delta time (s).
      * @return New velocity (px/s).
      */
-    private float applyFriction(float $speed, float $frict, float $deltaTime) {
-        float delta = Math.signum($speed) * $frict * $deltaTime;
-        float estimated = $speed - delta;
+    private float applyFriction(float speed, float frict, float deltaTime) {
+        float delta = Math.signum(speed) * frict * deltaTime;
+        float estimated = speed - delta;
         return delta * estimated < 0 ? 0 : estimated;
     }
 
     /** Applies the electrostatic effect of a point charge to a velocity.
-     * @param $speed The original velocity (px/s).
-     * @param $quantityProduct The product of the point's quantity and the object's quantity (C^2).
-     * @param $distance The absolute distance between the point charge and the object.
-     * @param $cosine The cosine of the included angel between the distance and its projection on the direction of speed.
-     * @param $deltaTime Delta time (s).
+     * @param speed The original velocity (px/s).
+     * @param quantityProduct The product of the point's quantity and the object's quantity (C^2).
+     * @param distance The absolute distance between the point charge and the object.
+     * @param cosine The cosine of the included angel between the distance and its projection on the direction of speed.
+     * @param deltaTime Delta time (s).
      * @return New velocity (px/s).
      */
-    private float applyElectrostaticEffect(float $speed, float $quantityProduct, float $distance, float $cosine, float $deltaTime){
+    private float applyElectrostaticEffect(float speed, float quantityProduct, float distance, float cosine, float deltaTime){
         final float k   = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
         final float dm  = 20; // Min distance
-        $distance = Math.max(Math.abs($distance), dm); // Limit the distance
-        float delta = k * $quantityProduct / $distance / $distance * $cosine * $deltaTime;
-        return $speed + delta;
+        distance = Math.max(Math.abs(distance), dm); // Limit the distance
+        float delta = k * quantityProduct / distance / distance * cosine * deltaTime;
+        return speed + delta;
     }
 
     /** Limits the x-position to avoid overstepping.
-     * @param $x X (px).
+     * @param x X (px).
      * @return New x (px).
      */
-    private float limitX(float $x) {
-        return Math.max(borderLeft(), Math.min($x, borderRight() - obj.x));
+    private float limitX(float x) {
+        return Math.max(borderLeft(), Math.min(x, borderRight() - obj.x));
     }
 
     /** Limits the y-position to avoid overstepping.
-     * @param $y Y (px).
+     * @param y Y (px).
      * @return New y (px).
      */
-    private float limitY(float $y) {
-        return Math.max(borderBottom(), Math.min($y, borderTop() - obj.y));
+    private float limitY(float y) {
+        return Math.max(borderBottom(), Math.min(y, borderTop() - obj.y));
     }
 
     /** Gets the position of the top border.
@@ -325,54 +325,42 @@ public class Plane {
     }
 
 
-    public static class RectArea {
-        public final float left;
-        public final float right;
-        public final float top;
-        public final float bottom;
-
-        public RectArea(float $left, float $right, float $top, float $bottom) {
-            left     = $left;
-            right    = $right;
-            top      = $top;
-            bottom   = $bottom;
-        }
-
+    public record RectArea(float left, float right, float top, float bottom) {
         public float getWidth() {
-            return Math.abs(left - right);
-        }
+                return Math.abs(left - right);
+            }
 
         public float getHeight() {
             return Math.abs(top - bottom);
         }
 
-        public boolean isInArea(float $x, float $y) {
-            return isXInOrthographic($x) && isYInOrthographic($y);
+        public boolean isInArea(float x, float y) {
+            return isXInOrthographic(x) && isYInOrthographic(y);
         }
 
-        public boolean isInArea(float $x, float $y, float $allowanceX, float $allowanceY) {
-            return isXInOrthographic($x, $allowanceX) && isYInOrthographic($y, $allowanceY);
+        public boolean isInArea(float x, float y, float allowanceX, float allowanceY) {
+            return isXInOrthographic(x, allowanceX) && isYInOrthographic(y, allowanceY);
         }
 
-        public boolean isXInOrthographic(float $x) {
-            return $x >= left && $x <= right;
+        public boolean isXInOrthographic(float x) {
+            return x >= left && x <= right;
         }
 
-        public boolean isYInOrthographic(float $y) {
-            return $y >= bottom && $y <= top;
+        public boolean isYInOrthographic(float y) {
+            return y >= bottom && y <= top;
         }
 
-        public boolean isXInOrthographic(float $x, float $allowance) {
-            return $x >= left - $allowance && $x <= right + $allowance;
+        public boolean isXInOrthographic(float x, float allowance) {
+            return x >= left - allowance && x <= right + allowance;
         }
 
-        public boolean isYInOrthographic(float $y, float $allowance) {
-            return $y >= bottom - $allowance && $y <= top + $allowance;
+        public boolean isYInOrthographic(float y, float allowance) {
+            return y >= bottom - allowance && y <= top + allowance;
         }
 
         @Override
         public String toString() {
-            return "RectArea ^" + top + " >" + right + " v" + bottom + " <" + left;
-        }
+                return "RectArea ^" + top + " >" + right + " v" + bottom + " <" + left;
+            }
     }
 }

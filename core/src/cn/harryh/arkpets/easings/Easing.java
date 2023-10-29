@@ -12,54 +12,54 @@ abstract public class Easing {
     public float curValue;
 
     /** Easing handler instance.
-     * @param $from The start value.
-     * @param $to The end value.
-     * @param $duration The duration(second) of the whole easing process.
+     * @param from The start value.
+     * @param to The end value.
+     * @param duration The duration(second) of the whole easing process.
      */
-    public Easing(float $from, float $to, float $duration) {
-        FROM = $from;
-        TO = $to;
-        DURATION = $duration;
+    public Easing(float from, float to, float duration) {
+        FROM = from;
+        TO = to;
+        DURATION = duration;
         curDuration = 0;
-        curValue = $from;
+        curValue = from;
     }
 
     /** Gets a specific value directly.
-     * @param $curDuration The x-position of the process.
+     * @param curDuration The x-position of the process.
      * @return The y-position of the process.
      */
-    abstract float get(float $curDuration);
+    abstract float get(float curDuration);
 
     /** Updates the end value.
-     * @param $to The new end value.
+     * @param to The new end value.
      */
-    public void update(float $to) {
-        if ($to == TO)
+    public void update(float to) {
+        if (to == TO)
             return;
         FROM = curValue;
-        TO = $to;
+        TO = to;
         curDuration = 0;
     }
 
     /** Updates the end value and the duration.
-     * @param $to The new end value.
-     * @param $duration The new duration(second).
+     * @param to The new end value.
+     * @param duration The new duration(second).
      */
-    public void update(float $to, float $duration) {
-        if ($to == TO)
+    public void update(float to, float duration) {
+        if (to == TO)
             return;
         FROM = curValue;
-        TO = $to;
-        DURATION = $duration;
+        TO = to;
+        DURATION = duration;
         curDuration = 0;
     }
 
     /** Steps the easing process.
-     * @param $deltaTime The delta time.
+     * @param deltaTime The delta time.
      * @return The current value.
      */
-    public float step(float $deltaTime) {
-        curDuration += $deltaTime;
+    public float step(float deltaTime) {
+        curDuration += deltaTime;
         curValue = get(curDuration);
         return curValue;
     }

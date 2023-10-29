@@ -49,14 +49,14 @@ public class AssetCtrl {
     }
 
     /** Gets a single asset controller instance using the given asset directory.
-     * @param $assetDir File instance of the specified asset directory.
-     * @param $modelsDataset JSONObject of the models' dataset.
+     * @param assetDir File instance of the specified asset directory.
+     * @param modelsDataset JSONObject of the models' dataset.
      * @return The asset controller instance.
      */
-    public static AssetCtrl getAssetCtrl(File $assetDir, JSONObject $modelsDataset) {
-        if (AssetVerifier.isValidAsset($assetDir, $modelsDataset)) {
-            AssetCtrl assetCtrl = $modelsDataset.getObject($assetDir.getName(), AssetCtrl.class);
-            assetCtrl.assetDir = $assetDir;
+    public static AssetCtrl getAssetCtrl(File assetDir, JSONObject modelsDataset) {
+        if (AssetVerifier.isValidAsset(assetDir, modelsDataset)) {
+            AssetCtrl assetCtrl = modelsDataset.getObject(assetDir.getName(), AssetCtrl.class);
+            assetCtrl.assetDir = assetDir;
             if (assetCtrl.assetList == null && assetCtrl.assetId != null) {
                 // Compatible to lower version
                 HashMap<String, Object> defaultFileMap = new HashMap<>();
@@ -70,11 +70,11 @@ public class AssetCtrl {
     }
 
     /** Gets asset controller instances from the given root directory.
-     * @param $rootDir File instance of the specified root directory.
-     * @param $modelsDataset JSONObject of the models' dataset.
+     * @param rootDir File instance of the specified root directory.
+     * @param modelsDataset JSONObject of the models' dataset.
      * @return The list containing asset controller instances.
      */
-    public static ArrayList<AssetCtrl> getAllAssetCtrls(File $rootDir, JSONObject $modelsDataset) {
+    public static ArrayList<AssetCtrl> getAllAssetCtrls(File rootDir, JSONObject modelsDataset) {
         ArrayList<AssetCtrl> list = new ArrayList<>();
         /* WorkDir
          *  +-rootDir
@@ -85,17 +85,17 @@ public class AssetCtrl {
          *  |---subDir2
          *  |---...
          */
-        if ($rootDir.isDirectory()) {
-            File[] subDirs = $rootDir.listFiles(fp -> fp.getParent().equals($rootDir.getPath()));
+        if (rootDir.isDirectory()) {
+            File[] subDirs = rootDir.listFiles(fp -> fp.getParent().equals(rootDir.getPath()));
             if (subDirs == null)
                 return list;
             for (File subDir : subDirs) {
-                if ($modelsDataset.containsKey(subDir.getName())) {
-                    if (!AssetVerifier.isExistedAsset(subDir, $modelsDataset)) {
+                if (modelsDataset.containsKey(subDir.getName())) {
+                    if (!AssetVerifier.isExistedAsset(subDir, modelsDataset)) {
                         //System.out.println("Not Integral: " + subDir.getName());
                         continue;
                     }
-                    list.add(getAssetCtrl(subDir, $modelsDataset));
+                    list.add(getAssetCtrl(subDir, modelsDataset));
                 }
             }
         }
@@ -103,12 +103,12 @@ public class AssetCtrl {
     }
 
     /** Sorts the asset controllers.
-     * @param $assetList The specified asset controllers.
+     * @param assetList The specified asset controllers.
      * @return The sorted list.
      */
-    public static ArrayList<AssetCtrl> sortAssetCtrls(ArrayList<AssetCtrl> $assetList) {
+    public static ArrayList<AssetCtrl> sortAssetCtrls(ArrayList<AssetCtrl> assetList) {
         ArrayList<AssetCtrl> newList = new ArrayList<>();
-        for (AssetCtrl i : $assetList) {
+        for (AssetCtrl i : assetList) {
             boolean flag = true;
             for (AssetCtrl j : newList) {
                 if (j.equals(i)) {
@@ -123,27 +123,27 @@ public class AssetCtrl {
     }
 
     /** Gets all assets' locations of the given asset controllers.
-     * @param $assetList The specified asset controllers.
+     * @param assetList The specified asset controllers.
      * @return The list containing asset locations.
      */
-    public static ArrayList<String> getAssetLocations(ArrayList<AssetCtrl> $assetList) {
+    public static ArrayList<String> getAssetLocations(ArrayList<AssetCtrl> assetList) {
         ArrayList<String> result = new ArrayList<>();
-        for (AssetCtrl asset : $assetList)
+        for (AssetCtrl asset : assetList)
             result.add(asset.getLocation());
         return result;
     }
 
     /** Searches assets by keywords in the given asset controller list.
-     * @param $keywords The keywords.
-     * @param $assetList The specified asset controller list.
+     * @param keywords The keywords.
+     * @param assetList The specified asset controller list.
      * @return The list containing asset controller instances that matches the keywords.
      */
-    public static ArrayList<AssetCtrl> searchByKeyWords(String $keywords, ArrayList<AssetCtrl> $assetList) {
-        if ($keywords.isEmpty())
-            return $assetList;
-        String[] wordList = $keywords.split(" ");
+    public static ArrayList<AssetCtrl> searchByKeyWords(String keywords, ArrayList<AssetCtrl> assetList) {
+        if (keywords.isEmpty())
+            return assetList;
+        String[] wordList = keywords.split(" ");
         ArrayList<AssetCtrl> result = new ArrayList<>();
-        for (AssetCtrl asset : $assetList) {
+        for (AssetCtrl asset : assetList) {
             for (String word : wordList) {
                 if (asset.name != null &&
                         asset.name.toLowerCase().contains(word.toLowerCase())) {
@@ -162,16 +162,16 @@ public class AssetCtrl {
     }
 
     /** Searches index by relative asset path in the given asset controller list.
-     * @param $assetRelPath The relative asset path (without ext), like {@code "models\xxx_xxx"}.
-     * @param $assetList The specified asset controller list.
+     * @param assetRelPath The relative asset path (without ext), like {@code "models\xxx_xxx"}.
+     * @param assetList The specified asset controller list.
      * @return The index of the 1st matched asset, otherwise {@code 0} will be return by default.
      */
-    public static int searchByAssetRelPath(String $assetRelPath, ArrayList<AssetCtrl> $assetList) {
-        if ($assetRelPath.isEmpty())
+    public static int searchByAssetRelPath(String assetRelPath, ArrayList<AssetCtrl> assetList) {
+        if (assetRelPath.isEmpty())
             return 0;
-        String assetId = new File($assetRelPath).getName();
-        for (int i = 0; i < $assetList.size(); i++) {
-            if ($assetList.get(i).assetDir.getName().equalsIgnoreCase(assetId))
+        String assetId = new File(assetRelPath).getName();
+        for (int i = 0; i < assetList.size(); i++) {
+            if (assetList.get(i).assetDir.getName().equalsIgnoreCase(assetId))
                 return i;
         }
         return 0;
@@ -268,23 +268,23 @@ public class AssetCtrl {
         private final JSONObject data;
 
         /** Initializes an Asset Verifier using the given dataset.
-         * @param $modelsDataset The specified dataset.
+         * @param modelsDataset The specified dataset.
          */
-        public AssetVerifier(JSONObject $modelsDataset) {
-            data = $modelsDataset;
+        public AssetVerifier(JSONObject modelsDataset) {
+            data = modelsDataset;
         }
 
         /** Verifies the integrity of the given asset.
-         * @param $assetDir The asset directory.
+         * @param assetDir The asset directory.
          * @return Asset Status enumeration.
          */
-        public AssetStatus verify(File $assetDir) {
+        public AssetStatus verify(File assetDir) {
             AssetStatus result = AssetStatus.NONE;
-            if (isValidAsset($assetDir, data)) {
+            if (isValidAsset(assetDir, data)) {
                 result = AssetStatus.VALID;
-                if (isExistedAsset($assetDir, data)) {
+                if (isExistedAsset(assetDir, data)) {
                     result = AssetStatus.EXISTED;
-                    if (isCheckedAsset($assetDir, data)) {
+                    if (isCheckedAsset(assetDir, data)) {
                         result = AssetStatus.CHECKED;
                     }
                 }
@@ -292,46 +292,46 @@ public class AssetCtrl {
             return result;
         }
 
-        private static boolean isValidAsset(File $assetDir, JSONObject $modelsDataset) {
-            if ($assetDir == null || $modelsDataset == null)
+        private static boolean isValidAsset(File assetDir, JSONObject modelsDataset) {
+            if (assetDir == null || modelsDataset == null)
                 return false;
-            if (!$modelsDataset.containsKey($assetDir.getName())) {
-                Logger.warn("Verifier", "The asset directory " + $assetDir.getPath() + " is undefined.");
+            if (!modelsDataset.containsKey(assetDir.getName())) {
+                Logger.warn("Verifier", "The asset directory " + assetDir.getPath() + " is undefined.");
                 return false;
             }
             return true;
         }
 
-        private static boolean isExistedAsset(File $assetDir, JSONObject $modelsDataset) {
+        private static boolean isExistedAsset(File assetDir, JSONObject modelsDataset) {
             try {
-                if (!$assetDir.isDirectory()) {
-                    Logger.warn("Verifier", "The asset directory " + $assetDir.getPath() + " is missing.");
+                if (!assetDir.isDirectory()) {
+                    Logger.warn("Verifier", "The asset directory " + assetDir.getPath() + " is missing.");
                     return false;
                 }
                 return true;
             } catch (Exception e) {
-                Logger.warn("Verifier", "Failed to handle the asset " + $assetDir.getName());
+                Logger.warn("Verifier", "Failed to handle the asset " + assetDir.getName());
                 return false;
             }
         }
 
-        private static boolean isCheckedAsset(File $assetDir, JSONObject $modelsDataset) {
+        private static boolean isCheckedAsset(File assetDir, JSONObject modelsDataset) {
             try {
-                AssetCtrl assetCtrl = getAssetCtrl($assetDir, $modelsDataset);
+                AssetCtrl assetCtrl = getAssetCtrl(assetDir, modelsDataset);
                 if (!assetCtrl.getAccessor().isAvailable())
                     return true; // Skip data-emptied asset (marked as verified)
-                ArrayList<String> existed = new ArrayList<>(List.of(Objects.requireNonNull($assetDir.list())));
+                ArrayList<String> existed = new ArrayList<>(List.of(Objects.requireNonNull(assetDir.list())));
                 existed.replaceAll(String::toLowerCase);
                 for (String fileName : assetCtrl.getAccessor().getAllFiles()) {
                     fileName = fileName.toLowerCase();
                     if (!existed.contains(fileName)) {
-                        Logger.warn("Verifier", "The asset file " + fileName + " (" + $assetDir + ") is missing.");
+                        Logger.warn("Verifier", "The asset file " + fileName + " (" + assetDir + ") is missing.");
                         return false;
                     }
                 }
                 return true;
             } catch (Exception e) {
-                Logger.warn("Verifier", "Failed to handle the asset " + $assetDir.getName());
+                Logger.warn("Verifier", "Failed to handle the asset " + assetDir.getName());
                 return false;
             }
         }

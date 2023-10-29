@@ -21,7 +21,7 @@ abstract public class ArgPending {
      */
     public ArgPending(String pattern, String[] args) {
         this.pattern = pattern;
-        this.judge(args);
+        this.handle(args);
     }
 
     /** Handles a given arguments list.
@@ -29,7 +29,7 @@ abstract public class ArgPending {
      * @param args The given arguments list to be dealt.
      * @return Whether the pattern specified before matches one of the arguments.
      */
-    public boolean judge(String[] args) {
+    public boolean handle(String[] args) {
         if (args.length == 0)
             return false;
         String addition = null;

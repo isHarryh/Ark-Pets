@@ -41,8 +41,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private EasingLinearVector2 WD_poseas; // Window Position Easing
 	private int OFFSET_Y = 0;
 
-	public ArkPets(String $title) {
-		APP_TITLE = $title;
+	public ArkPets(String title) {
+		APP_TITLE = title;
 	}
 
 	@Override
@@ -260,8 +260,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
 	}
 
-	public void setWindowTransparent(boolean $transparent) {
-		if ($transparent)
+	public void setWindowTransparent(boolean transparent) {
+		if (transparent)
 			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() | HWndCtrl.WS_EX_TRANSPARENT);
 		else
 			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() & ~HWndCtrl.WS_EX_TRANSPARENT);
@@ -423,24 +423,24 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return (plane.getX() >= plane.borderRight() - WD_W && len > 0) || (plane.getX() <= plane.borderLeft() && len < 0);
 	}
 
-	private void setWindowPosTar(float $pos_x, float $pos_y) {
-		WD_postar.set($pos_x, $pos_y);
-		WD_poseas.eX.update($pos_x);
-		WD_poseas.eY.update($pos_y + OFFSET_Y);
+	private void setWindowPosTar(float pos_x, float pos_y) {
+		WD_postar.set(pos_x, pos_y + OFFSET_Y);
+		WD_poseas.eX.update(pos_x);
+		WD_poseas.eY.update(pos_y + OFFSET_Y);
 	}
 
-	private void setWindowPosCur(float $deltaTime) {
-		WD_poscur.set(WD_poseas.eX.step($deltaTime), WD_poseas.eY.step($deltaTime));
+	private void setWindowPosCur(float deltaTime) {
+		WD_poscur.set(WD_poseas.eX.step(deltaTime), WD_poseas.eY.step(deltaTime));
 		setWindowPos((int)WD_poscur.x, (int)WD_poscur.y, false);
 	}
 
-	public void setWindowAlphaTar(float $alpha) {
-		WD_alpha.update($alpha);
+	public void setWindowAlphaTar(float alpha) {
+		WD_alpha.update(alpha);
 	}
 
-	private void setWindowAlphaCur(float $deltaTime) {
+	private void setWindowAlphaCur(float deltaTime) {
 		if (WD_alpha.curValue == WD_alpha.TO) return;
-		WD_alpha.step($deltaTime);
+		WD_alpha.step(deltaTime);
 		hWndMine.setWindowAlpha(WD_alpha.curValue);
 	}
 
@@ -451,17 +451,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		private float accumTime;
 
 		/** Loop Controller instance.
-		 * @param $minIntervalTime The minimal interval time for each loop.
+		 * @param minIntervalTime The minimal interval time for each loop.
 		 */
-		public LoopCtrl(float $minIntervalTime) {
-			minIntervalTime = $minIntervalTime;
+		public LoopCtrl(float minIntervalTime) {
+			this.minIntervalTime = minIntervalTime;
 		}
 
 		/** Returns true if the loop is executable now.
-		 * @param $deltaTime The updated delta time.
+		 * @param deltaTime The updated delta time.
 		 */
-		public boolean isExecutable(float $deltaTime) {
-			accumTime += $deltaTime;
+		public boolean isExecutable(float deltaTime) {
+			accumTime += deltaTime;
 			if (accumTime >= minIntervalTime) {
 				accumTime = 0;
 				return true;
