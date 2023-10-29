@@ -58,9 +58,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
 		cha = new ArkChar(config.character_asset, new AssetCtrl.AssetAccessor(config.character_files), skelBaseScale);
-		cha.setCanvas(APP_FPS);
-		behavior = new GeneralBehavior(config, cha.anim_list);
-		cha.setAnimation(behavior.defaultAnim());
+		cha.setCanvas();
+		behavior = new GeneralBehavior(config, cha.animList);
+		cha.composer.offer(behavior.defaultAnim());
 		Logger.info("Animation", "Animation stages " + behavior.getStages());
 		// 3.Window params setup
 		WD_poscur = new Vector2(0, 0);
@@ -88,24 +88,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void render() {
 		// 1.Render the next frame.
-		cha.next();
-		if (cha.anim_frame.isLoopEnd()) {
-			// When an animation's loop ends:
-			Logger.debug("Monitor", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int)Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-		}
+		cha.renderToScreen();
 
 		// 2.Select a new animation.
 		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
 		if (!mouse_drag) { // If no dragging:
 			plane.updatePosition(Gdx.graphics.getDeltaTime());
-			if (cha.anim_queue[0].mobility() != 0) {
-				if (willReachBorder(cha.anim_queue[0].mobility())) {
+			if (cha.getPlaying().mobility() != 0) {
+				if (willReachBorder(cha.getPlaying().mobility())) {
 					// Turn around if auto-walk cause the collision from screen border.
-					newAnim = cha.anim_queue[0];
-					newAnim = new AnimData(newAnim.animClip(), null, newAnim.loop(), newAnim.interruptable(), newAnim.offsetY(), -newAnim.mobility());
+					newAnim = cha.getPlaying();
+					newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), -newAnim.mobility());
 					tray.keepAnim = tray.keepAnim == null ? null : newAnim;
 				}
-				walkWindow(0.85f * cha.anim_queue[0].mobility());
+				walkWindow(0.85f * cha.getPlaying().mobility());
 			}
 		} else { // If dragging:
 			newAnim = behavior.dragging();
@@ -169,11 +165,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
 			if (button == Input.Buttons.LEFT) {
-				cha.setAnimation(behavior.clickStart());
+				Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int)Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+				changeAnimation(behavior.clickStart());
 				tray.hideDialog();
 				return true;
 			} else if (button == Input.Buttons.RIGHT) {
-				Logger.debug("Plane Debug Message", plane.getDebugMsg());
+				Logger.debug("Plane Debug Msg", plane.getDebugMsg());
 				// Toggle tray dialog:
 				tray.toggleDialog((int)(plane.getX() + screenX), (int)(-plane.getY() - WD_H));
 				return true;
@@ -205,9 +202,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 					changeAnimation(behavior.clickEnd());
 				else {
 					cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
-					if (tray.keepAnim != null && cha.anim_queue[0].mobility() != 0) {
-						AnimData newAnim = cha.anim_queue[0];
-						newAnim = new AnimData(newAnim.animClip(), null, newAnim.loop(), newAnim.interruptable(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
+					if (tray.keepAnim != null && cha.getPlaying().mobility() != 0) {
+						AnimData newAnim = cha.getPlaying();
+						newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
 						tray.keepAnim = newAnim;
 					}
 				}

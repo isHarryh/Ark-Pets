@@ -85,7 +85,7 @@ public class ArkTray {
         JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
-            keepAnim = arkPets.cha.anim_queue[0];
+            keepAnim = arkPets.cha.getPlaying();
             popMenu.remove(optKeepAnimEn);
             popMenu.add(optKeepAnimDis, 1);
         });
@@ -112,6 +112,11 @@ public class ArkTray {
         optChangeStage.addActionListener(e -> {
             Logger.info("Tray","Request to change stage");
             arkPets.changeStage();
+            if (keepAnim != null) {
+                keepAnim = null;
+                popMenu.remove(optKeepAnimDis);
+                popMenu.add(optKeepAnimEn, 1);
+            }
         });
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");

@@ -125,11 +125,8 @@ public class AnimClipGroup implements Collection<AnimClip> {
         AnimClip loop = found.findAnimations(AnimModifier.LOOP).get(0);
         AnimClip none = found.findAnimations(AnimModifier.NONE).get(0);
         AnimClip center = loop != null ? loop : none;
-        if (center != null) {
-            AnimData result = new AnimData(center);
-            result = result.derive(true, true);
-            return result;
-        }
+        if (center != null)
+            return new AnimData(center, null, true, false, 0, 0);
         return new AnimData(null);
     }
 
@@ -144,11 +141,8 @@ public class AnimClipGroup implements Collection<AnimClip> {
         AnimClip loop = found.findAnimations(AnimModifier.LOOP).get(0);
         AnimClip none = found.findAnimations(AnimModifier.NONE).get(0);
         AnimClip center = loop != null ? loop : none;
-        if (center != null) {
-            AnimData result = new AnimData(center);
-            result = result.derive(false, false);
-            return result;
-        }
+        if (center != null)
+            return new AnimData(center, null, false, true);
         return new AnimData(null);
     }
 
