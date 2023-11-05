@@ -6,7 +6,7 @@
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code><b> v2.2 </b></code> <br>
+      <code><b> v2.3 </b></code> <br>
       <sub>
          <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
       </sub>
@@ -32,10 +32,12 @@
     4. 桌宠会在其他桌宠靠近时被排斥推动
     5. 桌宠活动范围的[下边界距离](#额外说明)可以调整
     6. 桌宠可以被拖拽到扩展显示屏上
-- 实现了任务栏托盘图标 <details><summary>查看详情</summary>
-    1. 托盘菜单可以选择是否保持当前动作
-    2. 托盘菜单可以选择是否启用[透明模式](#额外说明)
-    3. 托盘菜单可以用于退出桌宠
+- 实现了托盘和右键菜单 <details><summary>查看详情</summary>
+    1. 右键系统托盘或桌宠本体均可以弹出菜单
+    2. 菜单可以选择是否保持当前动作
+    3. 菜单可以选择是否启用[透明模式](#额外说明)
+    4. 菜单可以切换多形态角色的形态
+    5. 菜单可以用于退出桌宠
 - 支持[开机自启动](#额外说明)
 
 ### 效果预览图
@@ -51,8 +53,6 @@
 以下内容可能在接下来的数个版本内得到实现：
 - 支持收藏夹功能
 - 支持将动态立绘作为桌宠启动
-- 支持右键桌宠本体直接弹出菜单
-- 支持部分敌方首领的阶段形态切换
 - 支持一键关闭所有已被启动的桌宠
 
 ### 相关文档
@@ -68,7 +68,7 @@
 1. 请[**前往此页面**](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 **ArkPets-Setup.exe** 安装包。
 2. 下载完成后，请运行所下载的安装包以进行软件的安装。
 3. 安装完成后，请通过桌面快捷方式等途径，打开 ArkPets 启动器。
-4. 打开启动器后，首次使用需要 **下载模型文件** 。请进入启动器“选项”页面，在“模型下载”处点击“全部下载”。（下载过程可能持续1~2分钟，下载总大小约为120MB）
+4. 打开启动器后，首次使用需要 **下载模型文件** 。请进入启动器“选项”页面，在“模型下载”处点击“全部下载”。（下载过程可能持续1~2分钟，下载总大小约为140MB）
 5. 最后，进入启动器“模型”页面即可检索并选中想要作为桌宠启动的角色，然后点击左下角“启动”按钮即可。  
 
 > 提示：
@@ -100,6 +100,5 @@
 本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
 
 ### 参与贡献
-您可以通过提交 Issues 等各种方式参与本项目的贡献。
-- 另见 [提交 Issues 必看指引](docs/Issues.md)
-- 另见 [开发者 Wiki](https://github.com/isHarryh/Ark-Pets/wiki)
+您可以通过提交 [Issues](https://github.com/isHarryh/Ark-Pets/issues) 等各种方式参与本项目的贡献。提交 Issues 前，请确认您的议题与已有的议题不重复。提交 Issues 时，请您完整地填写议题模板。
+- 另见 ~~很久没更新的~~ [开发者 Wiki](https://github.com/isHarryh/Ark-Pets/wiki)

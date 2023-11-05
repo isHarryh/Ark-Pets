@@ -4,7 +4,7 @@
 package cn.harryh.arkpets.utils;
 
 
-/** The class representing a semantic version.
+/** The class represents a semantic version.
  * <hr>
  * Given a version number {@code MAJOR.MINOR.PATCH}, increment the:
  * <ul>

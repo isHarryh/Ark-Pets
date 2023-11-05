@@ -169,20 +169,20 @@ public class Plane {
      */
     public String getDebugMsg() {
         // Primary debug messages:
-        String msg = this + "\n";
-        msg += "Position:\t" + Math.round(position.x) + "\t" + Math.round(position.y) + (getDropping() ? "\t(dropping)" : "") + "\n";
-        msg += "Velocity:\t" + Math.round(speed.x) + "\t" + Math.round(speed.y) + "\n";
-        msg += "Borders:\t^" + Math.round(borderTop()) + "\t>" + Math.round(borderRight()) + "\tv" + Math.round(borderBottom()) + "\t<" + Math.round(borderLeft()) + "\n";
-        msg += "Areas:\t" + world.size() + "\n";
+        String msg = this.toString();
+        msg += "\nPosition:\t" + Math.round(position.x) + "\t" + Math.round(position.y) + (getDropping() ? "\t(dropping)" : "");
+        msg += "\nVelocity:\t" + Math.round(speed.x) + "\t" + Math.round(speed.y);
+        msg += "\nBorders:\t^" + Math.round(borderTop()) + "\t>" + Math.round(borderRight()) + "\tv" + Math.round(borderBottom()) + "\t<" + Math.round(borderLeft());
+        msg += "\nAreas:\t" + world.size();
         // Additional debug messages:
         StringBuilder msgBuilder1 = new StringBuilder(msg);
         for (RectArea i : world)
-            msgBuilder1.append("- ").append(i.toString()).append("\n");
+            msgBuilder1.append("\n- ").append(i.toString());
         msg = msgBuilder1.toString();
-        msg += "Barriers:\t" + barriers.size() + "\n";
+        msg += "\nBarriers:\t" + barriers.size();
         StringBuilder msgBuilder2 = new StringBuilder(msg);
         for (Vector3 i : barriers)
-            msgBuilder2.append("- Y = ").append(i.y).append(", X range = (").append(i.x).append(",").append(i.x + i.z).append(")\n");
+            msgBuilder2.append("\n- Y = ").append(i.y).append(", X range = (").append(i.x).append(",").append(i.x + i.z).append(")");
         msg = msgBuilder2.toString();
         return msg;
     }

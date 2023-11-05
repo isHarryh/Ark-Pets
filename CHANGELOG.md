@@ -3,6 +3,24 @@
 ***目前最新可用版本：***
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
+## v2.3
+| **新增**      |                                          |
+|:------------|:-----------------------------------------|
+| [`a31afcf`] | 新增了右键桌宠本体即可弹出菜单的功能。                      |
+| [`17d3fde`] | 新增了可以在菜单中切换桌宠形态的功能，现在可以切换拥有多个形态的敌方领袖的形态。 |
+
+| **修复**                 |                                                  |
+|:-----------------------|:-------------------------------------------------|
+| [`#39`]<br>[`87c2263`] | 进一步修复了有概率出现桌宠本体程序在任务栏中无法隐藏的问题。                   |
+| [`17d3fde`]            | 进一步修复了个别敌方角色的部分动作的选择逻辑异常的问题。<br>重构了动画名识别和行为控制系统。 |
+| [`#48`]<br>[`b72421a`] | 修复了桌宠在保持坐下动作时拖动会导致异常浮动的问题。<br>重构了缓动控制系统。         |
+
+| **优化**      |                                          |
+|:------------|:-----------------------------------------|
+| [`0fb103c`] | 优化了 Windows 安装程序的语言本地化（修订了简体中文，新增了繁体中文）。 |
+| [`a31afcf`] | 优化了托盘菜单的外观表现。                            |
+| [`e046e1c`] | 优化了动画队列的代码逻辑。                            |
+
 ## v2.2
 | **新增**      |                                         |
 |:------------|:----------------------------------------|
@@ -191,6 +209,7 @@
 [`#12`]: https://github.com/isHarryh/Ark-Pets/issues/12
 [`#34`]: https://github.com/isHarryh/Ark-Pets/issues/34
 [`#39`]: https://github.com/isHarryh/Ark-Pets/issues/39
+[`#48`]: https://github.com/isHarryh/Ark-Pets/issues/48
 [`2bc0079`]: https://github.com/isHarryh/Ark-Pets/commit/2bc0079b922684b1d4850f9211225dcf803e555c
 [`48ef339`]: https://github.com/isHarryh/Ark-Pets/commit/48ef339dd78711e208ded8c5148569d8b89690b1
 [`95e6a1a`]: https://github.com/isHarryh/Ark-Pets/commit/95e6a1ace8d047ac51314e7d5572ce4169fa9f84
@@ -237,3 +256,9 @@
 [`2d76421`]: https://github.com/isHarryh/Ark-Pets/commit/2d76421016d7e4629afcb9699793a24c626c274c
 [`9c0edf9`]: https://github.com/isHarryh/Ark-Pets/commit/9c0edf93dbc193b9e10f7c8caa7306d95fef873e
 [`6fbcac2`]: https://github.com/isHarryh/Ark-Pets/commit/6fbcac231fd9964c5bd61089e6307d350c825f8d
+[`0fb103c`]: https://github.com/isHarryh/Ark-Pets/commit/0fb103c0f9aa6e5181242a11bf616fc8e439e42e
+[`87c2263`]: https://github.com/isHarryh/Ark-Pets/commit/87c226315f4fe84c300d3403258f5e68bed67f92
+[`a31afcf`]: https://github.com/isHarryh/Ark-Pets/commit/a31afcfd38e5cbc8a7e1bcde6c3e3dd72e281ad3
+[`17d3fde`]: https://github.com/isHarryh/Ark-Pets/commit/17d3fded56a6b92b4dabe62945897b8b7df1514b
+[`e046e1c`]: https://github.com/isHarryh/Ark-Pets/commit/e046e1c67ccbd61cde7e50927eccf9c20c7ee736
+[`b72421a`]: https://github.com/isHarryh/Ark-Pets/commit/b72421a90b9263c6f25fe76053f139ffa445a981
