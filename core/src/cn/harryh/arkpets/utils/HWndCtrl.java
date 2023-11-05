@@ -179,6 +179,17 @@ public class HWndCtrl {
         User32.INSTANCE.SetWindowPos(hWnd, insertAfter.hWnd, x, y, w, h, WinUser.SWP_NOACTIVATE);
     }
 
+    /** Sets the window's ability to be passed through.
+     * @param transparent Whether the window can be passed through.
+     */
+    public void setWindowTransparent(boolean transparent) {
+        if (isEmpty()) return;
+        if (transparent)
+            setWindowExStyle(getWindowExStyle() | HWndCtrl.WS_EX_TRANSPARENT);
+        else
+            setWindowExStyle(getWindowExStyle() & ~HWndCtrl.WS_EX_TRANSPARENT);
+    }
+
     /** Gets the current list of windows.
      * @param only_visible Whether exclude the invisible window.
      * @return An ArrayList consists of HWndCtrls.

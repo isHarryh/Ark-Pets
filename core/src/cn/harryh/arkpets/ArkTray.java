@@ -97,15 +97,15 @@ public class ArkTray {
         });
         optTransparentEn.addActionListener(e -> {
             Logger.info("Tray", "Transparent enabled");
-            arkPets.setWindowAlphaTar(0.75f);
-            arkPets.setWindowTransparent(true);
+            arkPets.windowAlpha.reset(0.75f);
+            arkPets.hWndMine.setWindowTransparent(true);
             popMenu.remove(optTransparentEn);
             popMenu.add(optTransparentDis, 2);
         });
         optTransparentDis.addActionListener(e -> {
             Logger.info("Tray", "Transparent disabled");
-            arkPets.setWindowAlphaTar(1);
-            arkPets.setWindowTransparent(false);
+            arkPets.windowAlpha.reset(1f);
+            arkPets.hWndMine.setWindowTransparent(false);
             popMenu.remove(optTransparentDis);
             popMenu.add(optTransparentEn, 2);
         });
@@ -120,7 +120,7 @@ public class ArkTray {
         });
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");
-            arkPets.setWindowAlphaTar(0);
+            arkPets.windowAlpha.reset(0f);
             remove();
             try {
                 Thread.sleep((long)(linearEasingDuration * 1000));

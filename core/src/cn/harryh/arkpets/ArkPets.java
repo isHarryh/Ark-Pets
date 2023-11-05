@@ -4,9 +4,8 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.*;
-import cn.harryh.arkpets.easings.EasingLinear;
-import cn.harryh.arkpets.easings.EasingLinearVector2;
 import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.transitions.*;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -26,20 +25,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public ArkTray tray;
 	public GeneralBehavior behavior;
 
+	public TransitionFloat windowAlpha; // Window Opacity Easing
+	public TransitionVector2 windowPosition; // Window Position Easing
+
+	public HWndCtrl hWndMine;
 	private HWndCtrl hWndTopmost;
 	private LoopCtrl getHWndLoopCtrl;
 
+	private final String APP_TITLE;
 	private int APP_FPS = fpsDefault;
 	private float WD_SCALE; // Window Scale
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
+	private int offsetY = 0;
 	private boolean isToolwindowStyle;
-
-	private Vector2 WD_poscur; // Window Current Position
-	private Vector2 WD_postar; // Window Target Position
-	private EasingLinear WD_alpha; // Window Opacity Easing
-	private EasingLinearVector2 WD_poseas; // Window Position Easing
-	private int OFFSET_Y = 0;
 
 	public ArkPets(String title) {
 		APP_TITLE = title;
@@ -60,13 +59,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		cha = new ArkChar(config.character_asset, new AssetCtrl.AssetAccessor(config.character_files), skelBaseScale);
 		cha.setCanvas();
 		behavior = new GeneralBehavior(config, cha.animList);
-		cha.composer.offer(behavior.defaultAnim());
+		cha.setAnimation(behavior.defaultAnim());
 		Logger.info("Animation", "Animation stages " + behavior.getStages());
 		// 3.Window params setup
-		WD_poscur = new Vector2(0, 0);
-		WD_postar = new Vector2(0, 0);
-		WD_poseas = new EasingLinearVector2(new EasingLinear(0, 1, linearEasingDuration));
-		WD_alpha = new EasingLinear(0, 1, linearEasingDuration);
+		windowPosition = new TransitionVector2(TernaryFunction.LINEAR, linearEasingDuration);
+		windowAlpha = new TransitionFloat(TernaryFunction.LINEAR, linearEasingDuration);
+		windowAlpha.reset(1f);
 		WD_SCALE = config.display_scale;
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
@@ -78,7 +76,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
-		promiseToolwindowStyle(1000);
 		// 5.Tray icon setup
 		tray = new ArkTray(this);
 		// Setup complete
@@ -88,7 +85,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void render() {
 		// 1.Render the next frame.
-		cha.renderToScreen();
+		cha.renderToBatch();
 
 		// 2.Select a new animation.
 		AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
@@ -115,10 +112,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 		changeAnimation(newAnim); // Apply the new anim.
 
-		// 3.Window activities.
-		setWindowPosTar(plane.getX(), - (WD_H + plane.getY()));
-		setWindowPosCur(Gdx.graphics.getDeltaTime());
-		setWindowAlphaCur(Gdx.graphics.getDeltaTime());
+		// 3.Window properties.
+		windowPosition.reset(plane.getX(), - (WD_H + plane.getY()) + offsetY);
+		windowPosition.addProgress(Gdx.graphics.getDeltaTime());
+		setWindowPos();
+		if (!windowAlpha.isEnded()) {
+			windowAlpha.addProgress(Gdx.graphics.getDeltaTime());
+			hWndMine.setWindowAlpha(windowAlpha.now());
+		}
 		promiseToolwindowStyle(1);
 	}
 
@@ -149,12 +150,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (animData != null && !animData.isEmpty()) {
 			// If it is needed to change animation:
 			if (cha.setAnimation(animData))
-				OFFSET_Y = (int)(animData.offsetY() * config.display_scale);
+				offsetY = (int)(animData.offsetY() * config.display_scale);
 		}
 	}
 
-
 	/* INPUT PROCESS */
+
 	private final Vector2 mouse_pos = new Vector2();
 	private int mouse_intention_x = 1;
 	private boolean mouse_drag = false;
@@ -172,7 +173,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			} else if (button == Input.Buttons.RIGHT) {
 				Logger.debug("Plane Debug Msg", plane.getDebugMsg());
 				// Toggle tray dialog:
-				tray.toggleDialog((int)(plane.getX() + screenX), (int)(-plane.getY() - WD_H));
+				tray.toggleDialog((int)(plane.getX() + screenX), (int)(- plane.getY() - WD_H));
 				return true;
 			}
 		}
@@ -185,10 +186,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		mouse_drag = true;
 		int t = (int)Math.signum(screenX - mouse_pos.x);
 		mouse_intention_x = t == 0 ? mouse_intention_x : t;
-		int x = (int)(WD_poscur.x + screenX - mouse_pos.x);
-		int y = (int)(WD_poscur.y + screenY - mouse_pos.y);
+		int x = (int)(windowPosition.now().x + screenX - mouse_pos.x);
+		int y = (int)(windowPosition.now().y + screenY - mouse_pos.y);
 		plane.changePosition(Gdx.graphics.getDeltaTime(), x, - (WD_H + y));
-		setWindowPos((int)plane.getX(),  - (WD_H + (int)plane.getY()), true);
+		windowPosition.setToEnd();
 		return true;
 	}
 
@@ -197,18 +198,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.debug("Input", "Click- Btn " + button +" @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
-			if (!mouse_drag)
-				if (button == Input.Buttons.LEFT)
-					changeAnimation(behavior.clickEnd());
-				else {
-					cha.setPositionTar(cha.positionTar.x, cha.positionTar.y, mouse_intention_x);
-					if (tray.keepAnim != null && cha.getPlaying().mobility() != 0) {
-						AnimData newAnim = cha.getPlaying();
-						newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
-						tray.keepAnim = newAnim;
-					}
-				}
-		}
+            if (mouse_drag) {
+				cha.position.reset(cha.position.end().x, cha.position.end().y, mouse_intention_x);
+                if (tray.keepAnim != null && cha.getPlaying().mobility() != 0) {
+                    AnimData newAnim = cha.getPlaying();
+                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
+                    tray.keepAnim = newAnim;
+                }
+            } else if (button == Input.Buttons.LEFT) {
+				changeAnimation(behavior.clickEnd());
+			}
+        }
 		mouse_drag = false;
 		return true;
 	}
@@ -240,9 +240,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 
-	/* WINDOW API */
-	private final String APP_TITLE;
-	public HWndCtrl hWndMine;
+	/* WINDOW OPERATIONS */
 
 	private void initWindow(int x, int y) {
 		// Initialize HWnd
@@ -251,38 +249,25 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		hWndTopmost = refreshWindowIdx();
 		// Set the initial style of the window
 		hWndMine.setWindowExStyle(HWndCtrl.WS_EX_LAYERED | HWndCtrl.WS_EX_TOPMOST);
+		hWndMine.setWindowTransparent(false);
 		refreshMonitorInfo();
-		setWindowPos(x, y, true);
-		setWindowTransparent(false);
-		plane.changePosition(0, WD_postar.x, - (WD_postar.y + WD_H));
+		promiseToolwindowStyle(1000);
+		// Set the initial position of the window
+		plane.changePosition(0, x, - (y + WD_H));
+		windowPosition.reset(plane.getX(), - (WD_H + plane.getY()) + offsetY);
+		windowPosition.setToEnd();
+		setWindowPos();
 	}
 
-	public void setWindowTransparent(boolean transparent) {
-		if (transparent)
-			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() | HWndCtrl.WS_EX_TRANSPARENT);
-		else
-			hWndMine.setWindowExStyle(hWndMine.getWindowExStyle() & ~HWndCtrl.WS_EX_TRANSPARENT);
-	}
-
-	private void setWindowPos(int x, int y, boolean override) {
+	private void setWindowPos() {
 		if (hWndMine == null) return;
 		if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
 			refreshMonitorInfo();
 			HWndCtrl new_hwnd_topmost = refreshWindowIdx();
-			if (new_hwnd_topmost != hWndTopmost) {
+			if (new_hwnd_topmost != hWndTopmost)
 				hWndTopmost = new_hwnd_topmost;
-				if (x == WD_poscur.x && y == WD_poscur.y)
-					return;
-			}
 		}
-		if (override) {
-			setWindowPosTar(x, y);
-			WD_poscur.x = WD_postar.x;
-			WD_poscur.y = WD_postar.y;
-			WD_poseas.eX.curDuration = WD_poseas.eX.DURATION;
-			WD_poseas.eY.curDuration = WD_poseas.eY.DURATION;
-		}
-		hWndMine.setWindowPosition(hWndTopmost, (int)WD_poscur.x, (int)WD_poscur.y, WD_W, WD_H);
+		hWndMine.setWindowPosition(hWndTopmost, (int)windowPosition.now().x, (int)windowPosition.now().y, WD_W, WD_H);
 	}
 
 	private HWndCtrl refreshWindowIdx() {
@@ -290,7 +275,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		//Logger.debug("HWND", windowList.toString());
 		HWndCtrl minWindow = null;
 		HashMap<Integer, HWndCtrl> line = new HashMap<>();
-		int myPos = (int)(WD_poscur.x + WD_W / 2);
+		int myPos = (int)(windowPosition.now().x + WD_W / 2);
 		int minNum = 2048;
 		int myNum = getArkPetsWindowNum(APP_TITLE);
 		final float quantityProduct = 1;
@@ -401,11 +386,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return -1; // Not ArkPets window
 	}
 
-	/* WINDOW OPERATION RELATED */
+	/* WINDOW WALKING RELATED */
+
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
-		plane.changePosition(Gdx.graphics.getDeltaTime(), WD_postar.x + realLen, - (WD_postar.y + WD_H));
+		float newPlaneX = windowPosition.end().x + realLen;
+		float newPlaneY = -(windowPosition.end().y - WD_H);
+		plane.changePosition(Gdx.graphics.getDeltaTime(), newPlaneX, newPlaneY);
 	}
 
 	private int randomRound(float val) {
@@ -419,28 +407,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (plane == null) return false;
 		return (plane.getX() >= plane.borderRight() - WD_W && len > 0) || (plane.getX() <= plane.borderLeft() && len < 0);
 	}
-
-	private void setWindowPosTar(float pos_x, float pos_y) {
-		WD_postar.set(pos_x, pos_y + OFFSET_Y);
-		WD_poseas.eX.update(pos_x);
-		WD_poseas.eY.update(pos_y + OFFSET_Y);
-	}
-
-	private void setWindowPosCur(float deltaTime) {
-		WD_poscur.set(WD_poseas.eX.step(deltaTime), WD_poseas.eY.step(deltaTime));
-		setWindowPos((int)WD_poscur.x, (int)WD_poscur.y, false);
-	}
-
-	public void setWindowAlphaTar(float alpha) {
-		WD_alpha.update(alpha);
-	}
-
-	private void setWindowAlphaCur(float deltaTime) {
-		if (WD_alpha.curValue == WD_alpha.TO) return;
-		WD_alpha.step(deltaTime);
-		hWndMine.setWindowAlpha(WD_alpha.curValue);
-	}
-
 
 	/* UTILS */
 	public static class LoopCtrl {

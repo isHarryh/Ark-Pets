@@ -6,9 +6,8 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimData;
-import cn.harryh.arkpets.easings.EasingLinear;
-import cn.harryh.arkpets.easings.EasingLinearVector3;
 import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.transitions.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
@@ -16,7 +15,6 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.SerializationException;
@@ -33,19 +31,17 @@ public class ArkChar {
     protected final FrameBuffer fbo;
     protected Texture bgTexture;
 
-    public final Vector3 positionCur;
-    public final Vector3 positionTar;
-    public final EasingLinearVector3 positionEas;
-    public int offsetY;
+    protected final AnimComposer composer;
+    protected final TransitionVector3 position;
+    protected final TransitionFloat offsetY;
 
     protected final Skeleton skeleton;
     protected final SkeletonRenderer renderer;
-    protected SkeletonData skeletonData;
-    protected AnimationState animationState;
+    protected final SkeletonData skeletonData;
+    protected final AnimationState animationState;
 
     public final CroppingCtrl flexibleLayout;
     public final AnimClipGroup animList;
-    public final AnimComposer composer;
 
     /** Initializes an ArkPets character.
      * @param assetLocation The path string to the model's directory.
@@ -53,19 +49,17 @@ public class ArkChar {
      * @param scale The scale of the character.
      */
     public ArkChar(String assetLocation, AssetCtrl.AssetAccessor assetAccessor, float scale) {
-        // Initialize graphics
+        // 1.Graphics setup
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();
         fbo = new FrameBuffer(Format.RGBA8888, canvasMaxSize, canvasMaxSize, false);
-        flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
         renderer = new SkeletonRenderer();
         renderer.setPremultipliedAlpha(true);
-        // Initialize layout
-        positionEas = new EasingLinearVector3(new EasingLinear(0, 1, linearEasingDuration));
-        positionCur = new Vector3(0, 0, 0);
-        positionTar = new Vector3(0, 0, 0);
-        offsetY = 0;
-        // Initialize SkeletonData
+        // 2.Geometry setup
+        position = new TransitionVector3(TernaryFunction.LINEAR, linearEasingDuration);
+        offsetY = new TransitionFloat(TernaryFunction.LINEAR, linearEasingDuration);
+        flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
+        // 3.Skeleton setup
         try {
             String path2atlas = assetLocation + separator + assetAccessor.getFirstFileOf(".atlas");
             String path2skel = assetLocation + separator + assetAccessor.getFirstFileOf(".skel");
@@ -79,21 +73,26 @@ public class ArkChar {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
             throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
         }
-        // Initialize Skeleton
         skeleton = new Skeleton(skeletonData);
         skeleton.updateWorldTransform();
         animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
-        // Set animation mix
+        // 4.Animation mixing
         AnimationStateData asd = new AnimationStateData(skeletonData);
         for (AnimClip i: animList)
             for (AnimClip j: animList)
                 if (!i.fullName.equals(j.fullName))
                     asd.setMix(i.fullName, j.fullName, linearEasingDuration);
-        // Initialize AnimationState
+        // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);
-        composer = new AnimComposer(animationState);
-        // Initialize canvas
+        composer = new AnimComposer(animationState){
+            @Override
+            protected void onApply(AnimData animData) {
+                Logger.debug("Animation", "Apply " + playing);
+                offsetY.reset((float)playing.offsetY());
+            }
+        };
+        // 6.Canvas setup
         for (int i = 0; i < animList.size(); i++)
             adjustCanvas(Math.round(canvasReserveLength * scale), animList.get(i), i == 0);
         Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
@@ -109,10 +108,10 @@ public class ArkChar {
     /** Sets the canvas with the specified background color.
      */
     public void setCanvas(Color bgColor) {
-        // Set position (center)
-        setPositionTar(canvasMaxSize >> 1, 0, 1);
+        // Set position (centered)
+        position.reset(canvasMaxSize >> 1, 0, 1);
         updateCanvas();
-        // Set background image
+        // Set background texture
         Pixmap pixmap = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         pixmap.setColor(bgColor);
         pixmap.fill();
@@ -132,9 +131,9 @@ public class ArkChar {
      */
     public void adjustCanvas(int reserved_length, AnimClip anim_clip, boolean initialize) {
         setCanvas();
-        setPositionCur(Float.MAX_VALUE);
         composer.reset();
         composer.offer(new AnimData(anim_clip));
+        position.addProgress(Float.MAX_VALUE);
         animationState.update(animationState.getCurrent(0).getAnimation().getDuration() / 2); // Take the middle frame as sample
         Pixmap snapshot = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         renderToPixmap(snapshot);
@@ -144,28 +143,6 @@ public class ArkChar {
                 false, true, initialize
         );
         snapshot.dispose();
-    }
-
-    /** Sets the skeleton's target position.
-     */
-    public void setPositionTar(float pos_x, float pos_y, float flip) {
-        positionTar.set(pos_x, pos_y, flip);
-        positionEas.eX.update(pos_x);
-        positionEas.eY.update(pos_y + offsetY);
-        positionEas.eZ.update(flip);
-    }
-
-    /** Sets the skeleton's current position.
-     */
-    public void setPositionCur(float deltaTime) {
-        positionCur.set(
-                positionEas.eX.step(deltaTime),
-                positionEas.eY.step(deltaTime),
-                positionEas.eZ.step(deltaTime)
-        );
-        skeleton.setPosition(positionCur.x, positionCur.y);
-        skeleton.setScaleX(positionCur.z);
-        skeleton.updateWorldTransform();
     }
 
     /** Requests to set the current animation of the character.
@@ -208,14 +185,15 @@ public class ArkChar {
     /** Renders the character to the Gdx 2D Batch.
      * The animation will be updated by {@code Gdx.graphics.getDeltaTime()};
      */
-    protected void renderToScreen() {
+    protected void renderToBatch() {
         // Apply Animation
-        offsetY = composer.getPlaying().offsetY();
-        setPositionTar(positionTar.x, positionTar.y, composer.getPlaying().mobility() > 0 ? 1 : -1);
-        setPositionCur(Gdx.graphics.getDeltaTime());
+        position.addProgress(Gdx.graphics.getDeltaTime());
+        offsetY.addProgress(Gdx.graphics.getDeltaTime());
+        skeleton.setPosition(position.now().x, position.now().y + offsetY.now());
+        skeleton.setScaleX(position.now().z);
+        skeleton.updateWorldTransform();
         animationState.apply(skeleton);
         animationState.update(Gdx.graphics.getDeltaTime());
-        skeleton.updateWorldTransform();
         // Render the skeleton to the batch
         updateCanvas();
         ScreenUtils.clear(0, 0, 0, 0, true);
@@ -232,14 +210,14 @@ public class ArkChar {
      */
     protected void renderToPixmap(Pixmap pixmap) {
         fbo.begin();
-        renderToScreen();
+        renderToBatch();
         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
         Gdx.gl.glReadPixels(0, 0, pixmap.getWidth(), pixmap.getHeight(),
                 GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixmap.getPixels());
         fbo.end();
     }
 
-    protected static class AnimComposer {
+    public static class AnimComposer {
         protected final AnimationState state;
         protected AnimData playing;
 
@@ -266,8 +244,8 @@ public class ArkChar {
             if (animData != null && !animData.isEmpty()) {
                 if (playing == null || playing.isEmpty() || (!playing.isStrict() && !playing.equals(animData))) {
                     playing = animData;
+                    onApply(playing);
                     state.setAnimation(0, playing.name(), playing.isLoop());
-                    Logger.debug("Animation", "Apply " + playing);
                     return true;
                 }
             }
@@ -280,6 +258,9 @@ public class ArkChar {
 
         public void reset() {
             playing = null;
+        }
+
+        protected void onApply(AnimData animData) {
         }
     } // End class AnimComposer
 } // End class ArkChar
