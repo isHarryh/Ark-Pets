@@ -13,6 +13,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+/** One Animation Clip is corresponding to one certain Spine {@link Animation}.
+ * @since ArkPets 2.3
+ */
 public class AnimClip {
     public final String fullName;
     public final String baseName;

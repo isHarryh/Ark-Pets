@@ -9,6 +9,7 @@ import java.util.Objects;
 /** The class represents a transition,
  * which controls a value transit from its starting value to its ending value.
  * @param <E> The type of the value.
+ * @since ArkPets 2.3
  */
 abstract public class Transition<E> {
     protected E start;

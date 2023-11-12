@@ -89,7 +89,9 @@ public class ArkChar {
             @Override
             protected void onApply(AnimData animData) {
                 Logger.debug("Animation", "Apply " + playing);
+                // Sync skeleton position data
                 offsetY.reset((float)playing.offsetY());
+                position.reset(position.end().x, position.end().y, playing.mobility() != 0 ? playing.mobility() : position.end().z);
             }
         };
         // 6.Canvas setup

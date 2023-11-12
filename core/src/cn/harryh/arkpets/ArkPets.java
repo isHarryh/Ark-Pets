@@ -200,10 +200,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		if (pointer <= 0) {
             if (mouse_drag) {
 				cha.position.reset(cha.position.end().x, cha.position.end().y, mouse_intention_x);
-                if (tray.keepAnim != null && cha.getPlaying().mobility() != 0) {
-                    AnimData newAnim = cha.getPlaying();
-                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), Math.abs(newAnim.mobility()) * mouse_intention_x);
-                    tray.keepAnim = newAnim;
+				if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
+					AnimData anim = cha.getPlaying();
+					cha.setAnimation(anim.derive(anim.offsetY(), Math.abs(anim.mobility()) * mouse_intention_x));
+				}
+                if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
+                    AnimData anim = tray.keepAnim;
+					tray.keepAnim = anim.derive(anim.offsetY(), Math.abs(anim.mobility()) * mouse_intention_x);
                 }
             } else if (button == Input.Buttons.LEFT) {
 				changeAnimation(behavior.clickEnd());
@@ -391,9 +394,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
-		float newPlaneX = windowPosition.end().x + realLen;
-		float newPlaneY = -(windowPosition.end().y - WD_H);
-		plane.changePosition(Gdx.graphics.getDeltaTime(), newPlaneX, newPlaneY);
+		float newPlaneX = plane.getX() + realLen;
+		plane.changePosition(Gdx.graphics.getDeltaTime(), newPlaneX, plane.getY());
 	}
 
 	private int randomRound(float val) {

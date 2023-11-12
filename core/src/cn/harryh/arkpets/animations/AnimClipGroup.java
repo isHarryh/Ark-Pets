@@ -9,6 +9,9 @@ import com.esotericsoftware.spine.Animation;
 import java.util.*;
 
 
+/** The class implements the Collection of {@link AnimClip}.
+ * @since ArkPets 2.3
+ */
 public class AnimClipGroup implements Collection<AnimClip> {
     protected final ArrayList<AnimClip> animClipList;
 
