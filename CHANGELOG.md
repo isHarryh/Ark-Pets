@@ -21,6 +21,10 @@
 | [`a31afcf`] | 优化了托盘菜单的外观表现。                            |
 | [`e046e1c`] | 优化了动画队列的代码逻辑。                            |
 
+| **补丁**                  |                    |
+|:------------------------|:-------------------|
+| `v2.3.1`<br>[`7a161d3`] | 修复了桌宠的行走动作表现异常的问题。 |
+
 ## v2.2
 | **新增**      |                                         |
 |:------------|:----------------------------------------|
@@ -262,3 +266,4 @@
 [`17d3fde`]: https://github.com/isHarryh/Ark-Pets/commit/17d3fded56a6b92b4dabe62945897b8b7df1514b
 [`e046e1c`]: https://github.com/isHarryh/Ark-Pets/commit/e046e1c67ccbd61cde7e50927eccf9c20c7ee736
 [`b72421a`]: https://github.com/isHarryh/Ark-Pets/commit/b72421a90b9263c6f25fe76053f139ffa445a981
+[`7a161d3`]: https://github.com/isHarryh/Ark-Pets/commit/7a161d304f4256d0dfa5f027fad1479ac0d06391
