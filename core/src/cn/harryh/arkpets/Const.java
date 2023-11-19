@@ -60,6 +60,12 @@ public final class Const {
     public static final String startupTarget    = "ArkPets.exe";
     public static final String startUpScript    = "ArkPetsStartupService.vbs";
 
+    // Changeable constants
+    public static boolean isHttpsTrustAll = false;
+    public static boolean isUpdateAvailable = false;
+    public static boolean isDatasetIncompatible = false;
+    public static boolean isNewcomer = false;
+
 
     /** Paths presets definition class.
      */

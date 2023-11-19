@@ -107,6 +107,6 @@ abstract public class Transition<E> {
 
     @Override
     public String toString() {
-        return getClass().getName() + " [" + start + ", " + end + ']';
+        return getClass().getSimpleName() + " [" + start + ", " + end + ']';
     }
 }

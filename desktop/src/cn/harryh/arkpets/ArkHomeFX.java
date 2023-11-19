@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
+import cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 /** ArkPets Homepage the JavaFX app.
@@ -54,10 +55,10 @@ public class ArkHomeFX extends Application {
                         Thread.sleep(100);
                         startArkPets();
                         Thread.sleep(1200);
-                        if (ctrl.isNewcomer && !ctrl.trayExitHandbook.hasShown()) {
+                        if (isNewcomer && !ctrl.trayExitHandbook.hasShown()) {
                             // Show handbook.
-                            PopupUtils.Handbook b = ctrl.trayExitHandbook;
-                            ctrl.popNotice(b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
+                            Handbook b = ctrl.trayExitHandbook;
+                            DialogUtil.createCommonDialog(ctrl.root, b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
                             b.setShown();
                         }
                     } catch (InterruptedException ignored) {

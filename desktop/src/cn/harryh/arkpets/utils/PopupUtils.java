@@ -3,14 +3,26 @@
  */
 package cn.harryh.arkpets.utils;
 
+import cn.harryh.arkpets.Const;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
+import com.jfoenix.controls.JFXTextArea;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
+
+import javax.net.ssl.SSLException;
+import java.io.FileNotFoundException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+import java.util.zip.ZipException;
 
 
 public class PopupUtils {
@@ -52,21 +64,134 @@ public class PopupUtils {
 
 
     public static class DialogUtil {
-        public static void disposeDialog(JFXDialog dialog, Pane root) {
+        public static void disposeDialog(JFXDialog dialog, StackPane root) {
+            if (dialog == null || root == null)
+                return;
+            if (dialog.isVisible())
+                dialog.setOnDialogClosed(e -> root.requestFocus());
             dialog.close();
-            dialog.getDialogContainer().getChildren().remove(dialog);
-            root.getChildren().remove(dialog.getDialogContainer());
-            root.requestFocus();
         }
 
-        public static JFXDialog createCenteredDialog(Pane root, boolean overlayClose) {
-            StackPane container = new StackPane();
-            container.setPrefSize(root.getWidth(), root.getHeight());
-            root.getChildren().add(container);
+        public static JFXDialog createCenteredDialog(StackPane root, boolean overlayClose) {
             JFXDialog dialog = new JFXDialog();
-            dialog.setDialogContainer(container);
+            dialog.setDialogContainer(root);
             dialog.setOverlayClose(overlayClose);
             dialog.setTransitionType(JFXDialog.DialogTransition.CENTER);
+            return dialog;
+        }
+
+        public static JFXDialog createCommonDialog(StackPane root, Node graphic, String title, String header, String content, String detail) {
+            JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+            VBox body = new VBox();
+            Label h2 = (Label)DialogUtil.getPrefabsH2(header);
+            Label h3 = (Label)DialogUtil.getPrefabsH3(content);
+            body.setSpacing(5);
+            body.getChildren().add(h2);
+            body.getChildren().add(new Separator());
+            body.getChildren().add(h3);
+
+            JFXDialogLayout layout = new JFXDialogLayout();
+            layout.setHeading(DialogUtil.getHeading(graphic, title, COLOR_LIGHT_GRAY));
+            layout.setBody(body);
+            layout.setActions(DialogUtil.getOkayButton(dialog, root));
+            dialog.setContent(layout);
+
+            if (detail != null && !detail.isEmpty()) {
+                JFXTextArea textArea = new JFXTextArea();
+                textArea.setEditable(false);
+                textArea.setScrollTop(0);
+                textArea.getStyleClass().add("popup-detail-field");
+                textArea.appendText(detail);
+                body.getChildren().add(textArea);
+            }
+            return dialog;
+        }
+
+        public static JFXDialog createErrorDialog(StackPane root, Throwable e) {
+            JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+
+            VBox content = new VBox();
+            Label h2 = (Label)DialogUtil.getPrefabsH2("啊哦~ ArkPets启动器抛出了一个异常。");
+            Label h3 = (Label)DialogUtil.getPrefabsH3("请重试操作，或查看帮助文档与日志。如需联系开发者，请提供下述信息：");
+            content.setSpacing(5);
+            content.getChildren().add(h2);
+            content.getChildren().add(new Separator());
+            content.getChildren().add(h3);
+
+            JFXTextArea textArea = new JFXTextArea();
+            textArea.setEditable(false);
+            textArea.setScrollTop(0);
+            textArea.getStyleClass().add("popup-detail-field");
+            textArea.appendText("[Exception] " + e.getClass().getSimpleName() + "\n");
+            textArea.appendText("[Message] " + (e.getLocalizedMessage() != null ? e.getLocalizedMessage() : "") + "\n");
+            textArea.appendText("\n[StackTrace]\nCaused by " + e.getClass().getCanonicalName() + ": " + e.getMessage() + "\n");
+            for (StackTraceElement ste : e.getStackTrace())
+                textArea.appendText("  at " + ste + "\n");
+            content.getChildren().add(textArea);
+
+            JFXDialogLayout layout = new JFXDialogLayout();
+            layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_DANGER, COLOR_DANGER), "发生异常", COLOR_DANGER));
+            layout.setBody(content);
+            layout.setActions(DialogUtil.getOkayButton(dialog, root));
+            dialog.setContent(layout);
+
+            if (e instanceof JavaProcess.UnexpectedExitCodeException) {
+                h2.setText("检测到桌宠异常退出");
+                h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
+            }
+            if (e instanceof FileNotFoundException) {
+                h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
+            }
+            if (e instanceof NetUtils.HttpResponseCodeException) {
+                h2.setText("神经递质接收异常");
+                if (((NetUtils.HttpResponseCodeException)e).isRedirection()) {
+                    h3.setText("请求的网络地址被重定向转移。详细信息：");
+                }
+                if (((NetUtils.HttpResponseCodeException)e).isClientError()) {
+                    h3.setText("可能是客户端引发的网络错误，详细信息：");
+                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 403) {
+                        h3.setText("(403)访问被拒绝。详细信息：");
+                    }
+                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 404) {
+                        h3.setText("(404)找不到要访问的目标。详细信息：");
+                    }
+                }
+                if (((NetUtils.HttpResponseCodeException)e).isServerError()) {
+                    h3.setText("可能是服务器引发的网络错误，详细信息：");
+                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 500) {
+                        h3.setText("(500)服务器发生故障，请稍后重试。详细信息");
+                    }
+                }
+            }
+            if (e instanceof UnknownHostException) {
+                h2.setText("无法建立神经连接");
+                h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
+            }
+            if (e instanceof ConnectException) {
+                h2.setText("无法建立神经连接");
+                h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
+            }
+            if (e instanceof SocketException) {
+                h2.setText("无法建立神经连接");
+                h3.setText("在访问套接字时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
+            }
+            if (e instanceof SocketTimeoutException) {
+                h2.setText("神经递质接收异常");
+                h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
+            }
+            if (e instanceof SSLException) {
+                h2.setText("无法建立安全的神经连接");
+                h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
+                JFXButton apply = DialogUtil.getTrustButton(dialog, root);
+                apply.setOnAction(ev -> {
+                    Const.isHttpsTrustAll = true;
+                    DialogUtil.disposeDialog(dialog, root);
+                });
+                layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
+            }
+            if (e instanceof ZipException) {
+                h3.setText("压缩文件相关错误。推测可能是下载源问题，请再次重试。");
+            }
             return dialog;
         }
 
@@ -92,7 +217,7 @@ public class PopupUtils {
             return h3;
         }
 
-        public static JFXButton getCancelButton(JFXDialog dialog, Pane root) {
+        public static JFXButton getCancelButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("取 消");
             button.setTextFill(Paint.valueOf(COLOR_WHITE));
@@ -101,7 +226,7 @@ public class PopupUtils {
             return button;
         }
 
-        public static JFXButton getOkayButton(JFXDialog dialog, Pane root) {
+        public static JFXButton getOkayButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("确 认");
             button.setTextFill(Paint.valueOf(COLOR_WHITE));
@@ -110,7 +235,7 @@ public class PopupUtils {
             return button;
         }
 
-        public static JFXButton getTrustButton(JFXDialog dialog, Pane root) {
+        public static JFXButton getTrustButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("信 任");
             button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_WARNING);
