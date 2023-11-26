@@ -28,8 +28,8 @@ public class NetUtils {
                 "https://raw.githubusercontent.com/",
                 "https://github.com/"));
         ghSources.add(new GitHubSource("GHProxy",
-                "https://ghproxy.com/https://raw.githubusercontent.com/",
-                "https://ghproxy.com/https://github.com/"));
+                "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/",
+                "https://ghproxy.harryh.cn/https://github.com/"));
     }
 
     public static final Map<Long, String> sizeMap;
@@ -173,8 +173,8 @@ public class NetUtils {
                 return true;
             }
         }
-
     }
+
 
     public static class BufferLog {
         protected long[] bufferTimestamps;
@@ -221,6 +221,7 @@ public class NetUtils {
         }
     }
 
+
     public enum HttpResponseCodeType {
         /** Indicates an invalid HTTP response */
         UNKNOWN,
@@ -235,6 +236,7 @@ public class NetUtils {
         /** Indicates a {@code 5xx} HTTP response code */
         SERVER_ERROR
     }
+
 
     public static class HttpResponseCode {
         public final int code;

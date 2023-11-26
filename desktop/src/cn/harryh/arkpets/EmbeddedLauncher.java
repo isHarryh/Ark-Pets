@@ -14,6 +14,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.MemoryUtil;
 
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
@@ -55,7 +56,7 @@ public class EmbeddedLauncher {
         };
         Logger.info("System", "Entering the app of EmbeddedLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
-
+        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
 
         try {
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();

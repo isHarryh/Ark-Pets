@@ -7,6 +7,7 @@ import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
+import java.nio.charset.Charset;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
@@ -46,6 +47,7 @@ public class DesktopLauncher {
         };
         Logger.info("System", "Entering the app of DesktopLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
+        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
 
         // If requested to start the core app directly
         new ArgPending("--direct-start", args) {

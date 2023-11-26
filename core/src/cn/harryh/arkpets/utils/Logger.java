@@ -5,6 +5,7 @@ package cn.harryh.arkpets.utils;
 
 import org.apache.log4j.*;
 import org.apache.log4j.helpers.LogLog;
+import org.apache.log4j.varia.LevelRangeFilter;
 
 import java.io.*;
 import java.text.ParseException;
@@ -12,6 +13,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static cn.harryh.arkpets.Const.charsetDefault;
 
 
 public class Logger {
@@ -28,6 +31,14 @@ public class Logger {
     public static final int WARN  = 30000;
     public static final int INFO  = 20000;
     public static final int DEBUG = 10000;
+
+    protected static final LevelRangeFilter sysOutFilter = new LevelRangeFilter();
+    protected static final LevelRangeFilter sysErrFilter = new LevelRangeFilter();
+
+    static {
+        sysOutFilter.setLevelMax(Level.toLevel(WARN));
+        sysErrFilter.setLevelMin(Level.toLevel(ERROR));
+    }
 
     /** Initializes the static logger for the app.
      * The default log level is {@code INFO}.
@@ -51,13 +62,20 @@ public class Logger {
             FileAppender fileAppender = new FileAppender(
                     fileLayout, logFilePath, false, false, 0
             );
+            fileAppender.setEncoding(charsetDefault);
             currentLogger.addAppender(fileAppender);
             isFileLoggerAvailable = true;
         } catch (IOException e) {
             LogLog.error("Failed to initialize the file logger.");
         }
-        ConsoleAppender consoleAppender = new ConsoleAppender(consoleLayout);
-        rootLogger.addAppender(consoleAppender);
+        ConsoleAppender sysOutAppender = new ConsoleAppender(consoleLayout);
+        ConsoleAppender sysErrAppender = new ConsoleAppender(consoleLayout);
+        sysOutAppender.addFilter(sysOutFilter);
+        sysErrAppender.addFilter(sysErrFilter);
+        sysOutAppender.setTarget(ConsoleAppender.SYSTEM_OUT);
+        sysErrAppender.setTarget(ConsoleAppender.SYSTEM_ERR);
+        rootLogger.addAppender(sysOutAppender);
+        rootLogger.addAppender(sysErrAppender);
 
         // Reset log level
         setLevel(level);
@@ -119,28 +137,28 @@ public class Logger {
      */
     public static void debug(String tag, String message) {
         if (isFileLoggerAvailable)
-            currentLogger.log(Level.DEBUG, combine(tag, message));
+            currentLogger.debug(combine(tag, message));
     }
 
     /** Logs a message with the level {@code INFO}.
      */
     public static void info(String tag, String message) {
         if (isFileLoggerAvailable)
-            currentLogger.log(Level.INFO, combine(tag, message));
+            currentLogger.info(combine(tag, message));
     }
 
     /** Logs a message with the level {@code WARN}.
      */
     public static void warn(String tag, String message) {
         if (isFileLoggerAvailable)
-            currentLogger.log(Level.WARN, combine(tag, message));
+            currentLogger.warn(combine(tag, message));
     }
 
     /** Logs a message with the level {@code ERROR}.
      */
     public static void error(String tag, String message) {
         if (isFileLoggerAvailable)
-            currentLogger.log(Level.ERROR, combine(tag, message));
+            currentLogger.error(combine(tag, message));
     }
 
     /** Logs a message with the level {@code ERROR},
