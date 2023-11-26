@@ -12,10 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 public class NetUtils {
@@ -24,10 +21,17 @@ public class NetUtils {
     private static final int delayUpThreshold = 2000;
     private static final DecimalFormat df = new DecimalFormat("0.0");
 
-    public static GitHubSource[] ghSources = new GitHubSource[] {
-            new GitHubSource("GitHub", "https://raw.githubusercontent.com/", "https://github.com/"),
-            new GitHubSource("GHProxy", "https://ghproxy.com/https://raw.githubusercontent.com/", "https://ghproxy.com/https://github.com/")
-    };
+    public static final ArrayList<Source> ghSources;
+    static {
+        ghSources = new ArrayList<>();
+        ghSources.add(new GitHubSource("GitHub",
+                "https://raw.githubusercontent.com/",
+                "https://github.com/"));
+        ghSources.add(new GitHubSource("GHProxy",
+                "https://ghproxy.com/https://raw.githubusercontent.com/",
+                "https://ghproxy.com/https://github.com/"));
+    }
+
     public static final Map<Long, String> sizeMap;
     static {
         sizeMap = new HashMap<>();
@@ -46,7 +50,7 @@ public class NetUtils {
         if (byteSize == 0)
             return "0";
         for (Long unitSize : sizeMap.keySet()) {
-            if (unitSize <= byteSize && byteSize < unitSize * k * 10)
+            if (unitSize <= byteSize && byteSize < unitSize * k)
                 return df.format((double)byteSize / unitSize) + " " + sizeMap.get(unitSize);
         }
         return "Unknown size";
@@ -113,9 +117,9 @@ public class NetUtils {
                 connection.setConnectTimeout(connectTimeout);
                 connection.setReadTimeout(readTimeout);
                 connection.connect();
-                int code = connection.getResponseCode();
-                if (200 > code || code >= 300)
-                    throw new HttpResponseCodeException(code, connection.getResponseMessage());
+                HttpResponseCode responseCode = new HttpResponseCode(connection);
+                if (responseCode.type != HttpResponseCodeType.SUCCESS)
+                    throw new HttpResponseCodeException(responseCode);
                 return connection;
             } catch (IOException e) {
                 try {
@@ -172,43 +176,115 @@ public class NetUtils {
 
     }
 
+    public static class BufferLog {
+        protected long[] bufferTimestamps;
+        protected int bufferSize;
+        protected int bufferTimestampsPointer = 0;
+        protected long lastCalculatedResult = 0;
+        protected long lastCalculatedTime = 0;
 
-    public static class HttpResponseCodeException extends IOException {
-        private final int code;
-        private final String message;
+        public BufferLog(int bufferSize, int maxBufferCount) {
+            if (bufferSize <= 0 || maxBufferCount <= 0)
+                throw new IllegalArgumentException("bufferSize and maxBufferCount should be positive.");
+            this.bufferTimestamps = new long[maxBufferCount];
+            this.bufferSize = bufferSize;
+        }
 
-        public HttpResponseCodeException(int code, String message) {
+        public BufferLog(int bufferSize) {
+            this(bufferSize, 1024);
+        }
+
+        public void receive() {
+            bufferTimestamps[bufferTimestampsPointer++] = System.currentTimeMillis();
+            bufferTimestampsPointer = bufferTimestampsPointer < bufferTimestamps.length ? bufferTimestampsPointer : 0;
+        }
+
+        public long getSpeedPerSecond(int cacheTimeMillis) {
+            long currentTimestamp = System.currentTimeMillis();
+            if (lastCalculatedTime + cacheTimeMillis <= currentTimestamp) {
+                int actualLength;
+                for (actualLength = bufferTimestamps.length; actualLength > 0; actualLength--)
+                    if (bufferTimestamps[actualLength - 1] != 0)
+                        break;
+                if (actualLength <= 1)
+                    return 0;
+
+                long maxTimestamp = bufferTimestamps[bufferTimestampsPointer != 0 ? bufferTimestampsPointer - 1 : actualLength - 1];
+                long minTimestamp = bufferTimestamps[bufferTimestampsPointer < actualLength ? bufferTimestampsPointer : 0];
+                if (maxTimestamp - minTimestamp < 100)
+                    return 0;
+
+                lastCalculatedResult = (actualLength - 1) * bufferSize * 1000L / (maxTimestamp - minTimestamp);
+                lastCalculatedTime = currentTimestamp;
+            }
+            return lastCalculatedResult;
+        }
+    }
+
+    public enum HttpResponseCodeType {
+        /** Indicates an invalid HTTP response */
+        UNKNOWN,
+        /** Indicates a {@code 1xx} HTTP response code */
+        INFORMATION,
+        /** Indicates a {@code 2xx} HTTP response code */
+        SUCCESS,
+        /** Indicates a {@code 3xx} HTTP response code */
+        REDIRECTION,
+        /** Indicates a {@code 4xx} HTTP response code */
+        CLIENT_ERROR,
+        /** Indicates a {@code 5xx} HTTP response code */
+        SERVER_ERROR
+    }
+
+    public static class HttpResponseCode {
+        public final int code;
+        public final String message;
+        public final NetUtils.HttpResponseCodeType type;
+
+        public HttpResponseCode(int code, String message) {
             this.code = code;
             this.message = message;
+            NetUtils.HttpResponseCodeType type;
+            if (100 <= code && code < 200)
+                type = NetUtils.HttpResponseCodeType.INFORMATION;
+            else if (200 <= code && code < 300)
+                type = NetUtils.HttpResponseCodeType.SUCCESS;
+            else if (300 <= code && code < 400)
+                type = NetUtils.HttpResponseCodeType.REDIRECTION;
+            else if (400 <= code && code < 500)
+                type = NetUtils.HttpResponseCodeType.CLIENT_ERROR;
+            else if (500 <= code && code < 600)
+                type = NetUtils.HttpResponseCodeType.SERVER_ERROR;
+            else
+                type = NetUtils.HttpResponseCodeType.UNKNOWN;
+            this.type = type;
+        }
+
+        public HttpResponseCode(HttpURLConnection connection)
+                throws IOException {
+            this(connection.getResponseCode(), connection.getResponseMessage());
+        }
+    }
+
+
+    public static class HttpResponseCodeException extends IOException {
+        private final HttpResponseCode responseCode;
+
+        public HttpResponseCodeException(HttpResponseCode responseCode) {
+            this.responseCode = responseCode;
         }
 
         public int getCode() {
-            return code;
+            return responseCode.code;
         }
 
         @Override
         public String getMessage() {
-            return code + ": " + message;
+            return responseCode.code + ": " + responseCode.message;
         }
 
-        public boolean isInformation() {
-            return code >= 100 && code < 200;
-        }
-
-        public boolean isSuccess() {
-            return code >= 200 && code < 300;
-        }
-
-        public boolean isRedirection() {
-            return code >= 300 && code < 400;
-        }
-
-        public boolean isClientError() {
-            return code >= 400 && code < 500;
-        }
-
-        public boolean isServerError() {
-            return code >= 500 && code < 600;
+        public HttpResponseCodeType getType() {
+            return responseCode.type;
         }
     }
 
@@ -229,21 +305,22 @@ public class NetUtils {
             Logger.debug("Network", "Marked source \"" + tag + "\" as historical unavailable with timestamp " + lastErrorTime);
         }
 
-        public int testDelay() {
-            return testDelay(delayTestPort, delayUpThreshold);
+        public void testDelay() {
+            testDelay(delayTestPort, delayUpThreshold);
         }
 
-        public int testDelay(int port, int timeoutMillis) {
+        public void testDelay(int port, int timeoutMillis) {
             delay = ConnectionUtil.testDelay(preUrl, port, timeoutMillis);
             Logger.debug("Network", "Real delay for \"" + tag + "\" is " + delay + "ms");
-            return delay;
         }
 
-        public static Source[] sortByDelay(Source[] sources) {
-            for (Source s : sources)
-                s.testDelay();
-            ArrayList<Source> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
-            sourcesList.sort((o1, o2) -> {
+        public static void testDelay(List<Source> sources) {
+            sources.forEach(Source::testDelay);
+        }
+
+        public static void sortByDelay(List<Source> sources) {
+            testDelay(sources);
+            sources.sort((o1, o2) -> {
                 if (o1.delay == o2.delay)
                     return 0;
                 if (o1.delay < 0 && o2.delay >= 0)
@@ -252,25 +329,20 @@ public class NetUtils {
                     return -1;
                 return (o1.delay > o2.delay) ? 1 : -1;
             });
-            return sourcesList.toArray(new Source[0]);
         }
 
-        public static Source[] sortByOverallAvailability(Source[] sources) {
-            for (Source s : sources)
-                s.testDelay();
-            ArrayList<Source> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
-            sourcesList.sort((o1, o2) -> {
+        public static void sortByOverallAvailability(List<Source> sources) {
+            sortByDelay(sources);
+            sources.sort((o1, o2) -> {
                 if (o1.lastErrorTime != o2.lastErrorTime)
                     return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
-                if (o1.delay == o2.delay)
-                    return 0;
-                if (o1.delay < 0 && o2.delay >= 0)
-                    return 1;
-                if (o1.delay >= 0 && o2.delay < 0)
-                    return -1;
-                return (o1.delay > o2.delay) ? 1 : -1;
+                return 0;
             });
-            return sourcesList.toArray(new Source[0]);
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + " \"" + tag + "\" (" + delay + "ms)";
         }
     }
 
@@ -279,50 +351,10 @@ public class NetUtils {
         public final String rawPreUrl;
         public final String archivePreUrl;
 
-        public GitHubSource(String tag, String preUrl) {
-            super(tag, preUrl);
-            rawPreUrl = preUrl;
-            archivePreUrl = preUrl;
-        }
-
         public GitHubSource(String tag, String rawPreUrl, String archivePreUrl) {
             super(tag, rawPreUrl);
             this.rawPreUrl = rawPreUrl;
             this.archivePreUrl = archivePreUrl;
-        }
-
-        public static GitHubSource[] sortByDelay(GitHubSource[] sources) {
-            for (GitHubSource s : sources)
-                s.testDelay();
-            ArrayList<GitHubSource> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
-            sourcesList.sort((o1, o2) -> {
-                if (o1.delay == o2.delay)
-                    return 0;
-                if (o1.delay < 0 && o2.delay >= 0)
-                    return 1;
-                if (o1.delay >= 0 && o2.delay < 0)
-                    return -1;
-                return (o1.delay > o2.delay) ? 1 : -1;
-            });
-            return sourcesList.toArray(new GitHubSource[0]);
-        }
-
-        public static GitHubSource[] sortByOverallAvailability(GitHubSource[] sources) {
-            for (GitHubSource s : sources)
-                s.testDelay();
-            ArrayList<GitHubSource> sourcesList = new ArrayList<>(Arrays.stream(sources).toList());
-            sourcesList.sort((o1, o2) -> {
-                if (o1.lastErrorTime != o2.lastErrorTime)
-                    return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
-                if (o1.delay == o2.delay)
-                    return 0;
-                if (o1.delay < 0 && o2.delay >= 0)
-                    return 1;
-                if (o1.delay >= 0 && o2.delay < 0)
-                    return -1;
-                return (o1.delay > o2.delay) ? 1 : -1;
-            });
-            return sourcesList.toArray(new GitHubSource[0]);
         }
     }
 }

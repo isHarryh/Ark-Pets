@@ -163,6 +163,7 @@ abstract public class GuiTask {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName();
+        String name = getClass().getSimpleName();
+        return name.isEmpty() ? getClass().getSuperclass().getSimpleName() : name;
     }
 }

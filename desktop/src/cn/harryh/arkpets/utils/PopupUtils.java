@@ -138,48 +138,40 @@ public class PopupUtils {
             if (e instanceof JavaProcess.UnexpectedExitCodeException) {
                 h2.setText("检测到桌宠异常退出");
                 h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
-            }
-            if (e instanceof FileNotFoundException) {
+            } else if (e instanceof FileNotFoundException) {
                 h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
-            }
-            if (e instanceof NetUtils.HttpResponseCodeException) {
+            } else if (e instanceof NetUtils.HttpResponseCodeException ex) {
                 h2.setText("神经递质接收异常");
-                if (((NetUtils.HttpResponseCodeException)e).isRedirection()) {
-                    h3.setText("请求的网络地址被重定向转移。详细信息：");
-                }
-                if (((NetUtils.HttpResponseCodeException)e).isClientError()) {
-                    h3.setText("可能是客户端引发的网络错误，详细信息：");
-                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 403) {
-                        h3.setText("(403)访问被拒绝。详细信息：");
+                switch (ex.getType()) {
+                    case REDIRECTION -> h3.setText("请求的网络地址被重定向转移。详细信息：");
+                    case CLIENT_ERROR -> {
+                        h3.setText("可能是客户端引发的网络错误，详细信息：");
+                        switch (ex.getCode()) {
+                            case 403 -> h3.setText("(403)访问被拒绝。详细信息：");
+                            case 404 -> h3.setText("(404)找不到要访问的目标。详细信息：");
+                        }
                     }
-                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 404) {
-                        h3.setText("(404)找不到要访问的目标。详细信息：");
+                    case SERVER_ERROR -> {
+                        h3.setText("可能是服务器引发的网络错误，详细信息：");
+                        switch (ex.getCode()) {
+                            case 500 -> h3.setText("(500)服务器内部故障，请稍后重试。详细信息：");
+                            case 502 -> h3.setText("(502)服务器网关故障，请稍后重试。详细信息：");
+                        }
                     }
                 }
-                if (((NetUtils.HttpResponseCodeException)e).isServerError()) {
-                    h3.setText("可能是服务器引发的网络错误，详细信息：");
-                    if (((NetUtils.HttpResponseCodeException)e).getCode() == 500) {
-                        h3.setText("(500)服务器发生故障，请稍后重试。详细信息");
-                    }
-                }
-            }
-            if (e instanceof UnknownHostException) {
+            } else if (e instanceof UnknownHostException) {
                 h2.setText("无法建立神经连接");
                 h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");
-            }
-            if (e instanceof ConnectException) {
+            } else if (e instanceof ConnectException) {
                 h2.setText("无法建立神经连接");
                 h3.setText("在建立连接时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
-            }
-            if (e instanceof SocketException) {
+            } else if (e instanceof SocketException) {
                 h2.setText("无法建立神经连接");
                 h3.setText("在访问套接字时发生了问题。请尝试更换网络环境、检查防火墙和代理设置。");
-            }
-            if (e instanceof SocketTimeoutException) {
+            } else if (e instanceof SocketTimeoutException) {
                 h2.setText("神经递质接收异常");
                 h3.setText("接收数据超时。请尝试更换网络环境、检查防火墙和代理设置。");
-            }
-            if (e instanceof SSLException) {
+            } else if (e instanceof SSLException) {
                 h2.setText("无法建立安全的神经连接");
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
                 JFXButton apply = DialogUtil.getTrustButton(dialog, root);
@@ -188,8 +180,7 @@ public class PopupUtils {
                     DialogUtil.disposeDialog(dialog, root);
                 });
                 layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
-            }
-            if (e instanceof ZipException) {
+            } else if (e instanceof ZipException) {
                 h3.setText("压缩文件相关错误。推测可能是下载源问题，请再次重试。");
             }
             return dialog;
