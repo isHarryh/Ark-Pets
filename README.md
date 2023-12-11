@@ -7,8 +7,9 @@
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
       <a href="https://www.github.com/isHarryh/Ark-Pets/releases/latest">
-      <img alt="GitHub release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets">
+      <!-- <img alt="GitHub release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets"> -->
       </a>
+      <code><b> v2.3 </b></code> <br>
       <img alt="GitHub top language" src="https://img.shields.io/github/languages/top/isHarryh/Ark-Pets">
       <!-- <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/isHarryh/Ark-Pets/build.yml"> -->
       <img alt="GPLv3" src="https://img.shields.io/badge/License-GPLv3-blue"/>
