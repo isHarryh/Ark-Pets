@@ -5,7 +5,7 @@ on:
     tags:
       - 'v*'
     branches:
-      - '*'
+      - 'v*'
     paths:
       - 'assets/**'
       - 'core/**'
@@ -14,7 +14,7 @@ on:
     tags:
       - 'v*'
     branches:
-      - '*'
+      - 'v*'
     paths:
       - 'assets/**'
       - 'core/**'
@@ -25,14 +25,14 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - name: Check Tags
+      - name: Check Ref
         run: |
-          echo "${{  github.ref  }}"
+          echo "Current ref: ${{  github.ref  }}"
 
       - name: Clone Repo
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Setup JavaJDK
         uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -44,10 +44,10 @@ jobs:
         with:
           gradle-version: 8.1.1
 
-      - name: Execute Gradle build
+      - name: Execute Gradle Tasks
         run: gradle clean distJar
 
-#      - name: Compile EXE Installer
+#      - name: Setup InnoSetup
 #        uses: Minionguyjpro/Inno-Setup-Action@latest
 #        with:
 #          path: docs/scripts/ExePacking.iss
