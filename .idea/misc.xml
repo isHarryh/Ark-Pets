@@ -1,9 +1,11 @@
 <project version="4">
   <component name="EntryPointsManager">
-    <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="javafx.fxml.FXML" />
+    <list size="2">
+      <item index="0" class="java.lang.String" itemvalue="com.alibaba.fastjson.annotation.JSONField" />
+      <item index="1" class="java.lang.String" itemvalue="javafx.fxml.FXML" />
     </list>
     <writeAnnotations>
+      <writeAnnotation name="com.alibaba.fastjson.annotation.JSONField" />
       <writeAnnotation name="javafx.fxml.FXML" />
     </writeAnnotations>
   </component>

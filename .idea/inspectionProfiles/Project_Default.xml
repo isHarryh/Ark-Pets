@@ -1,0 +1,17 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="HardcodedFileSeparators" enabled="true" level="TYPO" enabled_by_default="true" editorAttributes="TYPO">
+      <option name="m_recognizeExampleMediaType" value="false" />
+    </inspection_tool>
+    <inspection_tool class="HardcodedLineSeparators" enabled="true" level="TYPO" enabled_by_default="true" editorAttributes="TYPO" />
+    <inspection_tool class="ReassignedToPlainText" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES" />
+    <inspection_tool class="UNCHECKED_WARNING" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES" />
+    <inspection_tool class="WeakerAccess" enabled="false" level="WEAK WARNING" enabled_by_default="false" editorAttributes="INFO_ATTRIBUTES">
+      <option name="SUGGEST_PACKAGE_LOCAL_FOR_MEMBERS" value="true" />
+      <option name="SUGGEST_PACKAGE_LOCAL_FOR_TOP_CLASSES" value="true" />
+      <option name="SUGGEST_PRIVATE_FOR_INNERS" value="false" />
+    </inspection_tool>
+  </profile>
+</component>
