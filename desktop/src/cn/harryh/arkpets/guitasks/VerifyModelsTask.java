@@ -3,32 +3,28 @@
  */
 package cn.harryh.arkpets.guitasks;
 
-import cn.harryh.arkpets.utils.AssetCtrl;
+import cn.harryh.arkpets.assets.AssetItem;
+import cn.harryh.arkpets.assets.AssetItemGroup;
+import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.PopupUtils;
-import com.alibaba.fastjson.JSONObject;
 import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
-
-import java.io.File;
-import java.util.ArrayList;
 
 import static cn.harryh.arkpets.utils.PopupUtils.COLOR_SUCCESS;
 import static cn.harryh.arkpets.utils.PopupUtils.COLOR_WARNING;
 
 
 public class VerifyModelsTask extends GuiTask {
-    protected final JSONObject modelsDatasetFull;
-    protected final Iterable<AssetCtrl> foundModelAssets;
+    protected final ModelsDataset modelsDataset;
     private final Node[] dialogGraphic = new Node[1];
     private final String[] dialogHeader = new String[1];
     private final String[] dialogContent = new String[1];
 
-    public VerifyModelsTask(StackPane root, GuiTaskStyle style, JSONObject modelsDatasetFull, Iterable<AssetCtrl> foundModelAssets) {
+    public VerifyModelsTask(StackPane root, GuiTaskStyle style, ModelsDataset modelsDataset) {
         super(root, style);
-        this.modelsDatasetFull = modelsDatasetFull;
-        this.foundModelAssets = foundModelAssets;
+        this.modelsDataset = modelsDataset;
     }
 
     @Override
@@ -45,36 +41,34 @@ public class VerifyModelsTask extends GuiTask {
     protected Task<Boolean> getTask() {
         return new Task<>() {
             @Override
-            protected Boolean call() throws Exception {
-                ArrayList<File> pendingDirs = new ArrayList<>();
-                JSONObject modelsDatasetData = modelsDatasetFull.getJSONObject("data");
-                for (AssetCtrl assetCtrl : foundModelAssets)
-                    pendingDirs.add(new File(assetCtrl.getLocation()));
+            protected Boolean call() {
+                AssetItemGroup validModelAssets = modelsDataset.data.filter(AssetItem::isValid);
+                int currentProgress = 0;
+                int totalProgress = validModelAssets.size();
 
-                Thread.sleep(100);
                 boolean flag = false;
-                AssetCtrl.AssetVerifier assetVerifier = new AssetCtrl.AssetVerifier(modelsDatasetData);
-                for (int i = 0; i < pendingDirs.size(); i++) {
-                    this.updateProgress(i, pendingDirs.size());
-                    File file = pendingDirs.get(i);
-                    AssetCtrl.AssetStatus result = assetVerifier.verify(file);
-                    if (result == AssetCtrl.AssetStatus.VALID) {
-                        Logger.info("Checker", "Model repo check finished (not integral)");
-                        dialogGraphic[0] = PopupUtils.IconUtil.getIcon(PopupUtils.IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
-                        dialogHeader[0] = "已发现问题，模型资源可能不完整";
-                        dialogContent[0] = "资源 " + file.getPath() + " 可能不存在，重新下载模型文件可能解决此问题。";
-                        flag = true;
-                        break;
-                    } else if (result == AssetCtrl.AssetStatus.EXISTED) {
-                        Logger.info("Checker", "Model repo check finished (checksum mismatch)");
-                        dialogGraphic[0] = PopupUtils.IconUtil.getIcon(PopupUtils.IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
-                        dialogHeader[0] = "已发现问题，模型资源可能不完整";
-                        dialogContent[0] = "资源 " + file.getPath() + " 可能缺少部分文件，重新下载模型文件可能解决此问题。";
-                        flag = true;
-                        break;
-                    } else if (this.isCancelled()) {
+                for (AssetItem item : validModelAssets) {
+                    this.updateProgress(currentProgress++, totalProgress);
+                    if (this.isCancelled()) {
+                        // Cancelled:
                         Logger.info("Checker", "Model repo check was cancelled in verification stage.");
                         return false;
+                    } else if (!item.isChecked()) {
+                        if (!item.isExisted()) {
+                            // Dir missing:
+                            Logger.info("Checker", "Model repo check finished (dir not integral)");
+                            dialogGraphic[0] = PopupUtils.IconUtil.getIcon(PopupUtils.IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
+                            dialogHeader[0] = "已发现问题，模型资源可能不完整";
+                            dialogContent[0] = "资源 " + item.assetDir + " 不存在。重新下载模型文件可能解决此问题。";
+                        } else {
+                            // Dir existing but file missing
+                            Logger.info("Checker", "Model repo check finished (file not integral)");
+                            dialogGraphic[0] = PopupUtils.IconUtil.getIcon(PopupUtils.IconUtil.ICON_WARNING_ALT, COLOR_WARNING);
+                            dialogHeader[0] = "已发现问题，模型资源可能不完整";
+                            dialogContent[0] = "资源 " + item.assetDir + " 缺少部分文件。重新下载模型文件可能解决此问题。";
+                        }
+                        flag = true;
+                        break;
                     }
                 }
 

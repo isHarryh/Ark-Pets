@@ -4,6 +4,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.*;
+import cn.harryh.arkpets.assets.AssetItem;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.transitions.*;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -56,7 +57,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
-		cha = new ArkChar(config.character_asset, new AssetCtrl.AssetAccessor(config.character_files), skelBaseScale);
+		cha = new ArkChar(config.character_asset, new AssetItem.AssetAccessor(config.character_files), skelBaseScale);
 		cha.setCanvas();
 		behavior = new GeneralBehavior(config, cha.animList);
 		cha.setAnimation(behavior.defaultAnim());

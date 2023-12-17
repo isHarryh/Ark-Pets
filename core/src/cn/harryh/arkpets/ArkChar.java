@@ -6,6 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.assets.AssetItem;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.transitions.*;
 import com.badlogic.gdx.Gdx;
@@ -48,7 +49,7 @@ public class ArkChar {
      * @param assetAccessor The Asset Accessor of the model.
      * @param scale The scale of the character.
      */
-    public ArkChar(String assetLocation, AssetCtrl.AssetAccessor assetAccessor, float scale) {
+    public ArkChar(String assetLocation, AssetItem.AssetAccessor assetAccessor, float scale) {
         // 1.Graphics setup
         camera = new OrthographicCamera();
         batch = new TwoColorPolygonBatch();

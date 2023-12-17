@@ -188,7 +188,7 @@
                     </styleClass>
                 </JFXButton>
             </Pane>
-            <JFXListView id="Search-models-list" fx:id="searchModelList" layoutX="165.0" layoutY="85.0"
+            <JFXListView id="Search-models-list" fx:id="searchModelView" layoutX="165.0" layoutY="85.0"
                          prefHeight="265.0" prefWidth="280.0"/>
             <VBox id="Loading-failure-tip" fx:id="loadFailureTip" alignment="CENTER" layoutX="1.0" layoutY="85.0"
                   prefHeight="285.0" prefWidth="458.0" spacing="5.0" visible="false">
