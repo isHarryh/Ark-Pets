@@ -8,8 +8,6 @@ import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.varia.LevelRangeFilter;
 
 import java.io.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -97,10 +95,6 @@ public class Logger {
         };
     }
 
-    public static String getCurrentLogFilePath() {
-        return logFilePath;
-    }
-
     /** Sets a new log level.
      * @param level The new level.
      */
@@ -174,51 +168,7 @@ public class Logger {
     }
 
 
-    public static class RealtimeInspector {
-        private BufferedReader reader;
-        private long fileLengthCache;
-
-        public RealtimeInspector(File file) {
-            initialize(file);
-        }
-
-        public RealtimeInspector(String filePath) {
-            initialize(new File(filePath));
-        }
-
-        public String[] getNewLines() {
-            ArrayList<String> newLines = new ArrayList<>();
-            if (isAvailable()) {
-                String line;
-                try {
-                    while ((line = reader.readLine()) != null)
-                        newLines.add(line);
-                } catch (IOException ignored) {
-                }
-            }
-            return newLines.toArray(new String[0]);
-        }
-
-        public boolean isAvailable() {
-            return reader != null;
-        }
-
-        private void initialize(File file) {
-            try {
-                if (file.exists() && file.canRead()) {
-                    reader = new BufferedReader(new FileReader(file));
-                    return;
-                }
-            } catch (IOException ignored) {
-            }
-            reader = null;
-        }
-    }
-
-
     protected static class Cleaner {
-        private static final SimpleDateFormat sdf = new SimpleDateFormat();
-
         public static void cleanByModifiedTime(String logPrefixName, int maxFileCount) {
             List<File> fileList = getAllLogs(logPrefixName);
             maxFileCount = Math.max(1, maxFileCount);
@@ -242,24 +192,6 @@ public class Logger {
             }
         }
 
-        @Deprecated
-        private static void sortByDateStr(String prefixName, List<File> fileList) {
-            fileList.sort((o1, o2) -> {
-                try {
-                    if (getDateStr(prefixName, o1).isEmpty())
-                        return 1;
-                    if (getDateStr(prefixName, o2).isEmpty())
-                        return -1;
-                    long t1 = sdf.parse(getDateStr(prefixName, o1)).getTime();
-                    long t2 = sdf.parse(getDateStr(prefixName, o2)).getTime();
-                    if (t1 != t2)
-                        return t1 > t2 ? 1 : -1;
-                } catch (ParseException ignored) {
-                }
-                return 0;
-            });
-        }
-
         private static void sortByModifiedTime(List<File> fileList) {
             if (fileList.isEmpty())
                 return;
@@ -270,10 +202,6 @@ public class Logger {
                     return t1 > t2 ? 1 : -1;
                 return 0;
             });
-        }
-
-        private static String getDateStr(String prefixName, File file) {
-            return file == null ? "" : file.getName().replaceAll(new File(prefixName).getName(), "");
         }
 
         private static List<File> getAllLogs(String logPrefixName) {

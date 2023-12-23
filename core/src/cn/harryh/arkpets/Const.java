@@ -36,9 +36,6 @@ public final class Const {
     public static final int behaviorBaseWeight      = 320;
     public static final int behaviorWeightLv1       = 32;
     public static final int behaviorWeightLv2       = 64;
-    public static final float behaviorMinTimeLv1    = 2.5f;
-    public static final float behaviorMinTimeLv2    = 5.0f;
-    public static final float behaviorMinTimeLv3    = 7.5f;
     public static final float droppedThreshold      = 10f;
 
     // Duration presets
@@ -53,7 +50,6 @@ public final class Const {
     // Paths of static files and internal files
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
-    public static final String iconFileIco      = "/icons/icon.ico";
     public static final String iconFilePng      = "/icons/icon.png";
     public static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
     public static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";

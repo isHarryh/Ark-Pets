@@ -174,7 +174,6 @@ public final class Homepage {
     private NoticeBar appVersionNotice;
     private NoticeBar diskFreeSpaceNotice;
     private NoticeBar datasetIncompatibleNotice;
-    private Logger.RealtimeInspector inspector = new Logger.RealtimeInspector(Logger.getCurrentLogFilePath());
 
     public Homepage() {
     }

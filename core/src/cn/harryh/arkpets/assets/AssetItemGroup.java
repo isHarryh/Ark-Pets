@@ -5,7 +5,6 @@ package cn.harryh.arkpets.assets;
 
 import cn.harryh.arkpets.assets.AssetItem.PropertyExtractor;
 
-import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -38,7 +37,7 @@ public class AssetItemGroup implements Collection<AssetItem> {
     }
 
     public AssetItemGroup searchByKeyWords(String keyWords) {
-        if (keyWords.isEmpty())
+        if (keyWords == null || keyWords.isEmpty())
             return this;
         String[] wordList = keyWords.split(" ");
         AssetItemGroup result = new AssetItemGroup();
@@ -61,11 +60,10 @@ public class AssetItemGroup implements Collection<AssetItem> {
     }
 
     public AssetItem searchByRelPath(String relPath) {
-        if (relPath.isEmpty())
+        if (relPath == null || relPath.isEmpty())
             return null;
-        String assetId = new File(relPath).getName();
         for (AssetItem asset : this)
-            if (asset.assetDir.getName().equalsIgnoreCase(assetId))
+            if (asset.getLocation().equalsIgnoreCase(relPath))
                 return asset;
         return null;
     }
@@ -126,8 +124,6 @@ public class AssetItemGroup implements Collection<AssetItem> {
     public static class FilterMode {
         public static final int MATCH_ANY           = 0b1;
         public static final int MATCH_REVERSE       = 0b10;
-        public static final int STRING_IGNORE_CASE  = 0b100;
-        public static final int STRING_PARTIAL      = 0b1000;
     }
 
     @Override
