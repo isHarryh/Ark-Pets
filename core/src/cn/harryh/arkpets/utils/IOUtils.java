@@ -30,6 +30,7 @@ public class IOUtils {
                 throws IOException {
             byte[] content = new byte[(int)file.length()];
             FileInputStream stream = new FileInputStream(file);
+            //noinspection ResultOfMethodCallIgnored
             stream.read(content);
             stream.close();
             return content;
@@ -200,6 +201,7 @@ public class IOUtils {
                     name = entry.getName();
                     name = name.substring(0, name.length() - 1);
                     File fileObject = new File(destDirPath + name);
+                    //noinspection ResultOfMethodCallIgnored
                     fileObject.mkdir();
                 }
             }

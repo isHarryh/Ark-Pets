@@ -29,11 +29,12 @@ public class ControlUtils {
 
 
     public static class SliderUtil {
+        @SuppressWarnings("UnusedReturnValue")
         abstract public static class SliderSetup<N extends Number> {
-            protected Slider slider;
+            protected final Slider slider;
             protected Labeled display;
-            protected DoubleProperty proxy;
-            protected ChangeListener<? super Number> listener;
+            protected final DoubleProperty proxy;
+            protected final ChangeListener<? super Number> listener;
             protected ChangeListener<? super Number> listenerForDisplay;
             protected ChangeListener<? super Number> listenerForExternal;
             protected static final double initialValue = Double.MIN_VALUE;

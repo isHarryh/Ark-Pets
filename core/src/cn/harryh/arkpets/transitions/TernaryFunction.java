@@ -17,7 +17,7 @@ public interface TernaryFunction<I extends Number, O extends Number> {
      */
     O apply(I a, I b, I c);
 
-    TernaryFunction<Float, Float> LINEAR = new TernaryFunction<Float, Float>() {
+    TernaryFunction<Float, Float> LINEAR = new TernaryFunction<>() {
         @Override
         public Float apply(Float start, Float end, Float progress) {
             return start + progress * (end - start);

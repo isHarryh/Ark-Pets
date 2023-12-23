@@ -215,6 +215,7 @@ public class ArkConfig {
     }
 
 
+    @SuppressWarnings("unused")
     public static class Monitor {
         public String name;
         public int[]  size;

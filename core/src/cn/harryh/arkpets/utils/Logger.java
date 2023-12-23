@@ -232,6 +232,7 @@ public class Logger {
             if (fileList.size() > maxFileCount) {
                 for (int i = 0; i < fileList.size() - maxFileCount; i++) {
                     try {
+                        //noinspection ResultOfMethodCallIgnored
                         fileList.get(i).delete();
                         LogLog.debug("Delete file: " + fileList.get(i));
                     } catch (SecurityException e) {

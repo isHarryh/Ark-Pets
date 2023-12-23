@@ -25,6 +25,7 @@ import java.net.UnknownHostException;
 import java.util.zip.ZipException;
 
 
+@SuppressWarnings("unused")
 public class PopupUtils {
     public static final String COLOR_INFO       = "#37B";
     public static final String COLOR_SUCCESS    = "#5B5";

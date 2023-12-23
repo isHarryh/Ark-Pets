@@ -100,7 +100,7 @@ abstract public class GuiTask {
      */
     protected String getInitialContent() {
         return "";
-    };
+    }
 
     /** On task cancelled, this method would be invoked.
      */

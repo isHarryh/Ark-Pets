@@ -70,9 +70,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
 		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
 		// 4.Plane setup
-		plane = new Plane(new ArrayList<>(), config.physic_gravity_acc);
+		plane = new Plane(new ArrayList<>());
+		plane.setGravity(config.physic_gravity_acc);
+		plane.setResilience(0);
 		plane.setFrict(config.physic_air_friction_acc, config.physic_static_friction_acc);
-		plane.setBounce(0);
 		plane.setObjSize(WD_W, WD_H);
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];

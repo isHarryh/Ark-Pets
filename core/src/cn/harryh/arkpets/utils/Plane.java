@@ -18,8 +18,8 @@ public class Plane {
     private final Vector2 position;
     private final Vector2 speed;
     private final Vector2 speedLimit;
-    private float bounce;
     private float gravity;
+    private float resilience;
     private float airFrict;
     private float staticFrict;
     private boolean dropped = false;
@@ -27,9 +27,8 @@ public class Plane {
 
     /** Initializes a plane with gravity field.
      * @param world The collection of all available areas.
-     * @param gravity The acceleration of gravity (px/s^2).
      */
-    public Plane(ArrayList<RectArea> world, float gravity) {
+    public Plane(ArrayList<RectArea> world) {
         barriers        = new ArrayList<>();
         pointCharges    = new ArrayList<>();
         this.world      = world;
@@ -37,22 +36,29 @@ public class Plane {
         position        = new Vector2(0, 0);
         speed           = new Vector2(0, 0);
         speedLimit      = new Vector2(0, 0);
-        this.gravity    = gravity;
-        bounce          = 0;
+        gravity         = 0;
+        resilience      = 0;
         airFrict        = 0;
         staticFrict     = 0;
     }
 
-    /** Sets the bounce coefficient.
-     * @param bounce The ratio of Ek to be reserved after the bounce.
+    /** Sets the gravity acceleration.
+     * @param gravity The acceleration of gravity (px/s^2).
      */
-    public void setBounce(float bounce) {
-        this.bounce = bounce > 1 ? 1 : (bounce < 0 ? 0 : bounce);
+    public void setGravity(float gravity) {
+        this.gravity = gravity;
+    }
+
+    /** Sets the bounce coefficient.
+     * @param resilience The ratio of Ek to be reserved after the bounce.
+     */
+    public void setResilience(float resilience) {
+        this.resilience = resilience > 1 ? 1 : (resilience < 0 ? 0 : resilience);
     }
 
     /** Sets the friction params.
      * @param airFrict The acceleration of air friction (px/s^2).
-     * @param staticFrict The acceleration of static friction provided by the groud (px/s^2).
+     * @param staticFrict The acceleration of static friction provided by the ground (px/s^2).
      */
     public void setFrict(float airFrict, float staticFrict) {
         this.airFrict    = Math.max(0, airFrict);
@@ -217,8 +223,8 @@ public class Plane {
         if (speedLimit.y != 0 && Math.abs(speed.y) > speedLimit.y)
             speed.y = Math.signum(speed.y) * speedLimit.y;
         // Bounce
-        if (bounce != 0 && (position.x == borderLeft() || position.x == borderRight())) {
-            speed.x = (float)(Math.sqrt(speed.x * speed.x * bounce) * Math.signum(-speed.x));
+        if (resilience != 0 && (position.x == borderLeft() || position.x == borderRight())) {
+            speed.x = (float)(Math.sqrt(speed.x * speed.x * resilience) * Math.signum(-speed.x));
         }
     }
 
@@ -325,6 +331,7 @@ public class Plane {
     }
 
 
+    @SuppressWarnings("unused")
     public record RectArea(float left, float right, float top, float bottom) {
         public float getWidth() {
                 return Math.abs(left - right);

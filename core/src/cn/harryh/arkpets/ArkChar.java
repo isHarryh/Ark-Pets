@@ -88,7 +88,7 @@ public class ArkChar {
         animationState.apply(skeleton);
         composer = new AnimComposer(animationState){
             @Override
-            protected void onApply(AnimData animData) {
+            protected void onApply(AnimData playing) {
                 Logger.debug("Animation", "Apply " + playing);
                 // Sync skeleton position data
                 offsetY.reset((float)playing.offsetY());
@@ -263,7 +263,7 @@ public class ArkChar {
             playing = null;
         }
 
-        protected void onApply(AnimData animData) {
+        protected void onApply(AnimData playing) {
         }
     } // End class AnimComposer
 } // End class ArkChar
