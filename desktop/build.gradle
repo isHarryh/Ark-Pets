@@ -6,7 +6,6 @@ project.ext.mainClassName = "cn.harryh.arkpets.DesktopLauncher"
 project.ext.assetsDir = new File("../assets")
 eclipse.project.name = appName + "-desktop"
 
-import java.lang.Exception
 import org.gradle.internal.os.OperatingSystem
 
 // Runs the app without debug.
@@ -90,13 +89,18 @@ task jlink(dependsOn: distJar, type: Exec, group: 'dist') {
             '--vm=server',
             '--compress=1',
             '--include-locales', jlinkLocalesList
-    ]
+    ] as List<String>
     outputs.dir(jlinkRuntimeDir)
 }
 
 // Packs the app into an EXE.
 task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
-    doFirst() { delete jpackageDir }
+    doFirst() {
+        fileTree(jarLibDir).size()
+        if (fileTree(jarLibDir).size() > 1)
+            throw new RuntimeException("There may be legacy jars in the libs dir, please run 'clean' first.")
+        delete jpackageDir
+    }
     doLast() {
         copy {
             from "${project.rootDir}/LICENSE"
@@ -107,7 +111,7 @@ task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
     workingDir project.projectDir
     def commands = [
             "${javaHome}/bin/jpackage",
-            '--input', "${buildDir}/libs",
+            '--input', jarLibDir,
             '--dest', jpackageDir,
             '--type', 'app-image',
             '--name', project.appName,
@@ -153,13 +157,13 @@ task distExe(dependsOn: jpackage, type: Exec, group: 'dist') {
 // Generates ALL kinds of distributing files.
 task distAll(dependsOn: [distJar, distZip, distExe], group: 'dist') {
     doLast() {
-        print("\tAll files were successfully generated.")
+        println("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
         try {
             delete "${buildDir}/tmp"
             delete jpackageDir
             delete jarLibDir
-        } catch (Exception e) {
-            print("\tUnable to delete temp files.")
+        } catch (Exception ignored) {
+            println("Unable to delete temp files.")
         }
     }
 }

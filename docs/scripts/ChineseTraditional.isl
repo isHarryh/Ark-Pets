@@ -82,7 +82,7 @@ ErrorTooManyFilesInDir=ÓÉì¶Ä¿ä› "%1" °üº¬ÁËÌ«¶àµÄÎÄ¼ş£¬°²Ñb³ÌÊ½Ÿo·¨‡»ÆäÖĞŒ‘ÈëÎÄ¼
 
 ; *** Setup common messages
 ExitSetupTitle=ÍË³ö°²Ñb
-ExitSetupMessage=°²ÑbÒıŒ§ÉĞÎ´Íê³É¡£Èç¹ûÄú¬FÔÚÍË³ö£¬°²ÑbŒ¢•ş±»È¡Ïû¡£%n%nÄú¿ÉÒÔÉÔááß\ĞĞ°²Ñb°üÒÔÖØĞÂ°²Ñb¡£%n%n´_ÕJÍË³ö°²Ñb£¿
+ExitSetupMessage=Èç¹ûÄúÍË³ö°²Ñb£¬°²ÑbŒ¢•ş±»È¡Ïû¡£%n%n´_ÕJÍË³ö°²Ñb£¿
 AboutSetupMenuItem=êPì¶°²Ñb³ÌÊ½(&A)...
 AboutSetupTitle=êPì¶°²Ñb³ÌÊ½
 AboutSetupMessage=%1 °æ±¾ %2%n%3%n%n%1 Ö÷í“£º%n%4
@@ -351,8 +351,8 @@ ConfirmUninstall=Äú´_¶¨ÏëÒªĞ¶İd %1 ¼°ÆäËùÓĞ½M¼ş†á£¿
 UninstallOnlyOnWin64=Ô“³ÌÊ½Ö»ÄÜÔÚ 64Î» Windows ÖĞßMĞĞĞ¶İd¡£
 OnlyAdminCanUninstall=Ô“³ÌÊ½ĞèÒªÓÃ‘ôÒÔ ¹ÜÀí†TÉí·İ ßMĞĞĞ¶İd¡£
 UninstallStatusLabel=ÕıÔÚÄÄúµÄÓ‹Ëã™CÖĞĞ¶İd %1£¬ÕˆÉÔ×÷µÈ´ı...
-UninstalledAll=%1 ÒÑí˜ÀûµØÄÄúµÄÓ‹Ëã™CÖĞĞ¶İd¡£ÆÚ´ıÅcÄúµÄÔÙ´ÎÏàÒŠ¡£
-UninstalledMost=%1 Ğ¶İdÍê³É¡£%n%nÓĞÒ»Ğ©ƒÈÈİŸo·¨±»„h³ı£¬Äú¿ÉÒÔÊÖ„Ó„h³ıËü‚ƒ¡£
+UninstalledAll=%1 ÒÑí˜ÀûµØÍê³ÉÁËĞ¶İd¡£%n%nÆÚ´ıÅcÄúµÄÔÙ´ÎÏàÒŠ¡£
+UninstalledMost=%1 µÄĞ¶İdÒÑÍê³É¡£%n%nÓĞÒ»Ğ©ƒÈÈİŸo·¨±»„h³ı£¬Äú¿ÉÒÔÊÖ„Ó„h³ıËü‚ƒ¡£
 UninstalledAndNeedsRestart=ÒªÍê³É [name] µÄ°²Ñb£¬ÎÒ‚ƒ±ØíšÖØĞÂ†¢„ÓÄúµÄÓ‹Ëã™C¡£%n%nÊÇ·ñÁ¢¼´ÖØĞÂ†¢„Ó£¿
 UninstallDataCorrupted=ÎÄ¼ş "%1" ÒÑ“p‰Ä£¬Ÿo·¨À^ÀmßMĞĞĞ¶İd
 

@@ -1,9 +1,10 @@
 ; *** Inno Setup Script for ArkPets ***
+; This script is based on Inno Setup 6, a free installer for Windows programs.
 ; Documentation: https://jrsoftware.org/ishelp.php
 ; Download Inno Setup: https://jrsoftware.org/isdl.php
 
 #define MyAppName "ArkPets"
-#define MyAppVersion "2.3.1"
+#define MyAppVersion "2.4.0"
 #define MyAppPublisher "Harry Huang"
 #define MyAppURL "https://arkpets.harryh.cn/"
 
@@ -18,17 +19,17 @@ AppVerName          ="{#MyAppName} {#MyAppVersion}"
 AppPublisher        ={#MyAppPublisher}
 AppPublisherURL     ={#MyAppURL}
 AppSupportURL       ={#MyAppURL}
-AppUpdatesURL       ={#MyAppURL}
-Compression         =lzma2/max
-DefaultDirName      =/{#MyAppName}
-DefaultGroupName    ={#MyAppName}
+
 AllowNoIcons        =yes
-; Remove the following line to run in administrative install mode (install for all users.)
+Compression         =lzma2/max
+DefaultDirName      ="{userpf}\{#MyAppName}"
+DefaultGroupName    ={#MyAppName}
 PrivilegesRequired  =lowest
 OutputBaseFilename  ={#MyAppName}-v{#MyAppVersion}-Setup
 OutputDir           =..\..\desktop\build\dist
 SetupIconFile       =..\..\assets\icons\icon.ico
 SolidCompression    =yes
+UninstallDisplayIcon={app}\{#MyAppName}.ico
 WizardStyle         =modern
 
 [Languages]
