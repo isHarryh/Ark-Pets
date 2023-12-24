@@ -58,7 +58,6 @@ public class ModelsDataset {
             }
             data.add(assetItem);
         }
-        data.removeDuplicated();
         data.sort();
 
         arkPetsCompatibility = new Version(bean.arkPetsCompatibility);

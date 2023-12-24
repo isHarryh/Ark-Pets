@@ -8,6 +8,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
 import com.jfoenix.controls.JFXTextArea;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
@@ -180,11 +181,19 @@ public class PopupUtils {
                     Const.isHttpsTrustAll = true;
                     DialogUtil.disposeDialog(dialog, root);
                 });
-                layout.setActions(DialogUtil.getOkayButton(dialog, root), apply);
+                DialogUtil.attachAction(dialog, apply, 0);
             } else if (e instanceof ZipException) {
-                h3.setText("压缩文件相关错误。推测可能是下载源问题，请再次重试。");
+                h3.setText("压缩文件相关错误。可能是文件不完整或已损坏，请稍后重试。");
             }
             return dialog;
+        }
+
+        public static void attachAction(JFXDialog dialog, Node action, int index) {
+            ObservableList<Node> actionList = ((JFXDialogLayout)dialog.getContent()).getActions();
+            if (index < 0)
+                actionList.add(action);
+            else
+                actionList.add(index, action);
         }
 
         public static Node getHeading(Node graphic, String text, String color) {
@@ -223,6 +232,14 @@ public class PopupUtils {
             button.setText("确 认");
             button.setTextFill(Paint.valueOf(COLOR_WHITE));
             button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
+            button.setOnAction(e -> disposeDialog(dialog, root));
+            return button;
+        }
+
+        public static JFXButton getGotoButton(JFXDialog dialog, StackPane root) {
+            JFXButton button = new JFXButton();
+            button.setText("前 往");
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_SUCCESS);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }

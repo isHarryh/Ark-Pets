@@ -103,23 +103,6 @@ public class AssetItemGroup implements Collection<AssetItem> {
         assetItemList.sort(Comparator.comparing(asset -> asset.assetDir, Comparator.naturalOrder()));
     }
 
-    @Deprecated
-    public void removeDuplicated() {
-        ArrayList<AssetItem> newList = new ArrayList<>();
-        for (AssetItem i : assetItemList) {
-            boolean flag = true;
-            for (AssetItem j : newList) {
-                if (j.equals(i)) {
-                    flag = false;
-                    break;
-                }
-            }
-            if (flag)
-                newList.add(i);
-        }
-        assetItemList.clear();
-        assetItemList.addAll(newList);
-    }
 
     public static class FilterMode {
         public static final int MATCH_ANY           = 0b1;
@@ -133,12 +116,14 @@ public class AssetItemGroup implements Collection<AssetItem> {
 
     @Override
     public boolean add(AssetItem assetItem) {
-        return assetItemList.add(assetItem);
+        return !assetItemList.contains(assetItem) && assetItemList.add(assetItem);
     }
 
     @Override
     public boolean addAll(Collection<? extends AssetItem> c) {
-        return assetItemList.addAll(c);
+        int size = size();
+        c.forEach(this::add);
+        return size != size();
     }
 
     @Override

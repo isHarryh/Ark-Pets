@@ -74,9 +74,8 @@ public class PostUnzipModelTask extends GuiTask {
                     throw new FileNotFoundException("The file " + modelsDataPath + " not found.");
                 try {
                     IOUtils.FileUtil.delete(new File(PathConfig.tempModelsUnzipDirPath).toPath(), false);
-                    IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), false);
                 } catch (IOException e) {
-                    Logger.warn("Task", "The cache file or directory cannot be deleted, because " + e.getMessage());
+                    Logger.warn("Task", "The unzipped cache cannot be deleted, because " + e.getMessage());
                 }
                 Logger.info("Task", "Moved required files from unzipped files, finished");
                 return true;

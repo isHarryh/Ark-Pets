@@ -11,6 +11,7 @@ import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.stage.FileChooser;
 import org.apache.log4j.Level;
 
 import javafx.animation.FadeTransition;
@@ -41,7 +42,6 @@ import static cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 public final class Homepage {
-    private boolean isNoFilter = true;
     public PopupUtils.Handbook trayExitHandbook = new TrayExitHandBook();
     public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
 
@@ -151,6 +151,8 @@ public final class Homepage {
     @FXML
     private JFXButton manageModelVerify;
     @FXML
+    private JFXButton manageModelImport;
+    @FXML
     private JFXComboBox<String> configLoggingLevel;
     @FXML
     private Label exploreLogDir;
@@ -203,7 +205,6 @@ public final class Homepage {
             config.saveConfig();
             menuBtn1.getStyleClass().add("menu-btn-active");
             new CheckAppUpdateTask(root, GuiTask.GuiTaskStyle.HIDDEN, "auto").start();
-
         });
     }
 
@@ -236,7 +237,6 @@ public final class Homepage {
     private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
         if (searchModelFilter.getValue() != null) {
             popLoading(e -> {
-                isNoFilter = searchModelFilter.getSelectionModel().getSelectedIndex() == 0;
                 Logger.info("ModelManager", "Filter \"" + searchModelFilter.getValue() + "\"");
                 dealModelSearch(searchModelInput.getText());
                 searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
@@ -304,9 +304,17 @@ public final class Homepage {
         // If any exception occurred during the progress above:
         } catch (FileNotFoundException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
-            if (doPopNotice)
-                DialogUtil.createCommonDialog(root, IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到数据集。",
-                        "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。", null).show();
+            if (doPopNotice) {
+                JFXDialog dialog = DialogUtil.createCommonDialog(root, IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：未找到数据集。",
+                        "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。", null);
+                JFXButton go2 = DialogUtil.getGotoButton(dialog, root);
+                go2.setOnAction(ev -> {
+                    initWrapper(3);
+                    DialogUtil.disposeDialog(dialog, root);
+                });
+                DialogUtil.attachAction(dialog, go2, 0);
+                dialog.show();
+            }
         } catch (ModelsDataset.DatasetKeyException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
             if (doPopNotice)
@@ -321,9 +329,9 @@ public final class Homepage {
         return false;
     }
 
-    private boolean initModelAssets(boolean doPopNotice) {
+    private void initModelAssets(boolean doPopNotice) {
         if (!initModelDataset(doPopNotice))
-            return false;
+            return;
         try {
             // Find every model assets.
             assetItemList = modelsDataset.data.filter(AssetItem::isExisted);
@@ -340,7 +348,6 @@ public final class Homepage {
             modelCellList = new ArrayList<>();
             assetItemList.forEach(assetItem -> modelCellList.add(getMenuItem(assetItem, searchModelView)));
             Logger.debug("ModelManager", "Initialized model assets successfully.");
-            return true;
         } catch (IOException e) {
             // Explicitly set all lists to empty.
             assetItemList = new AssetItemGroup();
@@ -350,7 +357,6 @@ public final class Homepage {
                 DialogUtil.createCommonDialog(root, IconUtil.getIcon(IconUtil.ICON_WARNING_ALT, COLOR_WARNING), "模型载入失败", "模型未成功载入：读取模型列表失败。",
                         "失败原因概要：" + e.getLocalizedMessage(), null).show();
         }
-        return false;
     }
 
     private void initConfigBehavior() {
@@ -502,14 +508,20 @@ public final class Homepage {
                 @Override
                 protected void onSucceeded(boolean result){
                     // Go to [Step 2/3]:
-                    new UnzipModelsTask(root, GuiTaskStyle.STRICT) {
+                    new UnzipModelsTask(root, GuiTaskStyle.STRICT, PathConfig.tempModelsZipCachePath) {
                         @Override
                         protected void onSucceeded(boolean result) {
                             // Go to [Step 3/3]:
                             new PostUnzipModelTask(root, GuiTaskStyle.STRICT) {
                                 @Override
                                 protected void onSucceeded(boolean result) {
+                                    try {
+                                        IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), false);
+                                    } catch (IOException ex) {
+                                        Logger.warn("Task", "The zip file cannot be deleted, because " + ex.getMessage());
+                                    }
                                     dealModelReload(true);
+                                    initWrapper(1);
                                 }
                             }.start();
                         }
@@ -522,6 +534,34 @@ public final class Homepage {
             if (!initModelDataset(true))
                 return;
             new VerifyModelsTask(root, GuiTask.GuiTaskStyle.COMMON, modelsDataset).start();
+        });
+        manageModelImport.setOnAction(e -> {
+            // Initialize the file chooser
+            Logger.info("ModelManager", "Opening file chooser to import zip file");
+            FileChooser fileChooser = new FileChooser();
+            FileChooser.ExtensionFilter extensionFilter1 = new FileChooser.ExtensionFilter("All Files", "*.*");
+            FileChooser.ExtensionFilter extensionFilter2 = new FileChooser.ExtensionFilter("Archives", "*.zip");
+            fileChooser.getExtensionFilters().addAll(extensionFilter1, extensionFilter2);
+            fileChooser.setSelectedExtensionFilter(extensionFilter2);
+            // Handle the chosen file
+            File zipFile = fileChooser.showOpenDialog(root.getScene().getWindow());
+            if (zipFile != null && zipFile.isFile()) {
+                Logger.info("ModelManager", "Importing zip file: " + zipFile);
+                // Go to [Step 1/2]:
+                new UnzipModelsTask(root, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
+                    @Override
+                    protected void onSucceeded(boolean result) {
+                        // Go to [Step 2/2]:
+                        new PostUnzipModelTask(root, GuiTaskStyle.STRICT) {
+                            @Override
+                            protected void onSucceeded(boolean result) {
+                                dealModelReload(true);
+                                initWrapper(1);
+                            }
+                        }.start();
+                    }
+                }.start();
+            }
         });
     }
 
