@@ -1,10 +1,16 @@
-/** Copyright (c) 2022-2023, Harry Huang
+/**
+ * Copyright (c) 2022-2023, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Homepage;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.tray.SystemTrayManager;
+import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.JavaProcess;
+import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.PopupUtils.DialogUtil;
+import cn.harryh.arkpets.utils.PopupUtils.Handbook;
 import javafx.application.Application;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
@@ -22,7 +28,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
-import cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 /** ArkPets Homepage the JavaFX app.
@@ -44,7 +49,7 @@ public class ArkHomeFX extends Application {
         Font.loadFont(getClass().getResourceAsStream(fontFileBold), Font.getDefault().getSize());
 
         // Set handler for internal start button.
-        Button startBtn = (Button)root.lookup("#Start-btn");
+        Button startBtn = (Button) root.lookup("#Start-btn");
         startBtn.setOnAction(e -> {
             // When request to launch ArkPets:
             ctrl.config.saveConfig();
@@ -76,6 +81,16 @@ public class ArkHomeFX extends Application {
         stage.setTitle(desktopTitle);
         stage.show();
 
+        SystemTrayManager.INSTANCE.listen(stage);
+
+        stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue) {
+                SystemTrayManager.INSTANCE.hide(stage);
+            }
+        }));
+
+        stage.setOnCloseRequest(e -> SystemTrayManager.INSTANCE.hide(stage));
+
         // Finish.
         startBtn.requestFocus();
         ctrl = fxml.getController();
@@ -100,8 +115,8 @@ public class ArkHomeFX extends Application {
                 args.remove(LogConfig.debugArg);
                 String temp = switch (ctrl.config.logging_level) {
                     case LogConfig.error -> LogConfig.errorArg;
-                    case LogConfig.warn  -> LogConfig.warnArg;
-                    case LogConfig.info  -> LogConfig.infoArg;
+                    case LogConfig.warn -> LogConfig.warnArg;
+                    case LogConfig.info -> LogConfig.infoArg;
                     case LogConfig.debug -> LogConfig.debugArg;
                     default -> "";
                 };
@@ -123,10 +138,11 @@ public class ArkHomeFX extends Application {
                 return true;
             }
         };
-        Thread thread = new Thread(task);
+
         task.setOnFailed(e ->
                 Logger.error("Launcher", "Detected an unexpected failure of an ArkPets thread, details see below.", task.getException())
         );
-        thread.start();
+
+        SystemTrayManager.INSTANCE.execute(task);
     }
 }

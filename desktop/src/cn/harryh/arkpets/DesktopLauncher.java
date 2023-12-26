@@ -1,23 +1,28 @@
-/** Copyright (c) 2022-2023, Harry Huang
+/**
+ * Copyright (c) 2022-2023, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.LogConfig;
+import static cn.harryh.arkpets.Const.appVersion;
 
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
  * @see ArkHomeFX
  */
 public class DesktopLauncher {
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         ArgPending.argCache = args;
         // Logger
         Logger.initialize(LogConfig.logDesktopPath, LogConfig.logDesktopMaxKeep);
@@ -58,7 +63,12 @@ public class DesktopLauncher {
         };
 
         // Java FX bootstrap
-        Application.launch(ArkHomeFX.class, args);
+        Future<?> future = SystemTrayManager.INSTANCE.submit(() -> Application.launch(ArkHomeFX.class, args));
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         Logger.info("System", "Exited from DesktopLauncher successfully");
         System.exit(0);
     }
