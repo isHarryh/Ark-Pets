@@ -5,7 +5,9 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Homepage;
+import cn.harryh.arkpets.process_pool.Status;
 import cn.harryh.arkpets.tray.SystemTrayManager;
+import cn.harryh.arkpets.process_pool.TaskStatus;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.JavaProcess;
 import cn.harryh.arkpets.utils.Logger;
@@ -26,11 +28,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static cn.harryh.arkpets.Const.*;
 
 
-/** ArkPets Homepage the JavaFX app.
+/**
+ * ArkPets Homepage the JavaFX app.
  */
 public class ArkHomeFX extends Application {
     private Homepage ctrl;
@@ -81,32 +86,39 @@ public class ArkHomeFX extends Application {
         stage.setTitle(desktopTitle);
         stage.show();
 
-        SystemTrayManager.INSTANCE.listen(stage);
+        SystemTrayManager.getInstance().listen(stage);
 
         stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
-                SystemTrayManager.INSTANCE.hide(stage);
+                SystemTrayManager.getInstance().hide(stage);
             }
         }));
 
-        stage.setOnCloseRequest(e -> SystemTrayManager.INSTANCE.hide(stage));
+        stage.setOnCloseRequest(e -> SystemTrayManager.getInstance().hide(stage));
 
         // Finish.
         startBtn.requestFocus();
         ctrl = fxml.getController();
     }
 
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        SystemTrayManager.getInstance().shutdown();
+    }
 
-    /** Runs the EmbeddedLauncher to launch the ArkPets app.
+    /**
+     * Runs the EmbeddedLauncher to launch the ArkPets app.
      * It will run in multi-threading mode provided by JavaFX,
      * so this method must be invoked in {@code FXApplicationThread}.
+     *
      * @see EmbeddedLauncher
      * @see javafx.concurrent.Task
      */
     public void startArkPets() {
         Task<Boolean> task = new Task<>() {
             @Override
-            protected Boolean call() throws IOException, InterruptedException {
+            protected Boolean call() throws IOException, InterruptedException, ExecutionException {
                 // Renew the logging level arg to match the custom value of the Launcher.
                 ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
                 args.remove(LogConfig.errorArg);
@@ -124,14 +136,15 @@ public class ArkHomeFX extends Application {
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + ctrl.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
-                int code = JavaProcess.exec(
-                        EmbeddedLauncher.class, true,
-                        List.of(), args
-                );
+                FutureTask<TaskStatus> future = SystemTrayManager.getInstance().submit(EmbeddedLauncher. class, List.of(), args);
+//                int code = JavaProcess.exec(
+//                        EmbeddedLauncher.class, true,
+//                        List.of(), args
+//                );
                 // ArkPets core finalized.
-                if (code != 0) {
-                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + code + "). Please check the log file for details.");
-                    ctrl.lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(code);
+                if (Objects.equals(future.get().getStatus(), Status.FAILURE)) {
+                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code -1). Please check the log file for details.");
+                    ctrl.lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(-1);
                     return false;
                 }
                 Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
@@ -143,6 +156,6 @@ public class ArkHomeFX extends Application {
                 Logger.error("Launcher", "Detected an unexpected failure of an ArkPets thread, details see below.", task.getException())
         );
 
-        SystemTrayManager.INSTANCE.execute(task);
+        SystemTrayManager.getInstance().submit(task);
     }
 }

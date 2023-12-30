@@ -63,7 +63,7 @@ public class DesktopLauncher {
         };
 
         // Java FX bootstrap
-        Future<?> future = SystemTrayManager.INSTANCE.submit(() -> Application.launch(ArkHomeFX.class, args));
+        Future<?> future = SystemTrayManager.getInstance().submit(() -> Application.launch(ArkHomeFX.class, args));
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {
