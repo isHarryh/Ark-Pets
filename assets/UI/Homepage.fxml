@@ -311,6 +311,11 @@
                             <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0" />
                             <Label fx:id="exploreLogDir" styleClass="config-hyper-link" text="浏览日志" />
                         </HBox>
+                        <HBox>
+                            <Label text="网络代理（仅本次有效）" />
+                            <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0" />
+                            <Label fx:id="configNetworkAgentStatus" alignment="TOP_CENTER" text="-"/>
+                        </HBox>
                         <Separator />
                         <Label styleClass="config-group-title" text="关于软件" />
                         <HBox spacing="22.5">

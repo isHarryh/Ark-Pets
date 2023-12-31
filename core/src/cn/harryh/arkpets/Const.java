@@ -62,6 +62,9 @@ public final class Const {
     public static boolean isDatasetIncompatible = false;
     public static boolean isNewcomer = false;
 
+    // Misc constants
+    public static String ipPortRegex = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$";
+
 
     /** Paths presets definition class.
      */
