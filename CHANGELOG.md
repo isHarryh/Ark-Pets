@@ -3,11 +3,32 @@
 ***目前最新可用版本：***
 [<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
 
+## v2.4
+| **新增**      |                                                     |
+|:------------|:----------------------------------------------------|
+| [`4754554`] | 新增了在下载对话框中显示下载速率的功能。                                |
+| [`1eb6c08`] | 新增了**模型库下载源** ghproxy.harryh.cn，取代了原来的 ghproxy.com。 |
+| [`a5c7b9a`] | 新增了可以**导入模型仓库的压缩包**以加载模型的功能。<br>新增了一些启动器页面跳转逻辑。     |
+| [`727a34e`] | 新增了启动器的网络代理设置项。                                     |
+
+| **修复**      |                              |
+|:------------|:-----------------------------|
+| [`cb06cba`] | 修复了启动器内弹出的对话框在关闭时未播放关闭动画的问题。 |
+
+| **优化**                     |                                                |
+|:---------------------------|:-----------------------------------------------|
+| [`cb06cba`]                | 重构了**启动器前台任务**的代码逻辑。                           |
+| [`1eb6c08`]                | 优化了控制台日志，输出流与错误流相分离。                           |
+| [`#52`]<br>[`#55`]         | 优化了**自动化构建**，在 GitHub Actions 新增了 `build` 工作流。 |
+| [`3b8f5fc`]<br>[`abc4743`] | 修订并公布了代码检查规则。                                  |
+| [`f6139c3`]                | 重构了**模型资源**的代码逻辑。                              |
+| [`#47`]<br>[`7db99c3`]     | 优化了 Windows 安装程序的默认安装目录和在控制面板卸载页面中的表现。         |
+
 ## v2.3
-| **新增**      |                                          |
-|:------------|:-----------------------------------------|
-| [`a31afcf`] | 新增了右键桌宠本体即可弹出菜单的功能。                      |
-| [`17d3fde`] | 新增了可以在菜单中切换桌宠形态的功能，现在可以切换拥有多个形态的敌方领袖的形态。 |
+| **新增**      |                                              |
+|:------------|:---------------------------------------------|
+| [`a31afcf`] | 新增了**右键桌宠本体即可弹出菜单**的功能。                      |
+| [`17d3fde`] | 新增了可以在菜单中**切换桌宠形态**的功能，现在可以切换拥有多个形态的敌方领袖的形态。 |
 
 | **修复**                 |                                                  |
 |:-----------------------|:-------------------------------------------------|
@@ -18,8 +39,8 @@
 | **优化**      |                                          |
 |:------------|:-----------------------------------------|
 | [`0fb103c`] | 优化了 Windows 安装程序的语言本地化（修订了简体中文，新增了繁体中文）。 |
-| [`a31afcf`] | 优化了托盘菜单的外观表现。                            |
-| [`e046e1c`] | 优化了动画队列的代码逻辑。                            |
+| [`a31afcf`] | 优化了**托盘菜单**的外观表现。                        |
+| [`e046e1c`] | 优化了**动画队列**的代码逻辑。                        |
 
 | **补丁**                  |                    |
 |:------------------------|:-------------------|
@@ -213,7 +234,10 @@
 [`#12`]: https://github.com/isHarryh/Ark-Pets/issues/12
 [`#34`]: https://github.com/isHarryh/Ark-Pets/issues/34
 [`#39`]: https://github.com/isHarryh/Ark-Pets/issues/39
+[`#47`]: https://github.com/isHarryh/Ark-Pets/issues/47
 [`#48`]: https://github.com/isHarryh/Ark-Pets/issues/48
+[`#52`]: https://github.com/isHarryh/Ark-Pets/issues/52
+[`#55`]: https://github.com/isHarryh/Ark-Pets/issues/55
 [`2bc0079`]: https://github.com/isHarryh/Ark-Pets/commit/2bc0079b922684b1d4850f9211225dcf803e555c
 [`48ef339`]: https://github.com/isHarryh/Ark-Pets/commit/48ef339dd78711e208ded8c5148569d8b89690b1
 [`95e6a1a`]: https://github.com/isHarryh/Ark-Pets/commit/95e6a1ace8d047ac51314e7d5572ce4169fa9f84
@@ -267,3 +291,12 @@
 [`e046e1c`]: https://github.com/isHarryh/Ark-Pets/commit/e046e1c67ccbd61cde7e50927eccf9c20c7ee736
 [`b72421a`]: https://github.com/isHarryh/Ark-Pets/commit/b72421a90b9263c6f25fe76053f139ffa445a981
 [`7a161d3`]: https://github.com/isHarryh/Ark-Pets/commit/7a161d304f4256d0dfa5f027fad1479ac0d06391
+[`cb06cba`]: https://github.com/isHarryh/Ark-Pets/commit/cb06cba4e14838da89e4ea5c10cd29c402719985
+[`4754554`]: https://github.com/isHarryh/Ark-Pets/commit/4754554ae9356f53f34313b8cfc1abc4fb57fd9b
+[`1eb6c08`]: https://github.com/isHarryh/Ark-Pets/commit/1eb6c087b2b7587bfb9de38daabb9060dd0bfba7
+[`3b8f5fc`]: https://github.com/isHarryh/Ark-Pets/commit/3b8f5fc2db55cd0916a6a9207b733f015951f746
+[`f6139c3`]: https://github.com/isHarryh/Ark-Pets/commit/f6139c3890f1a23fc6abf71d62e8def0e17bb72e
+[`abc4743`]: https://github.com/isHarryh/Ark-Pets/commit/abc4743ae4e4b2a854e405008de2bb7269ac6b17
+[`7db99c3`]: https://github.com/isHarryh/Ark-Pets/commit/7db99c32f44d86ff23b9857fec21e5e024f8a9b8
+[`a5c7b9a`]: https://github.com/isHarryh/Ark-Pets/commit/a5c7b9a99f4fd79d4f92497a7a855c71ba112dcb
+[`727a34e`]: https://github.com/isHarryh/Ark-Pets/commit/727a34eed5d1a41ee3e6f153726f2bcf92a28958
