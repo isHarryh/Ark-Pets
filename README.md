@@ -7,7 +7,7 @@
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code><b> v2.4 </b></code>
+      <code><b> v3.0 </b></code>
    </p>
    <p>
       <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/isHarryh/Ark-Pets?label=Java">
@@ -59,8 +59,6 @@
 </table>
 
 ### 下一步计划
-
-当前版本 **v2.4** 将成为 ArkPets v2.x 系列的**最后一个**子版本。
 
 以下内容将在 ArkPets v3.x 系列实现：
 
