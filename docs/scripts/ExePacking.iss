@@ -11,7 +11,7 @@
 [Setup]
 ; WARN: The value of AppId uniquely identifies this app. Do not use the same AppId value in installers for other apps.
 ; (To generate a new GUID, click Tools | Generate GUID inside the Inno Setup IDE.)
-AppCopyright        = Copyright (C) 2022-2023 {#MyAppPublisher}
+AppCopyright        = Copyright (C) 2022-2024 {#MyAppPublisher}
 AppId               ={{213DB689-8F8A-4DEA-BE79-545FAD7769A6}
 AppName             ={#MyAppName}
 AppVersion          ={#MyAppVersion}
