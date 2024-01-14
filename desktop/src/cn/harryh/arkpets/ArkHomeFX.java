@@ -3,130 +3,119 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.controllers.Homepage;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.assets.ModelsDataset;
+import cn.harryh.arkpets.controllers.BehaviorModule;
+import cn.harryh.arkpets.controllers.ModelsModule;
+import cn.harryh.arkpets.controllers.RootModule;
+import cn.harryh.arkpets.controllers.SettingsModule;
+import cn.harryh.arkpets.utils.FXMLHelper;
+import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
+import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.util.Duration;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
-import cn.harryh.arkpets.utils.PopupUtils.*;
 
 
 /** ArkPets Homepage the JavaFX app.
  */
 public class ArkHomeFX extends Application {
-    private Homepage ctrl;
-    public final String urlStyleSheet = Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm();
+    public Stage stage;
+    public ArkConfig config;
+    public ModelsDataset modelsDataset;
+    public StackPane root;
+
+    public RootModule rootModule;
+    public ModelsModule modelsModule;
+    public BehaviorModule behaviorModule;
+    public SettingsModule settingsModule;
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Load FXML for Homepage.
         Logger.info("Launcher", "Starting");
-        FXMLLoader fxml = new FXMLLoader();
-        fxml.setLocation(getClass().getResource("/UI/Homepage.fxml"));
-        Parent root = fxml.load();
+        this.stage = stage;
 
         // Load fonts.
         Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());
         Font.loadFont(getClass().getResourceAsStream(fontFileBold), Font.getDefault().getSize());
 
-        // Set handler for internal start button.
-        Button startBtn = (Button)root.lookup("#Start-btn");
-        startBtn.setOnAction(e -> {
-            // When request to launch ArkPets:
-            ctrl.config.saveConfig();
-            if (ctrl.config.character_asset != null && !ctrl.config.character_asset.isEmpty()) {
-                ctrl.popLoading(ev -> {
-                    try {
-                        // Do launch ArkPets core.
-                        Thread.sleep(100);
-                        startArkPets();
-                        Thread.sleep(1200);
-                        if (isNewcomer && !ctrl.trayExitHandbook.hasShown()) {
-                            // Show handbook.
-                            Handbook b = ctrl.trayExitHandbook;
-                            DialogUtil.createCommonDialog(ctrl.root, b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
-                            b.setShown();
-                        }
-                    } catch (InterruptedException ignored) {
-                    }
-                });
-            }
-        });
+        // Load FXML for root node.
+        LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
+        fxml0.initializeWith(this);
+        root = (StackPane) fxml0.content();
+        rootModule = (RootModule) fxml0.controller();
 
-        // Setup scene and show primary stage.
+        // Setup scene and primary stage.
+        Logger.info("Launcher", "Creating main scene");
         Scene scene = new Scene(root);
+        scene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("/UI/Main.css")).toExternalForm());
         stage.getIcons().setAll(new Image(Objects.requireNonNull(getClass().getResource(iconFilePng)).toExternalForm()));
-        scene.getStylesheets().setAll(urlStyleSheet);
+        stage.initStyle(StageStyle.UNDECORATED);
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setTitle(desktopTitle);
-        stage.show();
+        rootModule.titleText.setText(desktopTitle);
 
-        // Finish.
-        startBtn.requestFocus();
-        ctrl = fxml.getController();
+        // After the stage is shown, do initialize modules.
+        stage.show();
+        rootModule.popSplashScreen(e -> {
+            Logger.info("Launcher", "Loading modules");
+            try {
+                LoadFXMLResult<ArkHomeFX> fxml1 = FXMLHelper.loadFXML("/UI/ModelsModule.fxml");
+                LoadFXMLResult<ArkHomeFX> fxml2 = FXMLHelper.loadFXML("/UI/BehaviorModule.fxml");
+                LoadFXMLResult<ArkHomeFX> fxml3 = FXMLHelper.loadFXML("/UI/SettingsModule.fxml");
+                fxml1.addToNode(rootModule.wrapper1);
+                fxml2.addToNode(rootModule.wrapper2);
+                fxml3.addToNode(rootModule.wrapper3);
+                modelsModule = (ModelsModule) fxml1.initializeWith(this);
+                behaviorModule = (BehaviorModule) fxml2.initializeWith(this);
+                settingsModule = (SettingsModule) fxml3.initializeWith(this);
+            } catch (Exception ex) {
+                Logger.error("Launcher", "Failed to initialize module, details see below.", ex);
+            }
+
+            // Post initialization.
+            syncRemoteMetaInfo();
+            switchToModelsPane();
+            Logger.info("Launcher", "Finished starting");
+        }, Duration.ZERO, durationFast);
     }
 
+    public boolean initModelsDataset(boolean popNotice) {
+        return modelsModule.initModelsDataset(popNotice);
+    }
 
-    /** Runs the EmbeddedLauncher to launch the ArkPets app.
-     * It will run in multi-threading mode provided by JavaFX,
-     * so this method must be invoked in {@code FXApplicationThread}.
-     * @see EmbeddedLauncher
-     * @see javafx.concurrent.Task
-     */
-    public void startArkPets() {
-        Task<Boolean> task = new Task<>() {
-            @Override
-            protected Boolean call() throws IOException, InterruptedException {
-                // Renew the logging level arg to match the custom value of the Launcher.
-                ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
-                args.remove(LogConfig.errorArg);
-                args.remove(LogConfig.warnArg);
-                args.remove(LogConfig.infoArg);
-                args.remove(LogConfig.debugArg);
-                String temp = switch (ctrl.config.logging_level) {
-                    case LogConfig.error -> LogConfig.errorArg;
-                    case LogConfig.warn  -> LogConfig.warnArg;
-                    case LogConfig.info  -> LogConfig.infoArg;
-                    case LogConfig.debug -> LogConfig.debugArg;
-                    default -> "";
-                };
-                args.add(temp);
-                // Start ArkPets core.
-                Logger.info("Launcher", "Launching " + ctrl.config.character_asset);
-                Logger.debug("Launcher", "With args " + args);
-                int code = JavaProcess.exec(
-                        EmbeddedLauncher.class, true,
-                        List.of(), args
-                );
-                // ArkPets core finalized.
-                if (code != 0) {
-                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + code + "). Please check the log file for details.");
-                    ctrl.lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(code);
-                    return false;
-                }
-                Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
-                return true;
-            }
-        };
-        Thread thread = new Thread(task);
-        task.setOnFailed(e ->
-                Logger.error("Launcher", "Detected an unexpected failure of an ArkPets thread, details see below.", task.getException())
-        );
-        thread.start();
+    public void popLoading(EventHandler<ActionEvent> handler) {
+        rootModule.popLoading(handler);
+    }
+
+    public void modelReload(boolean popNotice) {
+        modelsModule.modelReload(popNotice);
+    }
+
+    public void switchToModelsPane() {
+        rootModule.menuBtn1.getOnAction().handle(new ActionEvent());
+    }
+
+    public void switchToBehaviorPane() {
+        rootModule.menuBtn2.getOnAction().handle(new ActionEvent());
+    }
+
+    public void switchToSettingsPane() {
+        rootModule.menuBtn3.getOnAction().handle(new ActionEvent());
+    }
+
+    public void syncRemoteMetaInfo() {
+        rootModule.syncRemoteMetaInfo();
     }
 }

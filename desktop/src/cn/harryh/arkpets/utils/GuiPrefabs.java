@@ -4,18 +4,18 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
-import com.jfoenix.controls.JFXTextArea;
+import com.jfoenix.controls.*;
+import javafx.animation.FadeTransition;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
+import javafx.util.Duration;
 
 import javax.net.ssl.SSLException;
 import java.io.FileNotFoundException;
@@ -27,7 +27,8 @@ import java.util.zip.ZipException;
 
 
 @SuppressWarnings("unused")
-public class PopupUtils {
+public class GuiPrefabs {
+    public static final String tooltipStyle = "-fx-text-fill:#FFF;-fx-font-size:10px;-fx-font-weight:normal;";
     public static final String COLOR_INFO       = "#37B";
     public static final String COLOR_SUCCESS    = "#5B5";
     public static final String COLOR_WARNING    = "#E93";
@@ -37,6 +38,29 @@ public class PopupUtils {
     public static final String COLOR_DARK_GRAY  = "#222";
     public static final String COLOR_GRAY       = "#444";
     public static final String COLOR_LIGHT_GRAY = "#666";
+
+    public static void fadeInNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
+        node.setVisible(true);
+        if (onFinished != null)
+            fadeT.setOnFinished(onFinished);
+        fadeT.setFromValue(0);
+        fadeT.setToValue(1);
+        fadeT.playFromStart();
+    }
+
+    public static void fadeOutNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
+        fadeT.setOnFinished(e -> {
+            node.setVisible(false);
+            if (onFinished != null)
+                onFinished.handle(e);
+        });
+        fadeT.setFromValue(1);
+        fadeT.setToValue(0);
+        fadeT.playFromStart();
+    }
+
 
     public static class IconUtil {
         public static final String ICON_INFO        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";

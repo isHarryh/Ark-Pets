@@ -3,10 +3,10 @@
  */
 package cn.harryh.arkpets.guitasks;
 
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.NetUtils;
 import cn.harryh.arkpets.utils.NetUtils.GitHubSource;
-import cn.harryh.arkpets.utils.PopupUtils;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
@@ -91,7 +91,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
     @Override
     protected void onFailed(Throwable e) {
         if (style != GuiTaskStyle.HIDDEN)
-            PopupUtils.DialogUtil.createErrorDialog(root, e).show();
+            GuiPrefabs.DialogUtil.createErrorDialog(root, e).show();
         if (selectedSource != null)
             selectedSource.receiveError();
     }

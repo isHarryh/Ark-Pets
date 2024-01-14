@@ -3,8 +3,8 @@
  */
 package cn.harryh.arkpets.guitasks;
 
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.PopupUtils.DialogUtil;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
@@ -51,17 +51,17 @@ abstract public class GuiTask {
         task.setOnCancelled(e -> {
             Logger.info("Task", this + " was cancelled.");
             this.onCancelled();
-            DialogUtil.disposeDialog(dialog, root);
+            GuiPrefabs.DialogUtil.disposeDialog(dialog, root);
         });
         task.setOnFailed(e -> {
             Logger.error("Task", this + " failed, details see below.", task.getException());
             this.onFailed(task.getException());
-            DialogUtil.disposeDialog(dialog, root);
+            GuiPrefabs.DialogUtil.disposeDialog(dialog, root);
         });
         task.setOnSucceeded(e -> {
             Logger.info("Task", this + " completed.");
             this.onSucceeded(task.getValue());
-            DialogUtil.disposeDialog(dialog, root);
+            GuiPrefabs.DialogUtil.disposeDialog(dialog, root);
         });
         task.setOnRunning(e -> Logger.debug("Task", this + " running."));
         task.setOnScheduled(e -> Logger.debug("Task", this + " scheduled."));
@@ -121,14 +121,14 @@ abstract public class GuiTask {
 
     private JFXDialog getDialog(StackPane root, Task<Boolean> boundTask, boolean cancelable) {
         // Initialize the dialog framework
-        JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
+        JFXDialog dialog = GuiPrefabs.DialogUtil.createCenteredDialog(root, false);
         ProgressBar bar = new ProgressBar(-1);
         bar.setPrefSize(root.getWidth() * 0.6, 10);
 
         // Add components to the dialog
         VBox content = new VBox();
-        Label h2 = (Label)DialogUtil.getPrefabsH2(getHeader());
-        Label h3 = (Label)DialogUtil.getPrefabsH3(getInitialContent());
+        Label h2 = (Label) GuiPrefabs.DialogUtil.getPrefabsH2(getHeader());
+        Label h3 = (Label) GuiPrefabs.DialogUtil.getPrefabsH3(getInitialContent());
         content.setSpacing(5);
         content.getChildren().add(h2);
         content.getChildren().add(new Separator());
@@ -138,10 +138,10 @@ abstract public class GuiTask {
         JFXDialogLayout layout = new JFXDialogLayout();
         layout.setHeading(bar);
         layout.setBody(content);
-        layout.setActions(DialogUtil.getOkayButton(dialog, root));
+        layout.setActions(GuiPrefabs.DialogUtil.getOkayButton(dialog, root));
         dialog.setContent(layout);
         if (cancelable) {
-            JFXButton cancel = DialogUtil.getCancelButton(dialog, root);
+            JFXButton cancel = GuiPrefabs.DialogUtil.getCancelButton(dialog, root);
             cancel.setOnAction(e -> boundTask.cancel());
             layout.setActions(cancel);
         } else {

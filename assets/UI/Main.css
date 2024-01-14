@@ -371,6 +371,39 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 -fx-font-weight: bold;
 }
 
+#Title-bar {
+-fx-background-color: #204880;
+}
+
+#Title-bar Text {
+-fx-fill: #FFFFFF;
+-fx-font-size: 12px;
+-fx-font-weight: bold;
+}
+
+#Title-bar JFXButton {
+-fx-background-color: #204880;
+-fx-border-radius: 0px;
+-fx-border-style: none;
+-fx-min-width: 24px;
+-fx-min-height: 24px;
+-fx-max-width: 24px;
+-fx-max-height: 24px;
+-fx-focus-traversable: false;
+}
+
+#Title-bar JFXButton SVGPath {
+-fx-fill: #FFFFFF;
+}
+
+#Title-minimize-btn:hover, #Title-minimize-btn:focused {
+-fx-background-color: #305890;
+}
+
+#Title-close-btn:hover, #Title-close-btn:focused {
+-fx-background-color: #CC2211;
+}
+
 /*******************************************************************************
  *                                                                             *
  * 6. ScrollBar and ScrollPane                                                 *

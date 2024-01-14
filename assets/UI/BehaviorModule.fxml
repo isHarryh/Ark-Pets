@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Copyright (c) 2022-2024, Harry Huang
+    At GPL-3.0 License
+-->
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- ********* Wrapper 2 ********* -->
+<Pane prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
+      xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="cn.harryh.arkpets.controllers.BehaviorModule">
+    <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
+        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0"
+                    prefWidth="425.0" styleClass="config-field">
+            <VBox>
+                <Label styleClass="config-group-title" text="动作"/>
+                <HBox>
+                    <JFXCheckBox fx:id="configBehaviorAllowWalk" mnemonicParsing="false" text="允许行走"/>
+                    <JFXCheckBox fx:id="configBehaviorAllowSit" mnemonicParsing="false" text="允许坐下"/>
+                </HBox>
+                <HBox>
+                    <Label text="动作活跃度"/>
+                    <JFXSlider fx:id="configBehaviorAiActivation"/>
+                    <Label fx:id="configBehaviorAiActivationValue" text="0"/>
+                </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="交互"/>
+                <HBox>
+                    <JFXCheckBox fx:id="configBehaviorAllowInteract" mnemonicParsing="false" text="允许触发交互动画"/>
+                    <JFXCheckBox fx:id="configBehaviorDoPeerRepulsion" mnemonicParsing="false"
+                                 text="允许被其他桌宠排斥"/>
+                </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="位置"/>
+                <HBox>
+                    <JFXCheckBox fx:id="configDeployMultiMonitors" mnemonicParsing="false" text="启用多显示屏"/>
+                    <Label fx:id="configDeployMultiMonitorsStatus" text="-"/>
+                </HBox>
+                <HBox>
+                    <Label text="任务栏高度（下边界距离）"/>
+                    <JFXSlider fx:id="configDeployMarginBottom"/>
+                    <Label fx:id="configDeployMarginBottomValue" text="0"/>
+                </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="物理"/>
+                <HBox>
+                    <Label text="重力加速度"/>
+                    <JFXSlider fx:id="configPhysicGravity"/>
+                    <Label fx:id="configPhysicGravityValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="空气阻力系加速度"/>
+                    <JFXSlider fx:id="configPhysicAirFriction"/>
+                    <Label fx:id="configPhysicAirFrictionValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="地面摩擦系加速度"/>
+                    <JFXSlider fx:id="configPhysicStaticFriction"/>
+                    <Label fx:id="configPhysicStaticFrictionValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="最大水平运动速率"/>
+                    <JFXSlider fx:id="configPhysicSpeedLimitX"/>
+                    <Label fx:id="configPhysicSpeedLimitXValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="最大垂直运动速率"/>
+                    <JFXSlider fx:id="configPhysicSpeedLimitY"/>
+                    <Label fx:id="configPhysicSpeedLimitYValue" text="0"/>
+                </HBox>
+                <Separator/>
+                <HBox spacing="22.5">
+                    <Label fx:id="configPhysicRestore" styleClass="config-hyper-link" text="恢复默认物理设置"/>
+                </HBox>
+                <Separator/>
+            </VBox>
+        </AnchorPane>
+    </ScrollPane>
+</Pane>
