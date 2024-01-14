@@ -189,8 +189,7 @@ public final class Homepage {
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
-            if (config.isAllPhysicConfigZeroed())
-                isNewcomer = config.isNewcomer();
+            isNewcomer = config.isNewcomer();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
@@ -946,7 +945,7 @@ public final class Homepage {
 
         @Override
         public String getHeader() {
-            return "如需关闭桌宠，请右键系统托盘图标后选择退出。";
+            return "如需关闭桌宠，请右键单击桌宠或系统托盘图标，然后选择退出。";
         }
 
         @Override
