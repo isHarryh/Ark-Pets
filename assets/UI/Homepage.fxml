@@ -255,7 +255,8 @@
                         </HBox>
                         <Separator />
                         <Label styleClass="config-group-title" text="模型下载" />
-                        <HBox spacing="12.5">
+                        <VBox spacing="22.5">
+                            <HBox spacing="12.5">
                             <JFXButton fx:id="manageModelCheck" mnemonicParsing="false" prefHeight="35.0" prefWidth="82.0" text=" 检查更新">
                                 <graphic>
                                     <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
@@ -300,7 +301,19 @@
                                     <String fx:value="btn-with-icon" />
                                 </styleClass>
                             </JFXButton>
-                        </HBox>
+
+                            </HBox>
+                            <HBox spacing="12.5">
+                                <!--                            //添加按钮用以用户获取手动下载链接-->
+                                <JFXButton fx:id="getLink" mnemonicParsing="false" prefHeight="35.0" prefWidth="150.0" text="获取手动下载链接">
+                                    <styleClass>
+                                        <String fx:value="btn-secondary" />
+                                        <String fx:value="btn-with-icon" />
+                                    </styleClass>
+                                </JFXButton>
+                            </HBox>
+                        </VBox>
+
                         <Separator />
                         <Label styleClass="config-group-title" text="高级设置" />
                         <HBox>

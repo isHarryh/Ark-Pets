@@ -1,4 +1,5 @@
-/** Copyright (c) 2022-2023, Harry Huang
+/**
+ * Copyright (c) 2022-2023, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -11,9 +12,6 @@ import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
-import javafx.stage.FileChooser;
-import org.apache.log4j.Level;
-
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
@@ -24,14 +22,26 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import org.apache.log4j.Level;
 
-import java.io.*;
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -47,6 +57,11 @@ public final class Homepage {
 
     @FXML
     public StackPane root;
+
+    @FXML
+    public JFXButton getLink;
+    public ArkConfig config;
+    public ModelsDataset modelsDataset;
     @FXML
     private AnchorPane body;
     @FXML
@@ -67,7 +82,6 @@ public final class Homepage {
     private Pane wrapper0;
     @FXML
     private JFXButton startBtn;
-
     @FXML
     private Pane loadFailureTip;
     @FXML
@@ -94,7 +108,6 @@ public final class Homepage {
     private Label selectedModelType;
     @FXML
     private ImageView selectedModelView;
-
     @FXML
     private JFXCheckBox configBehaviorAllowWalk;
     @FXML
@@ -137,7 +150,6 @@ public final class Homepage {
     private Label configPhysicSpeedLimitYValue;
     @FXML
     private Label configPhysicRestore;
-
     @FXML
     private Pane noticeBox;
     @FXML
@@ -170,18 +182,45 @@ public final class Homepage {
     private Label aboutReadme;
     @FXML
     private Label aboutGitHub;
-
     private AssetItemGroup assetItemList;
     private JFXListCell<AssetItem> selectedModelCell;
     private ArrayList<JFXListCell<AssetItem>> modelCellList = new ArrayList<>();
-
-    public ArkConfig config;
-    public ModelsDataset modelsDataset;
+    private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
+        if (searchModelFilter.getValue() != null) {
+            popLoading(e -> {
+                Logger.info("ModelManager", "Filter \"" + searchModelFilter.getValue() + "\"");
+                dealModelSearch(searchModelInput.getText());
+                searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
+            });
+        }
+    };
     private NoticeBar appVersionNotice;
     private NoticeBar diskFreeSpaceNotice;
     private NoticeBar datasetIncompatibleNotice;
 
     public Homepage() {
+    }
+
+    private static void fadeInNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
+        node.setVisible(true);
+        if (onFinished != null)
+            fadeT.setOnFinished(onFinished);
+        fadeT.setFromValue(0.025);
+        fadeT.setToValue(1);
+        fadeT.playFromStart();
+    }
+
+    private static void fadeOutNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        FadeTransition fadeT = new FadeTransition(duration, node);
+        fadeT.setOnFinished(e -> {
+            node.setVisible(false);
+            if (onFinished != null)
+                onFinished.handle(e);
+        });
+        fadeT.setFromValue(0.975);
+        fadeT.setToValue(0);
+        fadeT.playFromStart();
     }
 
     public void initialize() {
@@ -236,16 +275,6 @@ public final class Homepage {
             }
         }
     }
-
-    private final ChangeListener<String> filterListener = (observable, oldValue, newValue) -> {
-        if (searchModelFilter.getValue() != null) {
-            popLoading(e -> {
-                Logger.info("ModelManager", "Filter \"" + searchModelFilter.getValue() + "\"");
-                dealModelSearch(searchModelInput.getText());
-                searchModelFilter.getSelectionModel().clearAndSelect(searchModelFilter.getSelectionModel().getSelectedIndex());
-            });
-        }
-    };
 
     private void initModelSearch() {
         searchModelInput.setPromptText("输入关键字");
@@ -304,7 +333,7 @@ public final class Homepage {
                 throw e;
             }
 
-        // If any exception occurred during the progress above:
+            // If any exception occurred during the progress above:
         } catch (FileNotFoundException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
             if (doPopNotice) {
@@ -343,7 +372,7 @@ public final class Homepage {
             // Initialize list view:
             searchModelView.getSelectionModel().getSelectedItems().addListener(
                     (ListChangeListener<JFXListCell<AssetItem>>) (observable -> observable.getList().forEach(
-                                    (Consumer<JFXListCell<AssetItem>>) cell -> selectModel(cell.getItem(), cell))
+                            (Consumer<JFXListCell<AssetItem>>) cell -> selectModel(cell.getItem(), cell))
                     )
             );
             searchModelView.setFixedCellSize(30);
@@ -509,7 +538,7 @@ public final class Homepage {
             // Go to [Step 1/3]:
             new DownloadModelsTask(root, GuiTask.GuiTaskStyle.COMMON) {
                 @Override
-                protected void onSucceeded(boolean result){
+                protected void onSucceeded(boolean result) {
                     // Go to [Step 2/3]:
                     new UnzipModelsTask(root, GuiTaskStyle.STRICT, PathConfig.tempModelsZipCachePath) {
                         @Override
@@ -531,6 +560,16 @@ public final class Homepage {
                     }.start();
                 }
             }.start();
+        });
+        getLink.setOnAction(event -> {
+            if (getLink.getText().equals("获取手动下载链接")) {
+
+                getLink.setText("链接已复制到您的剪切板，请粘贴至浏览器下载。下载后，请选择压缩包导入");
+                getLink.setPrefWidth(350);
+            }
+            Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection stringSelection = new StringSelection("https://github.com/isHarryh/Ark-Models");
+            systemClipboard.setContents(stringSelection, null);
         });
         manageModelVerify.setOnAction(e -> {
             /* Foreground verify models */
@@ -650,13 +689,13 @@ public final class Homepage {
     }
 
     private void initAbout() {
-        aboutQueryUpdate.setOnMouseClicked  (e -> {
+        aboutQueryUpdate.setOnMouseClicked(e -> {
             /* Foreground check app update */
             new CheckAppUpdateTask(root, GuiTask.GuiTaskStyle.COMMON, "manual").start();
         });
-        aboutVisitWebsite.setOnMouseClicked (e -> NetUtils.browseWebpage(PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked       (e -> NetUtils.browseWebpage(PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked(e -> NetUtils.browseWebpage(PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked(e -> NetUtils.browseWebpage(PathConfig.urlReadme));
+        aboutGitHub.setOnMouseClicked(e -> NetUtils.browseWebpage(PathConfig.urlLicense));
     }
 
     private void initNoticeBox() {
@@ -768,7 +807,7 @@ public final class Homepage {
                 Task<Boolean> task = new Task<>() {
                     @Override
                     protected Boolean call() {
-                            return true;
+                        return true;
                     }
                 };
                 task.setOnSucceeded(e -> {
@@ -821,7 +860,7 @@ public final class Homepage {
     private void dealModelRandom() {
         if (!assertModelLoaded(true))
             return;
-        int idx = (int)(Math.random() * (searchModelView.getItems().size() - 1));
+        int idx = (int) (Math.random() * (searchModelView.getItems().size() - 1));
         searchModelView.scrollTo(idx);
         searchModelView.getSelectionModel().select(idx);
         searchModelView.requestFocus();
@@ -913,28 +952,6 @@ public final class Homepage {
             // Loaded:
             return true;
         }
-    }
-
-    private static void fadeInNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
-        FadeTransition fadeT = new FadeTransition(duration, node);
-        node.setVisible(true);
-        if (onFinished != null)
-            fadeT.setOnFinished(onFinished);
-        fadeT.setFromValue(0.025);
-        fadeT.setToValue(1);
-        fadeT.playFromStart();
-    }
-
-    private static void fadeOutNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
-        FadeTransition fadeT = new FadeTransition(duration, node);
-        fadeT.setOnFinished(e -> {
-            node.setVisible(false);
-            if (onFinished != null)
-                onFinished.handle(e);
-        });
-        fadeT.setFromValue(0.975);
-        fadeT.setToValue(0);
-        fadeT.playFromStart();
     }
 
     private static class TrayExitHandBook extends PopupUtils.Handbook {
