@@ -39,7 +39,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                this.updateMessage("正在选择最佳线路");
+                this.updateMessage("正在选择最佳线路"+"\n 如果失败，请多次尝试软件会自动切换下载路线。如果依旧无法下载，请前往\"https://github.com/isHarryh/Ark-Models\" 手动下载");
                 Logger.info("Network", "Testing real delay");
                 GitHubSource.sortByOverallAvailability(NetUtils.ghSources);
                 selectedSource = (GitHubSource)NetUtils.ghSources.get(0);
