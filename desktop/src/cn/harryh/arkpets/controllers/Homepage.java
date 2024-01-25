@@ -564,7 +564,7 @@ public final class Homepage {
         getLink.setOnAction(event -> {
             if (getLink.getText().equals("获取手动下载链接")) {
 
-                getLink.setText("链接已复制到您的剪切板，请粘贴至浏览器下载。下载后，请选择压缩包导入");
+                getLink.setText("链接已复制到您的剪切板，请粘贴至浏览器下载。");
                 getLink.setPrefWidth(350);
             }
             Clipboard systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
