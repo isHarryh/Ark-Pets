@@ -55,7 +55,9 @@ public class ArkChar {
         batch = new TwoColorPolygonBatch();
         fbo = new FrameBuffer(Format.RGBA8888, canvasMaxSize, canvasMaxSize, false);
         renderer = new SkeletonRenderer();
-        renderer.setPremultipliedAlpha(true);
+        /* Pre-multiplied alpha shouldn't be applied to models released in Arknights 2.1.41 or later,
+        otherwise you may get a corrupted rendering result. */
+        renderer.setPremultipliedAlpha(false);
         // 2.Geometry setup
         position = new TransitionVector3(TernaryFunction.LINEAR, linearEasingDuration);
         offsetY = new TransitionFloat(TernaryFunction.LINEAR, linearEasingDuration);
