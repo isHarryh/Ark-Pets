@@ -13,6 +13,7 @@ import java.util.function.Predicate;
  * <hr>
  * The structure of the root directory may be like what is shown below.
  * Each {@code SubDir} represents an {@code AssetItem}.
+ *
  * <blockquote><pre>
  * +-RootDir
  * |-+-SubDir1 (whose name is the model name of xxx)
@@ -23,6 +24,7 @@ import java.util.function.Predicate;
  * |---SubDir3
  * |---...</pre>
  * </blockquote>
+ *
  * @since ArkPets 2.4
  */
 public class AssetItemGroup implements Collection<AssetItem> {
@@ -36,6 +38,10 @@ public class AssetItemGroup implements Collection<AssetItem> {
         this(new ArrayList<>());
     }
 
+    /** Searches the Asset Items whose {@code name} and {@code appellation} match the given keywords.
+     * @param keyWords The given keywords. Each keyword should be separated by a blank.
+     * @return An Asset Item Group. Returns {@code this} if the parameter {@code keyWords} is {@code null} or empty.
+     */
     public AssetItemGroup searchByKeyWords(String keyWords) {
         if (keyWords == null || keyWords.isEmpty())
             return this;
@@ -59,6 +65,10 @@ public class AssetItemGroup implements Collection<AssetItem> {
         return result;
     }
 
+    /** Searches the Asset Item whose relative path provided by {@code getLocation} matches the given path string.
+     * @param relPath The given path string.
+     * @return The first matched Asset Item. Returns {@code null} if no one matched.
+     */
     public AssetItem searchByRelPath(String relPath) {
         if (relPath == null || relPath.isEmpty())
             return null;
@@ -68,6 +78,11 @@ public class AssetItemGroup implements Collection<AssetItem> {
         return null;
     }
 
+    /** Collects the values of a specified property of the Asset Items.
+     * @param property A property extractor.
+     * @return A Set that contains all the possible values of the property.
+     * @param <T> The type of the property value.
+     */
     public <T> Set<T> extract(PropertyExtractor<T> property) {
         HashSet<T> result = new HashSet<>();
         for (AssetItem item : this)
@@ -75,10 +90,21 @@ public class AssetItemGroup implements Collection<AssetItem> {
         return result;
     }
 
+    /** Returns a new Asset Item Group consisting of the Asset Items that match the given predicate.
+     * @param predicate A predicate to apply to each Asset Item to determine if it should be included.
+     * @return An Asset Item Group.
+     */
     public AssetItemGroup filter(Predicate<AssetItem> predicate) {
         return new AssetItemGroup(assetItemList.stream().filter(predicate).toList());
     }
 
+    /** Returns a new Asset Item Group consisting of the Asset Items whose property satisfied the requirements.
+     * @param property A property extractor.
+     * @param filterValues The property values to be matched.
+     * @param mode The {@link AssetItemGroup.FilterMode}.
+     * @return An Asset Item Group.
+     * @param <T> The type of the property value.
+     */
     public <T> AssetItemGroup filter(PropertyExtractor<T> property, Set<T> filterValues, int mode) {
         final boolean TRUE = (mode & FilterMode.MATCH_REVERSE) == 0;
         return filter(assetItem -> {
@@ -95,10 +121,18 @@ public class AssetItemGroup implements Collection<AssetItem> {
         });
     }
 
+    /** Returns a new Asset Item Group consisting of the Asset Items whose property satisfied the requirements.
+     * @param property A property extractor.
+     * @param filterValues The property values to be matched.
+     * @return An Asset Item Group.
+     * @param <T> The type of the property value.
+     */
     public <T> AssetItemGroup filter(PropertyExtractor<T> property, Set<T> filterValues) {
         return filter(property, filterValues, 0);
     }
 
+    /** Sorts the Asset Items by their {@code assetDir} in natural order.
+     */
     public void sort() {
         assetItemList.sort(Comparator.comparing(asset -> asset.assetDir, Comparator.naturalOrder()));
     }

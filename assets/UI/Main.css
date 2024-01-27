@@ -2,7 +2,7 @@
  * At GPL-3.0 License
  */
 
-/* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/18/javafx.graphics/javafx/scene/doc-files/cssref.html */
+/* JavaFX CSS Reference Guide: https://openjfx.cn/javadoc/17/javafx.graphics/javafx/scene/doc-files/cssref.html */
 /* JFoenix Wiki: https://github.com/sshahine/JFoenix/wiki */
 
 /*******************************************************************************
@@ -20,7 +20,8 @@
 
 /* Drop shadow for Nodes */
 .shadowed {
--fx-effect: dropshadow(gaussian, #00000040, 10, 0.2, 0, 1);
+/* Note: dropshadow(type, color, radius, spread, x, y) */
+-fx-effect: dropshadow(gaussian, #00000040, 10, 0.1, 0, 0.5);
 }
 
 /* Fluorescent strokes for Shapes */
@@ -125,7 +126,7 @@ JFXButton {
 -fx-border-style: solid;
 }
 
-.menu-btn-active, .menu-btn-active:hover, .menu-btn-active:focused {
+.menu-btn-active {
 /* Active */
 -fx-text-fill: #FFFFFF;
 -fx-background-color: #204880;
@@ -136,7 +137,7 @@ JFXButton {
 -fx-fill: #204880;
 }
 
-.menu-btn-active SVGPath, .menu-btn-active:hover SVGPath, .menu-btn-active:focused SVGPath {
+.menu-btn-active SVGPath {
 /* Hover & Active */
 -fx-fill: #FFFFFF;
 }
@@ -247,27 +248,27 @@ JFXButton {
 -fx-text-fill: #606060;
 }
 
-.Info-primary {
+.info-primary {
 -fx-font-size: 16px;
 -fx-text-fill: #202020;
 -fx-font-weight: bold;
 -fx-label-padding: 4px 2px 4px 2px;
 }
 
-.Info-secondary {
+.info-secondary {
 -fx-font-size: 12px;
 -fx-font-weight: normal;
 -fx-text-fill: #808080;
 -fx-label-padding: 2px;
 }
 
-.Info-tag {
+.info-tag {
 -fx-font-size: 10px;
 -fx-background-radius: 6px;
 -fx-label-padding: 2px 4px 2px 4px;
 }
 
-.Info-tag-theme {
+.info-tag-theme {
 -fx-text-fill: #FFFFFF;
 -fx-background-color: #4D7999;
 }
@@ -434,11 +435,11 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 -fx-padding: 0;
 }
 
+.scroll-pane:focused, .scroll-pane .corner {
+-fx-background-insets: 0;
+}
+
 .scroll-v {
 -fx-hbar-policy: never;
 -fx-vbar-policy: as-needed;
-}
-
-.scroll-pane:focused, .scroll-pane .corner {
--fx-background-insets: 0;
 }

@@ -157,6 +157,10 @@ public final class Homepage {
     @FXML
     private Label exploreLogDir;
     @FXML
+    private JFXTextField configNetworkAgent;
+    @FXML
+    private Label configNetworkAgentStatus;
+    @FXML
     private JFXCheckBox configAutoStartup;
     @FXML
     private Label aboutQueryUpdate;
@@ -185,8 +189,7 @@ public final class Homepage {
         wrapper0.setVisible(true);
         popLoading(e -> {
             config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
-            if (config.isAllPhysicConfigZeroed())
-                isNewcomer = config.isNewcomer();
+            isNewcomer = config.isNewcomer();
             initMenuBtn(menuBtn1, 1);
             initMenuBtn(menuBtn2, 2);
             initMenuBtn(menuBtn3, 3);
@@ -596,6 +599,35 @@ public final class Homepage {
             }
         });
 
+        configNetworkAgent.setPromptText("示例：0.0.0.0:0");
+        configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                configNetworkAgentStatus.setText("未使用代理");
+                configNetworkAgentStatus.setStyle("-fx-text-fill:" + COLOR_LIGHT_GRAY);
+                Logger.info("Network", "Set proxy to none");
+                System.setProperty("http.proxyHost", "");
+                System.setProperty("http.proxyPort", "");
+                System.setProperty("https.proxyHost", "");
+                System.setProperty("https.proxyPort", "");
+            } else {
+                if (newValue.matches(ipPortRegex)) {
+                    String[] ipPort = newValue.split(":");
+                    System.setProperty("http.proxyHost", ipPort[0]);
+                    System.setProperty("http.proxyPort", ipPort[1]);
+                    System.setProperty("https.proxyHost", ipPort[0]);
+                    System.setProperty("https.proxyPort", ipPort[1]);
+                    configNetworkAgentStatus.setText("代理生效中");
+                    configNetworkAgentStatus.setStyle("-fx-text-fill:" + COLOR_SUCCESS);
+                    Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
+                } else {
+                    configNetworkAgentStatus.setText("输入不合法");
+                    configNetworkAgentStatus.setStyle("-fx-text-fill:" + COLOR_DANGER);
+                }
+            }
+        });
+        configNetworkAgentStatus.setText("未使用代理");
+        configNetworkAgentStatus.setStyle("-fx-text-fill:" + COLOR_LIGHT_GRAY);
+
         configAutoStartup.setSelected(ArkConfig.StartupConfig.isSetStartup());
         configAutoStartup.setOnAction(e -> {
             if (configAutoStartup.isSelected()) {
@@ -913,7 +945,7 @@ public final class Homepage {
 
         @Override
         public String getHeader() {
-            return "如需关闭桌宠，请右键系统托盘图标后选择退出。";
+            return "如需关闭桌宠，请右键单击桌宠或系统托盘图标，然后选择退出。";
         }
 
         @Override

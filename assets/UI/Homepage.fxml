@@ -32,7 +32,7 @@
                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 </rowConstraints>
-                <JFXButton fx:id="menuBtn1" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="模型" textAlignment="CENTER">
+                <JFXButton fx:id="menuBtn1" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" text="模型" textAlignment="CENTER">
                     <GridPane.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </GridPane.margin>
@@ -42,7 +42,7 @@
                         </AnchorPane>
                     </graphic>
                 </JFXButton>
-                <JFXButton fx:id="menuBtn2" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="行为" textAlignment="CENTER" GridPane.rowIndex="1">
+                <JFXButton fx:id="menuBtn2" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" text="行为" textAlignment="CENTER" GridPane.rowIndex="1">
                     <GridPane.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </GridPane.margin>
@@ -52,7 +52,7 @@
                         </AnchorPane>
                     </graphic>
                 </JFXButton>
-                <JFXButton fx:id="menuBtn3" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" styleClass="shadowed" text="选项" textAlignment="CENTER" GridPane.rowIndex="2">
+                <JFXButton fx:id="menuBtn3" mnemonicParsing="false" prefHeight="40.0" prefWidth="140.0" text="选项" textAlignment="CENTER" GridPane.rowIndex="2">
                     <GridPane.margin>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                     </GridPane.margin>
@@ -77,13 +77,13 @@
             <Label layoutX="10.0" layoutY="15.0" styleClass="config-group-title" text="模型选择" />
             <ImageView fx:id="selectedModelView" fitHeight="140.0" fitWidth="140.0" layoutX="15.0" layoutY="85.0" pickOnBounds="true" preserveRatio="true" />
             <VBox layoutX="15.0" layoutY="200.0" prefHeight="140.0" prefWidth="140.0">
-                <Label fx:id="selectedModelName" styleClass="Info-primary" text="Name" />
-                <Label fx:id="selectedModelAppellation" styleClass="Info-secondary" text="Appellation" />
-                <Label fx:id="selectedModelSkinGroupName" styleClass="Info-secondary" text="SkinGroup" />
+                <Label fx:id="selectedModelName" styleClass="info-primary" text="Name" />
+                <Label fx:id="selectedModelAppellation" styleClass="info-secondary" text="Appellation" />
+                <Label fx:id="selectedModelSkinGroupName" styleClass="info-secondary" text="SkinGroup" />
                 <Label fx:id="selectedModelType" text="ModelType">
                     <styleClass>
-                        <String fx:value="Info-tag" />
-                        <String fx:value="Info-tag-theme" />
+                        <String fx:value="info-tag" />
+                        <String fx:value="info-tag-theme" />
                     </styleClass>
                 </Label>
             </VBox>
@@ -310,6 +310,11 @@
                             <Label text="日志级别" />
                             <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0" />
                             <Label fx:id="exploreLogDir" styleClass="config-hyper-link" text="浏览日志" />
+                        </HBox>
+                        <HBox>
+                            <Label text="网络代理（仅本次有效）" />
+                            <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0" />
+                            <Label fx:id="configNetworkAgentStatus" alignment="TOP_CENTER" text="-"/>
                         </HBox>
                         <Separator />
                         <Label styleClass="config-group-title" text="关于软件" />

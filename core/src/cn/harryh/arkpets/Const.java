@@ -11,7 +11,7 @@ import javafx.util.Duration;
  */
 public final class Const {
     // App version
-    public static final Version appVersion  = new Version(2, 4, 0);
+    public static final Version appVersion  = new Version(2, 4, 1);
 
     // App name
     public static final String appName      = "ArkPets";
@@ -61,6 +61,9 @@ public final class Const {
     public static boolean isUpdateAvailable = false;
     public static boolean isDatasetIncompatible = false;
     public static boolean isNewcomer = false;
+
+    // Misc constants
+    public static String ipPortRegex = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$";
 
 
     /** Paths presets definition class.

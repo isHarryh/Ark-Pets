@@ -2,31 +2,62 @@ ArkPets附加说明文档
 # 自定义模型
 
 ArkPets 添加自定义 Spine 模型的方法。
+> 注意：  
+> 本文档适用于 ArkPets v2.x，不同版本的 ArkPets 的模型管理逻辑可能有较大差异。
 
 ### 前提
-- **熟悉 JSON 数据格式。**
-- 所要添加的模型的 **Spine版本必须是 3.8** ，这也是截至本文档撰写时《明日方舟》所使用的版本。不同版本的Spine之间的兼容性较差，您可以使用文本编辑器强制查看小人.skel文件的头部信息，以确定其Spine版本。
-- 所要添加的模型必须是《明日方舟》中的游戏模型，如果不是，那么该模型包含的动画名称必须与《明日方舟》的动画名称命名方式一致。
+1. **熟悉 JSON 数据格式。**
+2. 所要添加的模型的 **Spine 版本必须是 3.8**，这也是截至本文档撰写时《明日方舟》所使用的 Spine 的版本。不同版本的 Spine 之间的兼容性较差，您可以使用文本编辑器强制查看小人骨骼（.skel）文件的头部信息，以确定其 Spine 版本。
+3. 所要添加的模型必须是《明日方舟》中的角色模型，如果不是，那么该模型包含的动画名称必须与《明日方舟》中的动画名称命名方式一致。关于命名方式，参见本项目 Java 源码 `cn.harryh.arkpets.animations.AnimClip` 中的 `AnimType` 枚举）。
 
 ### 步骤
-1. 安装 ArkPets 并确保已在 [选项] 中下载了模型。
-2. 将所要添加的模型的资源文件（包括 .atlas .png .skel）放入文件夹 _A_ 中，然后将文件夹 _A_ 放到程序目录中的 `models` 资源文件夹中。
-    > 也可以放到其他资源文件夹，但是需要进行额外的操作。假设把文件夹 _A_ 放到了程序目录中的文件夹 _B_ 中，且模型的 `type` 值是 _C_ ，那么程序目录中的 `models_data.json` 的 `storageDirectory` 字段中需要添加键值对 `"C" : "B"`。
-3. 在程序目录中的 `models_data.json`，找到 `data` 字段。仿照其他模型对象的格式，加入你所要添加的新模型的信息，示例如下：
+下面将演示如何添加名称为 `MyModel` 的干员类型（Operator）的模型到 ArkPets 中：
+
+1. 在程序工作目录（下简称“根目录”）中创建一个数据集文件 `models_data.json` 和一个总模型文件夹 `models`。  
+   数据集文件的格式如下（标注星号 `*` 者为必需条目）：
    ```json
-   "285_medic2": { // 键需要设置为模型文件夹A的名称（重要）
-       "assetId": "build_char_285_medic2", // 模型资源文件的纯文件名称（去掉扩展名）
-       "type": "Operator",
-       "style": null,
-       "name": "Lancet-2", // 模型在启动器中显示的名称
-       "sortTags": [
-           "Operator"
-       ],
-       "appellation": null,
-       "skinGroupId": null,
-       "skinGroupName": null,
-       "checksum": null
+   {
+       "storageDirectory": {
+           // * 每种模型类型所对应的总模型文件夹名称
+           "Operator": "models"
+        },
+       "sortTags": {
+            // 每个模型标签所对应的本地化描述
+            "Operator": "干员",
+            "Skinned": "时装"
+        },
+        "gameDataVersionDescription": "xxxxx", // 游戏数据版本描述
+        "gameDataServerRegion": "zh_CN", // 游戏数据服务器地区描述
+        "data": {
+            // * 每个模型的信息
+            // ...
+        },
+        "arkPetsCompatibility": [2, 0, 0] // ArkPets 兼容性版本标识
    }
    ```
-   上方示例中，大部分字段都可以设为 `null`，它们的具体功能在此不进行介绍，可自行探索。
-4. 重新打开启动器即可找到已添加的自定义模型。若未在启动器中找到自定义模型，请检查你的操作和相关拼写。
+   > 提示：
+   > 1. 也可以通过启动器 “选项” 页的模型下载或导入功能来导入 ArkModels 仓库的数据集文件和总模型文件夹。
+   > 2. 总资源文件夹的名称可以是其他名称，但是需要为数据集文件中的 `storageDirectory` 字段中添加一个键值对 `"角色类型" : "总资源文件夹名"`。
+2. 将所要添加的模型的资源文件（包括 .atlas .png .skel 文件）放入同一个文件夹（下称“单模型文件夹”）中，然后将单模型文件夹放入总资源文件夹中。
+3. 在数据集文件中的 `data` 字段中，仿照其他模型对象的格式，加入你所要添加的新模型的信息，示例如下（标注星号 `*` 者为必需条目）：
+   ```json lines
+   "my_model": { // * 单模型文件夹的名称
+       "assetId": "build_my_model", // * 模型资源文件的纯文件名称（去掉扩展名）
+       "type": "Operator", // * 模型类型
+       "style": "BuildingDefault", // 模型子类型
+       "name": "My Model", // * 角色名称
+       "sortTags": [
+            // 模型标签
+           "Operator"
+       ],
+       "appellation": "My Model", // 角色代号
+       "skinGroupId": "ILLUST", // 时装系列编号
+       "skinGroupName": "默认服装", // 时装系列名称
+       "checksum": { // 文件 MD5 校验和
+            ".atlas": "xxxxx",
+            ".png": "xxxxx",
+            ".skel": "xxxxx"
+       }
+   }
+   ```
+4. 打开 ArkPets 启动器，进行模型 “重载” 后，即可载入自定义模型。若未在启动器中找到自定义模型，请检查相关操作和拼写。
