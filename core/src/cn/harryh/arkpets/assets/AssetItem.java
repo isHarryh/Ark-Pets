@@ -207,9 +207,9 @@ public class AssetItem implements Serializable {
         @Override
         Set<T> apply(AssetItem assetItem);
 
-        PropertyExtractor<String> ASSET_ITEM_TYPE               = item -> Set.of(item.type);
-        PropertyExtractor<String> ASSET_ITEM_STYLE              = item -> Set.of(item.style);
-        PropertyExtractor<String> ASSET_ITEM_SKIN_GROUP_NAME    = item -> Set.of(item.skinGroupName);
-        PropertyExtractor<String> ASSET_ITEM_SORT_TAGS          = item -> new HashSet<>(item.sortTags.toJavaList(String.class));
+        PropertyExtractor<String> ASSET_ITEM_TYPE            = item -> item.type          == null ? Set.of() : Set.of(item.type);
+        PropertyExtractor<String> ASSET_ITEM_STYLE           = item -> item.style         == null ? Set.of() : Set.of(item.style);
+        PropertyExtractor<String> ASSET_ITEM_SKIN_GROUP_NAME = item -> item.skinGroupName == null ? Set.of() : Set.of(item.skinGroupName);
+        PropertyExtractor<String> ASSET_ITEM_SORT_TAGS       = item -> new HashSet<>(item.sortTags.toJavaList(String.class));
     }
 }
