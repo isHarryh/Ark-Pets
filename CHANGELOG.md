@@ -1,8 +1,5 @@
 # 更新日志 / CHANGELOG
 
-***目前最新可用版本：***
-[<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
-
 ## v2.4
 | **新增**      |                                                     |
 |:------------|:----------------------------------------------------|
@@ -24,9 +21,10 @@
 | [`f6139c3`]                | 重构了**模型资源**的代码逻辑。                              |
 | [`#47`]<br>[`7db99c3`]     | 优化了 Windows 安装程序的默认安装目录和在控制面板卸载页面中的表现。         |
 
-| **补丁**                  |                        |
-|:------------------------|:-----------------------|
-| `v2.4.1`<br>[`f2683f9`] | 修复了首次启动桌宠后的提示弹窗未生效的问题。 |
+| **补丁**                  |                                             |
+|:------------------------|:--------------------------------------------|
+| `v2.4.1`<br>[`f2683f9`] | 修复了首次启动桌宠后的提示弹窗未生效的问题。                      |
+| `v2.4.2`<br>[`5e15d00`] | 修复了渲染《明日方舟》2.1.41 及以后的新模型时 Alpha 图层表现异常的问题。 |
 
 ## v2.3
 | **新增**      |                                              |
@@ -305,3 +303,4 @@
 [`a5c7b9a`]: https://github.com/isHarryh/Ark-Pets/commit/a5c7b9a99f4fd79d4f92497a7a855c71ba112dcb
 [`727a34e`]: https://github.com/isHarryh/Ark-Pets/commit/727a34eed5d1a41ee3e6f153726f2bcf92a28958
 [`f2683f9`]: https://github.com/isHarryh/Ark-Pets/commit/f2683f9d40bfb09fdacee719df9a001f55fa9d8f
+[`5e15d00`]: https://github.com/isHarryh/Ark-Pets/commit/5e15d000bd77006da596696de2e41024fb4183d4
