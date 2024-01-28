@@ -81,21 +81,21 @@
 
 ## 使用方法 <sub>Usage</sub>
 
-***目前最新可用版本：***
-[<img alt="GitHub latest release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Version&sort=semver&include_prereleases">](https://github.com/isHarryh/Ark-Pets/releases)
+|                                            **[目前最新版本](https://github.com/isHarryh/Ark-Pets/releases)**                                             |                                   **支持的操作系统**                                    |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------:|
+| ![GitHub latest release](https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Release&sort=semver&include_prereleases) | ![Windows 7+](https://img.shields.io/badge/7%2B-blue?logo=Windows&label=Windows) |
 
 ### 快速上手
 
 1. 请[**前往此页面**](https://github.com/isHarryh/Ark-Pets/releases)下载最新的 **ArkPets-Setup.exe** 安装包。
-2. 下载完成后，请运行所下载的安装包以进行软件的安装。
-3. 安装完成后，请通过桌面快捷方式等途径，打开 ArkPets 启动器。
-4. 打开启动器后，首次使用需要 **下载模型文件** 。请进入启动器“选项”页面，在“模型下载”处点击“全部下载”。
-5. 最后，进入启动器“模型”页面即可检索并选中想要作为桌宠启动的角色，然后点击左下角“启动”按钮即可。
+2. 运行安装包并进行软件的安装。安装完成后，打开 ArkPets 启动器。
+3. 首次使用时需要**下载模型文件**。请进入启动器 “选项” 页面，在模型下载处点击 “全部下载” 按钮。
+4. 进入启动器 “模型” 页面即可检索并选中想要作为桌宠启动的角色，最后点击左下角 “启动” 按钮即可。
 
 > 提示：
-> - 本程序当前只支持在`Windows`系统上运行。
-> - 如需更新软件到 v2.x 的更高版本，无需预先手动卸载，直接运行安装包即可。
-> - 如需关闭已启动的桌宠，请右键点击系统托盘中的 ArkPets 图标，然后选择“退出”。
+> - 如需关闭已启动的桌宠，请右键单击桌宠或系统托盘中的 ArkPets 图标，然后选择 “退出”。
+> - 若无法在软件内下载模型，可以访问 [ArkModels 模型仓库](https://github.com/isHarryh/Ark-Models)页面。手动下载模型压缩包后，在 “选项” 页面点击 “导入压缩包” 按钮后导入即可。
+> - 如需更新软件到 v2.x 的更高版本，无需预先手动卸载，直接运行新版安装包即可。
 
 ### 额外说明
 
@@ -123,7 +123,7 @@
 
 ### 许可证
 
-本项目基于**GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
+本项目基于 **GPL3协议**。任何人都可以自由地使用和修改项目内的源代码，前提是要在源代码或版权声明中保留作者说明和原有协议，且使用相同的许可证进行开源。
 
 ### 参与贡献
 
