@@ -4,30 +4,28 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.tray.Tray;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.fontFileRegular;
+import static cn.harryh.arkpets.Const.linearEasingDuration;
 
 
-public class ArkTray {
+public class ArkTray extends Tray {
     private final ArkPets arkPets;
-    private final SystemTray tray;
-    private final TrayIcon icon;
-    private final JDialog popWindow;
-    private final JPopupMenu popMenu;
+//    private final SystemTray tray;
+//    private final TrayIcon icon;
     private boolean isTrayIconApplied;
     public String name;
-    public String title;
+//    public String title;
     public AnimData keepAnim;
     public static Font font;
 
@@ -50,39 +48,22 @@ public class ArkTray {
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
      */
     public ArkTray(ArkPets boundArkPets) {
+        super();
         arkPets = boundArkPets;
-        tray = SystemTray.getSystemTray();
+//        tray = SystemTray.getSystemTray();
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
-        title = name + " - " + appName;
+//        title = name + " - " + appName;
 
         // Load the tray icon image.
-        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
-        icon = new TrayIcon(image, name);
-        icon.setImageAutoSize(true);
+//        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
+//        icon = new TrayIcon(image, name);
+//        icon.setImageAutoSize(true);
 
-        // This Dialog is the container (the "anchor") of the PopupMenu:
-        popWindow = new JDialog();
-        popWindow.setUndecorated(true);
-        popWindow.setSize(1, 1);
-
-        // PopupMenu:
-        popMenu = new JPopupMenu() {
-            @Override
-            public void firePopupMenuWillBecomeInvisible() {
-                popWindow.setVisible(false); // Hide the container when the menu is invisible.
-            }
-        };
         JLabel innerLabel = new JLabel(" " + name + " ");
         innerLabel.setAlignmentX(0.5f);
         popMenu.add(innerLabel);
 
         // Menu options:
-        JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
-        JMenuItem optKeepAnimDis = new JMenuItem("取消保持");
-        JMenuItem optTransparentEn = new JMenuItem("透明模式");
-        JMenuItem optTransparentDis = new JMenuItem("取消透明");
-        JMenuItem optChangeStage = new JMenuItem("切换形态");
-        JMenuItem optExit = new JMenuItem("退出");
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
             keepAnim = arkPets.cha.getPlaying();
@@ -121,7 +102,7 @@ public class ArkTray {
         optExit.addActionListener(e -> {
             Logger.info("Tray","Request to exit");
             arkPets.windowAlpha.reset(0f);
-            remove();
+            removeTray();
             try {
                 Thread.sleep((long)(linearEasingDuration * 1000));
                 Gdx.app.exit();
@@ -135,34 +116,45 @@ public class ArkTray {
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
         // Mouse event listener:
-        icon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == 3 && e.isPopupTrigger()) {
-                    // After right-click on the tray icon.
-                    int x = e.getX();
-                    int y = e.getY();
-                    showDialog(x + 5, y);
-                }
-            }
-        });
+//        icon.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseReleased(MouseEvent e) {
+//                if (e.getButton() == 3 && e.isPopupTrigger()) {
+//                    // After right-click on the tray icon.
+//                    int x = e.getX();
+//                    int y = e.getY();
+//                    showDialog(x + 5, y);
+//                }
+//            }
+//        });
 
         // Add the icon to the system tray.
-        try {
-            tray.add(icon);
-            isTrayIconApplied = true;
-            Logger.info("Tray", "Tray icon applied, titled \"" + title + "\"");
-        } catch (AWTException e) {
-            isTrayIconApplied = false;
-            Logger.error("Tray", "Unable to apply tray icon, details see below", e);
-        }
+//        try {
+//            tray.add(icon);
+//            isTrayIconApplied = true;
+//            Logger.info("Tray", "Tray icon applied, titled \"" + title + "\"");
+//        } catch (AWTException e) {
+//            isTrayIconApplied = false;
+//            Logger.error("Tray", "Unable to apply tray icon, details see below", e);
+//        }
+    }
+
+    @Override
+    public void addTray(SystemTray systemTray) {
+
+    }
+
+    @Override
+    public void removeTray(SystemTray systemTray) {
+
     }
 
     /** Removes the icon from system tray.
      */
-    public void remove() {
+
+    public void removeTray() {
         if (isTrayIconApplied) {
-            tray.remove(icon);
+//            tray.remove(icon);
             popMenu.removeAll();
             popWindow.dispose();
         }

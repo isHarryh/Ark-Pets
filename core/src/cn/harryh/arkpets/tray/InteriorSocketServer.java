@@ -1,6 +1,8 @@
 package cn.harryh.arkpets.tray;
 
+import cn.harryh.arkpets.tray.model.View;
 import cn.harryh.arkpets.utils.Logger;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +21,8 @@ public class InteriorSocketServer {
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
     private ServerSocket serverSocket;
     private static boolean mainThreadExitFlag = false;
+    SystemTrayManager systemTrayManager = null;
+//    SystemTrayManager systemTrayManager = SystemTrayManager.getInstance();
 
     public InteriorSocketServer(int port) {
         this.port = port;
@@ -84,6 +88,9 @@ public class InteriorSocketServer {
                     if (request == null)
                         break;
                     System.out.println("收到客户端请求：" + request);
+                    View view = JSONObject.parseObject(request, View.class);
+                    System.out.println(view.uuid);
+                    System.out.println(view.operateType);
 
                     out.println(request);
                     System.out.println("发送响应给客户端：" + request);

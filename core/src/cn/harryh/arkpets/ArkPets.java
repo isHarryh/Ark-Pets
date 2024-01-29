@@ -3,17 +3,24 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.animations.*;
+import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.assets.AssetItem;
-import cn.harryh.arkpets.utils.*;
-import cn.harryh.arkpets.transitions.*;
+import cn.harryh.arkpets.transitions.TernaryFunction;
+import cn.harryh.arkpets.transitions.TransitionFloat;
+import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.utils.HWndCtrl;
+import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.Plane;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -133,7 +140,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void dispose() {
 		Logger.info("App", "Dispose");
-		tray.remove();
+		tray.removeTray();
 	}
 
 	public boolean canChangeStage() {
