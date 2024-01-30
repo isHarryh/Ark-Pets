@@ -45,9 +45,11 @@ public abstract class TrayManager {
 
     public abstract void hide(Stage stage);
 
-    public abstract void addArkPets(UUID uuid, Tray tray);
+    public abstract void addTray(UUID uuid);
 
-    public abstract void removeArkPets(UUID uuid, Tray tray);
+    public abstract void removeTray(UUID uuid);
+
+    public abstract Tray getTray(UUID uuid);
 
     public void shutdown() {
         threadPool.shutdown();

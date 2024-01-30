@@ -1,7 +1,7 @@
 package cn.harryh.arkpets.tray;
 
 import javax.swing.*;
-import java.awt.*;
+import java.util.UUID;
 
 public abstract class Tray {
     protected JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
@@ -12,8 +12,10 @@ public abstract class Tray {
     protected JMenuItem optExit = new JMenuItem("退出");
     protected final JDialog popWindow;
     protected final JPopupMenu popMenu;
+    protected final UUID uuid;
 
-    public Tray() {
+    public Tray(UUID uuid) {
+        this.uuid = uuid;
         // This Dialog is the container (the "anchor") of the PopupMenu:
         popWindow = new JDialog();
         popWindow.setUndecorated(true);
@@ -28,7 +30,5 @@ public abstract class Tray {
         };
     }
 
-    public abstract void addTray(SystemTray systemTray);
-
-    public abstract void removeTray(SystemTray systemTray);
+    protected abstract void addComponent();
 }

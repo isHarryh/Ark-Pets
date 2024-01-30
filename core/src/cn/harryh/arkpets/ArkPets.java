@@ -9,6 +9,7 @@ import cn.harryh.arkpets.assets.AssetItem;
 import cn.harryh.arkpets.transitions.TernaryFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.SocketClient;
 import cn.harryh.arkpets.utils.HWndCtrl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
@@ -21,6 +22,7 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -47,6 +49,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private int WD_H; // Window Real Height
 	private int offsetY = 0;
 	private boolean isToolwindowStyle;
+
+	private SocketClient socketClient;
 
 	public ArkPets(String title) {
 		APP_TITLE = title;
@@ -85,8 +89,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
+		socketClient = new SocketClient(8080);
 		// 5.Tray icon setup
-		tray = new ArkTray(this);
+		tray = new ArkTray(this, socketClient, UUID.randomUUID());
 		// Setup complete
 		Logger.info("App", "Render");
 	}

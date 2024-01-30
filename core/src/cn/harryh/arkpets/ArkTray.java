@@ -4,7 +4,9 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.tray.SocketClient;
 import cn.harryh.arkpets.tray.Tray;
+import cn.harryh.arkpets.tray.model.SocketData;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
@@ -14,6 +16,7 @@ import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.fontFileRegular;
 import static cn.harryh.arkpets.Const.linearEasingDuration;
@@ -21,11 +24,8 @@ import static cn.harryh.arkpets.Const.linearEasingDuration;
 
 public class ArkTray extends Tray {
     private final ArkPets arkPets;
-//    private final SystemTray tray;
-//    private final TrayIcon icon;
-    private boolean isTrayIconApplied;
+    private final SocketClient socketClient;
     public String name;
-//    public String title;
     public AnimData keepAnim;
     public static Font font;
 
@@ -47,18 +47,18 @@ public class ArkTray extends Tray {
      * Must be used after Gdx.app was initialized.
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
      */
-    public ArkTray(ArkPets boundArkPets) {
-        super();
+    public ArkTray(ArkPets boundArkPets, SocketClient socket, UUID uuid) {
+        super(uuid);
         arkPets = boundArkPets;
-//        tray = SystemTray.getSystemTray();
+        socketClient = socket;
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
-//        title = name + " - " + appName;
+        SocketData socketData = new SocketData(this.uuid, SocketData.OperateType.LOGIN, name);
+        socketClient.sendRequest(socketData);
+        addComponent();
+    }
 
-        // Load the tray icon image.
-//        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
-//        icon = new TrayIcon(image, name);
-//        icon.setImageAutoSize(true);
-
+    @Override
+    protected void addComponent() {
         JLabel innerLabel = new JLabel(" " + name + " ");
         innerLabel.setAlignmentX(0.5f);
         popMenu.add(innerLabel);
@@ -67,12 +67,16 @@ public class ArkTray extends Tray {
         optKeepAnimEn.addActionListener(e -> {
             Logger.info("Tray", "Keep-Anim enabled");
             keepAnim = arkPets.cha.getPlaying();
+            SocketData data = new SocketData(uuid, SocketData.OperateType.KEEP_ACTION);
+            socketClient.sendRequest(data);
             popMenu.remove(optKeepAnimEn);
             popMenu.add(optKeepAnimDis, 1);
         });
         optKeepAnimDis.addActionListener(e -> {
             Logger.info("Tray","Keep-Anim disabled");
             keepAnim = null;
+            SocketData data = new SocketData(uuid, SocketData.OperateType.NO_KEEP_ACTION);
+            socketClient.sendRequest(data);
             popMenu.remove(optKeepAnimDis);
             popMenu.add(optKeepAnimEn, 1);
         });
@@ -80,6 +84,8 @@ public class ArkTray extends Tray {
             Logger.info("Tray", "Transparent enabled");
             arkPets.windowAlpha.reset(0.75f);
             arkPets.hWndMine.setWindowTransparent(true);
+            SocketData data = new SocketData(uuid, SocketData.OperateType.TRANSPARENT_MODE);
+            socketClient.sendRequest(data);
             popMenu.remove(optTransparentEn);
             popMenu.add(optTransparentDis, 2);
         });
@@ -87,6 +93,8 @@ public class ArkTray extends Tray {
             Logger.info("Tray", "Transparent disabled");
             arkPets.windowAlpha.reset(1f);
             arkPets.hWndMine.setWindowTransparent(false);
+            SocketData data = new SocketData(uuid, SocketData.OperateType.NO_TRANSPARENT_MODE);
+            socketClient.sendRequest(data);
             popMenu.remove(optTransparentDis);
             popMenu.add(optTransparentEn, 2);
         });
@@ -95,6 +103,8 @@ public class ArkTray extends Tray {
             arkPets.changeStage();
             if (keepAnim != null) {
                 keepAnim = null;
+                SocketData data = new SocketData(uuid, SocketData.OperateType.CHANGE_STAGE);
+                socketClient.sendRequest(data);
                 popMenu.remove(optKeepAnimDis);
                 popMenu.add(optKeepAnimEn, 1);
             }
@@ -114,51 +124,14 @@ public class ArkTray extends Tray {
         if (arkPets.canChangeStage()) popMenu.add(optChangeStage);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
-
-        // Mouse event listener:
-//        icon.addMouseListener(new MouseAdapter() {
-//            @Override
-//            public void mouseReleased(MouseEvent e) {
-//                if (e.getButton() == 3 && e.isPopupTrigger()) {
-//                    // After right-click on the tray icon.
-//                    int x = e.getX();
-//                    int y = e.getY();
-//                    showDialog(x + 5, y);
-//                }
-//            }
-//        });
-
-        // Add the icon to the system tray.
-//        try {
-//            tray.add(icon);
-//            isTrayIconApplied = true;
-//            Logger.info("Tray", "Tray icon applied, titled \"" + title + "\"");
-//        } catch (AWTException e) {
-//            isTrayIconApplied = false;
-//            Logger.error("Tray", "Unable to apply tray icon, details see below", e);
-//        }
     }
-
-    @Override
-    public void addTray(SystemTray systemTray) {
-
-    }
-
-    @Override
-    public void removeTray(SystemTray systemTray) {
-
-    }
-
-    /** Removes the icon from system tray.
-     */
 
     public void removeTray() {
-        if (isTrayIconApplied) {
-//            tray.remove(icon);
-            popMenu.removeAll();
-            popWindow.dispose();
-        }
-        isTrayIconApplied = false;
+        SocketData data = new SocketData(uuid, SocketData.OperateType.LOGOUT);
+        socketClient.sendRequest(data);
+        popMenu.removeAll();
+        popWindow.dispose();
+        socketClient.disconnect();
     }
 
     /** Hides the menu.

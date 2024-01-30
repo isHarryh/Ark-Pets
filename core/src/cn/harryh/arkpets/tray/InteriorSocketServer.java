@@ -1,6 +1,6 @@
 package cn.harryh.arkpets.tray;
 
-import cn.harryh.arkpets.tray.model.View;
+import cn.harryh.arkpets.tray.model.SocketData;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson2.JSONObject;
 
@@ -21,8 +21,6 @@ public class InteriorSocketServer {
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
     private ServerSocket serverSocket;
     private static boolean mainThreadExitFlag = false;
-    SystemTrayManager systemTrayManager = null;
-//    SystemTrayManager systemTrayManager = SystemTrayManager.getInstance();
 
     public InteriorSocketServer(int port) {
         this.port = port;
@@ -36,7 +34,7 @@ public class InteriorSocketServer {
                 while (!mainThreadExitFlag) {
                     Socket clientSocket = serverSocket.accept();
                     clientSockets.add(clientSocket);
-                    System.out.println("新的客户端连接：" + clientSocket.getInetAddress().getHostAddress());
+                    Logger.info("Socket", "New client connection from %s:%d".formatted(clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
                     executorService.execute(new ClientHandler(clientSocket));
                 }
             } catch (IOException e) {
@@ -47,6 +45,14 @@ public class InteriorSocketServer {
 
     public synchronized void stopServer() {
         mainThreadExitFlag = true;
+        clientSockets.forEach(socket -> {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        executorService.shutdown();
     }
 
     @Override
@@ -72,6 +78,7 @@ public class InteriorSocketServer {
 
     static class ClientHandler implements Runnable {
         private final Socket clientSocket;
+        private final static SystemTrayManager systemTrayManager = SystemTrayManager.getInstance();
 
         public ClientHandler(Socket clientSocket) {
             this.clientSocket = clientSocket;
@@ -83,21 +90,25 @@ public class InteriorSocketServer {
                     PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
             ) {
-                while (true) {
+                while (!mainThreadExitFlag) {
                     String request = in.readLine();
                     if (request == null)
                         break;
-                    System.out.println("收到客户端请求：" + request);
-                    View view = JSONObject.parseObject(request, View.class);
-                    System.out.println(view.uuid);
-                    System.out.println(view.operateType);
-
-                    out.println(request);
-                    System.out.println("发送响应给客户端：" + request);
+                    SocketData socketData = JSONObject.parseObject(request, SocketData.class);
+                    switch (socketData.operateType) {
+                        case LOGIN -> systemTrayManager.addTray(socketData.uuid);
+                        case LOGOUT -> systemTrayManager.removeTray(socketData.uuid);
+                    }
+                    socketData = new SocketData(socketData.uuid, SocketData.OperateType.SUCCESS);
+                    out.println(JSONObject.toJSONString(socketData));
+                    Logger.debug("Socket", "Send data to client：" + request);
                 }
 
-                System.out.println("客户端断开连接: " + clientSocket.getInetAddress().getHostAddress());
+                Logger.info("Socket", "Client(%s:%d) disconnected.".formatted(clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
                 clientSockets.remove(clientSocket);
+                if (clientSocket.isClosed()) {
+                    return;
+                }
                 clientSocket.close();
             } catch (IOException e) {
                 Logger.error("Socket", e.getMessage());

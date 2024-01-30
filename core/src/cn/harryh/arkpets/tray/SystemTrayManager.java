@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.iconFilePng;
 
-public class SystemTrayManager extends TrayManager{
+public class SystemTrayManager extends TrayManager {
     private static SystemTrayManager instance = null;
     private volatile JPopupMenu popupMenu;
     private volatile JDialog popWindow;
@@ -143,14 +143,19 @@ public class SystemTrayManager extends TrayManager{
     }
 
     @Override
-    public void addArkPets(UUID uuid, Tray tray) {
-        arkPetTrays.put(uuid, tray);
-        tray.addTray(this.tray);
+    public void addTray(UUID uuid) {
+        arkPetTrays.put(uuid, null);
+//        tray.addTray(playerMenu);
     }
 
     @Override
-    public void removeArkPets(UUID uuid, Tray tray) {
+    public void removeTray(UUID uuid) {
         arkPetTrays.remove(uuid);
-        tray.removeTray(this.tray);
+//        tray.removeTray(playerMenu);
+    }
+
+    @Override
+    public Tray getTray(UUID uuid) {
+        return arkPetTrays.get(uuid);
     }
 }
