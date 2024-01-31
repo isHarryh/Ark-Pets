@@ -9,28 +9,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.UUID;
 
 public class ClientTrayHandler implements Runnable {
     private final Socket clientSocket;
     private Tray tray;
+    private UUID uuid = null;
     private final static SystemTrayManager systemTrayManager = SystemTrayManager.getInstance();
-    private final InteriorSocketServer server;
     private volatile boolean threadExitFlag = false;
 
-    public ClientTrayHandler(Socket clientSocket, InteriorSocketServer server) {
+    public ClientTrayHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.server = server;
+
     }
 
     public void stopThread() {
         threadExitFlag = true;
+        tray.removeTray();
     }
 
     @Override
     public void run() {
-        try (
-                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
-        ) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))) {
             boolean flag = false;
             while (!threadExitFlag) {
                 String request = in.readLine();
@@ -38,6 +38,8 @@ public class ClientTrayHandler implements Runnable {
                     break;
                 Logger.debug("SocketServer", request);
                 SocketData socketData = JSONObject.parseObject(request, SocketData.class);
+                if (uuid == null)
+                    uuid = socketData.uuid;
                 switch (socketData.operateType) {
                     case LOGIN -> {
                         tray = new TrayInstance(socketData.uuid, clientSocket, new String(socketData.name, "GBK"), socketData.canChangeStage);
@@ -59,8 +61,8 @@ public class ClientTrayHandler implements Runnable {
 
             Logger.info("Socket", "Client(%s:%d) disconnected.".formatted(clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
             tray.optExitHandler();
-            server.removeClientSocket(clientSocket);
-            server.removeClientHandler(this);
+            InteriorSocketServer.getInstance().removeClientSocket(clientSocket);
+            InteriorSocketServer.getInstance().removeClientHandler(this);
             if (clientSocket.isClosed()) {
                 return;
             }

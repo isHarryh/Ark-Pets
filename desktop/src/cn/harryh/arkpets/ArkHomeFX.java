@@ -50,8 +50,9 @@ public class ArkHomeFX extends Application {
         fxml.setLocation(getClass().getResource("/UI/Homepage.fxml"));
         Parent root = fxml.load();
         Logger.info("Socket", "Server starting");
-        InteriorSocketServer socketServer = new InteriorSocketServer(8080);
-        socketServer.startServer();
+
+        // Start Socket Server
+        InteriorSocketServer.getInstance().startServer();
 
         // Load fonts.
         Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());
@@ -108,7 +109,9 @@ public class ArkHomeFX extends Application {
     @Override
     public void stop() throws Exception {
         super.stop();
-        SystemTrayManager.getInstance().shutdown();
+        InteriorSocketServer.getInstance().stopServer();
+        if (!(Objects.requireNonNull(ArkConfig.getConfig()).separate_arkpet_from_launcher))
+            SystemTrayManager.getInstance().shutdown();
     }
 
     /**

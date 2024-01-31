@@ -51,7 +51,7 @@ public class SystemTrayManager extends TrayManager {
 
             playerMenu = new JMenu("干员管理");
             JMenuItem exitItem = new JMenuItem("退出程序");
-            exitItem.addActionListener(e -> System.exit(0));
+            exitItem.addActionListener(e -> Platform.exit());
 
             popupMenu.addSeparator();
             popupMenu.add(playerMenu);

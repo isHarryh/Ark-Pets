@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.socket;
 
+import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.tray.ClientTrayHandler;
 import cn.harryh.arkpets.utils.Logger;
 
@@ -8,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 public class InteriorSocketServer {
@@ -24,9 +26,15 @@ public class InteriorSocketServer {
                     });
     private ServerSocket serverSocket;
     private static volatile boolean mainThreadExitFlag = false;
+    private static InteriorSocketServer instance = null;
+    public static InteriorSocketServer getInstance() {
+        if (instance == null)
+            instance = new InteriorSocketServer();
+        return instance;
+    }
 
-    public InteriorSocketServer(int port) {
-        this.port = port;
+    private InteriorSocketServer() {
+        this.port = Objects.requireNonNull(ArkConfig.getConfig()).server_port;
     }
 
     public synchronized void startServer() {
@@ -38,7 +46,7 @@ public class InteriorSocketServer {
                     Socket clientSocket = serverSocket.accept();
                     clientSockets.add(clientSocket);
                     Logger.info("Socket", "New client connection from %s:%d".formatted(clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
-                    ClientTrayHandler clientTrayHandler = new ClientTrayHandler(clientSocket, this);
+                    ClientTrayHandler clientTrayHandler = new ClientTrayHandler(clientSocket);
                     clientHandlers.add(clientTrayHandler);
                     executorService.execute(clientTrayHandler);
                 }
@@ -57,7 +65,8 @@ public class InteriorSocketServer {
                 throw new RuntimeException(e);
             }
         });
-        clientHandlers.forEach(ClientTrayHandler::stopThread);
+        if (!(Objects.requireNonNull(ArkConfig.getConfig()).separate_arkpet_from_launcher))
+            clientHandlers.forEach(ClientTrayHandler::stopThread);
         executorService.shutdown();
     }
 

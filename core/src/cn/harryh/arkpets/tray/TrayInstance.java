@@ -57,6 +57,7 @@ public class TrayInstance extends Tray {
     @Override
     public void removeTray() {
         SystemTrayManager.getInstance().removeTray(popMenu);
+        sendRequest(new SocketData(uuid, SocketData.OperateType.LOGOUT));
         socketOut.close();
     }
 

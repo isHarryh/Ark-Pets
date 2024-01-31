@@ -87,9 +87,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
-		SocketClient socketClient = new SocketClient(8080);
 		// 5.Tray icon setup
-		tray = new ArkTray(this, socketClient, UUID.randomUUID());
+		tray = new ArkTray(this, new SocketClient(config.server_port), UUID.randomUUID());
 		// Setup complete
 		Logger.info("App", "Render");
 	}
