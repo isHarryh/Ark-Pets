@@ -158,11 +158,11 @@ public class SystemTrayManager extends TrayManager {
         return arkPetTrays.get(uuid);
     }
 
-    public void addTray(JPopupMenu menu) {
+    public void addTray(JMenu menu) {
         playerMenu.add(menu);
     }
 
-    public void removeTray(JPopupMenu menu) {
+    public void removeTray(JMenu menu) {
         playerMenu.remove(menu);
     }
 }

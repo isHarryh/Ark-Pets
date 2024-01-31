@@ -14,7 +14,7 @@ public class InteriorSocketServer {
     private final int port;
     private static final List<Socket> clientSockets = new ArrayList<>();
     private static final List<ClientTrayHandler> clientHandlers = new ArrayList<>();
-    public static final ExecutorService executorService =
+    private static final ExecutorService executorService =
             new ThreadPoolExecutor(20, Integer.MAX_VALUE,
                     60L, TimeUnit.SECONDS, new SynchronousQueue<>(),
                     r -> {

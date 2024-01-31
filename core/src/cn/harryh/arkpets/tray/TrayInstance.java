@@ -14,11 +14,13 @@ import java.util.UUID;
 public class TrayInstance extends Tray {
     private final PrintWriter socketOut;
     private final boolean canChangeStage;
+    private final JMenu popMenu;
 
     public TrayInstance(UUID uuid, Socket socket, String name, boolean canChangeStage) {
         super(uuid);
         this.name = name;
         this.canChangeStage = canChangeStage;
+        popMenu = new JMenu(name);
         try {
             socketOut = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
@@ -60,41 +62,41 @@ public class TrayInstance extends Tray {
 
     @Override
     protected void optExitHandler() {
-        Logger.info("Tray", "Request to exit");
+        Logger.info("SocketTray", "Request to exit");
         removeTray();
     }
 
     @Override
     protected void optChangeStageHandler() {
-        Logger.info("Tray", "Request to change stage");
+        Logger.info("SocketTray", "Request to change stage");
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);
     }
 
     @Override
     protected void optTransparentDisHandler() {
-        Logger.info("Tray", "Transparent disabled");
+        Logger.info("SocketTray", "Transparent disabled");
         popMenu.remove(optTransparentDis);
         popMenu.add(optTransparentEn, 2);
     }
 
     @Override
     protected void optTransparentEnHandler() {
-        Logger.info("Tray", "Transparent enabled");
+        Logger.info("SocketTray", "Transparent enabled");
         popMenu.remove(optTransparentEn);
         popMenu.add(optTransparentDis, 2);
     }
 
     @Override
     protected void optKeepAnimDisHandler() {
-        Logger.info("Tray", "Keep-Anim disabled");
+        Logger.info("SocketTray", "Keep-Anim disabled");
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);
     }
 
     @Override
     protected void optKeepAnimEnHandler() {
-        Logger.info("Tray", "Keep-Anim enabled");
+        Logger.info("SocketTray", "Keep-Anim enabled");
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);
     }

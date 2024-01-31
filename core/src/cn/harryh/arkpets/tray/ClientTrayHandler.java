@@ -36,10 +36,13 @@ public class ClientTrayHandler implements Runnable {
                 String request = in.readLine();
                 if (request == null)
                     break;
+                Logger.debug("SocketServer", request);
                 SocketData socketData = JSONObject.parseObject(request, SocketData.class);
-                tray = new TrayInstance(socketData.uuid, clientSocket, socketData.name, socketData.canChangeStage);
                 switch (socketData.operateType) {
-                    case LOGIN -> systemTrayManager.addTray(socketData.uuid, tray);
+                    case LOGIN -> {
+                        tray = new TrayInstance(socketData.uuid, clientSocket, socketData.name, socketData.canChangeStage);
+                        systemTrayManager.addTray(socketData.uuid, tray);
+                    }
                     case LOGOUT -> {
                         systemTrayManager.removeTray(socketData.uuid);
                         flag = true;

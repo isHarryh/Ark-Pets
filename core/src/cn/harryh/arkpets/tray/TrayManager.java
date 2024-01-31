@@ -20,7 +20,7 @@ import static cn.harryh.arkpets.Const.fontFileRegular;
 public abstract class TrayManager {
     protected volatile SystemTray tray;
     protected volatile TrayIcon trayIcon;
-    protected final static ProcessPool threadPool = new ProcessPool();
+    protected final static ProcessPool processPool = new ProcessPool();
     protected boolean initialized = false;
     protected Map<UUID, Tray> arkPetTrays = new HashMap<>();
     public static Font font;
@@ -52,7 +52,7 @@ public abstract class TrayManager {
     public abstract Tray getTray(UUID uuid);
 
     public void shutdown() {
-        threadPool.shutdown();
+        processPool.shutdown();
     }
 
     public SystemTray getTray() {
@@ -82,10 +82,10 @@ public abstract class TrayManager {
     }
 
     public FutureTask<TaskStatus> submit(Class<?> clazz, java.util.List<String> jvmArgs, List<String> args) {
-        return threadPool.submit(clazz, jvmArgs, args);
+        return processPool.submit(clazz, jvmArgs, args);
     }
 
     public Future<?> submit(Runnable task) {
-        return threadPool.submit(task);
+        return processPool.submit(task);
     }
 }

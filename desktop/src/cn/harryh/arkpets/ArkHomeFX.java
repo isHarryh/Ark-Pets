@@ -6,8 +6,9 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Homepage;
 import cn.harryh.arkpets.process_pool.Status;
-import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.process_pool.TaskStatus;
+import cn.harryh.arkpets.socket.InteriorSocketServer;
+import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.JavaProcess;
 import cn.harryh.arkpets.utils.Logger;
@@ -48,6 +49,9 @@ public class ArkHomeFX extends Application {
         FXMLLoader fxml = new FXMLLoader();
         fxml.setLocation(getClass().getResource("/UI/Homepage.fxml"));
         Parent root = fxml.load();
+        Logger.info("Socket", "Server starting");
+        InteriorSocketServer socketServer = new InteriorSocketServer(8080);
+        socketServer.startServer();
 
         // Load fonts.
         Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());

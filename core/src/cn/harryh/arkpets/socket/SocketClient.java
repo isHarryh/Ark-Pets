@@ -3,11 +3,9 @@ package cn.harryh.arkpets.socket;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson2.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 public class SocketClient {
@@ -74,7 +72,14 @@ public class SocketClient {
         if (!connected) {
             return;
         }
-        socketOut.println(JSONObject.toJSONString(socketData));
+        try {
+            socketData.name = new String(socketData.name.getBytes(StandardCharsets.UTF_8), "GBK");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        String data = JSONObject.toJSONString(socketData);
+        Logger.debug("SocketClient", data);
+        socketOut.println(data);
     }
 
 }

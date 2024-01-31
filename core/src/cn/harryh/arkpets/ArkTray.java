@@ -28,6 +28,8 @@ public class ArkTray extends Tray {
     private final SocketClient socketClient;
     public AnimData keepAnim;
     public static Font font;
+    private final JDialog popWindow;
+    private final JPopupMenu popMenu;
 
     static {
         try {
@@ -51,9 +53,20 @@ public class ArkTray extends Tray {
         super(uuid);
         arkPets = boundArkPets;
         socketClient = socket;
+        popWindow = new JDialog();
+        popWindow.setUndecorated(true);
+        popWindow.setSize(1, 1);
+
+        // PopupMenu:
+        popMenu = new JPopupMenu() {
+            @Override
+            public void firePopupMenuWillBecomeInvisible() {
+                popWindow.setVisible(false); // Hide the container when the menu is invisible.
+            }
+        };
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
         socketClient.connect(socketData -> {
-            if (socketData.uuid != uuid)
+            if (socketData == null || socketData.uuid.compareTo(uuid) != 0)
                 return;
             switch (socketData.operateType) {
                 case LOGOUT -> optExitHandler();
