@@ -8,6 +8,9 @@ import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.EmbeddedLauncher;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
+import cn.harryh.arkpets.process_pool.Status;
+import cn.harryh.arkpets.process_pool.TaskStatus;
+import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.JavaProcess;
@@ -27,8 +30,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.utils.GuiPrefabs.DialogUtil;
@@ -125,7 +129,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
     public void startArkPetsCore() {
         Task<Boolean> task = new Task<>() {
             @Override
-            protected Boolean call() throws IOException, InterruptedException {
+            protected Boolean call() throws InterruptedException, ExecutionException {
                 // Update the logging level arg to match the custom value of the Launcher.
                 ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
                 args.remove(LogConfig.errorArg);
@@ -134,8 +138,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 args.remove(LogConfig.debugArg);
                 String temp = switch (app.config.logging_level) {
                     case LogConfig.error -> LogConfig.errorArg;
-                    case LogConfig.warn  -> LogConfig.warnArg;
-                    case LogConfig.info  -> LogConfig.infoArg;
+                    case LogConfig.warn -> LogConfig.warnArg;
+                    case LogConfig.info -> LogConfig.infoArg;
                     case LogConfig.debug -> LogConfig.debugArg;
                     default -> "";
                 };
@@ -143,14 +147,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
-                int code = JavaProcess.exec(
-                        EmbeddedLauncher.class, true,
-                        List.of(), args
-                );
+                FutureTask<TaskStatus> future = SystemTrayManager.getInstance().submit(EmbeddedLauncher.class, List.of(), args);
                 // ArkPets core finalized.
-                if (code != 0) {
-                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + code + "). Please check the log file for details.");
-                    lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(code);
+                if (Objects.equals(future.get().getStatus(), Status.FAILURE)) {
+                    Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code -1). Please check the log file for details.");
+                    lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(-1);
                     return false;
                 }
                 Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");

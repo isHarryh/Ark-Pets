@@ -23,9 +23,8 @@ public class ClientTrayHandler implements Runnable {
 
     }
 
-    public void stopThread() {
+    public synchronized void stopThread() {
         threadExitFlag = true;
-        tray.removeTray();
     }
 
     @Override
@@ -69,6 +68,9 @@ public class ClientTrayHandler implements Runnable {
             clientSocket.close();
         } catch (IOException e) {
             Logger.error("Socket", e.getMessage());
+            tray.optExitHandler();
+            InteriorSocketServer.getInstance().removeClientSocket(clientSocket);
+            InteriorSocketServer.getInstance().removeClientHandler(this);
         }
     }
 }

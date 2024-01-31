@@ -8,6 +8,8 @@ import cn.harryh.arkpets.controllers.BehaviorModule;
 import cn.harryh.arkpets.controllers.ModelsModule;
 import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
+import cn.harryh.arkpets.socket.InteriorSocketServer;
+import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.Logger;
@@ -49,6 +51,9 @@ public class ArkHomeFX extends Application {
         Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());
         Font.loadFont(getClass().getResourceAsStream(fontFileBold), Font.getDefault().getSize());
 
+        // Start Socket Server
+        InteriorSocketServer.getInstance().startServer();
+
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
         fxml0.initializeWith(this);
@@ -65,6 +70,16 @@ public class ArkHomeFX extends Application {
         stage.setScene(scene);
         stage.setTitle(desktopTitle);
         rootModule.titleText.setText(desktopTitle);
+
+        SystemTrayManager.getInstance().listen(stage);
+
+        stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue) {
+                SystemTrayManager.getInstance().hide(stage);
+            }
+        }));
+
+        stage.setOnCloseRequest(e -> SystemTrayManager.getInstance().hide(stage));
 
         // After the stage is shown, do initialize modules.
         stage.show();
@@ -89,6 +104,14 @@ public class ArkHomeFX extends Application {
             switchToModelsPane();
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        InteriorSocketServer.getInstance().stopServer();
+        if (!(Objects.requireNonNull(ArkConfig.getConfig()).separate_arkpet_from_launcher))
+            SystemTrayManager.getInstance().shutdown();
     }
 
     public boolean initModelsDataset(boolean popNotice) {
