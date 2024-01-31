@@ -4,32 +4,31 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.socket.SocketClient;
+import cn.harryh.arkpets.socket.SocketData;
+import cn.harryh.arkpets.tray.Tray;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.UUID;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.fontFileRegular;
+import static cn.harryh.arkpets.Const.linearEasingDuration;
 
 
-public class ArkTray {
+public class ArkTray extends Tray {
     private final ArkPets arkPets;
-    private final SystemTray tray;
-    private final TrayIcon icon;
-    private final JDialog popWindow;
-    private final JPopupMenu popMenu;
-    private boolean isTrayIconApplied;
-    public String name;
-    public String title;
+    private final SocketClient socketClient;
     public AnimData keepAnim;
     public static Font font;
+    private final JDialog popWindow;
+    private final JPopupMenu popMenu;
 
     static {
         try {
@@ -49,18 +48,10 @@ public class ArkTray {
      * Must be used after Gdx.app was initialized.
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
      */
-    public ArkTray(ArkPets boundArkPets) {
+    public ArkTray(ArkPets boundArkPets, SocketClient socket, UUID uuid) {
+        super(uuid);
         arkPets = boundArkPets;
-        tray = SystemTray.getSystemTray();
-        name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
-        title = name + " - " + appName;
-
-        // Load the tray icon image.
-        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
-        icon = new TrayIcon(image, name);
-        icon.setImageAutoSize(true);
-
-        // This Dialog is the container (the "anchor") of the PopupMenu:
+        socketClient = socket;
         popWindow = new JDialog();
         popWindow.setUndecorated(true);
         popWindow.setSize(1, 1);
@@ -72,101 +63,109 @@ public class ArkTray {
                 popWindow.setVisible(false); // Hide the container when the menu is invisible.
             }
         };
+        name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
+        socketClient.connect(socketData -> {
+            if (socketData == null || socketData.uuid.compareTo(uuid) != 0)
+                return;
+            switch (socketData.operateType) {
+                case LOGOUT -> optExitHandler();
+                case KEEP_ACTION -> optKeepAnimEnHandler();
+                case NO_KEEP_ACTION -> optKeepAnimDisHandler();
+                case TRANSPARENT_MODE -> optTransparentEnHandler();
+                case NO_TRANSPARENT_MODE -> optTransparentDisHandler();
+                case CHANGE_STAGE -> optChangeStageHandler();
+            }
+        });
+        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.LOGIN, name, arkPets.canChangeStage()));
+        addComponent();
+    }
+
+
+    @Override
+    protected void addComponent() {
         JLabel innerLabel = new JLabel(" " + name + " ");
         innerLabel.setAlignmentX(0.5f);
         popMenu.add(innerLabel);
 
-        // Menu options:
-        JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
-        JMenuItem optKeepAnimDis = new JMenuItem("取消保持");
-        JMenuItem optTransparentEn = new JMenuItem("透明模式");
-        JMenuItem optTransparentDis = new JMenuItem("取消透明");
-        JMenuItem optChangeStage = new JMenuItem("切换形态");
-        JMenuItem optExit = new JMenuItem("退出");
-        optKeepAnimEn.addActionListener(e -> {
-            Logger.info("Tray", "Keep-Anim enabled");
-            keepAnim = arkPets.cha.getPlaying();
-            popMenu.remove(optKeepAnimEn);
-            popMenu.add(optKeepAnimDis, 1);
-        });
-        optKeepAnimDis.addActionListener(e -> {
-            Logger.info("Tray","Keep-Anim disabled");
-            keepAnim = null;
-            popMenu.remove(optKeepAnimDis);
-            popMenu.add(optKeepAnimEn, 1);
-        });
-        optTransparentEn.addActionListener(e -> {
-            Logger.info("Tray", "Transparent enabled");
-            arkPets.windowAlpha.reset(0.75f);
-            arkPets.hWndMine.setWindowTransparent(true);
-            popMenu.remove(optTransparentEn);
-            popMenu.add(optTransparentDis, 2);
-        });
-        optTransparentDis.addActionListener(e -> {
-            Logger.info("Tray", "Transparent disabled");
-            arkPets.windowAlpha.reset(1f);
-            arkPets.hWndMine.setWindowTransparent(false);
-            popMenu.remove(optTransparentDis);
-            popMenu.add(optTransparentEn, 2);
-        });
+        optKeepAnimEn.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.KEEP_ACTION)));
+        optKeepAnimDis.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.NO_KEEP_ACTION)));
+        optTransparentEn.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.TRANSPARENT_MODE)));
+        optTransparentDis.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.NO_TRANSPARENT_MODE)));
         optChangeStage.addActionListener(e -> {
-            Logger.info("Tray","Request to change stage");
-            arkPets.changeStage();
-            if (keepAnim != null) {
-                keepAnim = null;
-                popMenu.remove(optKeepAnimDis);
-                popMenu.add(optKeepAnimEn, 1);
-            }
+            if (keepAnim != null)
+                socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.CHANGE_STAGE));
         });
-        optExit.addActionListener(e -> {
-            Logger.info("Tray","Request to exit");
-            arkPets.windowAlpha.reset(0f);
-            remove();
-            try {
-                Thread.sleep((long)(linearEasingDuration * 1000));
-                Gdx.app.exit();
-            } catch (InterruptedException ignored) {
-            }
-        });
+        optExit.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.LOGOUT)));
+
         popMenu.add(optKeepAnimEn);
         popMenu.add(optTransparentEn);
         if (arkPets.canChangeStage()) popMenu.add(optChangeStage);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
+    }
 
-        // Mouse event listener:
-        icon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == 3 && e.isPopupTrigger()) {
-                    // After right-click on the tray icon.
-                    int x = e.getX();
-                    int y = e.getY();
-                    showDialog(x + 5, y);
-                }
-            }
-        });
-
-        // Add the icon to the system tray.
+    @Override
+    protected void optExitHandler() {
+        Logger.info("Tray", "Request to exit");
+        arkPets.windowAlpha.reset(0f);
+        removeTray();
         try {
-            tray.add(icon);
-            isTrayIconApplied = true;
-            Logger.info("Tray", "Tray icon applied, titled \"" + title + "\"");
-        } catch (AWTException e) {
-            isTrayIconApplied = false;
-            Logger.error("Tray", "Unable to apply tray icon, details see below", e);
+            Thread.sleep((long) (linearEasingDuration * 1000));
+            Gdx.app.exit();
+        } catch (InterruptedException ignored) {
         }
     }
 
-    /** Removes the icon from system tray.
-     */
-    public void remove() {
-        if (isTrayIconApplied) {
-            tray.remove(icon);
-            popMenu.removeAll();
-            popWindow.dispose();
+    @Override
+    protected void optChangeStageHandler() {
+        Logger.info("Tray", "Request to change stage");
+        arkPets.changeStage();
+        if (keepAnim != null) {
+            keepAnim = null;
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
         }
-        isTrayIconApplied = false;
+    }
+
+    @Override
+    protected void optTransparentDisHandler() {
+        Logger.info("Tray", "Transparent disabled");
+        arkPets.windowAlpha.reset(1f);
+        arkPets.hWndMine.setWindowTransparent(false);
+        popMenu.remove(optTransparentDis);
+        popMenu.add(optTransparentEn, 2);
+    }
+
+    @Override
+    protected void optTransparentEnHandler() {
+        Logger.info("Tray", "Transparent enabled");
+        arkPets.windowAlpha.reset(0.75f);
+        arkPets.hWndMine.setWindowTransparent(true);
+        popMenu.remove(optTransparentEn);
+        popMenu.add(optTransparentDis, 2);
+    }
+
+    @Override
+    protected void optKeepAnimDisHandler() {
+        Logger.info("Tray", "Keep-Anim disabled");
+        keepAnim = null;
+        popMenu.remove(optKeepAnimDis);
+        popMenu.add(optKeepAnimEn, 1);
+    }
+
+    @Override
+    protected void optKeepAnimEnHandler() {
+        Logger.info("Tray", "Keep-Anim enabled");
+        keepAnim = arkPets.cha.getPlaying();
+        popMenu.remove(optKeepAnimEn);
+        popMenu.add(optKeepAnimDis, 1);
+    }
+
+    @Override
+    public void removeTray() {
+        popMenu.removeAll();
+        popWindow.dispose();
+        socketClient.disconnect();
     }
 
     /** Hides the menu.
@@ -184,8 +183,8 @@ public class ArkTray {
         /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
         Here we will adapt the coordinate for system scaling artificially. See below. */
         AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-        int scaledX = (int)(x / at.getScaleX());
-        int scaledY = (int)(y / at.getScaleY());
+        int scaledX = (int) (x / at.getScaleX());
+        int scaledY = (int) (y / at.getScaleY());
 
         // Show the JDialog together with the JPopupMenu.
         popWindow.setVisible(true);

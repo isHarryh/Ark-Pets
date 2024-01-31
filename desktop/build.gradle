@@ -8,6 +8,16 @@ eclipse.project.name = appName + "-desktop"
 
 import org.gradle.internal.os.OperatingSystem
 
+processResources {
+    includeEmptyDirs = false
+    excludes = [
+            "**/models_enemies/**",
+            "**/models/**",
+            "**/logs/**",
+            "models_data.json"
+    ]
+}
+
 // Runs the app without debug.
 task run(dependsOn: classes, type: JavaExec, group: 'execute') {
     mainClass = project.mainClassName
