@@ -40,7 +40,7 @@ public class ClientTrayHandler implements Runnable {
                 SocketData socketData = JSONObject.parseObject(request, SocketData.class);
                 switch (socketData.operateType) {
                     case LOGIN -> {
-                        tray = new TrayInstance(socketData.uuid, clientSocket, socketData.name, socketData.canChangeStage);
+                        tray = new TrayInstance(socketData.uuid, clientSocket, new String(socketData.name, "GBK"), socketData.canChangeStage);
                         systemTrayManager.addTray(socketData.uuid, tray);
                     }
                     case LOGOUT -> {

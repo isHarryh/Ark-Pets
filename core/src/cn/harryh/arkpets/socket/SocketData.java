@@ -16,7 +16,7 @@ public class SocketData {
     public UUID uuid;
     public OperateType operateType;
 
-    public String name;
+    public byte[] name;
     public boolean canChangeStage;
 
     public SocketData(UUID uuid, OperateType operateType) {
@@ -26,7 +26,7 @@ public class SocketData {
     public SocketData(UUID uuid, OperateType operateType, String name, boolean canChangeStage) {
         this.uuid = uuid;
         this.operateType = operateType;
-        this.name = name;
+        this.name = name.getBytes();
         this.canChangeStage = canChangeStage;
     }
 }
