@@ -63,6 +63,8 @@ public class ArkConfig {
     public float      physic_static_friction_acc;
     public float      physic_speed_limit_x;
     public float      physic_speed_limit_y;
+    public int        server_port;
+    public boolean    separate_arkpet_from_launcher;
 
     private ArkConfig() {
     }
