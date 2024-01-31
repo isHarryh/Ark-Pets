@@ -6,10 +6,10 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.assets.AssetItem;
+import cn.harryh.arkpets.socket.SocketClient;
 import cn.harryh.arkpets.transitions.TernaryFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector2;
-import cn.harryh.arkpets.tray.SocketClient;
 import cn.harryh.arkpets.utils.HWndCtrl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
@@ -50,8 +50,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private int offsetY = 0;
 	private boolean isToolwindowStyle;
 
-	private SocketClient socketClient;
-
 	public ArkPets(String title) {
 		APP_TITLE = title;
 	}
@@ -89,7 +87,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
-		socketClient = new SocketClient(8080);
+		SocketClient socketClient = new SocketClient(8080);
 		// 5.Tray icon setup
 		tray = new ArkTray(this, socketClient, UUID.randomUUID());
 		// Setup complete

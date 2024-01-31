@@ -13,6 +13,7 @@ public abstract class Tray {
     protected final JDialog popWindow;
     protected final JPopupMenu popMenu;
     protected final UUID uuid;
+    protected String name;
 
     public Tray(UUID uuid) {
         this.uuid = uuid;
@@ -28,7 +29,26 @@ public abstract class Tray {
                 popWindow.setVisible(false); // Hide the container when the menu is invisible.
             }
         };
+        optKeepAnimEn.addActionListener(e -> optKeepAnimEnHandler());
+        optKeepAnimDis.addActionListener(e -> optKeepAnimDisHandler());
+        optTransparentEn.addActionListener(e -> optTransparentEnHandler());
+        optTransparentDis.addActionListener(e -> optTransparentDisHandler());
+        optChangeStage.addActionListener(e -> optChangeStageHandler());
+        optExit.addActionListener(e -> optExitHandler());
     }
 
     protected abstract void addComponent();
+
+    protected abstract void optExitHandler();
+
+    protected abstract void optChangeStageHandler();
+
+    protected abstract void optTransparentDisHandler();
+
+    protected abstract void optTransparentEnHandler();
+
+    protected abstract void optKeepAnimDisHandler();
+
+    protected abstract void optKeepAnimEnHandler();
+    public abstract void removeTray();
 }

@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.tray.model;
+package cn.harryh.arkpets.socket;
 
 import java.util.UUID;
 
@@ -10,23 +10,23 @@ public class SocketData {
         NO_KEEP_ACTION,
         TRANSPARENT_MODE,
         NO_TRANSPARENT_MODE,
-        CHANGE_STAGE,
-        SUCCESS,
-        FAILURE
+        CHANGE_STAGE
     }
 
     public UUID uuid;
     public OperateType operateType;
 
     public String name;
+    public boolean canChangeStage;
 
     public SocketData(UUID uuid, OperateType operateType) {
-        this.uuid = uuid;
-        this.operateType = operateType;
+        this(uuid, operateType, "", false);
     }
 
-    public SocketData(UUID uuid, OperateType operateType, String name) {
-        this(uuid, operateType);
+    public SocketData(UUID uuid, OperateType operateType, String name, boolean canChangeStage) {
+        this.uuid = uuid;
+        this.operateType = operateType;
         this.name = name;
+        this.canChangeStage = canChangeStage;
     }
 }

@@ -143,19 +143,26 @@ public class SystemTrayManager extends TrayManager {
     }
 
     @Override
-    public void addTray(UUID uuid) {
-        arkPetTrays.put(uuid, null);
-//        tray.addTray(playerMenu);
+    public void addTray(UUID uuid, Tray tray) {
+        arkPetTrays.put(uuid, tray);
     }
 
     @Override
     public void removeTray(UUID uuid) {
+        getTray(uuid).removeTray();
         arkPetTrays.remove(uuid);
-//        tray.removeTray(playerMenu);
     }
 
     @Override
     public Tray getTray(UUID uuid) {
         return arkPetTrays.get(uuid);
+    }
+
+    public void addTray(JPopupMenu menu) {
+        playerMenu.add(menu);
+    }
+
+    public void removeTray(JPopupMenu menu) {
+        playerMenu.remove(menu);
     }
 }

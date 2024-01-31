@@ -45,7 +45,7 @@ public abstract class TrayManager {
 
     public abstract void hide(Stage stage);
 
-    public abstract void addTray(UUID uuid);
+    public abstract void addTray(UUID uuid, Tray tray);
 
     public abstract void removeTray(UUID uuid);
 
@@ -57,10 +57,6 @@ public abstract class TrayManager {
 
     public SystemTray getTray() {
         return tray;
-    }
-
-    public TrayIcon getTrayIcon() {
-        return trayIcon;
     }
 
     private void sendMessage(TrayIcon.MessageType messageType, String title, String content, Object... args) {

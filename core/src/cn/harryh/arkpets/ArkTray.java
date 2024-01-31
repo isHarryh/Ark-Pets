@@ -1,12 +1,13 @@
-/** Copyright (c) 2022-2023, Harry Huang
+/**
+ * Copyright (c) 2022-2023, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimData;
-import cn.harryh.arkpets.tray.SocketClient;
+import cn.harryh.arkpets.socket.SocketClient;
+import cn.harryh.arkpets.socket.SocketData;
 import cn.harryh.arkpets.tray.Tray;
-import cn.harryh.arkpets.tray.model.SocketData;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
@@ -25,7 +26,6 @@ import static cn.harryh.arkpets.Const.linearEasingDuration;
 public class ArkTray extends Tray {
     private final ArkPets arkPets;
     private final SocketClient socketClient;
-    public String name;
     public AnimData keepAnim;
     public static Font font;
 
@@ -52,10 +52,22 @@ public class ArkTray extends Tray {
         arkPets = boundArkPets;
         socketClient = socket;
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
-        SocketData socketData = new SocketData(this.uuid, SocketData.OperateType.LOGIN, name);
-        socketClient.sendRequest(socketData);
+        socketClient.connect(socketData -> {
+            if (socketData.uuid != uuid)
+                return;
+            switch (socketData.operateType) {
+                case LOGOUT -> optExitHandler();
+                case KEEP_ACTION -> optKeepAnimEnHandler();
+                case NO_KEEP_ACTION -> optKeepAnimDisHandler();
+                case TRANSPARENT_MODE -> optTransparentEnHandler();
+                case NO_TRANSPARENT_MODE -> optTransparentDisHandler();
+                case CHANGE_STAGE -> optChangeStageHandler();
+            }
+        });
+        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.LOGIN, name, arkPets.canChangeStage()));
         addComponent();
     }
+
 
     @Override
     protected void addComponent() {
@@ -63,62 +75,16 @@ public class ArkTray extends Tray {
         innerLabel.setAlignmentX(0.5f);
         popMenu.add(innerLabel);
 
-        // Menu options:
-        optKeepAnimEn.addActionListener(e -> {
-            Logger.info("Tray", "Keep-Anim enabled");
-            keepAnim = arkPets.cha.getPlaying();
-            SocketData data = new SocketData(uuid, SocketData.OperateType.KEEP_ACTION);
-            socketClient.sendRequest(data);
-            popMenu.remove(optKeepAnimEn);
-            popMenu.add(optKeepAnimDis, 1);
-        });
-        optKeepAnimDis.addActionListener(e -> {
-            Logger.info("Tray","Keep-Anim disabled");
-            keepAnim = null;
-            SocketData data = new SocketData(uuid, SocketData.OperateType.NO_KEEP_ACTION);
-            socketClient.sendRequest(data);
-            popMenu.remove(optKeepAnimDis);
-            popMenu.add(optKeepAnimEn, 1);
-        });
-        optTransparentEn.addActionListener(e -> {
-            Logger.info("Tray", "Transparent enabled");
-            arkPets.windowAlpha.reset(0.75f);
-            arkPets.hWndMine.setWindowTransparent(true);
-            SocketData data = new SocketData(uuid, SocketData.OperateType.TRANSPARENT_MODE);
-            socketClient.sendRequest(data);
-            popMenu.remove(optTransparentEn);
-            popMenu.add(optTransparentDis, 2);
-        });
-        optTransparentDis.addActionListener(e -> {
-            Logger.info("Tray", "Transparent disabled");
-            arkPets.windowAlpha.reset(1f);
-            arkPets.hWndMine.setWindowTransparent(false);
-            SocketData data = new SocketData(uuid, SocketData.OperateType.NO_TRANSPARENT_MODE);
-            socketClient.sendRequest(data);
-            popMenu.remove(optTransparentDis);
-            popMenu.add(optTransparentEn, 2);
-        });
+        optKeepAnimEn.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.KEEP_ACTION)));
+        optKeepAnimDis.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.NO_KEEP_ACTION)));
+        optTransparentEn.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.TRANSPARENT_MODE)));
+        optTransparentDis.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.NO_TRANSPARENT_MODE)));
         optChangeStage.addActionListener(e -> {
-            Logger.info("Tray","Request to change stage");
-            arkPets.changeStage();
-            if (keepAnim != null) {
-                keepAnim = null;
-                SocketData data = new SocketData(uuid, SocketData.OperateType.CHANGE_STAGE);
-                socketClient.sendRequest(data);
-                popMenu.remove(optKeepAnimDis);
-                popMenu.add(optKeepAnimEn, 1);
-            }
+            if (keepAnim != null)
+                socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.CHANGE_STAGE));
         });
-        optExit.addActionListener(e -> {
-            Logger.info("Tray","Request to exit");
-            arkPets.windowAlpha.reset(0f);
-            removeTray();
-            try {
-                Thread.sleep((long)(linearEasingDuration * 1000));
-                Gdx.app.exit();
-            } catch (InterruptedException ignored) {
-            }
-        });
+        optExit.addActionListener(e -> socketClient.sendRequest(new SocketData(uuid, SocketData.OperateType.LOGOUT)));
+
         popMenu.add(optKeepAnimEn);
         popMenu.add(optTransparentEn);
         if (arkPets.canChangeStage()) popMenu.add(optChangeStage);
@@ -126,9 +92,65 @@ public class ArkTray extends Tray {
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
     }
 
+    @Override
+    protected void optExitHandler() {
+        Logger.info("Tray", "Request to exit");
+        arkPets.windowAlpha.reset(0f);
+        removeTray();
+        try {
+            Thread.sleep((long) (linearEasingDuration * 1000));
+            Gdx.app.exit();
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    @Override
+    protected void optChangeStageHandler() {
+        Logger.info("Tray", "Request to change stage");
+        arkPets.changeStage();
+        if (keepAnim != null) {
+            keepAnim = null;
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
+        }
+    }
+
+    @Override
+    protected void optTransparentDisHandler() {
+        Logger.info("Tray", "Transparent disabled");
+        arkPets.windowAlpha.reset(1f);
+        arkPets.hWndMine.setWindowTransparent(false);
+        popMenu.remove(optTransparentDis);
+        popMenu.add(optTransparentEn, 2);
+    }
+
+    @Override
+    protected void optTransparentEnHandler() {
+        Logger.info("Tray", "Transparent enabled");
+        arkPets.windowAlpha.reset(0.75f);
+        arkPets.hWndMine.setWindowTransparent(true);
+        popMenu.remove(optTransparentEn);
+        popMenu.add(optTransparentDis, 2);
+    }
+
+    @Override
+    protected void optKeepAnimDisHandler() {
+        Logger.info("Tray", "Keep-Anim disabled");
+        keepAnim = null;
+        popMenu.remove(optKeepAnimDis);
+        popMenu.add(optKeepAnimEn, 1);
+    }
+
+    @Override
+    protected void optKeepAnimEnHandler() {
+        Logger.info("Tray", "Keep-Anim enabled");
+        keepAnim = arkPets.cha.getPlaying();
+        popMenu.remove(optKeepAnimEn);
+        popMenu.add(optKeepAnimDis, 1);
+    }
+
+    @Override
     public void removeTray() {
-        SocketData data = new SocketData(uuid, SocketData.OperateType.LOGOUT);
-        socketClient.sendRequest(data);
         popMenu.removeAll();
         popWindow.dispose();
         socketClient.disconnect();
@@ -149,8 +171,8 @@ public class ArkTray extends Tray {
         /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
         Here we will adapt the coordinate for system scaling artificially. See below. */
         AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-        int scaledX = (int)(x / at.getScaleX());
-        int scaledY = (int)(y / at.getScaleY());
+        int scaledX = (int) (x / at.getScaleX());
+        int scaledY = (int) (y / at.getScaleY());
 
         // Show the JDialog together with the JPopupMenu.
         popWindow.setVisible(true);

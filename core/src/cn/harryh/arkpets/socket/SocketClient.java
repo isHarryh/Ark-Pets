@@ -1,6 +1,5 @@
-package cn.harryh.arkpets.tray;
+package cn.harryh.arkpets.socket;
 
-import cn.harryh.arkpets.tray.model.SocketData;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson2.JSONObject;
 
@@ -18,6 +17,7 @@ public class SocketClient {
     private Socket socket;
     private PrintWriter socketOut;
     private BufferedReader socketIn;
+    private volatile boolean receiveThreadBreakFlag = false;
 
     public SocketClient(String host, int port) {
         this.host = host;
@@ -28,7 +28,7 @@ public class SocketClient {
         this("localhost", port);
     }
 
-    public void connect() {
+    public void connect(Consumer<SocketData> consumer) {
         if (connected) {
             return;
         }
@@ -36,6 +36,17 @@ public class SocketClient {
             socket = new Socket(host, port);
             socketOut = new PrintWriter(socket.getOutputStream(), true);
             socketIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            Thread thread = new Thread(() -> {
+                while (!receiveThreadBreakFlag) {
+                    try {
+                        consumer.accept(JSONObject.parseObject(socketIn.readLine(), SocketData.class));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            thread.setDaemon(true);
+            thread.start();
             connected = true;
         } catch (IOException e) {
             Logger.error("Socket", "Error connecting to %s:%d".formatted(host, port));
@@ -47,6 +58,7 @@ public class SocketClient {
         if (!connected) {
             return;
         }
+        receiveThreadBreakFlag = true;
         try {
             socket.close();
             socketOut.close();
@@ -60,21 +72,9 @@ public class SocketClient {
 
     public void sendRequest(SocketData socketData) {
         if (!connected) {
-            connect();
+            return;
         }
         socketOut.println(JSONObject.toJSONString(socketData));
     }
 
-    public void sendRequest(SocketData socketData, Consumer<SocketData> function) {
-        if (!connected) {
-            connect();
-        }
-        try {
-            socketOut.println(JSONObject.toJSONString(socketData));
-            function.accept(JSONObject.parseObject(socketIn.readLine(), SocketData.class));
-        } catch (IOException e) {
-            Logger.error("Socket", "Error receiving data from %s:%d".formatted(host, port));
-            throw new RuntimeException(e);
-        }
-    }
 }
