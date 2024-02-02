@@ -32,6 +32,7 @@ public class ArkTray extends Tray {
     public static Font font;
     private final JDialog popWindow;
     private final JPopupMenu popMenu;
+    private final boolean[] button = {false, false};
 
     static {
         try {
@@ -83,6 +84,12 @@ public class ArkTray extends Tray {
                 socketClient.reconnect(() -> {
                     SystemTray.getSystemTray().remove(icon);
                     socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.LOGIN, name, arkPets.canChangeStage()));
+                    if (button[0]) {
+                        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.KEEP_ACTION));
+                    }
+                    if (button[1]) {
+                        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.TRANSPARENT_MODE));
+                    }
                 });
                 return;
             }
@@ -168,6 +175,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optTransparentDisHandler() {
         Logger.info("Tray", "Transparent disabled");
+        button[1] = false;
         arkPets.windowAlpha.reset(1f);
         arkPets.hWndMine.setWindowTransparent(false);
         popMenu.remove(optTransparentDis);
@@ -177,6 +185,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optTransparentEnHandler() {
         Logger.info("Tray", "Transparent enabled");
+        button[1] = true;
         arkPets.windowAlpha.reset(0.75f);
         arkPets.hWndMine.setWindowTransparent(true);
         popMenu.remove(optTransparentEn);
@@ -186,6 +195,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optKeepAnimDisHandler() {
         Logger.info("Tray", "Keep-Anim disabled");
+        button[0] = false;
         keepAnim = null;
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);
@@ -194,6 +204,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optKeepAnimEnHandler() {
         Logger.info("Tray", "Keep-Anim enabled");
+        button[0] = true;
         keepAnim = arkPets.cha.getPlaying();
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);
