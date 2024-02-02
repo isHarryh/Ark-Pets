@@ -18,7 +18,5 @@
     "physic_gravity_acc":800.0,
     "physic_speed_limit_x":1000.0,
     "physic_speed_limit_y":1000.0,
-    "physic_static_friction_acc":500.0,
-    "server_port": 8080,
-    "separate_arkpet_from_launcher": false
+    "physic_static_friction_acc":500.0
 }

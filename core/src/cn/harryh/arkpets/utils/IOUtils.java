@@ -3,7 +3,16 @@
  */
 package cn.harryh.arkpets.utils;
 
+import cn.harryh.arkpets.exception.NoPortAvailableException;
+import cn.harryh.arkpets.exception.NoServerRunningException;
+import cn.harryh.arkpets.exception.ServerRunningException;
+import cn.harryh.arkpets.socket.SocketData;
+import com.alibaba.fastjson2.JSONObject;
+
 import java.io.*;
+import java.net.DatagramSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,13 +21,63 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.serverPorts;
+import static cn.harryh.arkpets.Const.zipBufferSizeDefault;
 
 
 public class IOUtils {
+
+    public static class NetUtils {
+        /**
+         * Get available server port for client to connect
+         * @return int
+         * @throws NoServerRunningException if server is not running
+         */
+        public static int getServerPort() throws NoServerRunningException {
+            for (int serverPort : serverPorts) {
+                try (Socket socket = new Socket("localhost", serverPort)) {
+                    socket.setSoTimeout(100);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    out.println(JSONObject.toJSONString(new SocketData(UUID.randomUUID(), SocketData.OperateType.VERIFY)));
+                    SocketData socketData = JSONObject.parseObject(in.readLine(), SocketData.class);
+                    out.close();
+                    in.close();
+                    if (socketData.operateType == SocketData.OperateType.SERVER_ONLINE) {
+                        return serverPort;
+                    }
+                } catch (IOException ignored) {
+                }
+            }
+            throw new NoServerRunningException();
+        }
+
+        /**
+         * Get available server port for server to bind
+         * @return int
+         * @throws NoPortAvailableException if every port was bound
+         * @throws ServerRunningException if the server is running
+         */
+        public static int getAvailablePort() throws NoPortAvailableException, ServerRunningException {
+            try {
+                getServerPort();
+                throw new ServerRunningException();
+            } catch (NoServerRunningException ignore) {
+            }
+            for (int serverPort : serverPorts) {
+                try (DatagramSocket ignored = new DatagramSocket(serverPort)) {
+                    return serverPort;
+                } catch (SocketException ignored) {
+                }
+            }
+            throw new NoPortAvailableException();
+        }
+
+    }
 
     public static class FileUtil {
         /** Reads the entire file into a byte array.
@@ -28,7 +87,7 @@ public class IOUtils {
          */
         public static byte[] readByte(File file)
                 throws IOException {
-            byte[] content = new byte[(int)file.length()];
+            byte[] content = new byte[(int) file.length()];
             FileInputStream stream = new FileInputStream(file);
             //noinspection ResultOfMethodCallIgnored
             stream.read(content);

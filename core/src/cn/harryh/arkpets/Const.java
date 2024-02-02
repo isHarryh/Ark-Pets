@@ -103,4 +103,8 @@ public final class Const {
         public static final String debugArg = "--debug";
     }
 
+    // SocketServer Ports
+
+    public static final int[] serverPorts = {8686, 8866, 8989, 8899, 8800};
+
 }

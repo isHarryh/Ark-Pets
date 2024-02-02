@@ -3,6 +3,7 @@ package cn.harryh.arkpets.tray;
 import javax.swing.*;
 import java.util.UUID;
 
+
 public abstract class Tray {
     protected JMenuItem optKeepAnimEn = new JMenuItem("保持动作");
     protected JMenuItem optKeepAnimDis = new JMenuItem("取消保持");
@@ -24,6 +25,10 @@ public abstract class Tray {
         optExit.addActionListener(e -> optExitHandler());
     }
 
+    public String getName() {
+        return name;
+    }
+
     protected abstract void addComponent();
 
     protected abstract void optExitHandler();
@@ -37,5 +42,6 @@ public abstract class Tray {
     protected abstract void optKeepAnimDisHandler();
 
     protected abstract void optKeepAnimEnHandler();
+
     public abstract void removeTray();
 }

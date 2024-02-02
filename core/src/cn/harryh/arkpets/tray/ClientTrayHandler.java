@@ -8,8 +8,10 @@ import com.alibaba.fastjson2.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.UUID;
+
 
 public class ClientTrayHandler implements Runnable {
     private final Socket clientSocket;
@@ -25,6 +27,11 @@ public class ClientTrayHandler implements Runnable {
 
     public synchronized void stopThread() {
         threadExitFlag = true;
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -40,6 +47,18 @@ public class ClientTrayHandler implements Runnable {
                 if (uuid == null)
                     uuid = socketData.uuid;
                 switch (socketData.operateType) {
+                    case VERIFY -> {
+                        PrintWriter socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
+                        socketOut.println(JSONObject.toJSONString(new SocketData(uuid, SocketData.OperateType.SERVER_ONLINE)));
+                        socketOut.close();
+                        clientSocket.close();
+                        return;
+                    }
+                    case ACTIVATE_LAUNCHER -> {
+                        SystemTrayManager.getInstance().showLauncher();
+                        clientSocket.close();
+                        return;
+                    }
                     case LOGIN -> {
                         tray = new TrayInstance(socketData.uuid, clientSocket, new String(socketData.name, "GBK"), socketData.canChangeStage);
                         systemTrayManager.addTray(socketData.uuid, tray);
@@ -68,7 +87,6 @@ public class ClientTrayHandler implements Runnable {
             clientSocket.close();
         } catch (IOException e) {
             Logger.error("Socket", e.getMessage());
-            tray.optExitHandler();
             InteriorSocketServer.getInstance().removeClientSocket(clientSocket);
             InteriorSocketServer.getInstance().removeClientHandler(this);
         }

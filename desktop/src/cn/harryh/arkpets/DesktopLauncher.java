@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.tray.SystemTrayManager;
+import cn.harryh.arkpets.process_pool.ProcessPool;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
@@ -62,7 +62,7 @@ public class DesktopLauncher {
         };
 
         // Java FX bootstrap
-        Future<?> future = SystemTrayManager.getInstance().submit(() -> Application.launch(ArkHomeFX.class, args));
+        Future<?> future = ProcessPool.getInstance().submit(() -> Application.launch(ArkHomeFX.class, args));
         try {
             future.get();
         } catch (InterruptedException | ExecutionException e) {

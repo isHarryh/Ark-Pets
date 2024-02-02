@@ -1,6 +1,12 @@
 package cn.harryh.arkpets.process_pool;
 
 public class TaskStatus {
+
+    public enum Status {
+        SUCCESS,
+        FAILURE
+    }
+
     private final Status status;
     private final Throwable exception;
     private final Long processId;

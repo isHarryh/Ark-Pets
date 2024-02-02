@@ -2,6 +2,7 @@ package cn.harryh.arkpets.socket;
 
 import java.util.UUID;
 
+
 public class SocketData {
     public enum OperateType {
         LOGIN,
@@ -10,7 +11,10 @@ public class SocketData {
         NO_KEEP_ACTION,
         TRANSPARENT_MODE,
         NO_TRANSPARENT_MODE,
-        CHANGE_STAGE
+        CHANGE_STAGE,
+        VERIFY,
+        SERVER_ONLINE,
+        ACTIVATE_LAUNCHER
     }
 
     public UUID uuid;
