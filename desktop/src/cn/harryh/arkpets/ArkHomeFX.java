@@ -9,11 +9,14 @@ import cn.harryh.arkpets.controllers.ModelsModule;
 import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.socket.InteriorSocketServer;
+import cn.harryh.arkpets.socket.SocketClient;
+import cn.harryh.arkpets.socket.SocketData;
 import cn.harryh.arkpets.tray.SystemTrayManager;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -25,6 +28,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -47,12 +51,38 @@ public class ArkHomeFX extends Application {
         Logger.info("Launcher", "Starting");
         this.stage = stage;
 
+        // Socket server initialize
+        Logger.info("Socket", "Check server status");
+        int status = InteriorSocketServer.getInstance().checkServerAvailable();
+        switch (status) {
+            case 1: {
+                // No server started, start server
+                Logger.info("Socket", "Server starting");
+                InteriorSocketServer.getInstance().startServer();
+                break;
+            }
+            case 0: {
+                // No available port
+                Logger.error("Socket", "No available port");
+                // TODO
+                //  What if there are no port available
+                Platform.exit();
+            }
+            case -1: {
+                // Server is running
+                Logger.error("Socket", "Server is running");
+                SocketClient socketClient = new SocketClient();
+                socketClient.connect();
+                socketClient.sendRequest(new SocketData(UUID.randomUUID(), SocketData.OperateType.ACTIVATE_LAUNCHER));
+                socketClient.disconnect();
+                Logger.info("Launcher", "ArkPets Launcher has started.");
+                System.exit(0);
+            }
+        }
+
         // Load fonts.
         Font.loadFont(getClass().getResourceAsStream(fontFileRegular), Font.getDefault().getSize());
         Font.loadFont(getClass().getResourceAsStream(fontFileBold), Font.getDefault().getSize());
-
-        // Start Socket Server
-        InteriorSocketServer.getInstance().startServer();
 
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
@@ -71,15 +101,18 @@ public class ArkHomeFX extends Application {
         stage.setTitle(desktopTitle);
         rootModule.titleText.setText(desktopTitle);
 
+        // Add system tray and listen stage
         SystemTrayManager.getInstance().listen(stage);
 
+        // Listen for tray click event
         stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue) {
-                SystemTrayManager.getInstance().hide(stage);
+                SystemTrayManager.getInstance().hide();
             }
         }));
 
-        stage.setOnCloseRequest(e -> SystemTrayManager.getInstance().hide(stage));
+        // Listen window close event
+        stage.setOnCloseRequest(e -> SystemTrayManager.getInstance().hide());
 
         // After the stage is shown, do initialize modules.
         stage.show();
@@ -110,8 +143,8 @@ public class ArkHomeFX extends Application {
     public void stop() throws Exception {
         super.stop();
         InteriorSocketServer.getInstance().stopServer();
-        if (!(Objects.requireNonNull(ArkConfig.getConfig()).separate_arkpet_from_launcher))
-            SystemTrayManager.getInstance().shutdown();
+        // function shutdown will kill all arkpets started by this launcher
+//        ProcessPool.getInstance().shutdown();
     }
 
     public boolean initModelsDataset(boolean popNotice) {

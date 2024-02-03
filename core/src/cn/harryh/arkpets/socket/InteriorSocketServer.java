@@ -1,6 +1,7 @@
 package cn.harryh.arkpets.socket;
 
-import cn.harryh.arkpets.ArkConfig;
+import cn.harryh.arkpets.exception.NoPortAvailableException;
+import cn.harryh.arkpets.exception.ServerRunningException;
 import cn.harryh.arkpets.tray.ClientTrayHandler;
 import cn.harryh.arkpets.utils.Logger;
 
@@ -9,11 +10,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 
+import static cn.harryh.arkpets.utils.IOUtils.NetUtils.getAvailablePort;
+
+
 public class InteriorSocketServer {
-    private final int port;
+    private int port;
+    private boolean checked = false;
     private static final List<Socket> clientSockets = new ArrayList<>();
     private static final List<ClientTrayHandler> clientHandlers = new ArrayList<>();
     private static final ExecutorService executorService =
@@ -24,57 +28,78 @@ public class InteriorSocketServer {
                         thread.setDaemon(true);
                         return thread;
                     });
-    private ServerSocket serverSocket;
-    private static volatile boolean mainThreadExitFlag = false;
+    private ServerSocket serverSocket = null;
+    private static Thread mainThread;
     private static InteriorSocketServer instance = null;
+
+    public static ExecutorService getThreadPool() {
+        return executorService;
+    }
+
     public static InteriorSocketServer getInstance() {
-        if (instance == null)
+        if (instance == null) {
             instance = new InteriorSocketServer();
+        }
         return instance;
     }
 
+    public int checkServerAvailable() {
+        try {
+            this.port = getAvailablePort();
+            checked = true;
+            return 1;
+        } catch (NoPortAvailableException e) {
+            return 0;
+        } catch (ServerRunningException e) {
+            return -1;
+        }
+    }
+
     private InteriorSocketServer() {
-        this.port = Objects.requireNonNull(ArkConfig.getConfig()).server_port;
     }
 
     public synchronized void startServer() {
-        executorService.execute(() -> {
+        if (!checked)
+            return;
+        mainThread = new Thread(() -> {
             try {
                 serverSocket = new ServerSocket(port);
                 Logger.info("Socket", "Server is running on port " + port);
-                while (!mainThreadExitFlag) {
+                while (true) {
                     Socket clientSocket = serverSocket.accept();
                     clientSockets.add(clientSocket);
                     Logger.info("Socket", "New client connection from %s:%d".formatted(clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort()));
                     ClientTrayHandler clientTrayHandler = new ClientTrayHandler(clientSocket);
                     clientHandlers.add(clientTrayHandler);
+                    if (executorService.isShutdown())
+                        break;
                     executorService.execute(clientTrayHandler);
                 }
+                Logger.info("Socket", "Server stop");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
+        executorService.execute(mainThread);
     }
 
     public synchronized void stopServer() {
-        mainThreadExitFlag = true;
-        clientSockets.forEach(socket -> {
-            try {
-                socket.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        if (!(Objects.requireNonNull(ArkConfig.getConfig()).separate_arkpet_from_launcher))
-            clientHandlers.forEach(ClientTrayHandler::stopThread);
+        if (!checked)
+            return;
+        mainThread.interrupt();
+        clientHandlers.forEach(ClientTrayHandler::stopThread);
         executorService.shutdown();
     }
 
     public void removeClientSocket(Socket socket) {
+        if (!checked)
+            return;
         clientSockets.remove(socket);
     }
 
     public void removeClientHandler(ClientTrayHandler handler) {
+        if (!checked)
+            return;
         clientHandlers.remove(handler);
     }
 

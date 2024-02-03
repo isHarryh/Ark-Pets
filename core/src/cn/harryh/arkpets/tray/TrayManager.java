@@ -1,8 +1,6 @@
 package cn.harryh.arkpets.tray;
 
 import cn.harryh.arkpets.ArkTray;
-import cn.harryh.arkpets.process_pool.ProcessPool;
-import cn.harryh.arkpets.process_pool.TaskStatus;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.stage.Stage;
 
@@ -10,17 +8,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.*;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.fontFileRegular;
 
 public abstract class TrayManager {
     protected volatile SystemTray tray;
     protected volatile TrayIcon trayIcon;
-    protected final static ProcessPool processPool = new ProcessPool();
     protected boolean initialized = false;
     protected Map<UUID, Tray> arkPetTrays = new HashMap<>();
     public static Font font;
@@ -43,7 +40,7 @@ public abstract class TrayManager {
 
     public abstract void listen(Stage stage);
 
-    public abstract void hide(Stage stage);
+    public abstract void hide();
 
     public abstract void addTray(UUID uuid, Tray tray);
 
@@ -51,14 +48,18 @@ public abstract class TrayManager {
 
     public abstract Tray getTray(UUID uuid);
 
-    public void shutdown() {
-        processPool.shutdown();
-    }
 
     public SystemTray getTray() {
         return tray;
     }
 
+    /**
+     * Send system tray information
+     * @param messageType info type
+     * @param title title
+     * @param content content
+     * @param args content args
+     */
     private void sendMessage(TrayIcon.MessageType messageType, String title, String content, Object... args) {
         if (!initialized)
             return;
@@ -79,13 +80,5 @@ public abstract class TrayManager {
 
     public void sendMessage(String title, String content, Object... args) {
         sendMessage(TrayIcon.MessageType.NONE, title, content, args);
-    }
-
-    public FutureTask<TaskStatus> submit(Class<?> clazz, java.util.List<String> jvmArgs, List<String> args) {
-        return processPool.submit(clazz, jvmArgs, args);
-    }
-
-    public Future<?> submit(Runnable task) {
-        return processPool.submit(task);
     }
 }

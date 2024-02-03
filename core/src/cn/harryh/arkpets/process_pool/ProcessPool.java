@@ -1,20 +1,30 @@
 package cn.harryh.arkpets.process_pool;
 
+import cn.harryh.arkpets.socket.InteriorSocketServer;
+
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 
 public class ProcessPool {
     private final Set<ProcessHolder> processHolderHashSet = new HashSet<>();
-    private final java.util.concurrent.ExecutorService executorService;
+    private final java.util.concurrent.ExecutorService executorService = InteriorSocketServer.getThreadPool();
+    private static ProcessPool instance = null;
 
-    public ProcessPool() {
-        this.executorService = Executors.newFixedThreadPool(10);
+    public static ProcessPool getInstance() {
+        if (instance == null)
+            instance = new ProcessPool();
+        return instance;
+    }
+
+    private ProcessPool() {
     }
 
     public void shutdown() {
         processHolderHashSet.forEach(processHolder -> processHolder.getProcess().destroy());
-        executorService.shutdown();
     }
 
     public Future<?> submit(Runnable task) {

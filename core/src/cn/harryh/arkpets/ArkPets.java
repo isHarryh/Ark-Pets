@@ -88,7 +88,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		// 5.Tray icon setup
-		tray = new ArkTray(this, new SocketClient(config.server_port), UUID.randomUUID());
+		tray = new ArkTray(this, new SocketClient(), UUID.randomUUID());
 		// Setup complete
 		Logger.info("App", "Render");
 	}
@@ -142,7 +142,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void dispose() {
 		Logger.info("App", "Dispose");
-		tray.removeTray();
 	}
 
 	public boolean canChangeStage() {

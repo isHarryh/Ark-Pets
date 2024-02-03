@@ -12,14 +12,17 @@ import com.badlogic.gdx.Gdx;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
-import static cn.harryh.arkpets.Const.fontFileRegular;
-import static cn.harryh.arkpets.Const.linearEasingDuration;
+import static cn.harryh.arkpets.Const.*;
 
 
 public class ArkTray extends Tray {
@@ -29,6 +32,7 @@ public class ArkTray extends Tray {
     public static Font font;
     private final JDialog popWindow;
     private final JPopupMenu popMenu;
+    private final boolean[] button = {false, false};
 
     static {
         try {
@@ -65,7 +69,31 @@ public class ArkTray extends Tray {
         };
         name = (arkPets.config.character_label == null || arkPets.config.character_label.isEmpty()) ? "Unknown" : arkPets.config.character_label;
         socketClient.connect(socketData -> {
-            if (socketData == null || socketData.uuid.compareTo(uuid) != 0)
+            if (socketData == null) {
+                Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
+                TrayIcon icon = getTrayIcon(image);
+
+                // Add the icon to the system tray.
+                try {
+                    SystemTray.getSystemTray().add(icon);
+                    Logger.info("Tray", "Tray icon applied");
+                } catch (AWTException e) {
+                    Logger.error("Tray", "Unable to apply tray icon, details see below", e);
+                }
+                socketClient.disconnect();
+                socketClient.reconnect(() -> {
+                    SystemTray.getSystemTray().remove(icon);
+                    socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.LOGIN, name, arkPets.canChangeStage()));
+                    if (button[0]) {
+                        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.KEEP_ACTION));
+                    }
+                    if (button[1]) {
+                        socketClient.sendRequest(new SocketData(this.uuid, SocketData.OperateType.TRANSPARENT_MODE));
+                    }
+                });
+                return;
+            }
+            if (socketData.uuid.compareTo(uuid) != 0)
                 return;
             switch (socketData.operateType) {
                 case LOGOUT -> optExitHandler();
@@ -80,6 +108,22 @@ public class ArkTray extends Tray {
         addComponent();
     }
 
+    private TrayIcon getTrayIcon(Image image) {
+        TrayIcon icon = new TrayIcon(image, name);
+        icon.setImageAutoSize(true);
+        icon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == 3 && e.isPopupTrigger()) {
+                    // After right-click on the tray icon.
+                    int x = e.getX();
+                    int y = e.getY();
+                    showDialog(x + 5, y);
+                }
+            }
+        });
+        return icon;
+    }
 
     @Override
     protected void addComponent() {
@@ -109,11 +153,12 @@ public class ArkTray extends Tray {
         Logger.info("Tray", "Request to exit");
         arkPets.windowAlpha.reset(0f);
         removeTray();
-        try {
-            Thread.sleep((long) (linearEasingDuration * 1000));
-            Gdx.app.exit();
-        } catch (InterruptedException ignored) {
-        }
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Gdx.app.exit();
+            }
+        }, (int) (linearEasingDuration * 1000));
     }
 
     @Override
@@ -130,6 +175,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optTransparentDisHandler() {
         Logger.info("Tray", "Transparent disabled");
+        button[1] = false;
         arkPets.windowAlpha.reset(1f);
         arkPets.hWndMine.setWindowTransparent(false);
         popMenu.remove(optTransparentDis);
@@ -139,6 +185,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optTransparentEnHandler() {
         Logger.info("Tray", "Transparent enabled");
+        button[1] = true;
         arkPets.windowAlpha.reset(0.75f);
         arkPets.hWndMine.setWindowTransparent(true);
         popMenu.remove(optTransparentEn);
@@ -148,6 +195,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optKeepAnimDisHandler() {
         Logger.info("Tray", "Keep-Anim disabled");
+        button[0] = false;
         keepAnim = null;
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);
@@ -156,6 +204,7 @@ public class ArkTray extends Tray {
     @Override
     protected void optKeepAnimEnHandler() {
         Logger.info("Tray", "Keep-Anim enabled");
+        button[0] = true;
         keepAnim = arkPets.cha.getPlaying();
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);

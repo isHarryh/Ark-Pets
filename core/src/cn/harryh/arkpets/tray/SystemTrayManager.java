@@ -14,11 +14,13 @@ import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.iconFilePng;
 
+
 public class SystemTrayManager extends TrayManager {
     private static SystemTrayManager instance = null;
     private volatile JPopupMenu popupMenu;
     private volatile JDialog popWindow;
     private volatile JMenu playerMenu;
+    private static Stage stage;
     private static double x = 0;
     private static double y = 0;
 
@@ -96,13 +98,14 @@ public class SystemTrayManager extends TrayManager {
     public void listen(Stage stage) {
         if (!initialized)
             return;
+        SystemTrayManager.stage = stage;
         trayIcon.removeMouseListener(new MouseAdapter() {
         });
         MouseListener mouseListener = new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    showStage(stage);
+                    showStage();
                 }
             }
         };
@@ -112,7 +115,7 @@ public class SystemTrayManager extends TrayManager {
     }
 
     @Override
-    public void hide(Stage stage) {
+    public void hide() {
         if (!initialized)
             return;
         Platform.runLater(() -> {
@@ -126,7 +129,7 @@ public class SystemTrayManager extends TrayManager {
         });
     }
 
-    private void showStage(Stage stage) {
+    private void showStage() {
         if (!initialized)
             return;
         Platform.runLater(() -> {
@@ -142,9 +145,14 @@ public class SystemTrayManager extends TrayManager {
         });
     }
 
+    public void showLauncher() {
+        showStage();
+    }
+
     @Override
     public void addTray(UUID uuid, Tray tray) {
         arkPetTrays.put(uuid, tray);
+//        sendInfoMessage("新桌宠连接", "%s", tray.getName());
     }
 
     @Override
