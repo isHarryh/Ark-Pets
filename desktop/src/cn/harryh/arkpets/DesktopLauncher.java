@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.process_pool.ProcessPool;
+import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
@@ -13,8 +13,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static cn.harryh.arkpets.Const.LogConfig;
-import static cn.harryh.arkpets.Const.appVersion;
+import static cn.harryh.arkpets.Const.*;
 
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.

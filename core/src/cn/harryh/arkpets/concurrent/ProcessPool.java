@@ -1,20 +1,27 @@
-package cn.harryh.arkpets.process_pool;
-
-import cn.harryh.arkpets.socket.InteriorSocketServer;
+package cn.harryh.arkpets.concurrent;
 
 import java.io.File;
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
 
 
 public class ProcessPool {
-    private final Set<ProcessHolder> processHolderHashSet = new HashSet<>();
-    private final java.util.concurrent.ExecutorService executorService = InteriorSocketServer.getThreadPool();
+    public static final ExecutorService executorService =
+            new ThreadPoolExecutor(20,
+                    Integer.MAX_VALUE,
+                    60L,
+                    TimeUnit.SECONDS,
+                    new SynchronousQueue<>(),
+                    r -> {
+                        Thread thread = Executors.defaultThreadFactory().newThread(r);
+                        thread.setDaemon(true);
+                        return thread;
+                    });
+
     private static ProcessPool instance = null;
 
-    public static ProcessPool getInstance() {
+    public static synchronized ProcessPool getInstance() {
         if (instance == null)
             instance = new ProcessPool();
         return instance;
@@ -23,16 +30,12 @@ public class ProcessPool {
     private ProcessPool() {
     }
 
-    public void shutdown() {
-        processHolderHashSet.forEach(processHolder -> processHolder.getProcess().destroy());
-    }
-
     public Future<?> submit(Runnable task) {
         return executorService.submit(task);
     }
 
-    public FutureTask<TaskStatus> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
-        Callable<TaskStatus> task = () -> {
+    public FutureTask<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
+        Callable<ProcessResult> task = () -> {
             // Attributes preparation
             String javaHome = System.getProperty("java.home");
             String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
@@ -51,17 +54,18 @@ public class ProcessPool {
             // Process execution
             ProcessBuilder builder = new ProcessBuilder(command);
             Process process = builder.inheritIO().start();
-            ProcessHolder processHolder = ProcessHolder.holder(process);
-            processHolderHashSet.add(processHolder);
-            int status = process.waitFor();
-            processHolderHashSet.remove(processHolder);
-            if (status == 0) {
-                return TaskStatus.ofSuccess(process.pid());
-            }
-            return TaskStatus.ofFailure(process.pid());
+            int exitValue = process.waitFor();
+            return new ProcessResult(exitValue, process.pid());
         };
-        FutureTask<TaskStatus> futureTask = new FutureTask<>(task);
+        FutureTask<ProcessResult> futureTask = new FutureTask<>(task);
         executorService.submit(futureTask);
         return futureTask;
+    }
+
+
+    public record ProcessResult(int exitValue, long processId) {
+        public boolean isSuccess() {
+            return exitValue() == 0;
+        }
     }
 }

@@ -6,10 +6,11 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.assets.AssetItem;
-import cn.harryh.arkpets.socket.SocketClient;
+import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.transitions.TernaryFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.HWndCtrl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
@@ -32,7 +33,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public Plane plane;
 	public ArkChar cha;
 	public ArkConfig config;
-	public ArkTray tray;
+	public MemberTrayImpl tray;
 	public GeneralBehavior behavior;
 
 	public TransitionFloat windowAlpha; // Window Opacity Easing
@@ -88,7 +89,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		// 5.Tray icon setup
-		tray = new ArkTray(this, new SocketClient(), UUID.randomUUID());
+		tray = new MemberTrayImpl(this, new SocketClient(), UUID.randomUUID());
 		// Setup complete
 		Logger.info("App", "Render");
 	}

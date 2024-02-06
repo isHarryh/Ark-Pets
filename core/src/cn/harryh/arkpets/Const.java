@@ -3,8 +3,15 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import javafx.util.Duration;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 
 /** Constants definition class.
@@ -51,20 +58,22 @@ public final class Const {
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
-    public static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
-    public static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
     public static final String startupTarget    = "ArkPets.exe";
     public static final String startUpScript    = "ArkPetsStartupService.vbs";
 
     // Changeable constants
-    public static boolean isHttpsTrustAll = false;
-    public static boolean isUpdateAvailable = false;
+    public static boolean isHttpsTrustAll       = false;
+    public static boolean isUpdateAvailable     = false;
     public static boolean isDatasetIncompatible = false;
-    public static boolean isNewcomer = false;
+    public static boolean isNewcomer            = false;
+
+    // Socket C/S constants
+    public static final String serverHost           = "localhost";
+    public static final int[] serverPorts           = {8686, 8866, 8989, 8899, 8800};
+    public static final int reconnectPeriodMillis   = 5 * 1000;
 
     // Misc constants
     public static String ipPortRegex = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$";
-
 
     /** Paths presets definition class.
      */
@@ -103,8 +112,29 @@ public final class Const {
         public static final String debugArg = "--debug";
     }
 
-    // SocketServer Ports
+    public static class FontsConfig {
+        private static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
+        private static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
 
-    public static final int[] serverPorts = {8686, 8866, 8989, 8899, 8800};
+        public static void loadFontsToJavafx() {
+            javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
+                    javafx.scene.text.Font.getDefault().getSize());
+            javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
+                    javafx.scene.text.Font.getDefault().getSize());
+        }
 
+        public static void loadFontsToSwing() {
+            try {
+                InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
+                java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
+                if (font != null) {
+                    UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
+                    UIManager.put("Menu.font", font.deriveFont(11f));
+                    UIManager.put("MenuItem.font", font.deriveFont(11f));
+                }
+            } catch (FontFormatException | IOException e) {
+                Logger.error("System", "Failed to load tray menu font, details see below.", e);
+            }
+        }
+    }
 }
