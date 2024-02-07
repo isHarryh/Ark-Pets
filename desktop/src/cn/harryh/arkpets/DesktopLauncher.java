@@ -3,17 +3,15 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.LogConfig;
+import static cn.harryh.arkpets.Const.appVersion;
 
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
@@ -61,12 +59,7 @@ public class DesktopLauncher {
         };
 
         // Java FX bootstrap
-        Future<?> future = ProcessPool.getInstance().submit(() -> Application.launch(ArkHomeFX.class, args));
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+        Application.launch(ArkHomeFX.class, args);
         Logger.info("System", "Exited from DesktopLauncher successfully");
         System.exit(0);
     }

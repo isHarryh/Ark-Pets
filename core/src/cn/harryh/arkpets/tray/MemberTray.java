@@ -32,12 +32,12 @@ public abstract class MemberTray {
         optChangeStage      .addActionListener(e -> onChangeStage());
         optExit             .addActionListener(e -> onExit());
 
-        optKeepAnimEn       .addActionListener(e -> sendRequest(SocketData.Operation.KEEP_ACTION));
-        optKeepAnimDis      .addActionListener(e -> sendRequest(SocketData.Operation.NO_KEEP_ACTION));
-        optTransparentEn    .addActionListener(e -> sendRequest(SocketData.Operation.TRANSPARENT_MODE));
-        optTransparentDis   .addActionListener(e -> sendRequest(SocketData.Operation.NO_TRANSPARENT_MODE));
-        optChangeStage      .addActionListener(e -> sendRequest(SocketData.Operation.CHANGE_STAGE));
-        optExit             .addActionListener(e -> sendRequest(SocketData.Operation.LOGOUT));
+        optKeepAnimEn       .addActionListener(e -> sendOperation(SocketData.Operation.KEEP_ACTION));
+        optKeepAnimDis      .addActionListener(e -> sendOperation(SocketData.Operation.NO_KEEP_ACTION));
+        optTransparentEn    .addActionListener(e -> sendOperation(SocketData.Operation.TRANSPARENT_MODE));
+        optTransparentDis   .addActionListener(e -> sendOperation(SocketData.Operation.NO_TRANSPARENT_MODE));
+        optChangeStage      .addActionListener(e -> sendOperation(SocketData.Operation.CHANGE_STAGE));
+        optExit             .addActionListener(e -> sendOperation(SocketData.Operation.LOGOUT));
     }
 
     abstract public void onExit();
@@ -54,5 +54,5 @@ public abstract class MemberTray {
 
     abstract public void remove();
 
-    abstract protected void sendRequest(SocketData.Operation operation);
+    abstract protected void sendOperation(SocketData.Operation operation);
 }

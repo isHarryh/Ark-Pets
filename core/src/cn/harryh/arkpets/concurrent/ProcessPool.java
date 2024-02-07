@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.concurrent.*;
 
 
-public class ProcessPool {
-    public static final ExecutorService executorService =
+public final class ProcessPool implements Executor {
+    private final ExecutorService executorService =
             new ThreadPoolExecutor(20,
                     Integer.MAX_VALUE,
                     60L,
@@ -30,12 +30,20 @@ public class ProcessPool {
     private ProcessPool() {
     }
 
-    public Future<?> submit(Runnable task) {
-        return executorService.submit(task);
+    @Override
+    public void execute(Runnable task) {
+        try {
+            executorService.submit(task);
+        } catch (RejectedExecutionException ignored) {
+        }
     }
 
-    public FutureTask<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
-        Callable<ProcessResult> task = () -> {
+    public void shutdown() {
+        executorService.shutdown();
+    }
+
+    public Future<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
+        FutureTask<ProcessResult> task = new FutureTask<> (() -> {
             // Attributes preparation
             String javaHome = System.getProperty("java.home");
             String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
@@ -56,10 +64,9 @@ public class ProcessPool {
             Process process = builder.inheritIO().start();
             int exitValue = process.waitFor();
             return new ProcessResult(exitValue, process.pid());
-        };
-        FutureTask<ProcessResult> futureTask = new FutureTask<>(task);
-        executorService.submit(futureTask);
-        return futureTask;
+        });
+        executorService.submit(task);
+        return task;
     }
 
 

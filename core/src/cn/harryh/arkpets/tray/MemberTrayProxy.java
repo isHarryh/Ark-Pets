@@ -1,29 +1,21 @@
 package cn.harryh.arkpets.tray;
 
 import cn.harryh.arkpets.concurrent.SocketData;
+import cn.harryh.arkpets.concurrent.SocketSession;
 import cn.harryh.arkpets.utils.Logger;
-import com.alibaba.fastjson2.JSONObject;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.nio.charset.Charset;
 
 
 public class MemberTrayProxy extends MemberTray {
-    private final PrintWriter socketOut;
+    private final SocketSession session;
     private final HostTray hostTray;
     private final JMenu popMenu;
 
-    public MemberTrayProxy(SocketData socketData, Socket clientSocket, HostTray hostTray) {
-        super(socketData.uuid, new String(socketData.name, Charset.forName("GBK")));
+    public MemberTrayProxy(SocketData socketData, SocketSession session, HostTray hostTray) {
+        super(socketData.uuid, socketData.getMsgString());
+        this.session = session;
         this.hostTray = hostTray;
-        try {
-            socketOut = new PrintWriter(clientSocket.getOutputStream(), true);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         // Ui Components:
         JLabel innerLabel = new JLabel(" " + name + " ");
@@ -33,12 +25,15 @@ public class MemberTrayProxy extends MemberTray {
         popMenu.add(innerLabel);
         popMenu.add(optKeepAnimEn);
         popMenu.add(optTransparentEn);
-        if (socketData.canChangeStage)
-            popMenu.add(optChangeStage);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
         hostTray.addMemberTray(popMenu);
+    }
+
+    public void onCanChangeStage() {
+        Logger.info("ProxyTray", "Can change stage");
+        popMenu.add(optChangeStage, popMenu.getSubElements().length - 2);
     }
 
     @Override
@@ -83,14 +78,13 @@ public class MemberTrayProxy extends MemberTray {
     }
 
     @Override
-    protected void sendRequest(SocketData.Operation operation) {
-        socketOut.println(JSONObject.toJSONString(new SocketData(uuid, operation)));
+    protected void sendOperation(SocketData.Operation operation) {
+        session.send(SocketData.ofOperation(uuid, operation));
     }
 
     @Override
     public void remove() {
         hostTray.removeMemberTray(popMenu);
-        sendRequest(SocketData.Operation.LOGOUT);
-        socketOut.close();
+        sendOperation(SocketData.Operation.LOGOUT);
     }
 }

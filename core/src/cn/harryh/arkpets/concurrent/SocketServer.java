@@ -1,11 +1,9 @@
 package cn.harryh.arkpets.concurrent;
 
 import cn.harryh.arkpets.tray.HostTray;
-import cn.harryh.arkpets.tray.MemberTray;
 import cn.harryh.arkpets.tray.MemberTrayProxy;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson2.JSONException;
-import com.alibaba.fastjson2.JSONObject;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,10 +16,10 @@ import java.util.concurrent.RejectedExecutionException;
 import static cn.harryh.arkpets.Const.serverPorts;
 
 
-public class SocketServer {
+public final class SocketServer {
     private int port;
     private ServerSocket serverSocket = null;
-    private final Set<ServerSocketSession> sessionList = new CopyOnWriteArraySet<>();
+    private final Set<SocketSession> sessionList = new CopyOnWriteArraySet<>();
     private Thread listener;
 
     private static SocketServer instance = null;
@@ -43,11 +41,12 @@ public class SocketServer {
             try {
                 serverSocket = new ServerSocket(port);
                 Logger.info("SocketServer", "Server is running on port " + port);
-                while (!listener.isInterrupted() && !ProcessPool.executorService.isShutdown()) {
-                    Socket clientSocket = serverSocket.accept();
-                    ServerSocketSession session = new ServerSocketSession(clientSocket, hostTray);
+                while (!listener.isInterrupted()) {
+                    Socket socket = serverSocket.accept();
+                    SocketSession session = new ServerSocketSession(hostTray);
+                    session.setTarget(socket);
                     sessionList.add(session);
-                    ProcessPool.executorService.execute(session);
+                    ProcessPool.getInstance().execute(session);
                     Logger.info("SocketServer", "(+)" + session + " connected");
                 }
                 serverSocket.close();
@@ -57,14 +56,14 @@ public class SocketServer {
             } catch (RejectedExecutionException ignored) {
             }
         });
-        ProcessPool.executorService.execute(listener);
+        ProcessPool.getInstance().execute(listener);
     }
 
     public synchronized void stopServer() {
         Logger.info("SocketServer", "Request to stop server");
         if (listener != null)
             listener.interrupt();
-        sessionList.forEach(ServerSocketSession::close);
+        sessionList.forEach(SocketSession::close);
     }
 
     @Override
@@ -89,44 +88,47 @@ public class SocketServer {
 
     public static class ServerSocketSession extends SocketSession {
         private final HostTray hostTray;
-        private MemberTray tray;
+        private MemberTrayProxy tray;
         private UUID uuid = null;
 
-        public ServerSocketSession(Socket target, HostTray hostTray) {
-            super(target);
+        public ServerSocketSession(HostTray hostTray) {
+            super();
             this.hostTray = hostTray;
         }
 
         @Override
         public void receive(String request) {
             try {
-                SocketData socketData = JSONObject.parseObject(request, SocketData.class);
-                if (socketData.operation == null)
+                SocketData socketData = SocketData.of(request);
+                if (socketData == null || socketData.operation == null)
                     return;
                 if (uuid == null)
                     uuid = socketData.uuid;
 
                 switch (socketData.operation) {
-                    case VERIFY -> {
-                        this.send(JSONObject.toJSONString(new SocketData(uuid, SocketData.Operation.SERVER_ONLINE)));
+                    case HANDSHAKE_REQUEST -> {
+                        this.send(SocketData.ofOperation(uuid, SocketData.Operation.HANDSHAKE_RESPONSE));
                         close();
                     }
                     case ACTIVATE_LAUNCHER -> hostTray.showStage();
                     case LOGIN -> {
-                        tray = new MemberTrayProxy(socketData, target, hostTray);
-                        hostTray.addMemberTray(socketData.uuid, tray);
+                        tray = new MemberTrayProxy(socketData, this, hostTray);
+                        hostTray.addMemberTray(uuid, tray);
                     }
                     case LOGOUT -> {
-                        hostTray.removeMemberTray(socketData.uuid);tray.onExit();
+                        hostTray.removeMemberTray(uuid);
+                        tray.onExit();
                         close();
                     }
-                    case KEEP_ACTION -> tray.onKeepAnimEn();
-                    case NO_KEEP_ACTION -> tray.onKeepAnimDis();
-                    case TRANSPARENT_MODE -> tray.onTransparentEn();
-                    case NO_TRANSPARENT_MODE -> tray.onTransparentDis();
-                    case CHANGE_STAGE -> tray.onChangeStage();
+                    case KEEP_ACTION            -> tray.onKeepAnimEn();
+                    case NO_KEEP_ACTION         -> tray.onKeepAnimDis();
+                    case TRANSPARENT_MODE       -> tray.onTransparentEn();
+                    case NO_TRANSPARENT_MODE    -> tray.onTransparentDis();
+                    case CAN_CHANGE_STAGE       -> tray.onCanChangeStage();
+                    case CHANGE_STAGE           -> tray.onChangeStage();
                 }
             } catch (JSONException ignored) {
+
             }
         }
 
@@ -134,6 +136,12 @@ public class SocketServer {
         protected void onClosed() {
             Logger.info("SocketServer", "(-)" + this + " closed");
             SocketServer.getInstance().sessionList.remove(this);
+        }
+
+        @Override
+        protected void onBroken() {
+            Logger.info("SocketServer", "(x)" + this + " broken");
+            hostTray.removeMemberTray(uuid);
         }
     }
 }

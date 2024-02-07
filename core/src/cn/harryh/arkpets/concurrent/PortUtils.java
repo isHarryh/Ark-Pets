@@ -25,11 +25,11 @@ public class PortUtils {
                 socket.setSoTimeout(100);
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                out.println(JSONObject.toJSONString(new SocketData(UUID.randomUUID(), SocketData.Operation.VERIFY)));
+                out.println(SocketData.ofOperation(UUID.randomUUID(), SocketData.Operation.HANDSHAKE_REQUEST));
                 SocketData socketData = JSONObject.parseObject(in.readLine(), SocketData.class);
                 out.close();
                 in.close();
-                if (socketData.operation == SocketData.Operation.SERVER_ONLINE)
+                if (socketData.operation == SocketData.Operation.HANDSHAKE_RESPONSE)
                     return serverPort;
             } catch (IOException ignored) {
             }

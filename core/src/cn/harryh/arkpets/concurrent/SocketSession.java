@@ -11,36 +11,43 @@ import java.net.SocketException;
 
 
 abstract public class SocketSession implements Runnable {
-    protected final Socket target;
-    protected final BufferedReader in;
-    protected final PrintWriter out;
-    protected boolean hasRun = false;
-    protected boolean hasClosed = false;
+    protected Socket target;
+    protected BufferedReader in;
+    protected PrintWriter out;
+    private boolean hasTarget = false;
+    private boolean hasRun = false;
+    private boolean hasClosed = false;
 
-    public SocketSession(Socket target) {
+    public SocketSession() {
+    }
+
+    public final void setTarget(Socket target) {
         try {
             this.target = target;
             in = new BufferedReader(new InputStreamReader(target.getInputStream()));
             out = new PrintWriter(target.getOutputStream(), true);
+            hasTarget = true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public final String getHostAddress() {
-        return target.getInetAddress().getHostAddress();
+        return target != null ? target.getInetAddress().getHostAddress() : "0.0.0.0";
     }
 
     public final int getPort() {
-        return target.getPort();
+        return target != null ? target.getPort() : 0;
     }
 
     public final void close() {
-        if (hasClosed)
+        if (!hasTarget || hasClosed)
             return;
         hasClosed = true;
         try {
             target.close();
+            in.close();
+            out.close();
             this.onClosed();
         } catch (IOException ignored) {
         }
@@ -50,6 +57,9 @@ abstract public class SocketSession implements Runnable {
     public final void run() {
         if (hasRun)
             throw new IllegalStateException("The session thread has run yet.");
+        if (!hasTarget)
+            throw new IllegalStateException("The target socket has not been set yet.");
+        hasRun = true;
         try {
             while (!target.isClosed()) {
                 try {
@@ -73,7 +83,9 @@ abstract public class SocketSession implements Runnable {
         }
     }
 
-    public final void send(String request) {
+    public final void send(Object request) {
+        if (!hasTarget)
+            throw new IllegalStateException("The target socket has not been set yet.");
         Logger.debug("SocketSession", this + " <- " + request);
         out.println(request);
     }

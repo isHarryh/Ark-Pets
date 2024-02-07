@@ -70,6 +70,7 @@ public final class Const {
     // Socket C/S constants
     public static final String serverHost           = "localhost";
     public static final int[] serverPorts           = {8686, 8866, 8989, 8899, 8800};
+    public static final int reconnectDelayMillis    = 5 * 1000;
     public static final int reconnectPeriodMillis   = 5 * 1000;
 
     // Misc constants

@@ -7,6 +7,7 @@ import cn.harryh.arkpets.ArkPets;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.concurrent.SocketData;
+import cn.harryh.arkpets.concurrent.SocketSession;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 
@@ -25,7 +26,7 @@ import static cn.harryh.arkpets.Const.linearEasingDuration;
 
 public class MemberTrayImpl extends MemberTray {
     private final ArkPets arkPets;
-    private final SocketClient socketClient;
+    private final SocketClient client;
     private final JDialog popWindow;
     private final JPopupMenu popMenu;
     private TrayIcon icon;
@@ -35,10 +36,10 @@ public class MemberTrayImpl extends MemberTray {
      * Must be used after Gdx.app was initialized.
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
      */
-    public MemberTrayImpl(ArkPets boundArkPets, SocketClient socketClient, UUID uuid) {
+    public MemberTrayImpl(ArkPets boundArkPets, SocketClient client, UUID uuid) {
         super(uuid, getName(boundArkPets));
         arkPets = boundArkPets;
-        this.socketClient = socketClient;
+        this.client = client;
 
         // Ui Components:
         popWindow = new JDialog();
@@ -61,10 +62,13 @@ public class MemberTrayImpl extends MemberTray {
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
-        socketClient.connectWithRetry(() -> {
-            socketClient.setHandler(new SocketClient.ClientSocketSession(socketClient, this));
-            socketClient.sendRequest(new SocketData(this.uuid, SocketData.Operation.LOGIN, name, arkPets.canChangeStage()));
-        });
+        Runnable onConnected = this::onConnected;
+        SocketSession session = new SocketClient.ClientSocketSession(client, this);
+        client.connect(onConnected, session);
+        if (!client.isConnected()) {
+            onDisconnected();
+            client.connectWithRetry(onConnected, session);
+        }
     }
 
     private static String getName(ArkPets boundArkPets) {
@@ -73,25 +77,24 @@ public class MemberTrayImpl extends MemberTray {
     }
 
     private TrayIcon getTrayIcon(Image image) {
-        if (icon == null) {
-            icon = new TrayIcon(image, name);
-            icon.setImageAutoSize(true);
-            icon.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.getButton() == 3 && e.isPopupTrigger())
-                        showDialog(e.getX() + 5, e.getY());
-                }
-            });
-        }
+        icon = new TrayIcon(image, name);
+        icon.setImageAutoSize(true);
+        icon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() == 3 && e.isPopupTrigger())
+                    showDialog(e.getX() + 5, e.getY());
+            }
+        });
         return icon;
     }
 
     @Override
     public void onExit() {
         Logger.info("MemberTray", "Request to exit");
-        arkPets.windowAlpha.reset(0f);
         remove();
+        client.disconnect();
+        arkPets.windowAlpha.reset(0f);
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
@@ -146,15 +149,30 @@ public class MemberTrayImpl extends MemberTray {
     }
 
     @Override
-    protected void sendRequest(SocketData.Operation operation) {
-        socketClient.sendRequest(new SocketData(uuid, operation));
+    protected void sendOperation(SocketData.Operation operation) {
+        client.sendRequest(SocketData.ofOperation(uuid, operation));
     }
 
     @Override
     public void remove() {
         popMenu.removeAll();
         popWindow.dispose();
-        socketClient.disconnect();
+        client.disconnect();
+    }
+
+    public void onConnected() {
+        // If integration was succeeded, remove the ISOLATED tray icon.
+        Logger.info("MemberTray", "Integrated tray service connected");
+        SystemTray.getSystemTray().remove(icon);
+        client.sendRequest(SocketData.ofLogin(uuid, name));
+        for (MenuElement element : popMenu.getSubElements()) {
+            if (arkPets.canChangeStage())
+                sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
+            if (element.equals(optKeepAnimDis))
+                sendOperation(SocketData.Operation.KEEP_ACTION);
+            if (element.equals(optTransparentDis))
+                sendOperation(SocketData.Operation.TRANSPARENT_MODE);
+        }
     }
 
     public void onDisconnected() {
@@ -169,19 +187,6 @@ public class MemberTrayImpl extends MemberTray {
             Logger.info("MemberTray", "Isolated tray icon applied");
         } catch (AWTException e) {
             Logger.error("MemberTray", "Unable to apply isolated tray icon, details see below", e);
-        }
-    }
-
-    public void onReconnected() {
-        // If integration was succeeded, remove the ISOLATED tray icon.
-        Logger.info("MemberTray", "Integrated tray service reconnected");
-        SystemTray.getSystemTray().remove(icon);
-        socketClient.sendRequest(new SocketData(this.uuid, SocketData.Operation.LOGIN, name, arkPets.canChangeStage()));
-        for (MenuElement element : popMenu.getSubElements()) {
-            if (element.equals(optKeepAnimDis))
-                sendRequest(SocketData.Operation.KEEP_ACTION);
-            if (element.equals(optTransparentDis))
-                sendRequest(SocketData.Operation.TRANSPARENT_MODE);
         }
     }
 

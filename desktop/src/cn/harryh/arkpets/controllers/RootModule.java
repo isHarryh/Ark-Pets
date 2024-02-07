@@ -6,9 +6,9 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.EmbeddedLauncher;
+import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.JavaProcess;
@@ -30,7 +30,7 @@ import javafx.util.Duration;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
+import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.utils.GuiPrefabs.DialogUtil;
@@ -145,7 +145,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
-                FutureTask<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, List.of(), args);
+                Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, List.of(), args);
                 // ArkPets core finalized.
                 if (!future.get().isSuccess()) {
                     Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code -1). Please check the log file for details.");

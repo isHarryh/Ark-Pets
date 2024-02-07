@@ -1,5 +1,8 @@
 package cn.harryh.arkpets.concurrent;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -13,25 +16,62 @@ public class SocketData implements Serializable {
         NO_KEEP_ACTION,
         TRANSPARENT_MODE,
         NO_TRANSPARENT_MODE,
+        CAN_CHANGE_STAGE,
         CHANGE_STAGE,
-        VERIFY,
-        SERVER_ONLINE,
+        HANDSHAKE_REQUEST,
+        HANDSHAKE_RESPONSE,
         ACTIVATE_LAUNCHER
     }
 
     public UUID uuid;
     public Operation operation;
-    public byte[] name;
-    public boolean canChangeStage;
+    public StringDTO msg;
 
-    public SocketData(UUID uuid, Operation operation) {
-        this(uuid, operation, "", false);
+    private SocketData(UUID uuid, Operation operation, StringDTO msg) {
+        this.uuid       = uuid;
+        this.operation  = operation;
+        this.msg        = msg;
     }
 
-    public SocketData(UUID uuid, Operation operation, String name, boolean canChangeStage) {
-        this.uuid = uuid;
-        this.operation = operation;
-        this.name = name.getBytes(Charset.forName("GBK"));
-        this.canChangeStage = canChangeStage;
+    @JSONField(serialize = false, deserialize = false)
+    public String getMsgString() {
+        return msg.toString();
+    }
+
+    @Override
+    public String toString() {
+        return JSONObject.toJSONString(this);
+    }
+
+    public static SocketData of(String jsonString) {
+        return JSONObject.parseObject(jsonString, SocketData.class);
+    }
+
+    public static SocketData ofLogin(UUID uuid, String name) {
+        return new SocketData(uuid, Operation.LOGIN, StringDTO.of(name));
+    }
+
+    public static SocketData ofOperation(UUID uuid, Operation operation) {
+        return new SocketData(uuid, operation, null);
+    }
+
+
+    private static class StringDTO {
+        public byte[] bytes;
+        public String encoding;
+
+        private StringDTO(byte[] bytes, String encoding) {
+            this.bytes = bytes;
+            this.encoding = encoding;
+        }
+
+        @Override
+        public String toString() {
+            return new String(bytes, Charset.forName(encoding));
+        }
+
+        public static StringDTO of(String string) {
+            return new StringDTO(string.getBytes(Charset.defaultCharset()), Charset.defaultCharset().name());
+        }
     }
 }

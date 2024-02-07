@@ -20,8 +20,8 @@ public class HostTray {
     protected boolean initialized = false;
     protected Map<UUID, MemberTray> arkPetTrays = new HashMap<>();
 
-    private JPopupMenu popupMenu;
     private JDialog popWindow;
+    private JPopupMenu popMenu;
     private JMenu playerMenu;
     private Stage stage;
 
@@ -32,7 +32,6 @@ public class HostTray {
     public HostTray(Stage boundStage) {
         if (SystemTray.isSupported()) {
             Platform.setImplicitExit(false);
-            SystemTray tray = SystemTray.getSystemTray();
 
             // Ui Components:
             popWindow = new JDialog();
@@ -48,17 +47,17 @@ public class HostTray {
                 Platform.exit();
             });
 
-            popupMenu = new JPopupMenu() {
+            popMenu = new JPopupMenu() {
                 @Override
                 public void firePopupMenuWillBecomeInvisible() {
                     popWindow.setVisible(false); // Hide the container when the menu is invisible.
                 }
             };
-            popupMenu.add(innerLabel);
-            popupMenu.addSeparator();
-            popupMenu.add(playerMenu);
-            popupMenu.add(exitItem);
-            popupMenu.setSize(100, 24 * popupMenu.getSubElements().length);
+            popMenu.add(innerLabel);
+            popMenu.addSeparator();
+            popMenu.add(playerMenu);
+            popMenu.add(exitItem);
+            popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
             Image image = Toolkit.getDefaultToolkit().getImage(HostTray.class.getResource(Const.iconFilePng));
             trayIcon = new TrayIcon(image, "ArkPets");
@@ -73,16 +72,11 @@ public class HostTray {
 
             // Bind JavaFX stage:
             stage = boundStage;
-            stage.xProperty().addListener((observable, oldValue, newValue) -> {
-            });
-            stage.yProperty().addListener(((observable, oldValue, newValue) -> {
-            }));
-
             stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
                 if (newValue)
-                    hideStage();
+                    stage.hide();
             }));
-            stage.setOnCloseRequest(e -> hideStage());
+            stage.setOnCloseRequest(e -> stage.setIconified(true));
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -90,44 +84,45 @@ public class HostTray {
                         showStage();
                 }
             });
-
-            try {
-                tray.add(trayIcon);
-                initialized = true;
-                Logger.info("HostTray", "HostTray icon applied");
-            } catch (AWTException e) {
-                Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
-            }
         } else {
             Logger.error("HostTray", "Tray is not supported.");
         }
     }
 
+    public void applyTrayIcon() {
+        if (initialized)
+            return;
+        try {
+            SystemTray.getSystemTray().add(trayIcon);
+            Logger.info("HostTray", "HostTray icon applied");
+            initialized = true;
+        } catch (AWTException e) {
+            Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
+        }
+    }
+
     public void showDialog(int x, int y) {
+        if (!initialized)
+            return;
+        /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
+        Here we will adapt the coordinate for system scaling artificially. See below. */
         AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
+        int scaledX = (int) (x / at.getScaleX());
+        int scaledY = (int) (y / at.getScaleY());
 
         // Show the JDialog together with the JPopupMenu.
         popWindow.setVisible(true);
-        popWindow.setLocation((int) (x / at.getScaleX()), (int) (y / at.getScaleY()) - popupMenu.getHeight());
-        popupMenu.show(popWindow, 0, 0);
-    }
-
-    public void hideStage() {
-        if (!initialized)
-            return;
-        stage.hide();
+        popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
+        popMenu.show(popWindow, 0, 0);
     }
 
     public void showStage() {
         if (!initialized)
             return;
+        Logger.info("HostTray", "Request to show stage");
         Platform.runLater(() -> {
-            if (stage.isIconified()) {
-                stage.setIconified(false);
-            }
-            if (!stage.isShowing()) {
-                stage.show();
-            }
+            stage.setIconified(false);
+            stage.show();
             stage.toFront();
         });
     }

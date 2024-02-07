@@ -16,34 +16,42 @@ import static cn.harryh.arkpets.Const.*;
 
 public class SocketClient {
     private boolean connected = false;
-    private Socket socket;
     private SocketSession session;
     private Timer timer;
 
     public SocketClient() {
     }
     
-    public void connectWithRetry(Runnable onConnected) {
+    public void connectWithRetry(Runnable onConnected, SocketSession session) {
         timer = new Timer();
         timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                connect(onConnected);
-                if (connected)
-                    timer.cancel();
-            }
-        }, 0, reconnectPeriodMillis);
+                           @Override
+                           public void run() {
+                               connect(onConnected, session);
+                               if (connected)
+                                   timer.cancel();
+                           }
+                       },
+                reconnectDelayMillis,
+                reconnectPeriodMillis
+        );
     }
 
-    public void connect(Runnable onConnected) {
+    public void connect(Runnable onConnected, SocketSession session) {
         if (connected)
             return;
         try {
             int port = PortUtils.getServerPort(serverPorts);
-            Logger.info("SocketClient", "Connecting to server on port" + port);
+            Logger.info("SocketClient", "Connecting to server on port " + port);
             try {
-                socket = new Socket(serverHost, port);
+                Socket socket = new Socket(serverHost, port);
                 connected = true;
+                if (this.session != null)
+                    this.session.close();
+                session.setTarget(socket);
+                ProcessPool.getInstance().execute(session);
+                this.session = session;
+                Logger.info("SocketClient", "(+)" + session + " connected");
                 if (onConnected != null)
                     onConnected.run();
             } catch (IOException e) {
@@ -54,28 +62,20 @@ public class SocketClient {
         }
     }
 
-    public void setHandler(SocketSession session) {
-        if (!connected)
-            throw new IllegalStateException("The socket was not yet connected.");
-        if (this.session != null)
-            this.session.close();
-        Thread listener = new Thread(() -> ProcessPool.executorService.execute(session));
-        ProcessPool.executorService.execute(listener);
-        this.session = session;
+    public void disconnect() {
+        if (connected)
+            connected = false;
+        if (session != null)
+            session.close();
     }
 
-    public void disconnect() {
-        if (!connected)
-            return;
-        connected = false;
-        session.close();
+    public boolean isConnected() {
+        return connected;
     }
 
     public void sendRequest(SocketData socketData) {
-        if (!connected)
-            return;
-        String data = JSONObject.toJSONString(socketData);
-        session.send(data);
+        if (connected && session != null)
+             session.send(JSONObject.toJSONString(socketData));
     }
 
 
@@ -85,7 +85,7 @@ public class SocketClient {
         private UUID uuid = null;
 
         public ClientSocketSession(SocketClient client, MemberTrayImpl memberTray) {
-            super(client.socket);
+            super();
             this.client = client;
             this.memberTray = memberTray;
         }
@@ -93,12 +93,12 @@ public class SocketClient {
         @Override
         public void receive(String request) {
             try {
-                SocketData socketData = JSONObject.parseObject(request, SocketData.class);
-                if (socketData.operation == null)
+                SocketData socketData = SocketData.of(request);
+                if (socketData == null || socketData.operation == null)
                     return;
                 if (uuid == null)
                     uuid = socketData.uuid;
-                if (socketData.uuid.compareTo(this.uuid) == 0) {
+                if (socketData.uuid.compareTo(this.uuid) == 0 && memberTray != null) {
                     // If the connection is normal:
                     switch (socketData.operation) {
                         case LOGOUT                 -> memberTray.onExit();
@@ -114,10 +114,16 @@ public class SocketClient {
         }
 
         @Override
+        protected void onClosed() {
+            Logger.info("SocketClient", "(-)" + this + " closed");
+        }
+
+        @Override
         protected void onBroken() {
+            Logger.info("SocketClient", "(x)" + this + " broken");
             memberTray.onDisconnected();
             client.disconnect();
-            client.connectWithRetry(memberTray::onReconnected);
+            client.connectWithRetry(memberTray::onConnected, new ClientSocketSession(client, memberTray));
         }
     }
 }

@@ -36,7 +36,6 @@ public class ArkHomeFX extends Application {
     public Stage stage;
     public ArkConfig config;
     public ModelsDataset modelsDataset;
-    public HostTray hostTray;
     public StackPane root;
 
     public RootModule rootModule;
@@ -54,22 +53,26 @@ public class ArkHomeFX extends Application {
         this.stage = stage;
 
         // Initialize socket server and HostTray
-        hostTray = new HostTray(stage);
+        HostTray hostTray = new HostTray(stage);
         try {
             SocketServer.getInstance().startServer(hostTray);
+            hostTray.applyTrayIcon();
         } catch (PortUtils.NoPortAvailableException ignored) {
             Logger.error("SocketServer", "No available port");
             // TODO What if there are no port available
             Platform.exit();
+            return;
         } catch (PortUtils.ServerCollisionException ignored) {
             Logger.error("SocketServer", "Server is already running");
             SocketClient socketClient = new SocketClient();
             socketClient.connect(() -> {
-                socketClient.sendRequest(new SocketData(UUID.randomUUID(), SocketData.Operation.ACTIVATE_LAUNCHER));
-                socketClient.disconnect();
-                Logger.info("Launcher", "ArkPets Launcher has started.");
-            });
+                        Logger.info("Launcher", "Request to start an existed Launcher");
+                        socketClient.sendRequest(SocketData.ofOperation(UUID.randomUUID(), SocketData.Operation.ACTIVATE_LAUNCHER));
+                        socketClient.disconnect();
+                    },
+                    new SocketClient.ClientSocketSession(socketClient, null));
             Platform.exit();
+            return;
         }
 
         // Load FXML for root node.
@@ -118,7 +121,7 @@ public class ArkHomeFX extends Application {
     public void stop() throws Exception {
         super.stop();
         SocketServer.getInstance().stopServer();
-        ProcessPool.executorService.shutdown();
+        ProcessPool.getInstance().shutdown();
     }
 
     public boolean initModelsDataset(boolean popNotice) {
