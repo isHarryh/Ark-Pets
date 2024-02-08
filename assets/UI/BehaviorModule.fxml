@@ -5,12 +5,11 @@
     At GPL-3.0 License
 -->
 
+<!-- ********* Wrapper 2 ********* -->
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<!-- ********* Wrapper 2 ********* -->
-<Pane prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
+<Pane prefHeight="376.0" prefWidth="460.0" styleClass="wrapper" stylesheets="@Main.css"
       xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cn.harryh.arkpets.controllers.BehaviorModule">
     <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">

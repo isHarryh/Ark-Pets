@@ -8,6 +8,7 @@ import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -23,21 +24,34 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.ZipException;
+
+import static cn.harryh.arkpets.Const.durationNormal;
 
 
 @SuppressWarnings("unused")
 public class GuiPrefabs {
     public static final String tooltipStyle = "-fx-text-fill:#FFF;-fx-font-size:10px;-fx-font-weight:normal;";
-    public static final String COLOR_INFO       = "#37B";
-    public static final String COLOR_SUCCESS    = "#5B5";
-    public static final String COLOR_WARNING    = "#E93";
-    public static final String COLOR_DANGER     = "#F54";
-    public static final String COLOR_WHITE      = "#FFF";
-    public static final String COLOR_BLACK      = "#000";
-    public static final String COLOR_DARK_GRAY  = "#222";
-    public static final String COLOR_GRAY       = "#444";
-    public static final String COLOR_LIGHT_GRAY = "#666";
+
+
+    public static class Colors {
+        public static final String COLOR_INFO       = "#37B";
+        public static final String COLOR_SUCCESS    = "#5B5";
+        public static final String COLOR_WARNING    = "#E93";
+        public static final String COLOR_DANGER     = "#F54";
+        public static final String COLOR_WHITE      = "#FFF";
+        public static final String COLOR_BLACK      = "#000";
+        public static final String COLOR_DARK_GRAY  = "#222";
+        public static final String COLOR_GRAY       = "#444";
+        public static final String COLOR_LIGHT_GRAY = "#666";
+
+        private Colors() {
+        }
+    }
+
 
     public static void fadeInNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
         FadeTransition fadeT = new FadeTransition(duration, node);
@@ -61,8 +75,15 @@ public class GuiPrefabs {
         fadeT.playFromStart();
     }
 
+    public static void replaceStyleClass(Node node, String from, String to) {
+        HashSet<String> styleClass = new HashSet<>(Set.copyOf(node.getStyleClass()));
+        styleClass.remove(from);
+        styleClass.add(to);
+        node.getStyleClass().setAll(styleClass);
+    }
 
-    public static class IconUtil {
+
+    public static class Icons {
         public static final String ICON_INFO        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
         public static final String ICON_INFO_ALT    = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
         public static final String ICON_HELP        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1.25 17c0 .69-.559 1.25-1.25 1.25-.689 0-1.25-.56-1.25-1.25s.561-1.25 1.25-1.25c.691 0 1.25.56 1.25 1.25zm1.393-9.998c-.608-.616-1.515-.955-2.551-.955-2.18 0-3.59 1.55-3.59 3.95h2.011c0-1.486.829-2.013 1.538-2.013.634 0 1.307.421 1.364 1.226.062.847-.39 1.277-.962 1.821-1.412 1.343-1.438 1.993-1.432 3.468h2.005c-.013-.664.03-1.203.935-2.178.677-.73 1.519-1.638 1.536-3.022.011-.924-.284-1.719-.854-2.297z";
@@ -85,6 +106,9 @@ public class GuiPrefabs {
             svgPath.setContent(svg);
             svgPath.setFill(Paint.valueOf(color));
             return svgPath;
+        }
+
+        private Icons() {
         }
     }
 
@@ -117,7 +141,7 @@ public class GuiPrefabs {
             body.getChildren().add(h3);
 
             JFXDialogLayout layout = new JFXDialogLayout();
-            layout.setHeading(DialogUtil.getHeading(graphic, title, COLOR_LIGHT_GRAY));
+            layout.setHeading(DialogUtil.getHeading(graphic, title, Colors.COLOR_LIGHT_GRAY));
             layout.setBody(body);
             layout.setActions(DialogUtil.getOkayButton(dialog, root));
             dialog.setContent(layout);
@@ -156,7 +180,7 @@ public class GuiPrefabs {
             content.getChildren().add(textArea);
 
             JFXDialogLayout layout = new JFXDialogLayout();
-            layout.setHeading(DialogUtil.getHeading(IconUtil.getIcon(IconUtil.ICON_DANGER, COLOR_DANGER), "发生异常", COLOR_DANGER));
+            layout.setHeading(DialogUtil.getHeading(Icons.getIcon(Icons.ICON_DANGER, Colors.COLOR_DANGER), "发生异常", Colors.COLOR_DANGER));
             layout.setBody(content);
             layout.setActions(DialogUtil.getOkayButton(dialog, root));
             dialog.setContent(layout);
@@ -230,14 +254,14 @@ public class GuiPrefabs {
 
         public static Node getPrefabsH2(String text) {
             Label h2 = new Label(text);
-            h2.setStyle("-fx-font-size:16px;-fx-text-fill:" + COLOR_DARK_GRAY);
+            h2.setStyle("-fx-font-size:16px;-fx-text-fill:" + Colors.COLOR_DARK_GRAY);
             h2.setWrapText(true);
             return h2;
         }
 
         public static Node getPrefabsH3(String text) {
             Label h3 = new Label(text);
-            h3.setStyle("-fx-font-size:12px;-fx-min-height:38px;-fx-wrap-text:true;-fx-text-fill:" + COLOR_LIGHT_GRAY);
+            h3.setStyle("-fx-font-size:12px;-fx-min-height:38px;-fx-wrap-text:true;-fx-text-fill:" + Colors.COLOR_LIGHT_GRAY);
             h3.setWrapText(true);
             return h3;
         }
@@ -245,8 +269,8 @@ public class GuiPrefabs {
         public static JFXButton getCancelButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("取 消");
-            button.setTextFill(Paint.valueOf(COLOR_WHITE));
-            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
+            button.setTextFill(Paint.valueOf(Colors.COLOR_WHITE));
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + Colors.COLOR_WHITE + ";-fx-background-color:" + Colors.COLOR_INFO);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
@@ -254,8 +278,8 @@ public class GuiPrefabs {
         public static JFXButton getOkayButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("确 认");
-            button.setTextFill(Paint.valueOf(COLOR_WHITE));
-            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_INFO);
+            button.setTextFill(Paint.valueOf(Colors.COLOR_WHITE));
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + Colors.COLOR_WHITE + ";-fx-background-color:" + Colors.COLOR_INFO);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
@@ -263,7 +287,7 @@ public class GuiPrefabs {
         public static JFXButton getGotoButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("前 往");
-            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_SUCCESS);
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + Colors.COLOR_WHITE + ";-fx-background-color:" + Colors.COLOR_SUCCESS);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
@@ -271,35 +295,88 @@ public class GuiPrefabs {
         public static JFXButton getTrustButton(JFXDialog dialog, StackPane root) {
             JFXButton button = new JFXButton();
             button.setText("信 任");
-            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + COLOR_WHITE + ";-fx-background-color:" + COLOR_WARNING);
+            button.setStyle("-fx-font-size:13px;-fx-text-fill:" + Colors.COLOR_WHITE + ";-fx-background-color:" + Colors.COLOR_WARNING);
             button.setOnAction(e -> disposeDialog(dialog, root));
             return button;
         }
     }
 
 
-    abstract public static class Handbook {
-        public boolean hasShown = false;
+    /** @since ArkPets 3.0
+     */
+    public static class PeerNodeComposer {
+        protected int activatedId;
+        protected final HashMap<Integer, PeerNodeData> peerNodeMap;
 
-        public Handbook() {
+        public PeerNodeComposer() {
+            activatedId = -1;
+            peerNodeMap = new HashMap<>();
         }
 
-        abstract public String getTitle();
-
-        abstract public String getHeader();
-
-        abstract public String getContent();
-
-        public SVGPath getIcon() {
-            return IconUtil.getIcon(IconUtil.ICON_HELP_ALT, COLOR_INFO);
+        protected void add(int id, PeerNodeData nodeData) {
+            if (id < 0)
+                throw new IllegalArgumentException("ID can't be negative.");
+            if (peerNodeMap.containsKey(id))
+                throw new IllegalStateException("ID already existed.");
+            peerNodeMap.put(id, nodeData);
         }
 
-        public boolean hasShown() {
-            return hasShown;
+        public void add(int id, Node... nodes) {
+            add(id, new PeerNodeData(nodes, Event::consume, Event::consume));
         }
 
-        public void setShown() {
-            hasShown = true;
+        public void add(int id, EventHandler<ActionEvent> onActivating, EventHandler<ActionEvent> onSuppressing, Node... nodes) {
+            add(id, new PeerNodeData(nodes, onActivating, onSuppressing));
+        }
+
+        public void activate(int id) {
+            if (!peerNodeMap.containsKey(id))
+                throw new IllegalStateException("ID not found");
+            peerNodeMap.keySet().forEach(i -> {
+                if (i == id)
+                    peerNodeMap.get(i).handleActivating();
+                else
+                    peerNodeMap.get(i).handleSuppressing();
+            });
+            activatedId = id;
+        }
+
+        public void toggle(int id, int replacementId) {
+            if (!peerNodeMap.containsKey(id) || !peerNodeMap.containsKey(replacementId))
+                throw new IllegalStateException("ID not found");
+            activate(activatedId == id ? replacementId : id);
+        }
+
+        public int getActivatedId() {
+            return activatedId;
+        }
+
+        protected record PeerNodeData(Node[] nodes, EventHandler<ActionEvent> onActivating, EventHandler<ActionEvent> onSuppressing) {
+            public void handleActivating() {
+                for (Node node : nodes)
+                    activateNode(node);
+                if (onActivating != null)
+                    onActivating.handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
+                if (nodes.length > 0 && nodes[0] != null)
+                    nodes[0].requestFocus();
+            }
+
+            public void handleSuppressing() {
+                for (Node node : nodes)
+                    suppressNode(node);
+                if (onSuppressing != null)
+                    onSuppressing.handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
+            }
+
+            private void activateNode(Node node) {
+                node.setManaged(true);
+                fadeInNode(node, durationNormal, null);
+            }
+
+            private void suppressNode(Node node) {
+                node.setVisible(false);
+                node.setManaged(false);
+            }
         }
     }
 }

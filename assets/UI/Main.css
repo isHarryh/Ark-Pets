@@ -52,7 +52,8 @@ JFXButton {
 -fx-translate-y: 0.5px;
 }
 
-.btn-icon SVGPath {
+Label > SVGPath, Label > AnchorPane, Label > AnchorPane > SVGPath,
+JFXButton > SVGPath, JFXButton > AnchorPane, JFXButton > AnchorPane > SVGPath {
 -fx-fill: inherit;
 }
 
@@ -91,9 +92,20 @@ JFXButton {
 -fx-border-color: #204880;
 }
 
-.btn-secondary .btn-icon {
+.btn-secondary .btn-icon, .btn-iconified-secondary .btn-icon {
 /* Regular */
 -fx-fill: #204880;
+}
+
+.btn-iconified-secondary {
+/* Regular */
+-fx-text-fill: #204880;
+-fx-background-color: #FFFFFF;
+-fx-background-radius: 38.2%;
+-fx-border-color: #204880;
+-fx-border-radius: 38.2%;
+-fx-border-width: 1px;
+-fx-border-style: solid;
 }
 
 /*******************************************************************************
@@ -103,7 +115,7 @@ JFXButton {
  ******************************************************************************/
 
 #Sidebar {
--fx-background-color: #95B7E5;
+-fx-background-color: #95B6E5;
 }
 
 #Title {
@@ -116,6 +128,8 @@ JFXButton {
 /* Regular */
 -fx-padding: 0 0 0 20px;
 -fx-font-size: 18px;
+-fx-font-weight: bold;
+-fx-fill: #204880;
 -fx-text-fill: #204880;
 -fx-text-alignment: left;
 -fx-background-color: #FFFFFF;
@@ -128,24 +142,17 @@ JFXButton {
 
 .menu-btn-active {
 /* Active */
+-fx-fill: #FFFFFF;
 -fx-text-fill: #FFFFFF;
 -fx-background-color: #204880;
-}
-
-.menu-btn SVGPath {
-/* Regular */
--fx-fill: #204880;
-}
-
-.menu-btn-active SVGPath {
-/* Hover & Active */
--fx-fill: #FFFFFF;
 }
 
 #Start-btn {
 /* Regular */
 -fx-padding: 0 0 0 20px;
 -fx-font-size: 18px;
+-fx-font-weight: bold;
+-fx-fill: #FFFFFF;
 -fx-text-fill: #FFFFFF;
 -fx-text-alignment: left;
 -fx-background-color: #204880;
@@ -156,16 +163,6 @@ JFXButton {
 -fx-border-style: solid;
 }
 
-#Start-btn SVGPath {
-/* Regular */
--fx-fill: #FFFFFF;
-}
-
-#Start-menu-btn:hover SVGPath, #Start-btn:focused SVGPath {
-/* Hover & Focused */
--fx-fill: #EEEEEE;
-}
-
 /*******************************************************************************
  *                                                                             *
  * 4. Contents in wrappers                                                     *
@@ -173,22 +170,72 @@ JFXButton {
  ******************************************************************************/
 
 .wrapper {
--fx-padding: 5px 10px 5px 10px;
+-fx-padding: 15px;
 }
 
-#Search-models-bar {
--fx-background-radius: 8px;
--fx-background-color: #95B7E5;
+.major-tool-bar-upper, .major-tool-bar-lower {
+-fx-background-color: #95B6E5;
 -fx-border-style: none;
+-fx-padding: 4px 8px 4px 8px;
+}
+
+.major-tool-bar-upper {
+-fx-background-radius: 8px 8px 8px 0;
+}
+
+.major-tool-bar-lower {
+-fx-background-radius: 0 0 8px 8px;
+}
+
+.info-pane-light {
+-fx-background-color: #FFFFFF;
+-fx-background-radius: 3px;
+-fx-border-color: #95B6E588;
+-fx-border-radius: 3px;
+-fx-border-width: 1.25px;
+-fx-border-style: solid;
+}
+
+.info-pane-light > VBox {
+-fx-padding: 8px;
+}
+
+.flow-wrapper {
+-fx-border-color: #95B6E588;
+-fx-border-width: 1.25px 0 0 0;
+-fx-border-style: solid;
+-fx-fit-to-width: true;
+-fx-fit-to-height: true;
+}
+
+.tag-flow {
+-fx-hgap: 4px;
+-fx-vgap: 6px;
+-fx-padding: 6px 4px 6px 4px;
+}
+
+.btn-flow {
+-fx-hgap: 2px;
+-fx-vgap: 4px;
+-fx-padding: 4px 0 4px 0;
+}
+
+#Search-models-status {
+-fx-fill: #204880;
+-fx-font-size: 11px;
+-fx-text-fill: #204880;
+-fx-label-padding: 0 2px 0 2px;
 }
 
 #Search-models-list {
 -fx-padding: 4px;
+-fx-background-radius: 3px;
 }
 
 .Search-models-item {
 /* Regular */
 -fx-cursor: hand;
+-fx-padding: 4px 2px 4px 2px;
 -fx-text-fill: #505050;
 -fx-background-color: transparent;
 -fx-focus-traversable: true;
@@ -249,28 +296,45 @@ JFXButton {
 }
 
 .info-primary {
--fx-font-size: 16px;
+-fx-font-size: 18px;
 -fx-text-fill: #202020;
 -fx-font-weight: bold;
--fx-label-padding: 4px 2px 4px 2px;
+-fx-label-padding: 3px 1px 3px 1px;
+-fx-wrap-text: true;
 }
 
 .info-secondary {
 -fx-font-size: 12px;
--fx-font-weight: normal;
 -fx-text-fill: #808080;
--fx-label-padding: 2px;
+-fx-font-weight: normal;
+-fx-label-padding: 2px 1px 2px 1px;
+-fx-wrap-text: false;
 }
 
-.info-tag {
--fx-font-size: 10px;
+.info-type-badge {
+-fx-font-size: 12px;
+-fx-font-weight: bold;
+-fx-text-fill: #FFFFFF;
+-fx-text-alignment: justify;
+-fx-background-color: #204880DD;
 -fx-background-radius: 6px;
 -fx-label-padding: 2px 4px 2px 4px;
 }
 
-.info-tag-theme {
+.info-tag-badge, .info-tag-badge-active {
+-fx-font-size: 11px;
 -fx-text-fill: #FFFFFF;
--fx-background-color: #4D7999;
+-fx-background-radius: 0;
+-fx-max-height: 14px;
+-fx-effect: dropshadow(gaussian, #00000040, 2.5, 0.25, 0.5, 1);
+}
+
+.info-tag-badge {
+-fx-background-color: #8492A5;
+}
+
+.info-tag-badge-active {
+-fx-background-color: #204880EE;
 }
 
 .config-group-title {
@@ -342,21 +406,21 @@ JFXButton {
 }
 
 /* Progress bar's outer track */
-ProgressBar > .track{
+ProgressBar > .track {
 -fx-background-color: #DDDDDDDD;
 -fx-background-radius: 2.5px;
 -fx-background-insets: 0;
 }
 
 /* Progress bar's inner bar */
-ProgressBar > .bar, ProgressBar:indeterminate > .bar{
+ProgressBar > .bar, ProgressBar:indeterminate > .bar {
 -fx-background-color: #204880DD;
 -fx-background-radius: 2.5px;
 -fx-background-insets: 0;
 }
 
 #Loading-failure-tip, #Loading-waiting-tip {
--fx-background-color: #F4F4F4E0;
+-fx-background-color: #F4F4F4D0;
 }
 
 #Loading-failure-tip-text {
@@ -383,18 +447,15 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 }
 
 #Title-bar JFXButton {
+-fx-fill: #FFFFFF;
 -fx-background-color: #204880;
--fx-border-radius: 0px;
+-fx-background-radius: 0;
 -fx-border-style: none;
 -fx-min-width: 24px;
 -fx-min-height: 24px;
 -fx-max-width: 24px;
 -fx-max-height: 24px;
 -fx-focus-traversable: false;
-}
-
-#Title-bar JFXButton SVGPath {
--fx-fill: #FFFFFF;
 }
 
 #Title-minimize-btn:hover, #Title-minimize-btn:focused {
@@ -411,18 +472,18 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
  *                                                                             *
  ******************************************************************************/
 
+.scroll-bar > .thumb {
+-fx-cursor: hand;
+-fx-background-color: #BCBCC2;
+-fx-background-insets: 0;
+-fx-background-radius: 2px;
+}
+
 .scroll-bar:vertical > .track-background, .scroll-bar:horizontal > .track-background {
 -fx-cursor: default;
 -fx-background-color: #F1F1F5;
 -fx-background-insets: 0;
 -fx-background-radius: 1px;
-}
-
-.scroll-bar:vertical > .thumb, .scroll-bar:horizontal > .thumb {
--fx-cursor: hand;
--fx-background-color: #BCBCC2;
--fx-background-insets: 0;
--fx-background-radius: 2px;
 }
 
 .scroll-bar > .increment-button, .scroll-bar > .decrement-button,
@@ -439,6 +500,7 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 -fx-padding: 2px 5px 2px 5px;
 }
 
+/* All Arrows */
 .scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
 -fx-background-color: #9696A0;
 }
@@ -472,7 +534,7 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar{
 -fx-background-insets: 0;
 }
 
-.scroll-v {
+.scroll-v, .flow-wrapper {
 -fx-hbar-policy: never;
 -fx-vbar-policy: as-needed;
 }

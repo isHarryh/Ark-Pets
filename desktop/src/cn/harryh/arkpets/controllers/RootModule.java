@@ -28,18 +28,22 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
 import static cn.harryh.arkpets.utils.GuiPrefabs.DialogUtil;
-import static cn.harryh.arkpets.utils.GuiPrefabs.Handbook;
 
 
 public final class RootModule implements Controller<ArkHomeFX> {
     public Handbook trayExitHandbook = new TrayExitHandBook();
-    public JavaProcess.UnexpectedExitCodeException lastLaunchFailed = null;
+    public JavaProcess.UnexpectedExitCodeException lastLaunchFailed;
+    public GuiPrefabs.PeerNodeComposer moduleWrapperComposer;
 
     @FXML
     private StackPane root;
@@ -61,11 +65,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane sidebar;
     @FXML
-    public JFXButton menuBtn1;
+    private JFXButton menuBtn1;
     @FXML
-    public JFXButton menuBtn2;
+    private JFXButton menuBtn2;
     @FXML
-    public JFXButton menuBtn3;
+    private JFXButton menuBtn3;
     @FXML
     public JFXButton launchBtn;
 
@@ -95,6 +99,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.config.saveConfig();
     }
 
+    /** Pops up the splash screen in the GUI.
+     * @param handler The event to be handled when the splash screen is shown.
+     * @param durationIn The fade-in transition duration.
+     * @param durationOut The fade-out transition duration.
+     */
     public void popSplashScreen(EventHandler<ActionEvent> handler, Duration durationIn, Duration durationOut) {
         body.setVisible(false);
         GuiPrefabs.fadeInNode(splashScreen, durationIn, e -> {
@@ -136,8 +145,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 args.remove(LogConfig.debugArg);
                 String temp = switch (app.config.logging_level) {
                     case LogConfig.error -> LogConfig.errorArg;
-                    case LogConfig.warn -> LogConfig.warnArg;
-                    case LogConfig.info -> LogConfig.infoArg;
+                    case LogConfig.warn  -> LogConfig.warnArg;
+                    case LogConfig.info  -> LogConfig.infoArg;
                     case LogConfig.debug -> LogConfig.debugArg;
                     default -> "";
                 };
@@ -198,6 +207,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         // Set handler for internal start button.
         launchBtn.setOnAction(e -> {
             // When request to launch ArkPets:
+            launchBtn.setDisable(true);
             app.config.saveConfig();
             if (app.config.character_asset != null && !app.config.character_asset.isEmpty()) {
                 app.popLoading(ev -> {
@@ -208,11 +218,13 @@ public final class RootModule implements Controller<ArkHomeFX> {
                         Thread.sleep(1200);
                         // Show handbook in the first-run.
                         if (isNewcomer && !trayExitHandbook.hasShown()) {
-                            GuiPrefabs.Handbook b = trayExitHandbook;
+                            Handbook b = trayExitHandbook;
                             GuiPrefabs.DialogUtil.createCommonDialog(app.root, b.getIcon(), b.getTitle(), b.getHeader(), b.getContent(), null).show();
                             b.setShown();
                         }
                     } catch (InterruptedException ignored) {
+                    } finally {
+                        launchBtn.setDisable(false);
                     }
                 });
             }
@@ -221,30 +233,20 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
     private void initMenuButtons() {
         // Bind the menu buttons to the corresponding modules' wrappers.
-        Map<Button, AnchorPane> btnMap = Map.of(menuBtn1, wrapper1, menuBtn2, wrapper2, menuBtn3, wrapper3);
-        btnMap.forEach((btn, wrapper) -> {
-            btn.getStyleClass().setAll("menu-btn");
-            btn.setOnAction(e -> {
-                switchModule(btnMap.get(btn));
-                // Restore all button's style.
-                btnMap.keySet().forEach(btn0 -> btn0.getStyleClass().setAll("menu-btn"));
-                // Set this active button's style.
-                btn.getStyleClass().add("menu-btn-active");
-            });
-        });
-    }
-
-    private void switchModule(Pane activeWrapper) {
-        List<Pane> wrapperList = List.of(wrapper1, wrapper2, wrapper3);
-        wrapperList.forEach(wrapper -> {
-            if (wrapper.equals(activeWrapper)) {
-                // Show this active wrapper.
-                GuiPrefabs.fadeInNode(wrapper, durationNormal, null);
-            } else {
-                // Hide other wrappers.
-                wrapper.setVisible(false);
-            }
-        });
+        moduleWrapperComposer = new GuiPrefabs.PeerNodeComposer();
+        Button[] menuBtnList = new Button[]{menuBtn1, menuBtn2, menuBtn3};
+        AnchorPane[] wrapperList = new AnchorPane[]{wrapper1, wrapper2, wrapper3};
+        for (int i = 0; i < 3; i++) {
+            // i = {0=Models, 1=Behavior, 2=Settings}
+            final int finalI = i;
+            menuBtnList[i].setOnAction(e -> moduleWrapperComposer.activate(finalI));
+            menuBtnList[i].getStyleClass().setAll("menu-btn");
+            moduleWrapperComposer.add(i,
+                    e -> menuBtnList[finalI].getStyleClass().add("menu-btn-active"),
+                    e -> menuBtnList[finalI].getStyleClass().setAll("menu-btn"),
+                    wrapperList[i]
+            );
+        }
     }
 
     private void initLaunchingStatusListener() {

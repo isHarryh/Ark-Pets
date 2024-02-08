@@ -22,8 +22,8 @@ public final class Const {
 
     // App name
     public static final String appName      = "ArkPets";
-    public static final String coreTitle    = "ArkPets Core";
-    public static final String desktopTitle = "ArkPets Launcher " + appVersion;
+    public static final String coreTitle    = appName + " Core";
+    public static final String desktopTitle = appName + " Launcher " + appVersion;
 
     // IO presets
     public static final int zipBufferSizeDefault      = 8 * 1024;
@@ -87,10 +87,11 @@ public final class Const {
         public static final String urlModelsZip     = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
         public static final String urlModelsData    = "isHarryh/Ark-Models/main/models_data.json";
         public static final String tempDirPath      = "temp/";
-        public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
-        public static final String tempModelsZipCachePath       = tempDirPath + "ArkModels.zip";
-        public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
+        public static final String fileModelsZipName            = "ArkModels";
         public static final String fileModelsDataPath           = "models_data.json";
+        public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
+        public static final String tempModelsZipCachePath       = tempDirPath + fileModelsZipName + ".zip";
+        public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
     }
 
 

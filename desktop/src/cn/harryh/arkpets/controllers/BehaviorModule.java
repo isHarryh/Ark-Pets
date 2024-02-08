@@ -181,7 +181,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         };
         configPhysicRestore.setOnMouseClicked(e -> {
             configPhysicRestoreEvent.handle(e);
-            app.switchToBehaviorPane();
+            app.rootModule.moduleWrapperComposer.activate(1);
         });
         if (app.config.isAllPhysicConfigZeroed())
             configPhysicRestoreEvent.handle(null);

@@ -22,97 +22,6 @@ import java.lang.reflect.Method;
 
 
 public class GuiComponents {
-    abstract public static class NoticeBar {
-        protected static final double borderRadius = 8;
-        protected static final double internalSpacing = 8;
-        protected static final double iconScale = 0.75;
-        protected static final double margin = 4;
-        protected static final double widthScale = 0.9;
-        protected final Pane container;
-        protected Pane noticeBar;
-
-        public NoticeBar(Pane root) {
-            container = root;
-        }
-
-        public final void refresh() {
-            if (getActivated() && noticeBar == null) {
-                noticeBar = getNoticeBar(getWidth(), getHeight());
-                container.getChildren().add(noticeBar);
-                ScaleTransition transition = new ScaleTransition(Const.durationFast, noticeBar);
-                transition.setFromY(0.1);
-                transition.setToY(1);
-                transition.play();
-            } else if (!getActivated() && noticeBar != null) {
-                final Pane finalNoticeBar = noticeBar;
-                noticeBar = null;
-                ScaleTransition transition = new ScaleTransition(Const.durationFast, finalNoticeBar);
-                transition.setFromY(1);
-                transition.setToY(0.1);
-                transition.setOnFinished(e -> container.getChildren().remove(finalNoticeBar));
-                transition.play();
-            }
-        }
-
-        abstract protected boolean getActivated();
-
-        abstract protected String getColorString();
-
-        abstract protected String getIconSVGPath();
-
-        abstract protected String getText();
-
-        protected double getHeight() {
-            return Font.getDefault().getSize() * 3;
-        }
-
-        protected double getWidth() {
-            Region region = (Region)container.getParent();
-            double regionWidth = region.getWidth() - region.getInsets().getLeft() - region.getInsets().getRight();
-            return regionWidth * widthScale;
-        }
-
-        protected Pane getNoticeBar(double width, double height) {
-            // Colors
-            Color color = Color.valueOf(getColorString());
-            BackgroundFill bgFill = new BackgroundFill(
-                    color.deriveColor(0, 0.62, 1.62, 0.38),
-                    new CornerRadii(borderRadius),
-                    new Insets(margin)
-            );
-            // Layouts
-            HBox bar = new HBox(internalSpacing);
-            bar.setBackground(new Background(bgFill));
-            bar.setMaxSize(width, height);
-            bar.setAlignment(Pos.CENTER_LEFT);
-            SVGPath icon = new SVGPath();
-            icon.setContent(getIconSVGPath());
-            icon.setFill(color);
-            icon.setScaleX(iconScale);
-            icon.setScaleY(iconScale);
-            icon.setTranslateX(margin);
-            Label label = new Label(getText());
-            label.setTextFill(color);
-            label.setMinWidth(width * widthScale * widthScale);
-            bar.getChildren().addAll(icon, label);
-            // Click event
-            try {
-                Method onClick = getClass().getDeclaredMethod("onClick", MouseEvent.class);
-                if (!NoticeBar.class.equals(onClick.getDeclaringClass())) {
-                    // If the method "onClick" has been overridden:
-                    bar.setCursor(Cursor.HAND);
-                    bar.setOnMouseClicked(this::onClick);
-                }
-            } catch (Exception ignored) {
-            }
-            return bar;
-        }
-
-        protected void onClick(MouseEvent event) {
-        }
-    }
-
-
     @SuppressWarnings("UnusedReturnValue")
     abstract public static class SliderSetup<N extends Number> {
         protected final Slider slider;
@@ -224,6 +133,123 @@ public class GuiComponents {
         @Override
         protected Integer adjustValue(double rawValue) {
             return Math.toIntExact(Math.round(Math.round(rawValue / commonMultiple) * commonMultiple));
+        }
+    }
+
+
+    abstract public static class NoticeBar {
+        protected static final double borderRadius = 8;
+        protected static final double internalSpacing = 8;
+        protected static final double iconScale = 0.75;
+        protected static final double margin = 4;
+        protected static final double widthScale = 0.9;
+        protected final Pane container;
+        protected Pane noticeBar;
+
+        public NoticeBar(Pane root) {
+            container = root;
+        }
+
+        public final void refresh() {
+            if (getActivated() && noticeBar == null) {
+                noticeBar = getNoticeBar(getWidth(), getHeight());
+                container.getChildren().add(noticeBar);
+                ScaleTransition transition = new ScaleTransition(Const.durationFast, noticeBar);
+                transition.setFromY(0.1);
+                transition.setToY(1);
+                transition.play();
+            } else if (!getActivated() && noticeBar != null) {
+                final Pane finalNoticeBar = noticeBar;
+                noticeBar = null;
+                ScaleTransition transition = new ScaleTransition(Const.durationFast, finalNoticeBar);
+                transition.setFromY(1);
+                transition.setToY(0.1);
+                transition.setOnFinished(e -> container.getChildren().remove(finalNoticeBar));
+                transition.play();
+            }
+        }
+
+        abstract protected boolean getActivated();
+
+        abstract protected String getColorString();
+
+        abstract protected String getIconSVGPath();
+
+        abstract protected String getText();
+
+        protected double getHeight() {
+            return Font.getDefault().getSize() * 3;
+        }
+
+        protected double getWidth() {
+            Region region = (Region)container.getParent();
+            double regionWidth = region.getWidth() - region.getInsets().getLeft() - region.getInsets().getRight();
+            return regionWidth * widthScale;
+        }
+
+        protected Pane getNoticeBar(double width, double height) {
+            // Colors
+            Color color = Color.valueOf(getColorString());
+            BackgroundFill bgFill = new BackgroundFill(
+                    color.deriveColor(0, 0.62, 1.62, 0.38),
+                    new CornerRadii(borderRadius),
+                    new Insets(margin)
+            );
+            // Layouts
+            HBox bar = new HBox(internalSpacing);
+            bar.setBackground(new Background(bgFill));
+            bar.setMaxSize(width, height);
+            bar.setAlignment(Pos.CENTER_LEFT);
+            SVGPath icon = new SVGPath();
+            icon.setContent(getIconSVGPath());
+            icon.setFill(color);
+            icon.setScaleX(iconScale);
+            icon.setScaleY(iconScale);
+            icon.setTranslateX(margin);
+            Label label = new Label(getText());
+            label.setTextFill(color);
+            label.setMinWidth(width * widthScale * widthScale);
+            bar.getChildren().addAll(icon, label);
+            // Click event
+            try {
+                Method onClick = getClass().getDeclaredMethod("onClick", MouseEvent.class);
+                if (!NoticeBar.class.equals(onClick.getDeclaringClass())) {
+                    // If the method "onClick" has been overridden:
+                    bar.setCursor(Cursor.HAND);
+                    bar.setOnMouseClicked(this::onClick);
+                }
+            } catch (Exception ignored) {
+            }
+            return bar;
+        }
+
+        protected void onClick(MouseEvent event) {
+        }
+    }
+
+
+    abstract public static class Handbook {
+        public boolean hasShown = false;
+
+        public Handbook() {
+        }
+
+        abstract public String getTitle();
+
+        abstract public String getHeader();
+
+        abstract public String getContent();
+
+        public SVGPath getIcon() {
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_HELP_ALT, GuiPrefabs.Colors.COLOR_INFO);
+        }
+
+        public boolean hasShown() {
+            return hasShown;
+        }
+
+        public void setShown() {
+            hasShown = true;
         }
     }
 }

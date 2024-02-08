@@ -12,8 +12,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import static cn.harryh.arkpets.Const.zipBufferSizeDefault;
 
@@ -121,17 +123,17 @@ public class IOUtils {
         }
 
         /** Deletes a file or a directory.
-         * @param path The path instance of the specified file or directory.
+         * @param fileOrDir The file instance of the specified file or directory.
          * @param ignoreError If true, exceptions will be ignored.
          * @throws IOException If I/O error occurs.
          */
-        public static void delete(Path path, boolean ignoreError)
+        public static void delete(File fileOrDir, boolean ignoreError)
                 throws IOException {
-            if (!path.toFile().exists())
+            if (!fileOrDir.exists())
                 return;
-            if (path.toFile().isFile()) {
+            if (fileOrDir.isFile()) {
                 try {
-                    Files.delete(path);
+                    Files.delete(fileOrDir.toPath());
                 } catch (IOException e) {
                     if (!ignoreError)
                         throw e;
@@ -139,7 +141,7 @@ public class IOUtils {
                 return;
             }
             try {
-                Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                Files.walkFileTree(fileOrDir.toPath(), new SimpleFileVisitor<>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                         try {
@@ -167,6 +169,16 @@ public class IOUtils {
                     throw e;
             }
         }
+
+        /** Deletes a file or a directory.
+         * @param path The path instance of the specified file or directory.
+         * @param ignoreError If true, exceptions will be ignored.
+         * @throws IOException If I/O error occurs.
+         */
+        public static void delete(Path path, boolean ignoreError)
+                throws IOException {
+            FileUtil.delete(path.toFile(), ignoreError);
+        }
     }
 
 
@@ -186,7 +198,7 @@ public class IOUtils {
             ZipFile zipfile = new ZipFile(zipFilePath);
             File destDir = new File(destDirPath);
 
-            if (overwrite && destDir.exists())
+            if (overwrite)
                 FileUtil.delete(destDir.toPath(), true);
             if (!destDir.exists())
                 Files.createDirectories(destDir.toPath());
@@ -222,6 +234,58 @@ public class IOUtils {
                     bis.close();
                 }
             }
+        }
+
+        /** Zips some files or directories into a zip file.
+         * Note that {@code UTF-8} encoding and {@code DEFAULT_COMPRESSION} level will be used to create the zip file.
+         * @param zipFilePath The path of the zip file.
+         * @param contents The map whose keys are the source paths and whose values are the zipped paths.
+         * @param overwrite If true, the existed zip file will be deleted before zipping.
+         * @throws IOException If I/O error occurs.
+         */
+        public static void zip(String zipFilePath, Map<String, String> contents, boolean overwrite)
+                throws IOException {
+            if (contents.isEmpty())
+                return;
+            if (overwrite)
+                FileUtil.delete(new File(zipFilePath), false);
+
+            try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(zipFilePath))) {
+                IOException[] error = new IOException[]{null};
+                for (String sourcePath : contents.keySet()) {
+                    File sourceFile = new File(sourcePath);
+                    String zippedPath = contents.get(sourcePath).replaceAll("(^/+)|(/+$)", "");
+                    if (sourceFile.isDirectory()) {
+                        //noinspection resource
+                        Files.walk(sourceFile.toPath())
+                                .filter(path -> !Files.isDirectory(path))
+                                .forEach(path -> {
+                                    try {
+                                        String relativePath = path.toString().substring(sourcePath.length() + 1);
+                                        copyFileToZip(zos, path.toFile(), zippedPath + "/" + relativePath);
+                                    } catch (IOException e) {
+                                        error[0] = e;
+                                    }
+                                });
+                        if (error[0] != null)
+                            throw error[0];
+                    } else if (sourceFile.isFile()) {
+                        copyFileToZip(zos, new File(sourcePath), zippedPath);
+                    }
+                }
+            }
+        }
+
+        private static void copyFileToZip(ZipOutputStream zos, File sourceFile, String zippedPath)
+                throws IOException {
+            zos.putNextEntry(new ZipEntry(zippedPath));
+            int len;
+            byte[] bytes = new byte[zipBufferSizeDefault];
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(sourceFile))) {
+                while ((len = bis.read(bytes, 0, zipBufferSizeDefault)) != -1)
+                    zos.write(bytes, 0, len);
+            }
+            zos.closeEntry();
         }
     }
 }

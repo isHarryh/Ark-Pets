@@ -111,8 +111,9 @@ public class ArkHomeFX extends Application {
             }
 
             // Post initialization.
-            syncRemoteMetaInfo();
-            switchToModelsPane();
+            rootModule.syncRemoteMetaInfo();
+            rootModule.moduleWrapperComposer.activate(0);
+
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);
     }
@@ -124,31 +125,7 @@ public class ArkHomeFX extends Application {
         ProcessPool.getInstance().shutdown();
     }
 
-    public boolean initModelsDataset(boolean popNotice) {
-        return modelsModule.initModelsDataset(popNotice);
-    }
-
     public void popLoading(EventHandler<ActionEvent> handler) {
         rootModule.popLoading(handler);
-    }
-
-    public void modelReload(boolean popNotice) {
-        modelsModule.modelReload(popNotice);
-    }
-
-    public void switchToModelsPane() {
-        rootModule.menuBtn1.getOnAction().handle(new ActionEvent());
-    }
-
-    public void switchToBehaviorPane() {
-        rootModule.menuBtn2.getOnAction().handle(new ActionEvent());
-    }
-
-    public void switchToSettingsPane() {
-        rootModule.menuBtn3.getOnAction().handle(new ActionEvent());
-    }
-
-    public void syncRemoteMetaInfo() {
-        rootModule.syncRemoteMetaInfo();
     }
 }

@@ -5,51 +5,67 @@
     At GPL-3.0 License
 -->
 
+<!-- ********* Wrapper 1 ********* -->
 <?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-
-<!-- ********* Wrapper 1 ********* -->
-<Pane prefHeight="372.0" prefWidth="460.0" styleClass="wrapper"
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import java.lang.*?>
+<Pane prefHeight="376.0" prefWidth="460.0" styleClass="wrapper" stylesheets="@Main.css"
       xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cn.harryh.arkpets.controllers.ModelsModule">
-    <Label layoutX="10.0" layoutY="15.0" styleClass="config-group-title" text="模型选择"/>
-    <ImageView fx:id="selectedModelView" fitHeight="140.0" fitWidth="140.0" layoutX="15.0" layoutY="85.0"
-               pickOnBounds="true" preserveRatio="true"/>
-    <VBox layoutX="15.0" layoutY="200.0" prefHeight="140.0" prefWidth="140.0">
-        <Label fx:id="selectedModelName" styleClass="Info-primary" text="Name"/>
-        <Label fx:id="selectedModelAppellation" styleClass="Info-secondary" text="Appellation"/>
-        <Label fx:id="selectedModelSkinGroupName" styleClass="Info-secondary" text="SkinGroup"/>
-        <Label fx:id="selectedModelType" text="ModelType">
-            <styleClass>
-                <String fx:value="Info-tag"/>
-                <String fx:value="Info-tag-theme"/>
-            </styleClass>
-        </Label>
-    </VBox>
-    <HBox layoutX="10.0" layoutY="325.0" prefHeight="40.0" prefWidth="150.0">
-        <Label id="Info-filter-label" prefWidth="55.0" text="筛选" translateX="-10.0">
+
+    <HBox layoutX="15.0" layoutY="15.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="37.5" prefWidth="430.0"
+          spacing="5.5" styleClass="major-tool-bar-upper">
+        <JFXButton fx:id="searchModelReload" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="60.0" text="重载">
             <graphic>
-                <AnchorPane prefHeight="10.0" prefWidth="0.0" translateX="5.0">
-                    <SVGPath content="M1 0h22l-9 15.094v8.906l-4-3v-5.906z" scaleX="0.5" scaleY="0.5"/>
+                <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"
+                            scaleX="1.05" scaleY="1.05"/>
                 </AnchorPane>
             </graphic>
-        </Label>
-        <JFXComboBox id="Info-filter-box" fx:id="searchModelFilter" prefWidth="95.0"/>
-    </HBox>
-    <Pane id="Search-models-bar" layoutX="15.0" layoutY="40.0" prefHeight="38.0" prefWidth="430.0">
+            <styleClass>
+                <String fx:value="btn-secondary"/>
+                <String fx:value="btn-with-icon"/>
+            </styleClass>
+        </JFXButton>
+        <JFXButton fx:id="searchModelRandom" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="60.0" text="随机">
+            <graphic>
+                <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="M18 9v-3c-1 0-3.308-.188-4.506 2.216l-4.218 8.461c-1.015 2.036-3.094 3.323-5.37 3.323h-3.906v-2h3.906c1.517 0 2.903-.858 3.58-2.216l4.218-8.461c1.356-2.721 3.674-3.323 6.296-3.323v-3l6 4-6 4zm-9.463 1.324l1.117-2.242c-1.235-2.479-2.899-4.082-5.748-4.082h-3.906v2h3.906c2.872 0 3.644 2.343 4.631 4.324zm15.463 8.676l-6-4v3c-3.78 0-4.019-1.238-5.556-4.322l-1.118 2.241c1.021 2.049 2.1 4.081 6.674 4.081v3l6-4z"
+                            scaleX="0.95" scaleY="0.95"/>
+                </AnchorPane>
+            </graphic>
+            <styleClass>
+                <String fx:value="btn-secondary"/>
+                <String fx:value="btn-with-icon"/>
+            </styleClass>
+        </JFXButton>
+        <JFXButton fx:id="searchModelReset" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="28.0" styleClass="btn-iconified-secondary" text=" ">
+            <graphic>
+                <AnchorPane prefHeight="28.0" prefWidth="28.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm.456-11.429l-4.528 4.528 5.658 5.659 4.527-4.53-5.657-5.657z"
+                            scaleX="1.05" scaleY="1.05" translateX="26.0"/>
+                </AnchorPane>
+            </graphic>
+        </JFXButton>
         <JFXTextField id="Search-models-input" fx:id="searchModelInput" layoutX="70.0" layoutY="6.0" prefHeight="23.0"
-                      prefWidth="170.0"/>
-        <JFXButton fx:id="searchModelConfirm" layoutX="8.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
-                   minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0"
-                   text="搜索">
-            <font>
-                <Font size="12.0"/>
-            </font>
+                      prefWidth="180.0">
+            <HBox.margin>
+                <Insets left="1.0"/>
+            </HBox.margin>
+        </JFXTextField>
+        <JFXButton fx:id="searchModelConfirm" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="60.0" text="搜索">
             <graphic>
                 <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                     <SVGPath
@@ -61,16 +77,14 @@
                 <String fx:value="btn-with-icon"/>
             </styleClass>
         </JFXButton>
-        <JFXButton fx:id="searchModelReset" layoutX="248.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
-                   minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0"
-                   text="清空">
-            <font>
-                <Font size="12.0"/>
-            </font>
+    </HBox>
+    <HBox layoutX="15.0" layoutY="52.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="37.5" prefWidth="175.0"
+          spacing="5.5" styleClass="major-tool-bar-lower">
+        <JFXButton fx:id="toggleFilterPane" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="60.0" text="筛选">
             <graphic>
                 <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
-                    <SVGPath
-                            content="M5.662 23l-5.369-5.365c-.195-.195-.293-.45-.293-.707 0-.256.098-.512.293-.707l14.929-14.928c.195-.194.451-.293.707-.293.255 0 .512.099.707.293l7.071 7.073c.196.195.293.451.293.708 0 .256-.097.511-.293.707l-11.216 11.219h5.514v2h-12.343zm3.657-2l-5.486-5.486-1.419 1.414 4.076 4.072h2.829zm.456-11.429l-4.528 4.528 5.658 5.659 4.527-4.53-5.657-5.657z"/>
+                    <SVGPath content="m1 0h22l-9 15.094v8.906l-4-3v-5.906z" scaleX="0.9" scaleY="0.9"/>
                 </AnchorPane>
             </graphic>
             <styleClass>
@@ -78,16 +92,13 @@
                 <String fx:value="btn-with-icon"/>
             </styleClass>
         </JFXButton>
-        <JFXButton fx:id="searchModelRandom" layoutX="308.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
-                   minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0"
-                   text="随机">
-            <font>
-                <Font size="12.0"/>
-            </font>
+        <JFXButton fx:id="toggleManagePane" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="92.5" text="模型库管理">
             <graphic>
-                <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
                     <SVGPath
-                            content="M18 9v-3c-1 0-3.308-.188-4.506 2.216l-4.218 8.461c-1.015 2.036-3.094 3.323-5.37 3.323h-3.906v-2h3.906c1.517 0 2.903-.858 3.58-2.216l4.218-8.461c1.356-2.721 3.674-3.323 6.296-3.323v-3l6 4-6 4zm-9.463 1.324l1.117-2.242c-1.235-2.479-2.899-4.082-5.748-4.082h-3.906v2h3.906c2.872 0 3.644 2.343 4.631 4.324zm15.463 8.676l-6-4v3c-3.78 0-4.019-1.238-5.556-4.322l-1.118 2.241c1.021 2.049 2.1 4.081 6.674 4.081v3l6-4z"/>
+                            content="m3.514 6.636c-.317.179-.514.519-.514.887v8.95c0 .37.197.708.514.887 1.597.901 6.456 3.639 8.005 4.512.152.085.319.128.487.128.164 0 .328-.041.477-.123 1.549-.855 6.39-3.523 7.994-4.408.323-.177.523-.519.523-.891v-9.055c0-.368-.197-.708-.515-.887-1.595-.899-6.444-3.632-7.999-4.508-.151-.085-.319-.128-.486-.128-.168 0-.335.043-.486.128-1.555.876-6.405 3.609-8 4.508zm15.986 2.115v7.525l-6.75 3.722v-7.578zm-14.264-1.344 6.764-3.813 6.801 3.834-6.801 3.716z"
+                            scaleX="1.15" scaleY="1.15" AnchorPane.leftAnchor="-43.0"/>
                 </AnchorPane>
             </graphic>
             <styleClass>
@@ -95,28 +106,106 @@
                 <String fx:value="btn-with-icon"/>
             </styleClass>
         </JFXButton>
-        <JFXButton fx:id="searchModelReload" layoutX="368.0" layoutY="5.0" maxHeight="-Infinity" maxWidth="-Infinity"
-                   minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="55.0"
-                   text="重载">
-            <font>
-                <Font size="12.0"/>
-            </font>
-            <graphic>
-                <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
-                    <SVGPath
-                            content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"/>
-                </AnchorPane>
-            </graphic>
-            <styleClass>
-                <String fx:value="btn-secondary"/>
-                <String fx:value="btn-with-icon"/>
-            </styleClass>
-        </JFXButton>
-    </Pane>
-    <JFXListView id="Search-models-list" fx:id="searchModelView" layoutX="165.0" layoutY="85.0" prefHeight="265.0"
-                 prefWidth="280.0"/>
-    <VBox id="Loading-failure-tip" fx:id="loadFailureTip" alignment="CENTER" layoutX="1.0" layoutY="85.0"
-          prefHeight="285.0" prefWidth="458.0" spacing="5.0" visible="false">
+    </HBox>
+
+    <fx:define>
+        <Double fx:id="_infoPaneX" fx:value="15.0"/>
+        <Double fx:id="_infoPaneY" fx:value="100.0"/>
+        <Double fx:id="_infoPaneH" fx:value="260.0"/>
+        <Double fx:id="_infoPaneW" fx:value="172.5"/>
+    </fx:define>
+    <AnchorPane fx:id="infoPane" layoutX="${_infoPaneX}" layoutY="${_infoPaneY}" prefHeight="${_infoPaneH}"
+                prefWidth="${_infoPaneW}"
+                styleClass="info-pane-light">
+        <VBox AnchorPane.topAnchor="0.0" prefWidth="${_infoPaneW}">
+            <Label fx:id="selectedModelType" text="ModelType" styleClass="info-type-badge"/>
+            <Label fx:id="selectedModelName" styleClass="info-primary" text="Name"/>
+            <Label fx:id="selectedModelAppellation" styleClass="info-secondary" text="Appellation"/>
+            <Label fx:id="selectedModelSkinGroupName" styleClass="info-secondary" text="SkinGroup"/>
+        </VBox>
+        <VBox AnchorPane.bottomAnchor="0.0" prefWidth="${_infoPaneW}">
+            <ScrollPane prefHeight="100.0" styleClass="flow-wrapper">
+                <FlowPane fx:id="infoPaneTagFlow" styleClass="tag-flow"/>
+            </ScrollPane>
+        </VBox>
+    </AnchorPane>
+    <AnchorPane fx:id="filterPane" layoutX="${_infoPaneX}" layoutY="${_infoPaneY}" prefHeight="${_infoPaneH}"
+                prefWidth="${_infoPaneW}"
+                styleClass="info-pane-light" visible="false">
+        <VBox AnchorPane.topAnchor="0.0" prefWidth="${_infoPaneW}">
+            <Label text="筛选" styleClass="info-type-badge"/>
+        </VBox>
+        <VBox AnchorPane.bottomAnchor="0.0" prefWidth="${_infoPaneW}">
+            <ScrollPane prefHeight="165.0" styleClass="flow-wrapper">
+                <FlowPane fx:id="filterPaneTagFlow" styleClass="tag-flow"/>
+            </ScrollPane>
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <Label fx:id="filterPaneTagClear" styleClass="config-hyper-link" text="清除筛选"/>
+            </HBox>
+        </VBox>
+    </AnchorPane>
+    <AnchorPane fx:id="managePane" layoutX="${_infoPaneX}" layoutY="${_infoPaneY}" prefHeight="${_infoPaneH}"
+                prefWidth="${_infoPaneW}"
+                styleClass="info-pane-light" visible="false">
+        <VBox AnchorPane.topAnchor="0.0" prefWidth="${_infoPaneW}">
+            <Label text="模型" styleClass="info-type-badge"/>
+        </VBox>
+        <VBox AnchorPane.topAnchor="35.0" prefWidth="${_infoPaneW}">
+            <FlowPane prefHeight="180.0" styleClass="btn-flow">
+                <fx:define>
+                    <Double fx:id="_largeBtnW" fx:value="157.5"/>
+                    <Double fx:id="_smallBtnW" fx:value="77.5"/>
+                </fx:define>
+                <JFXButton fx:id="modelUpdate" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_largeBtnW}"
+                           text="检查更新">
+                    <graphic>
+                        <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                            <SVGPath
+                                    content="M15.408 21h-9.908c-3.037 0-5.5-2.463-5.5-5.5 0-2.702 1.951-4.945 4.521-5.408.212-3.951 3.473-7.092 7.479-7.092 3.267 0 6.037 2.089 7.063 5.003l-.063-.003c-.681 0-1.336.102-1.958.283-.878-2.025-2.73-3.283-5.042-3.283-3.359 0-5.734 2.562-5.567 6.78-1.954-.113-4.433.923-4.433 3.72 0 1.93 1.57 3.5 3.5 3.5h7.76c.566.81 1.3 1.49 2.148 2zm2.257-8.669c.402-.206.852-.331 1.335-.331 1.455 0 2.67 1.042 2.941 2.418l1.96-.398c-.456-2.291-2.475-4.02-4.901-4.02-.957 0-1.845.278-2.604.745l-1.396-1.745-1 5h5l-1.335-1.669zm5.335 8.669l-1.396-1.745c-.759.467-1.647.745-2.604.745-2.426 0-4.445-1.729-4.901-4.02l1.96-.398c.271 1.376 1.486 2.418 2.941 2.418.483 0 .933-.125 1.335-.331l-1.335-1.669h5l-1 5z"
+                                    translateX="-24.0" translateY="-3.0"/>
+                        </AnchorPane>
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="btn-primary"/>
+                        <String fx:value="btn-with-icon"/>
+                    </styleClass>
+                </JFXButton>
+                <JFXButton fx:id="modelFetch" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_largeBtnW}"
+                           text="下载模型">
+                    <graphic>
+                        <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                            <SVGPath content="M16 11h5l-9 10-9-10h5v-11h8v11zm3 8v3h-14v-3h-2v5h18v-5h-2z"
+                                     translateX="-25.0"/>
+                        </AnchorPane>
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="btn-primary"/>
+                        <String fx:value="btn-with-icon"/>
+                    </styleClass>
+                </JFXButton>
+                <JFXButton fx:id="modelVerify" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_smallBtnW}"
+                           styleClass="btn-secondary" text="验证模型"/>
+                <JFXButton fx:id="modelReFetch" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_smallBtnW}"
+                           styleClass="btn-secondary" text="重新下载"/>
+                <JFXButton fx:id="modelImport" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_smallBtnW}"
+                           styleClass="btn-secondary" text="导入压缩包"/>
+                <JFXButton fx:id="modelExport" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_smallBtnW}"
+                           styleClass="btn-secondary" text="导出压缩包"/>
+            </FlowPane>
+        </VBox>
+    </AnchorPane>
+
+    <fx:define>
+        <Double fx:id="_modelViewX" fx:value="195.0"/>
+        <Double fx:id="_modelViewW" fx:value="250.0"/>
+    </fx:define>
+    <Label id="Search-models-status" fx:id="searchModelStatus" alignment="CENTER_RIGHT" layoutX="${_modelViewX}"
+           layoutY="80.0" prefWidth="${_modelViewW}" textAlignment="RIGHT"/>
+    <JFXListView id="Search-models-list" fx:id="searchModelView" layoutX="${_modelViewX}" layoutY="100.0"
+                 prefHeight="260.0" prefWidth="${_modelViewW}"/>
+
+    <VBox id="Loading-failure-tip" fx:id="loadFailureTip" alignment="CENTER" layoutX="${_modelViewX}" layoutY="95.0"
+          prefHeight="270.0" prefWidth="${_modelViewW}" spacing="5.0" visible="false">
         <SVGPath
                 content="M11.5 23l-8.5-4.535v-3.953l5.4 3.122 3.1-3.406v8.772zm1-.001v-8.806l3.162 3.343 5.338-2.958v3.887l-8.5 4.534zm-10.339-10.125l-2.161-1.244 3-3.302-3-2.823 8.718-4.505 3.215 2.385 3.325-2.385 8.742 4.561-2.995 2.771 2.995 3.443-2.242 1.241v-.001l-5.903 3.27-3.348-3.541 7.416-3.962-7.922-4.372-7.923 4.372 7.422 3.937v.024l-3.297 3.622-5.203-3.008-.16-.092-.679-.393v.002z"
                 scaleX="1.5" scaleY="1.5" translateY="-10.0"/>
@@ -126,7 +215,7 @@
                 <Font size="16.0"/>
             </font>
         </Text>
-        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [选项] 中进行模型下载"/>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [模型库管理] 中下载模型"/>
         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="如您已下载模型，请尝试点击 [重载] 按钮"/>
     </VBox>
 </Pane>
