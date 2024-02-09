@@ -72,8 +72,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		cha.setAnimation(behavior.defaultAnim());
 		Logger.info("Animation", "Animation stages " + behavior.getStages());
 		// 3.Window params setup
-		windowPosition = new TransitionVector2(TernaryFunction.LINEAR, linearEasingDuration);
-		windowAlpha = new TransitionFloat(TernaryFunction.LINEAR, linearEasingDuration);
+		windowPosition = new TransitionVector2(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
+		windowAlpha = new TransitionFloat(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
 		windowAlpha.reset(1f);
 		WD_SCALE = config.display_scale;
 		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());

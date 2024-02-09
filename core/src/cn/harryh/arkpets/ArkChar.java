@@ -59,8 +59,8 @@ public class ArkChar {
         otherwise you may get a corrupted rendering result. */
         renderer.setPremultipliedAlpha(false);
         // 2.Geometry setup
-        position = new TransitionVector3(TernaryFunction.LINEAR, linearEasingDuration);
-        offsetY = new TransitionFloat(TernaryFunction.LINEAR, linearEasingDuration);
+        position = new TransitionVector3(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
+        offsetY = new TransitionFloat(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
         flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
         // 3.Skeleton setup
         try {
@@ -84,7 +84,7 @@ public class ArkChar {
         for (AnimClip i: animList)
             for (AnimClip j: animList)
                 if (!i.fullName.equals(j.fullName))
-                    asd.setMix(i.fullName, j.fullName, linearEasingDuration);
+                    asd.setMix(i.fullName, j.fullName, easingDuration);
         // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);

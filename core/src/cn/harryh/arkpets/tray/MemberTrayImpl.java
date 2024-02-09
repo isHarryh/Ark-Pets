@@ -21,7 +21,7 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.iconFilePng;
-import static cn.harryh.arkpets.Const.linearEasingDuration;
+import static cn.harryh.arkpets.Const.easingDuration;
 
 
 public class MemberTrayImpl extends MemberTray {
@@ -100,7 +100,7 @@ public class MemberTrayImpl extends MemberTray {
             public void run() {
                 Gdx.app.exit();
             }
-        }, (int)(linearEasingDuration * 1000));
+        }, (int)(easingDuration * 1000));
     }
 
     @Override

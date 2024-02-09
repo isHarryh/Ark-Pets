@@ -35,9 +35,9 @@ public final class Const {
     public static final int fpsDefault          = 30;
     public static final int coreWidthDefault    = 150;
     public static final int coreHeightDefault   = 150;
-    public static final int canvasReserveLength = 100;
+    public static final int canvasReserveLength = 80;
     public static final int canvasMaxSize       = 720;
-    public static final float skelBaseScale     = 0.33333f;
+    public static final float skelBaseScale     = 0.3f;
 
     // Behavior presets
     public static final int behaviorBaseWeight      = 320;
@@ -46,7 +46,7 @@ public final class Const {
     public static final float droppedThreshold      = 10f;
 
     // Duration presets
-    public static final float linearEasingDuration  = 0.2f;
+    public static final float easingDuration    = 0.3f;
     public static final Duration durationFast   = new Duration(150);
     public static final Duration durationNormal = new Duration(300);
 
