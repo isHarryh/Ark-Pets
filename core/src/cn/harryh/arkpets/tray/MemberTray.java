@@ -54,5 +54,5 @@ public abstract class MemberTray {
 
     abstract public void remove();
 
-    abstract protected void sendOperation(SocketData.Operation operation);
+    abstract public void sendOperation(SocketData.Operation operation);
 }

@@ -45,6 +45,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXCheckBox configAutoStartup;
     @FXML
+    private JFXCheckBox configSolidExit;
+    @FXML
     private Label aboutQueryUpdate;
     @FXML
     private Label aboutVisitWebsite;
@@ -166,6 +168,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             } else {
                 ArkConfig.StartupConfig.removeStartup();
             }
+        });
+
+        configSolidExit.setSelected(app.config.launcher_solid_exit);
+        configSolidExit.setOnAction(e -> {
+            app.config.launcher_solid_exit = configSolidExit.isSelected();
+            app.config.saveConfig();
         });
     }
 

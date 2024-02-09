@@ -52,16 +52,15 @@ public class ArkHomeFX extends Application {
         Logger.info("Launcher", "Starting");
         this.stage = stage;
 
-        // Initialize socket server and HostTray
-        HostTray hostTray = new HostTray(stage);
+        // Initialize socket server and HostTray.
+        HostTray hostTray = HostTray.getInstance();
+        hostTray.bindStage(stage);
         try {
             SocketServer.getInstance().startServer(hostTray);
             hostTray.applyTrayIcon();
         } catch (PortUtils.NoPortAvailableException ignored) {
-            Logger.error("SocketServer", "No available port");
-            // TODO What if there are no port available
-            Platform.exit();
-            return;
+            Logger.error("SocketServer", "No available port, thus server cannot be started");
+            // No HostTray icon will be applied when this situation happens.
         } catch (PortUtils.ServerCollisionException ignored) {
             Logger.error("SocketServer", "Server is already running");
             SocketClient socketClient = new SocketClient();
@@ -71,6 +70,7 @@ public class ArkHomeFX extends Application {
                         socketClient.disconnect();
                     },
                     new SocketClient.ClientSocketSession(socketClient, null));
+            // Explicitly cancel the followed initialization in this start method.
             Platform.exit();
             return;
         }
@@ -119,10 +119,14 @@ public class ArkHomeFX extends Application {
     }
 
     @Override
-    public void stop() throws Exception {
-        super.stop();
+    public void stop() {
+        if (config != null && config.launcher_solid_exit) {
+            // Notify ArkPets core instances that connected to this app to close.
+            HostTray.getInstance().forEachMemberTray(memberTray -> memberTray.sendOperation(SocketData.Operation.LOGOUT));
+        }
         SocketServer.getInstance().stopServer();
         ProcessPool.getInstance().shutdown();
+        Logger.debug("Launcher", "Finished stopping");
     }
 
     public void popLoading(EventHandler<ActionEvent> handler) {

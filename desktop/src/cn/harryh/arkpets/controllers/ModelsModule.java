@@ -8,10 +8,7 @@ import cn.harryh.arkpets.assets.AssetItem;
 import cn.harryh.arkpets.assets.AssetItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.IOUtils;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Version;
+import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import javafx.collections.FXCollections;
@@ -39,8 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static cn.harryh.arkpets.Const.*;
-import static cn.harryh.arkpets.Const.PathConfig.fileModelsDataPath;
-import static cn.harryh.arkpets.Const.PathConfig.fileModelsZipName;
+import static cn.harryh.arkpets.Const.PathConfig.*;
 import static cn.harryh.arkpets.utils.GuiPrefabs.tooltipStyle;
 
 
@@ -99,6 +95,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private JFXButton modelImport;
     @FXML
     private JFXButton modelExport;
+    @FXML
+    private Label modelHelp;
 
     private AssetItemGroup assetItemList;
     private JFXListCell<AssetItem> selectedModelCell;
@@ -344,6 +342,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 new ZipTask(app.root, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), contents).start();
             }
         });
+
+        modelHelp.setOnMouseClicked(e -> NetUtils.browseWebpage(urlHelp));
     }
 
     public void modelSearch(String keyWords) {

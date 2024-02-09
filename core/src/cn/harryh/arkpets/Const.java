@@ -81,6 +81,7 @@ public final class Const {
     public static class PathConfig {
         public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
         public static final String urlDownload      = "https://arkpets.harryh.cn/p/arkpets/?from=client#/download";
+        public static final String urlHelp          = "https://arkpets.harryh.cn/p/arkpets/?from=client#/help";
         public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
         public static final String urlReadme        = "https://github.com/isHarryh/Ark-Pets#readme";
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";

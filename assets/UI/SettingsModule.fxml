@@ -32,6 +32,9 @@
                     <JFXCheckBox fx:id="configAutoStartup" mnemonicParsing="false" text="开机自动生成桌宠"/>
                 </HBox>
                 <HBox>
+                    <JFXCheckBox fx:id="configSolidExit" mnemonicParsing="false" text="退出程序时也退出桌宠"/>
+                </HBox>
+                <HBox>
                     <Label text="日志级别"/>
                     <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
                     <Label fx:id="exploreLogDir" styleClass="config-hyper-link" text="浏览日志"/>

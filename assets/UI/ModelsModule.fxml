@@ -191,6 +191,8 @@
                            styleClass="btn-secondary" text="导入压缩包"/>
                 <JFXButton fx:id="modelExport" minHeight="-Infinity" mnemonicParsing="false" prefWidth="${_smallBtnW}"
                            styleClass="btn-secondary" text="导出压缩包"/>
+                <Separator prefWidth="${_largeBtnW}"/>
+                <Label fx:id="modelHelp" styleClass="config-hyper-link" text="下载时遇到问题？"/>
             </FlowPane>
         </VBox>
     </AnchorPane>

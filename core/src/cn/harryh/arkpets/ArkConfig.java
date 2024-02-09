@@ -57,6 +57,7 @@ public class ArkConfig {
     public int        display_margin_bottom;
     public boolean    display_multi_monitors;
     public float      display_scale;
+    public boolean    launcher_solid_exit;
     public String     logging_level;
     public float      physic_gravity_acc;
     public float      physic_air_friction_acc;

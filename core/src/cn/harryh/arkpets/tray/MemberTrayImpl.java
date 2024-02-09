@@ -149,7 +149,7 @@ public class MemberTrayImpl extends MemberTray {
     }
 
     @Override
-    protected void sendOperation(SocketData.Operation operation) {
+    public void sendOperation(SocketData.Operation operation) {
         client.sendRequest(SocketData.ofOperation(uuid, operation));
     }
 

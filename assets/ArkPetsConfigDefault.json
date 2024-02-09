@@ -13,6 +13,7 @@
     "display_margin_bottom":0,
     "display_multi_monitors":true,
     "display_scale":1.0,
+    "launcher_solid_exit":true,
     "logging_level":"INFO",
     "physic_air_friction_acc":100.0,
     "physic_gravity_acc":800.0,

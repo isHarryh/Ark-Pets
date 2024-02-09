@@ -78,7 +78,7 @@ public class MemberTrayProxy extends MemberTray {
     }
 
     @Override
-    protected void sendOperation(SocketData.Operation operation) {
+    public void sendOperation(SocketData.Operation operation) {
         session.send(SocketData.ofOperation(uuid, operation));
     }
 

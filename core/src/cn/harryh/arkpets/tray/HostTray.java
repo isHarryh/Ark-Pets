@@ -13,6 +13,7 @@ import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 
 public class HostTray {
@@ -25,11 +26,19 @@ public class HostTray {
     private JMenu playerMenu;
     private Stage stage;
 
+    private static HostTray instance;
+
     static {
         Const.FontsConfig.loadFontsToSwing();
     }
 
-    public HostTray(Stage boundStage) {
+    public static HostTray getInstance() {
+        if (instance == null)
+            instance = new HostTray();
+        return instance;
+    }
+
+    private HostTray() {
         if (SystemTray.isSupported()) {
             Platform.setImplicitExit(false);
 
@@ -41,8 +50,8 @@ public class HostTray {
             innerLabel.setAlignmentX(0.5f);
 
             playerMenu = new JMenu("角色管理");
-            JMenuItem exitItem = new JMenuItem("退出程序");
-            exitItem.addActionListener(e -> {
+            JMenuItem optExit = new JMenuItem("退出程序");
+            optExit.addActionListener(e -> {
                 Logger.info("HostTray", "Request to exit");
                 Platform.exit();
             });
@@ -56,7 +65,7 @@ public class HostTray {
             popMenu.add(innerLabel);
             popMenu.addSeparator();
             popMenu.add(playerMenu);
-            popMenu.add(exitItem);
+            popMenu.add(optExit);
             popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
             Image image = Toolkit.getDefaultToolkit().getImage(HostTray.class.getResource(Const.iconFilePng));
@@ -69,14 +78,6 @@ public class HostTray {
                         showDialog(e.getX() + 5, e.getY());
                 }
             });
-
-            // Bind JavaFX stage:
-            stage = boundStage;
-            stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
-                if (newValue)
-                    stage.hide();
-            }));
-            stage.setOnCloseRequest(e -> stage.setIconified(true));
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -87,6 +88,15 @@ public class HostTray {
         } else {
             Logger.error("HostTray", "Tray is not supported.");
         }
+    }
+
+    public void bindStage(Stage stage) {
+        this.stage = stage;
+        this.stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue)
+                stage.hide();
+        }));
+        this.stage.setOnCloseRequest(e -> stage.setIconified(true));
     }
 
     public void applyTrayIcon() {
@@ -129,6 +139,10 @@ public class HostTray {
 
     public MemberTray getMemberTray(UUID uuid) {
         return arkPetTrays.get(uuid);
+    }
+
+    public void forEachMemberTray(Consumer<MemberTray> action) {
+        arkPetTrays.values().forEach(action);
     }
 
     public void addMemberTray(JMenu menu) {

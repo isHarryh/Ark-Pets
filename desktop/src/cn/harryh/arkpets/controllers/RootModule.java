@@ -14,6 +14,7 @@ import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.JavaProcess;
 import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -37,7 +38,6 @@ import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
-import static cn.harryh.arkpets.utils.GuiPrefabs.DialogUtil;
 
 
 public final class RootModule implements Controller<ArkHomeFX> {
@@ -197,10 +197,17 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
     @FXML
     public void windowClose(MouseEvent event) {
-        popSplashScreen(e -> {
-            Logger.info("Launcher", "User close request");
-            app.stage.close();
-        }, durationNormal, Duration.ZERO);
+        String solidExitTip = (app.config != null && app.config.launcher_solid_exit) ?
+            "退出程序将会同时退出已启动的桌宠。" : "退出程序后已启动的桌宠将会保留。";
+        GuiPrefabs.DialogUtil.createConfirmDialog(root,
+                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_HELP_ALT, GuiPrefabs.Colors.COLOR_INFO),
+                "确认退出",
+                "现在退出 " + appName + " 吗？",
+                "根据您的设置，" + solidExitTip + "\n使用最小化 [-] 按钮可以隐藏窗口到系统托盘。",
+                () -> popSplashScreen(e -> {
+                    Logger.info("Launcher", "User close request");
+                    Platform.exit();
+                }, durationNormal, Duration.ZERO)).show();
     }
 
     private void initLaunchButton() {
@@ -264,7 +271,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                         return false;
                     }
                 };
-                task.setOnFailed(e -> DialogUtil.createErrorDialog(app.root, task.getException()).show());
+                task.setOnFailed(e -> GuiPrefabs.DialogUtil.createErrorDialog(app.root, task.getException()).show());
                 return task;
             }
         };
@@ -282,7 +289,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
         @Override
         public String getHeader() {
-            return "如需关闭桌宠，请右键系统托盘图标后选择退出。";
+            return "可以通过右键系统托盘图标来管理已启动的桌宠。";
         }
 
         @Override

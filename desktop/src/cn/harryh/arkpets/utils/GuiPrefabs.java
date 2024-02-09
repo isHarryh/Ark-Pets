@@ -157,6 +157,30 @@ public class GuiPrefabs {
             return dialog;
         }
 
+        public static JFXDialog createConfirmDialog(StackPane root, Node graphic, String title, String header, String content, Runnable onConfirmed) {
+            JFXDialog dialog = DialogUtil.createCenteredDialog(root, true);
+            VBox body = new VBox();
+            Label h2 = (Label)DialogUtil.getPrefabsH2(header);
+            Label h3 = (Label)DialogUtil.getPrefabsH3(content);
+            body.setSpacing(5);
+            body.getChildren().add(h2);
+            body.getChildren().add(new Separator());
+            body.getChildren().add(h3);
+
+            JFXDialogLayout layout = new JFXDialogLayout();
+            layout.setHeading(DialogUtil.getHeading(graphic, title, Colors.COLOR_LIGHT_GRAY));
+            layout.setBody(body);
+            JFXButton confirmButton = getOkayButton(dialog, root);
+            JFXButton cancelButton = getCancelButton(dialog, root);
+            confirmButton.setOnAction(e -> {
+                dialog.setOnDialogClosed(ev -> onConfirmed.run());
+                dialog.close();
+            });
+            layout.setActions(cancelButton, confirmButton);
+            dialog.setContent(layout);
+            return dialog;
+        }
+
         public static JFXDialog createErrorDialog(StackPane root, Throwable e) {
             JFXDialog dialog = DialogUtil.createCenteredDialog(root, false);
 
