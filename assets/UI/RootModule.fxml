@@ -16,8 +16,9 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.Text?>
 <StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-           prefHeight="400.0" prefWidth="600.0" stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.2-ea"
-           xmlns:fx="http://javafx.com/fxml/1" fx:controller="cn.harryh.arkpets.controllers.RootModule">
+           prefHeight="400.0" prefWidth="600.0" styleClass="root" stylesheets="@Main.css"
+           xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="cn.harryh.arkpets.controllers.RootModule">
 
     <!-- ***** Main Body Content: All common UI elements are included here ***** -->
     <AnchorPane fx:id="body" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
