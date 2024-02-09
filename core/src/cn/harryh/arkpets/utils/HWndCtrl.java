@@ -27,10 +27,23 @@ public class HWndCtrl {
     public final int windowHeight;
     public static final HWndCtrl EMPTY = new HWndCtrl();
 
-    public static final int WS_EX_TOPMOST = 0x00000008;
-    public static final int WS_EX_TRANSPARENT = 0x00000020;
-    public static final int WS_EX_TOOLWINDOW = 0x00000080;
-    public static final int WS_EX_LAYERED = 0x00080000;
+    public static final int WS_EX_TOPMOST       = 0x00000008;
+    public static final int WS_EX_TRANSPARENT   = 0x00000020;
+    public static final int WS_EX_TOOLWINDOW    = 0x00000080;
+    public static final int WS_EX_LAYERED       = 0x00080000;
+
+    public static final int WM_MOUSEMOVE    = 0x0200;
+    public static final int WM_LBUTTONDOWN  = 0x0201;
+    public static final int WM_LBUTTONUP    = 0x0202;
+    public static final int WM_RBUTTONDOWN  = 0x0204;
+    public static final int WM_RBUTTONUP    = 0x0205;
+    public static final int WM_MBUTTONDOWN  = 0x0207;
+    public static final int WM_MBUTTONUP    = 0x0208;
+
+    private static final int MK_LBUTTON  = 0x0001;
+    private static final int MK_RBUTTON  = 0x0002;
+    private static final int MK_MBUTTON  = 0x0010;
+
 
     /** HWnd Controller instance.
      * @param hWnd The handle of the window.
@@ -110,21 +123,6 @@ public class HWndCtrl {
         return posTop + windowHeight / 2f;
     }
 
-    /** Gets the RGB color value at the specified position of the window.
-     * @param x The X-axis coordinate, related to the left border of the window.
-     * @param y The Y-axis coordinate, related to the top border of the window.
-     * @return The color array (R,G,B).
-     */
-    public int[] getPixel(int x, int y) {
-        WinDef.HDC hdc = User32.INSTANCE.GetDC(hWnd);
-        int color = GDI32Extended.INSTANCE.GetPixel(hdc, x, y);
-        int r = (color) & 0xFF;
-        int g = (color >> 8) & 0xFF;
-        int b = (color >> 16) & 0xFF;
-        User32.INSTANCE.ReleaseDC(hWnd, hdc);
-        return new int[] {r, g, b};
-    }
-
     /** Requests to close the window.
      * @param timeout Timeout for waiting response (ms).
      * @return true=success, false=failure.
@@ -188,6 +186,23 @@ public class HWndCtrl {
             setWindowExStyle(getWindowExStyle() | HWndCtrl.WS_EX_TRANSPARENT);
         else
             setWindowExStyle(getWindowExStyle() & ~HWndCtrl.WS_EX_TRANSPARENT);
+    }
+
+    /** Sends a mouse event message to the window.
+     * @param msg The window message value.
+     * @param x The X-axis coordinate, related to the left border of the window.
+     * @param y The Y-axis coordinate, related to the top border of the window.
+     */
+    public void sendMouseEvent(int msg, int x, int y) {
+        int wParam = switch (msg) {
+            case WM_LBUTTONDOWN, WM_LBUTTONUP -> MK_LBUTTON;
+            case WM_RBUTTONDOWN, WM_RBUTTONUP -> MK_RBUTTON;
+            case WM_MBUTTONDOWN, WM_MBUTTONUP -> MK_MBUTTON;
+            default -> 0;
+        };
+        int lParam = (y << 16) | (x & 0xFFFF);
+        User32.INSTANCE.SendMessage(hWnd, msg, new WinDef.WPARAM(0x0021), new WinDef.LPARAM(0));
+        User32.INSTANCE.SendMessage(hWnd, msg, new WinDef.WPARAM(wParam), new WinDef.LPARAM(lParam));
     }
 
     /** Gets the current list of windows.

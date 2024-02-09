@@ -20,10 +20,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -39,9 +36,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public TransitionFloat windowAlpha; // Window Opacity Easing
 	public TransitionVector2 windowPosition; // Window Position Easing
 
-	public HWndCtrl hWndMine;
+	private HWndCtrl hWndMine;
 	private HWndCtrl hWndTopmost;
 	private LoopCtrl getHWndLoopCtrl;
+	private List<HWndCtrl> hWndList;
 
 	private final String APP_TITLE;
 	private int APP_FPS = fpsDefault;
@@ -49,7 +47,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	private int WD_W; // Window Real Width
 	private int WD_H; // Window Real Height
 	private int offsetY = 0;
-	private boolean isToolwindowStyle;
+	private boolean isToolwindowStyle = false;
+	private boolean isAlwaysTransparent = false;
 
 	public ArkPets(String title) {
 		APP_TITLE = title;
@@ -64,7 +63,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		config = Objects.requireNonNull(ArkConfig.getConfig());
 		APP_FPS = config.display_fps;
 		Gdx.graphics.setForegroundFPS(APP_FPS);
-		getHWndLoopCtrl = new LoopCtrl(1.0f / APP_FPS * 4);
+		getHWndLoopCtrl = new LoopCtrl(1f / APP_FPS * 4);
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
 		cha = new ArkChar(config.character_asset, new AssetItem.AssetAccessor(config.character_files), skelBaseScale);
@@ -145,6 +144,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.info("App", "Dispose");
 	}
 
+	/* INTERFACES */
 	public boolean canChangeStage() {
 		return behavior != null && behavior.getStages().size() > 1;
 	}
@@ -157,6 +157,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		}
 	}
 
+	public void setAlwaysTransparent(boolean alwaysTransparent) {
+		isAlwaysTransparent = alwaysTransparent;
+	}
+
 	private void changeAnimation(AnimData animData) {
 		if (animData != null && !animData.isEmpty()) {
 			// If it is needed to change animation:
@@ -166,7 +170,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	/* INPUT PROCESS */
-
 	private final Vector2 mouse_pos = new Vector2();
 	private int mouse_intention_x = 1;
 	private boolean mouse_drag = false;
@@ -176,16 +179,30 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.debug("Input", "Click+ Btn " + button +" @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
-			if (button == Input.Buttons.LEFT) {
-				Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int)Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-				changeAnimation(behavior.clickStart());
-				tray.hideDialog();
-				return true;
-			} else if (button == Input.Buttons.RIGHT) {
-				Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-				// Toggle tray dialog:
-				tray.toggleDialog((int)(plane.getX() + screenX), (int)(- plane.getY() - WD_H));
-				return true;
+			if (!isMouseAtSolidPixel()) {
+				// Transfer mouse event
+				RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+				if (rwp != null) {
+					int msg = switch (button) {
+						case Input.Buttons.LEFT -> HWndCtrl.WM_LBUTTONDOWN;
+						case Input.Buttons.RIGHT -> HWndCtrl.WM_RBUTTONDOWN;
+						case Input.Buttons.MIDDLE -> HWndCtrl.WM_MBUTTONDOWN;
+						default -> 0;
+					};
+					if (msg != 0)
+						rwp.sendMouseEvent(msg);
+				}
+			} else {
+				if (button == Input.Buttons.LEFT) {
+					Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+					changeAnimation(behavior.clickStart());
+					tray.hideDialog();
+					return true;
+				} else if (button == Input.Buttons.RIGHT) {
+					// Toggle tray dialog:
+					tray.toggleDialog((int) (plane.getX() + screenX), (int) (-plane.getY() - WD_H));
+					return true;
+				}
 			}
 		}
 		return false;
@@ -194,14 +211,22 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
 		// Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
-		mouse_drag = true;
-		int t = (int)Math.signum(screenX - mouse_pos.x);
-		mouse_intention_x = t == 0 ? mouse_intention_x : t;
-		int x = (int)(windowPosition.now().x + screenX - mouse_pos.x);
-		int y = (int)(windowPosition.now().y + screenY - mouse_pos.y);
-		plane.changePosition(Gdx.graphics.getDeltaTime(), x, - (WD_H + y));
-		windowPosition.setToEnd();
-		return true;
+		if (!isMouseAtSolidPixel()) {
+			// Transfer mouse event
+			RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+			if (rwp != null)
+				rwp.sendMouseEvent(HWndCtrl.WM_MOUSEMOVE);
+		} else {
+			mouse_drag = true;
+			int t = (int) Math.signum(screenX - mouse_pos.x);
+			mouse_intention_x = t == 0 ? mouse_intention_x : t;
+			int x = (int) (windowPosition.now().x + screenX - mouse_pos.x);
+			int y = (int) (windowPosition.now().y + screenY - mouse_pos.y);
+			plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(WD_H + y));
+			windowPosition.setToEnd();
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -209,7 +234,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.debug("Input", "Click- Btn " + button +" @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
-            if (mouse_drag) {
+			if (!isMouseAtSolidPixel()) {
+				// Transfer mouse event
+				RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+				if (rwp != null) {
+					int msg = switch (button) {
+						case Input.Buttons.LEFT -> HWndCtrl.WM_LBUTTONUP;
+						case Input.Buttons.RIGHT -> HWndCtrl.WM_RBUTTONUP;
+						case Input.Buttons.MIDDLE -> HWndCtrl.WM_MBUTTONUP;
+						default -> 0;
+					};
+					if (msg != 0)
+						rwp.sendMouseEvent(msg);
+				}
+			} else if (mouse_drag) {
 				cha.position.reset(cha.position.end().x, cha.position.end().y, mouse_intention_x);
 				if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
 					AnimData anim = cha.getPlaying();
@@ -229,23 +267,29 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean keyDown(int keycode) {
-		Logger.debug("Input", "Key+ @ " + keycode);
 		return false;
 	}
 
 	@Override
 	public boolean keyUp(int keycode) {
-		Logger.debug("Input", "Key- @ " + keycode);
 		return false;
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
+		Logger.debug("Plane Debug Msg", plane.getDebugMsg());
 		return false;
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
+		mouse_pos.set(screenX, screenY);
+		if (!isMouseAtSolidPixel()) {
+			// Transfer mouse event
+			RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+			if (rwp != null)
+				rwp.sendMouseEvent(HWndCtrl.WM_MOUSEMOVE);
+		}
 		return false;
 	}
 
@@ -254,8 +298,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return false;
 	}
 
-	/* WINDOW OPERATIONS */
+	private boolean isMouseAtSolidPixel() {
+		int pixel = cha.getPixel((int)mouse_pos.x, (int)(WD_H - mouse_pos.y - 1));
+		return (pixel & 0x000000FF) > 0;
+	}
 
+	/* WINDOW OPERATIONS */
 	private void initWindow(int x, int y) {
 		// Initialize HWnd
 		if (hWndMine == null || hWndMine.isEmpty())
@@ -280,12 +328,30 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			HWndCtrl new_hwnd_topmost = refreshWindowIdx();
 			if (new_hwnd_topmost != hWndTopmost)
 				hWndTopmost = new_hwnd_topmost;
+			hWndMine.setWindowTransparent(isAlwaysTransparent);
 		}
 		hWndMine.setWindowPosition(hWndTopmost, (int)windowPosition.now().x, (int)windowPosition.now().y, WD_W, WD_H);
 	}
 
+	private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {
+		if (hWndList == null)
+			return null;
+		int absX = x + (int)(windowPosition.now().x);
+		int absY = y + (int)(windowPosition.now().y);
+		for (HWndCtrl hWndCtrl : hWndList) {
+			if (getArkPetsWindowNum(hWndCtrl.windowText) < 0)
+				if (hWndCtrl.posLeft <= absX && hWndCtrl.posRight > absX)
+					if (hWndCtrl.posTop <= absY && hWndCtrl.posBottom > absY) {
+						int relX = absX - hWndCtrl.posLeft;
+						int relY = absY - hWndCtrl.posTop;
+						return new RelativeWindowPosition(hWndCtrl, relX, relY);
+					}
+		}
+		return null;
+	}
+
 	private HWndCtrl refreshWindowIdx() {
-		ArrayList<HWndCtrl> windowList = HWndCtrl.getWindowList(true);
+		hWndList = HWndCtrl.getWindowList(true);
 		//Logger.debug("HWND", windowList.toString());
 		HWndCtrl minWindow = null;
 		HashMap<Integer, HWndCtrl> line = new HashMap<>();
@@ -298,10 +364,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			plane.barriers.clear();
 			plane.pointCharges.clear();
 		}
-		for (HWndCtrl hWndCtrl : windowList) {
+		for (HWndCtrl hWndCtrl : hWndList) {
 			int wndNum = getArkPetsWindowNum(hWndCtrl.windowText);
 			// Distinguish non-peer windows from peers.
-			if (wndNum == -1){
+			if (wndNum == -1) {
 				if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
 					// This window and the app are share the same vertical line.
 					if (-hWndCtrl.posBottom < plane.borderTop() && -hWndCtrl.posTop > plane.borderBottom()) {
@@ -401,7 +467,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	/* WINDOW WALKING RELATED */
-
 	private void walkWindow(float len) {
 		float expectedLen = len * WD_SCALE * (30f / APP_FPS);
 		int realLen = randomRound(expectedLen);
@@ -421,8 +486,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		return (plane.getX() >= plane.borderRight() - WD_W && len > 0) || (plane.getX() <= plane.borderLeft() && len < 0);
 	}
 
+
 	/* UTILS */
-	public static class LoopCtrl {
+	private static class LoopCtrl {
 		private final float minIntervalTime;
 		private float accumTime;
 
@@ -444,6 +510,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			} else {
 				return false;
 			}
+		}
+	}
+
+
+	private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
+		public void sendMouseEvent(int msg) {
+			//Logger.debug("Input", "Transfer mouse event to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
+			hWndCtrl.sendMouseEvent(msg, relX, relY);
 		}
 	}
 }

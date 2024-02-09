@@ -118,7 +118,7 @@ public class MemberTrayImpl extends MemberTray {
     public void onTransparentDis() {
         Logger.info("MemberTray", "Transparent disabled");
         arkPets.windowAlpha.reset(1f);
-        arkPets.hWndMine.setWindowTransparent(false);
+        arkPets.setAlwaysTransparent(false);
         popMenu.remove(optTransparentDis);
         popMenu.add(optTransparentEn, 2);
     }
@@ -127,7 +127,7 @@ public class MemberTrayImpl extends MemberTray {
     public void onTransparentEn() {
         Logger.info("MemberTray", "Transparent enabled");
         arkPets.windowAlpha.reset(0.75f);
-        arkPets.hWndMine.setWindowTransparent(true);
+        arkPets.setAlwaysTransparent(true);
         popMenu.remove(optTransparentEn);
         popMenu.add(optTransparentDis, 2);
     }

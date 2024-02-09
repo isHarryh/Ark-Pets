@@ -165,8 +165,21 @@ public class ArkChar {
         return composer.getPlaying();
     }
 
+    /** Gets the specified pixel's color value.
+     * Note that the image may be flipped along the y-axis.
+     * @param x The X-axis coordinate.
+     * @param y The Y-axis coordinate.
+     * @return The RGBA8888 value of the specified pixel.
+     */
+    public int getPixel(int x, int y) {
+        Pixmap pixmap = Pixmap.createFromFrameBuffer(x, y, 1, 1);
+        int pixel = pixmap.getPixel(0, 0);
+        pixmap.dispose();
+        return pixel;
+    }
+
     /** Saves the current framebuffer contents as an image file. (Only test-use)
-     * Note that the image may not be flipped along the y-axis.
+     * Note that the image may be flipped along the y-axis.
      * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
      */
     @Deprecated
