@@ -141,8 +141,8 @@ public class GuiComponents {
         protected static final double borderRadius = 8;
         protected static final double internalSpacing = 8;
         protected static final double iconScale = 0.75;
-        protected static final double margin = 4;
-        protected static final double widthScale = 0.9;
+        protected static final double inserts = 4;
+        protected static final double widthScale = 0.85;
         protected final Pane container;
         protected Pane noticeBar;
 
@@ -151,14 +151,25 @@ public class GuiComponents {
         }
 
         public final void refresh() {
-            if (getActivated() && noticeBar == null) {
+            if (isToActivate())
+                activate();
+            else
+                suppress();
+        }
+
+        public final void activate() {
+            if (noticeBar == null) {
                 noticeBar = getNoticeBar(getWidth(), getHeight());
                 container.getChildren().add(noticeBar);
                 ScaleTransition transition = new ScaleTransition(Const.durationFast, noticeBar);
                 transition.setFromY(0.1);
                 transition.setToY(1);
                 transition.play();
-            } else if (!getActivated() && noticeBar != null) {
+            }
+        }
+
+        public final void suppress() {
+            if (noticeBar != null) {
                 final Pane finalNoticeBar = noticeBar;
                 noticeBar = null;
                 ScaleTransition transition = new ScaleTransition(Const.durationFast, finalNoticeBar);
@@ -169,16 +180,18 @@ public class GuiComponents {
             }
         }
 
-        abstract protected boolean getActivated();
-
         abstract protected String getColorString();
 
         abstract protected String getIconSVGPath();
 
         abstract protected String getText();
 
+        protected boolean isToActivate() {
+            throw new UnsupportedOperationException("Unimplemented method invoked");
+        }
+
         protected double getHeight() {
-            return Font.getDefault().getSize() * 3;
+            return Font.getDefault().getSize() * 2;
         }
 
         protected double getWidth() {
@@ -191,24 +204,26 @@ public class GuiComponents {
             // Colors
             Color color = Color.valueOf(getColorString());
             BackgroundFill bgFill = new BackgroundFill(
-                    color.deriveColor(0, 0.62, 1.62, 0.38),
+                    color.deriveColor(0, 0.5, 1.5, 0.25),
                     new CornerRadii(borderRadius),
-                    new Insets(margin)
+                    new Insets(inserts)
             );
             // Layouts
             HBox bar = new HBox(internalSpacing);
             bar.setBackground(new Background(bgFill));
-            bar.setMaxSize(width, height);
+            bar.setMinSize(width, height);
             bar.setAlignment(Pos.CENTER_LEFT);
             SVGPath icon = new SVGPath();
             icon.setContent(getIconSVGPath());
             icon.setFill(color);
             icon.setScaleX(iconScale);
             icon.setScaleY(iconScale);
-            icon.setTranslateX(margin);
+            icon.setTranslateX(inserts);
             Label label = new Label(getText());
-            label.setTextFill(color);
             label.setMinWidth(width * widthScale * widthScale);
+            label.setPadding(new Insets(inserts));
+            label.setTextFill(color);
+            label.setWrapText(true);
             bar.getChildren().addAll(icon, label);
             // Click event
             try {

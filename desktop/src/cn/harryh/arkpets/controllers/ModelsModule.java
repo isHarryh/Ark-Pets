@@ -22,9 +22,11 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -84,6 +86,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private FlowPane filterPaneTagFlow;
 
     @FXML
+    private VBox noticeBox;
+    @FXML
     private JFXButton modelUpdate;
     @FXML
     private JFXButton modelFetch;
@@ -104,6 +108,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
     private GuiPrefabs.PeerNodeComposer mngBtnComposer;
+    private GuiComponents.NoticeBar datasetTooLowVerNotice;
+    private GuiComponents.NoticeBar datasetTooHighVerNotice;
 
     private ArkHomeFX app;
 
@@ -143,12 +149,18 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 app.modelsDataset.data.removeIf(Predicate.not(AssetItem::isValid));
                 try {
                     // Check the dataset compatibility
-                    Version acVersion = app.modelsDataset.arkPetsCompatibility;
-                    if (appVersion.lessThan(acVersion)) {
-                        isDatasetIncompatible = true;
-                        Logger.warn("ModelManager", "The model dataset may be incompatible (required " + acVersion + " or newer)");
+                    Version compatibleVersion = app.modelsDataset.arkPetsCompatibility;
+                    if (appVersion.lessThan(compatibleVersion)) {
+                        datasetTooHighVerNotice.activate();
+                        Logger.warn("ModelManager", "The model dataset version may be too high which requiring program version " + compatibleVersion);
                     } else {
-                        isDatasetIncompatible = false;
+                        datasetTooHighVerNotice.suppress();
+                    }
+                    if (datasetLowestVersion.greaterThan(compatibleVersion)) {
+                        datasetTooLowVerNotice.activate();
+                        Logger.warn("ModelManager", "The model dataset version may be too low");
+                    } else {
+                        datasetTooLowVerNotice.suppress();
                     }
                 } catch (Exception ex) {
                     Logger.warn("ModelManager", "Failed to get the compatibility of the model database.");
@@ -252,6 +264,44 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initModelManage() {
+        datasetTooLowVerNotice = new GuiComponents.NoticeBar(noticeBox) {
+            @Override
+            protected String getColorString() {
+                return GuiPrefabs.Colors.COLOR_WARNING;
+            }
+
+            @Override
+            protected String getIconSVGPath() {
+                return GuiPrefabs.Icons.ICON_WARNING_ALT;
+            }
+
+            @Override
+            protected String getText() {
+                return "模型库版本太旧，可能不被软件兼容，请您重新下载模型。";
+            }
+        };
+        datasetTooHighVerNotice = new GuiComponents.NoticeBar(noticeBox) {
+            @Override
+            protected String getColorString() {
+                return GuiPrefabs.Colors.COLOR_WARNING;
+            }
+
+            @Override
+            protected String getIconSVGPath() {
+                return GuiPrefabs.Icons.ICON_WARNING_ALT;
+            }
+
+            @Override
+            protected String getText() {
+                return "软件版本太旧，可能不被模型库兼容，建议您更新软件。";
+            }
+
+            @Override
+            protected void onClick(MouseEvent event) {
+                NetUtils.browseWebpage(PathConfig.urlDownload);
+            }
+        };
+
         EventHandler<ActionEvent> modelFetchEventHandler = e -> {
             /* Foreground fetch models */
             // Go to [Step 1/3]:

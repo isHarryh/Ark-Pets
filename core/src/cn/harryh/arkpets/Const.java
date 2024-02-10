@@ -18,7 +18,8 @@ import java.util.Objects;
  */
 public final class Const {
     // App version
-    public static final Version appVersion  = new Version(3, 0, 0);
+    public static final Version appVersion              = new Version(3, 0, 0);
+    public static final Version datasetLowestVersion    = new Version(2, 2, 0);
 
     // App name
     public static final String appName      = "ArkPets";
@@ -64,7 +65,6 @@ public final class Const {
     // Changeable constants
     public static boolean isHttpsTrustAll       = false;
     public static boolean isUpdateAvailable     = false;
-    public static boolean isDatasetIncompatible = false;
     public static boolean isNewcomer            = false;
 
     // Socket C/S constants

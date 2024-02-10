@@ -151,7 +151,8 @@
             <Label text="模型" styleClass="info-type-badge"/>
         </VBox>
         <VBox AnchorPane.topAnchor="35.0" prefWidth="${_infoPaneW}">
-            <FlowPane prefHeight="180.0" styleClass="btn-flow">
+            <VBox fx:id="noticeBox"/>
+            <FlowPane prefHeight="140.0" styleClass="btn-flow">
                 <fx:define>
                     <Double fx:id="_largeBtnW" fx:value="157.5"/>
                     <Double fx:id="_smallBtnW" fx:value="77.5"/>

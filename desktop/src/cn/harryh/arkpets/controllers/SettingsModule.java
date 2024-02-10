@@ -57,7 +57,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
     private GuiComponents.NoticeBar appVersionNotice;
     private GuiComponents.NoticeBar diskFreeSpaceNotice;
-    private GuiComponents.NoticeBar datasetIncompatibleNotice;
 
     private ArkHomeFX app;
 
@@ -190,7 +189,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private void initNoticeBox() {
         appVersionNotice = new GuiComponents.NoticeBar(noticeBox) {
             @Override
-            protected boolean getActivated() {
+            protected boolean isToActivate() {
                 return isUpdateAvailable;
             }
 
@@ -216,7 +215,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         };
         diskFreeSpaceNotice = new GuiComponents.NoticeBar(noticeBox) {
             @Override
-            protected boolean getActivated() {
+            protected boolean isToActivate() {
                 long freeSpace = new File(".").getFreeSpace();
                 return freeSpace < diskFreeSpaceRecommended && freeSpace > 0;
             }
@@ -236,32 +235,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 return "当前磁盘存储空间不足，可能影响使用体验。";
             }
         };
-        datasetIncompatibleNotice = new GuiComponents.NoticeBar(noticeBox) {
-            @Override
-            protected boolean getActivated() {
-                return isDatasetIncompatible;
-            }
-
-            @Override
-            protected String getColorString() {
-                return GuiPrefabs.Colors.COLOR_WARNING;
-            }
-
-            @Override
-            protected String getIconSVGPath() {
-                return GuiPrefabs.Icons.ICON_WARNING_ALT;
-            }
-
-            @Override
-            protected String getText() {
-                return "模型库可能不兼容当前的 ArkPets 版本，请更新软件。";
-            }
-
-            @Override
-            protected void onClick(MouseEvent event) {
-                NetUtils.browseWebpage(PathConfig.urlDownload);
-            }
-        };
     }
 
     private void initScheduledListener() {
@@ -277,13 +250,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 task.setOnSucceeded(e -> {
                     appVersionNotice.refresh();
                     diskFreeSpaceNotice.refresh();
-                    datasetIncompatibleNotice.refresh();
                 });
                 return task;
             }
         };
-        ss.setDelay(new Duration(2000));
-        ss.setPeriod(new Duration(2000));
+        ss.setDelay(new Duration(5000));
+        ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
     }
