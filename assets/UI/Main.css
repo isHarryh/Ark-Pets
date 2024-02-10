@@ -13,29 +13,29 @@
 
 /* Global font face */
 * {
-/* Note: Use `Font.loadFont()` in the `Application` to load additional font file */
--fx-font-family: "Source Han Sans CN";
--fx-font-smoothing-type: gray;
+    /* Note: Use `Font.loadFont()` in the `Application` to load additional font file */
+    -fx-font-family: "Source Han Sans CN";
+    -fx-font-smoothing-type: gray;
 }
 
 /* Drop shadow for Nodes */
 .shadowed {
-/* Note: dropshadow(type, color, radius, spread, x, y) */
--fx-effect: dropshadow(gaussian, derive(black, 80%), 10, 0.1, 0, 0.5);
+    /* Note: dropshadow(type, color, radius, spread, x, y) */
+    -fx-effect: dropshadow(gaussian, derive(black, 80%), 10, 0.1, 0, 0.5);
 }
 
 /* Fluorescent strokes for Shapes */
 .fluorescent {
--fx-stroke: #80DFFF;
--fx-stroke-type: outside;
--fx-stroke-width: 0.382px;
+    -fx-stroke: #80DFFF;
+    -fx-stroke-type: outside;
+    -fx-stroke-width: 0.382px;
 }
 
 .root {
--text-normal: #242424;
--theme-color: #204880;
--theme-color-dim: #8492A5;
--theme-color-light: #95B6E5;
+    -text-normal: #242424;
+    -theme-color: #2A528C;
+    -theme-color-dim: #8492A5;
+    -theme-color-light: #82A6D8;
 }
 
 /*******************************************************************************
@@ -46,83 +46,89 @@
 
 /* Common buttons */
 JFXButton {
--fx-cursor: hand;
+    -fx-cursor: hand;
 }
 
 /* Anchor panes that contains an SVG-path */
 .btn-icon {
--fx-pref-width: 0;
--fx-pref-height: 0;
--fx-scale-x: 0.525;
--fx-scale-y: 0.525;
--fx-translate-x: -21px;
--fx-translate-y: 0.5px;
+    -fx-pref-width: 0;
+    -fx-pref-height: 0;
+    -fx-scale-x: 0.525;
+    -fx-scale-y: 0.525;
+    -fx-translate-x: -21px;
+    -fx-translate-y: 0.5px;
 }
 
-Label > SVGPath, Label > AnchorPane, Label > AnchorPane > SVGPath,
-JFXButton > SVGPath, JFXButton > AnchorPane, JFXButton > AnchorPane > SVGPath {
--fx-fill: inherit;
+Label>SVGPath,
+Label>AnchorPane,
+Label>AnchorPane>SVGPath,
+JFXButton>SVGPath,
+JFXButton>AnchorPane,
+JFXButton>AnchorPane>SVGPath {
+    -fx-fill: inherit;
 }
 
 /* Buttons that contains a btn-icon on the left */
 .btn-with-icon {
--fx-label-padding: 0 0 0 10px;
--fx-content-display: center;
+    -fx-label-padding: 0 0 0 10px;
+    -fx-content-display: center;
 }
 
-.btn-primary, .btn-secondary {
-/* Regular */
--fx-font-size: 12px;
--fx-text-alignment: center;
--fx-background-radius: 6px;
--fx-border-radius: 6px;
--fx-border-width: 1px;
--fx-border-style: solid;
+.btn-primary,
+.btn-secondary {
+    /* Regular */
+    -fx-font-size: 12px;
+    -fx-text-alignment: center;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
 }
 
 .btn-primary {
-/* Regular */
--fx-text-fill: white;
--fx-background-color: -theme-color;
--fx-border-color: -theme-color;
+    /* Regular */
+    -fx-text-fill: white;
+    -fx-background-color: -theme-color;
+    -fx-border-color: -theme-color;
 }
 
 .btn-primary .btn-icon {
-/* Regular */
--fx-fill: white;
+    /* Regular */
+    -fx-fill: white;
 }
 
 .btn-secondary {
-/* Regular */
--fx-text-fill: -theme-color;
--fx-background-color: white;
--fx-border-color: -theme-color;
+    /* Regular */
+    -fx-text-fill: -theme-color;
+    -fx-background-color: white;
+    -fx-border-color: -theme-color;
 }
 
-.btn-secondary .btn-icon, .btn-iconified-secondary .btn-icon {
-/* Regular */
--fx-fill: -theme-color;
+.btn-secondary .btn-icon,
+.btn-iconified-secondary .btn-icon {
+    /* Regular */
+    -fx-fill: -theme-color;
 }
 
 .btn-iconified-secondary {
-/* Regular */
--fx-text-fill: -theme-color;
--fx-background-color: white;
--fx-background-radius: 38.2%;
--fx-border-color: -theme-color;
--fx-border-radius: 38.2%;
--fx-border-width: 1px;
--fx-border-style: solid;
+    /* Regular */
+    -fx-text-fill: -theme-color;
+    -fx-background-color: white;
+    -fx-background-radius: 38.2%;
+    -fx-border-color: -theme-color;
+    -fx-border-radius: 38.2%;
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
 }
 
 JFXCheckBox {
--jfx-checked-color: -theme-color;
--jfx-unchecked-color: dimgray;
+    -jfx-checked-color: -theme-color;
+    -jfx-unchecked-color: dimgray;
 }
 
 JFXSlider {
--jfx-default-thumb: -theme-color;
--jfx-default-track: -theme-color-light;
+    -jfx-default-thumb: -theme-color;
+    -jfx-default-track: -theme-color-light;
 }
 
 /*******************************************************************************
@@ -132,52 +138,52 @@ JFXSlider {
  ******************************************************************************/
 
 #Sidebar {
--fx-background-color: -theme-color-light;
+    -fx-background-color: -theme-color-light;
 }
 
 #Title {
--fx-fill: -theme-color;
--fx-font-size: 24px;
--fx-font-weight: bold;
+    -fx-fill: -theme-color;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
 }
 
 .menu-btn {
-/* Regular */
--fx-padding: 0 0 0 20px;
--fx-font-size: 18px;
--fx-font-weight: bold;
--fx-fill: -theme-color;
--fx-text-fill: -theme-color;
--fx-text-alignment: left;
--fx-background-color: white;
--fx-background-radius: 8px;
--fx-border-color: -theme-color;
--fx-border-radius: 8px;
--fx-border-width: 1.5px;
--fx-border-style: solid;
+    /* Regular */
+    -fx-padding: 0 0 0 20px;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: -theme-color;
+    -fx-text-fill: -theme-color;
+    -fx-text-alignment: left;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: -theme-color;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1.5px;
+    -fx-border-style: solid;
 }
 
 .menu-btn-active {
-/* Active */
--fx-fill: white;
--fx-text-fill: white;
--fx-background-color: -theme-color;
+    /* Active */
+    -fx-fill: white;
+    -fx-text-fill: white;
+    -fx-background-color: -theme-color;
 }
 
 #Start-btn {
-/* Regular */
--fx-padding: 0 0 0 20px;
--fx-font-size: 18px;
--fx-font-weight: bold;
--fx-fill: white;
--fx-text-fill: white;
--fx-text-alignment: left;
--fx-background-color: -theme-color;
--fx-background-radius: 18px;
--fx-border-color: -theme-color;
--fx-border-radius: 18px;
--fx-border-width: 1.5px;
--fx-border-style: solid;
+    /* Regular */
+    -fx-padding: 0 0 0 20px;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-fill: white;
+    -fx-text-fill: white;
+    -fx-text-alignment: left;
+    -fx-background-color: -theme-color;
+    -fx-background-radius: 18px;
+    -fx-border-color: -theme-color;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1.5px;
+    -fx-border-style: solid;
 }
 
 /*******************************************************************************
@@ -187,225 +193,229 @@ JFXSlider {
  ******************************************************************************/
 
 .wrapper {
--fx-padding: 15px;
+    -fx-padding: 15px;
 }
 
-.major-tool-bar-upper, .major-tool-bar-lower {
--fx-background-color: -theme-color-light;
--fx-border-style: none;
--fx-padding: 4px 8px 4px 8px;
+.major-tool-bar-upper,
+.major-tool-bar-lower {
+    -fx-background-color: -theme-color-light;
+    -fx-border-style: none;
+    -fx-padding: 4px 8px 4px 8px;
 }
 
 .major-tool-bar-upper {
--fx-background-radius: 8px 8px 8px 0;
+    -fx-background-radius: 8px 8px 8px 0;
 }
 
 .major-tool-bar-lower {
--fx-background-radius: 0 0 8px 8px;
+    -fx-background-radius: 0 0 8px 8px;
 }
 
 .info-pane-light {
--fx-background-color: white;
--fx-background-radius: 3px;
--fx-border-color: #95B6E588;
--fx-border-radius: 3px;
--fx-border-width: 1.25px;
--fx-border-style: solid;
+    -fx-background-color: white;
+    -fx-background-radius: 3px;
+    -fx-border-color: derive(-theme-color-light, 60%);
+    -fx-border-radius: 3px;
+    -fx-border-width: 1.25px;
+    -fx-border-style: solid;
 }
 
-.info-pane-light > VBox {
--fx-padding: 8px;
+.info-pane-light>VBox {
+    -fx-padding: 8px;
 }
 
 .flow-wrapper {
--fx-border-color: #95B6E588;
--fx-border-width: 1.25px 0 0 0;
--fx-border-style: solid;
--fx-fit-to-width: true;
--fx-fit-to-height: true;
+    -fx-border-color: derive(-theme-color-light, 60%);
+    -fx-border-width: 1.25px 0 0 0;
+    -fx-border-style: solid;
+    -fx-fit-to-width: true;
+    -fx-fit-to-height: true;
 }
 
 .tag-flow {
--fx-hgap: 4px;
--fx-vgap: 6px;
--fx-padding: 6px 4px 6px 4px;
+    -fx-hgap: 4px;
+    -fx-vgap: 6px;
+    -fx-padding: 6px 4px 6px 4px;
 }
 
 .btn-flow {
--fx-hgap: 2px;
--fx-vgap: 4px;
--fx-padding: 4px 0 4px 0;
+    -fx-hgap: 2px;
+    -fx-vgap: 4px;
+    -fx-padding: 4px 0 4px 0;
 }
 
 #Search-models-status {
--fx-fill: -theme-color;
--fx-font-size: 11px;
--fx-text-fill: -theme-color;
--fx-label-padding: 0 2px 0 2px;
+    -fx-fill: -theme-color;
+    -fx-font-size: 11px;
+    -fx-text-fill: -theme-color;
+    -fx-label-padding: 0 2px 0 2px;
 }
 
 #Search-models-list {
--fx-padding: 4px;
--fx-background-radius: 3px;
+    -fx-padding: 4px;
+    -fx-background-radius: 3px;
 }
 
 .Search-models-item {
-/* Regular */
--fx-cursor: hand;
--fx-padding: 4px 2px 4px 2px;
--fx-text-fill: dimgray;
--fx-background-color: transparent;
--fx-focus-traversable: true;
+    /* Regular */
+    -fx-cursor: hand;
+    -fx-padding: 4px 2px 4px 2px;
+    -fx-text-fill: dimgray;
+    -fx-background-color: transparent;
+    -fx-focus-traversable: true;
 }
 
 .Search-models-item-active {
-/* Active */
+    /* Active */
 }
 
 .Search-models-label {
--fx-text-overrun: ellipsis;
--fx-label-padding: 2px 2px 2px 4px;
--fx-background-color: transparent;
+    -fx-text-overrun: ellipsis;
+    -fx-label-padding: 2px 2px 2px 4px;
+    -fx-background-color: transparent;
 }
 
 .Search-models-label-primary {
--fx-font-size: 12px;
--fx-text-fill: -text-normal;
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-normal;
 }
 
 .Search-models-label-secondary {
--fx-font-size: 11px;
--fx-text-fill: dimgray;
+    -fx-font-size: 11px;
+    -fx-text-fill: dimgray;
 }
 
 #Search-models-list .Search-models-item-active .Search-models-label-primary {
--fx-font-size: 12.5px;
--fx-text-fill: -text-normal;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -text-normal;
 }
 
 #Search-models-list .Search-models-item-active .Search-models-label-secondary {
--fx-font-size: 11.5px;
--fx-text-fill: dimgray;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: dimgray;
 }
 
 #Search-models-list:focused .Search-models-item-active .Search-models-label-primary {
--fx-font-size: 12.5px;
--fx-text-fill: white;
+    -fx-font-size: 12.5px;
+    -fx-text-fill: white;
 }
 
 #Search-models-list:focused .Search-models-item-active .Search-models-label-secondary {
--fx-font-size: 11.5px;
--fx-text-fill: white;
+    -fx-font-size: 11.5px;
+    -fx-text-fill: white;
 }
 
 #Info-filter-label {
--fx-font-size: 12px;
--fx-text-fill: -theme-color;
+    -fx-font-size: 12px;
+    -fx-text-fill: -theme-color;
 }
 
 #Info-filter-label SVGPath {
--fx-fill: -theme-color;
+    -fx-fill: -theme-color;
 }
 
 #Info-filter-box {
--fx-font-size: 11px;
--fx-text-fill: dimgray;
+    -fx-font-size: 11px;
+    -fx-text-fill: dimgray;
 }
 
 .info-primary {
--fx-font-size: 18px;
--fx-text-fill: -text-normal;
--fx-font-weight: bold;
--fx-label-padding: 3px 1px 3px 1px;
--fx-wrap-text: true;
+    -fx-font-size: 18px;
+    -fx-text-fill: -text-normal;
+    -fx-font-weight: bold;
+    -fx-label-padding: 3px 1px 3px 1px;
+    -fx-wrap-text: true;
 }
 
 .info-secondary {
--fx-font-size: 12px;
--fx-text-fill: gray;
--fx-font-weight: normal;
--fx-label-padding: 2px 1px 2px 1px;
--fx-wrap-text: false;
+    -fx-font-size: 12px;
+    -fx-text-fill: gray;
+    -fx-font-weight: normal;
+    -fx-label-padding: 2px 1px 2px 1px;
+    -fx-wrap-text: false;
 }
 
 .info-type-badge {
--fx-font-size: 12px;
--fx-font-weight: bold;
--fx-text-fill: white;
--fx-text-alignment: justify;
--fx-background-color: derive(-theme-color, 20%);
--fx-background-radius: 6px;
--fx-label-padding: 2px 4px 2px 4px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: justify;
+    -fx-background-color: derive(-theme-color, 20%);
+    -fx-background-radius: 6px;
+    -fx-label-padding: 2px 4px 2px 4px;
 }
 
-.info-tag-badge, .info-tag-badge-active {
--fx-font-size: 11px;
--fx-text-fill: white;
--fx-background-radius: 0;
--fx-max-height: 14px;
--fx-effect: dropshadow(gaussian, derive(black, 80%), 2.5, 0.25, 0.5, 1);
+.info-tag-badge,
+.info-tag-badge-active {
+    -fx-font-size: 11px;
+    -fx-text-fill: white;
+    -fx-background-radius: 0;
+    -fx-max-height: 14px;
+    -fx-effect: dropshadow(gaussian, derive(black, 80%), 2.5, 0.25, 0.5, 1);
 }
 
 .info-tag-badge {
--fx-background-color: -theme-color-dim;
+    -fx-background-color: -theme-color-dim;
 }
 
 .info-tag-badge-active {
--fx-background-color: derive(-theme-color, 20%);
+    -fx-background-color: derive(-theme-color, 20%);
 }
 
 .config-group-title {
--fx-font-size: 14px;
--fx-text-fill: -theme-color;
--fx-label-padding: 0 0 0 6px;
--fx-border-width: 0 0 0 2px;
--fx-border-style: solid;
--fx-border-color: -theme-color;
+    -fx-font-size: 14px;
+    -fx-text-fill: -theme-color;
+    -fx-label-padding: 0 0 0 6px;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-style: solid;
+    -fx-border-color: -theme-color;
 }
 
-.config-field {
-}
+.config-field {}
 
 .config-field JFXComboBox {
--fx-font-size: 12px;
--fx-text-fill: -text-normal;
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-normal;
 }
 
-.config-field JFXCheckBox, .config-field HBox Label {
--fx-font-size: 12px;
--fx-text-fill: -text-normal;
--fx-label-padding: 4px;
+.config-field JFXCheckBox,
+.config-field HBox Label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-normal;
+    -fx-label-padding: 4px;
 }
 
 .config-field HBox {
--fx-padding: 8px 4px 4px 4px;
+    -fx-padding: 8px 4px 4px 4px;
 }
 
-.config-field HBox JFXCheckBox, .config-field HBox Label {
--fx-pref-width: 175px;
+.config-field HBox JFXCheckBox,
+.config-field HBox Label {
+    -fx-pref-width: 175px;
 }
 
 .config-field HBox ChoiceBox {
--fx-background-radius: 10px;
--fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
 }
 
 .config-field HBox JFXSlider {
--fx-show-tick-marks: true;
+    -fx-show-tick-marks: true;
 }
 
 .config-field Separator {
--fx-padding: 8px 0 8px 0;
--fx-opacity: 0.382;
+    -fx-padding: 8px 0 8px 0;
+    -fx-opacity: 0.382;
 }
 
 .config-hyper-link {
--fx-text-fill: -theme-color;
--fx-alignment: top-center;
+    -fx-text-fill: -theme-color;
+    -fx-alignment: top-center;
 }
 
-.config-hyper-link:hover, .config-hyper-link:focused {
--fx-underline: true;
+.config-hyper-link:hover,
+.config-hyper-link:focused {
+    -fx-underline: true;
 }
 
 /*******************************************************************************
@@ -416,71 +426,75 @@ JFXSlider {
 
 /* Expandable text area for popup dialogs */
 .popup-detail-field {
--fx-alignment: top-left;
--fx-font-size: 12px;
--fx-text-fill: dimgray;
--fx-pref-row-count: 12;
+    -fx-alignment: top-left;
+    -fx-font-size: 12px;
+    -fx-text-fill: dimgray;
+    -fx-pref-row-count: 12;
 }
 
 /* Progress bar's outer track */
-ProgressBar > .track {
--fx-background-color: #DDDDDDDD;
--fx-background-radius: 2.5px;
--fx-background-insets: 0;
+ProgressBar>.track {
+    -fx-background-color: #DDDDDDDD;
+    -fx-background-radius: 2.5px;
+    -fx-background-insets: 0;
 }
 
 /* Progress bar's inner bar */
-ProgressBar > .bar, ProgressBar:indeterminate > .bar {
--fx-background-color: derive(-theme-color, 20%);
--fx-background-radius: 2.5px;
--fx-background-insets: 0;
+ProgressBar>.bar,
+ProgressBar:indeterminate>.bar {
+    -fx-background-color: derive(-theme-color, 20%);
+    -fx-background-radius: 2.5px;
+    -fx-background-insets: 0;
 }
 
-#Loading-failure-tip, #Loading-waiting-tip {
--fx-background-color: #F4F4F4D0;
+#Loading-failure-tip,
+#Loading-waiting-tip {
+    -fx-background-color: #F4F4F4D0;
 }
 
 #Loading-failure-tip-text {
--fx-font-weight: bold;
+    -fx-font-weight: bold;
 }
 
-#Loading-failure-tip > * {
--fx-fill: dimgray;
+#Loading-failure-tip>* {
+    -fx-fill: dimgray;
 }
 
-#Loading-waiting-tip > * {
--fx-fill: derive(-theme-color, 20%);
--fx-font-weight: bold;
+#Loading-waiting-tip>* {
+    -fx-fill: derive(-theme-color, 20%);
+    -fx-font-weight: bold;
 }
 
 #Title-bar {
--fx-background-color: -theme-color;
+    -fx-background-color: -theme-color;
 }
 
 #Title-bar Text {
--fx-fill: white;
--fx-font-size: 12px;
--fx-font-weight: bold;
+    -fx-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
 
 #Title-bar JFXButton {
--fx-fill: white;
--fx-background-color: -theme-color;
--fx-background-radius: 0;
--fx-border-style: none;
--fx-min-width: 24px;
--fx-min-height: 24px;
--fx-max-width: 24px;
--fx-max-height: 24px;
--fx-focus-traversable: false;
+    -fx-fill: white;
+    -fx-background-color: -theme-color;
+    -fx-background-radius: 0;
+    -fx-border-style: none;
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-max-width: 24px;
+    -fx-max-height: 24px;
+    -fx-focus-traversable: false;
 }
 
-#Title-minimize-btn:hover, #Title-minimize-btn:focused {
--fx-background-color: #305890;
+#Title-minimize-btn:hover,
+#Title-minimize-btn:focused {
+    -fx-background-color: #305890;
 }
 
-#Title-close-btn:hover, #Title-close-btn:focused {
--fx-background-color: #CC2211;
+#Title-close-btn:hover,
+#Title-close-btn:focused {
+    -fx-background-color: #CC2211;
 }
 
 /*******************************************************************************
@@ -489,69 +503,77 @@ ProgressBar > .bar, ProgressBar:indeterminate > .bar {
  *                                                                             *
  ******************************************************************************/
 
-.scroll-bar > .thumb {
--fx-cursor: hand;
--fx-background-color: #BCBCC2;
--fx-background-insets: 0;
--fx-background-radius: 2px;
+.scroll-bar>.thumb {
+    -fx-cursor: hand;
+    -fx-background-color: #BCBCC2;
+    -fx-background-insets: 0;
+    -fx-background-radius: 2px;
 }
 
-.scroll-bar:vertical > .track-background, .scroll-bar:horizontal > .track-background {
--fx-cursor: default;
--fx-background-color: #F1F1F5;
--fx-background-insets: 0;
--fx-background-radius: 1px;
+.scroll-bar:vertical>.track-background,
+.scroll-bar:horizontal>.track-background {
+    -fx-cursor: default;
+    -fx-background-color: #F1F1F5;
+    -fx-background-insets: 0;
+    -fx-background-radius: 1px;
 }
 
-.scroll-bar > .increment-button, .scroll-bar > .decrement-button,
-.scroll-bar:hover > .increment-button, .scroll-bar:hover > .decrement-button {
--fx-cursor: hand;
--fx-background-color: transparent;
+.scroll-bar>.increment-button,
+.scroll-bar>.decrement-button,
+.scroll-bar:hover>.increment-button,
+.scroll-bar:hover>.decrement-button {
+    -fx-cursor: hand;
+    -fx-background-color: transparent;
 }
 
-.scroll-bar:vertical > .increment-button, .scroll-bar:vertical > .decrement-button {
--fx-padding: 5px 2px 5px 2px;
+.scroll-bar:vertical>.increment-button,
+.scroll-bar:vertical>.decrement-button {
+    -fx-padding: 5px 2px 5px 2px;
 }
 
-.scroll-bar:horizontal > .increment-button, .scroll-bar:horizontal > .decrement-button {
--fx-padding: 2px 5px 2px 5px;
+.scroll-bar:horizontal>.increment-button,
+.scroll-bar:horizontal>.decrement-button {
+    -fx-padding: 2px 5px 2px 5px;
 }
 
 /* All Arrows */
-.scroll-bar > .increment-button > .increment-arrow, .scroll-bar > .decrement-button > .decrement-arrow {
--fx-background-color: #9696A0;
+.scroll-bar>.increment-button>.increment-arrow,
+.scroll-bar>.decrement-button>.decrement-arrow {
+    -fx-background-color: #9696A0;
 }
 
 /* Up Arrow */
-.scroll-bar:vertical > .increment-button > .increment-arrow {
--fx-shape: "M298 426h428l-214 214z";
+.scroll-bar:vertical>.increment-button>.increment-arrow {
+    -fx-shape: "M298 426h428l-214 214z";
 }
 
 /* Down Arrow */
-.scroll-bar:vertical > .decrement-button > .decrement-arrow {
--fx-shape: "M298 598l214-214 214 214h-428z";
+.scroll-bar:vertical>.decrement-button>.decrement-arrow {
+    -fx-shape: "M298 598l214-214 214 214h-428z";
 }
 
 /* Right Arrow */
-.scroll-bar:horizontal > .increment-button > .increment-arrow {
--fx-shape: "M0 428l0 -428l214 214l-214 214z";
+.scroll-bar:horizontal>.increment-button>.increment-arrow {
+    -fx-shape: "M0 428l0 -428l214 214l-214 214z";
 }
 
 /* Left Arrow */
-.scroll-bar:horizontal > .decrement-button > .decrement-arrow {
--fx-shape: "M214 0l0 428l-214 -214l214 -214z";
+.scroll-bar:horizontal>.decrement-button>.decrement-arrow {
+    -fx-shape: "M214 0l0 428l-214 -214l214 -214z";
 }
 
 .scroll-pane {
--fx-background-insets: 0;
--fx-padding: 0;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
 }
 
-.scroll-pane:focused, .scroll-pane .corner {
--fx-background-insets: 0;
+.scroll-pane:focused,
+.scroll-pane .corner {
+    -fx-background-insets: 0;
 }
 
-.scroll-v, .flow-wrapper {
--fx-hbar-policy: never;
--fx-vbar-policy: as-needed;
+.scroll-v,
+.flow-wrapper {
+    -fx-hbar-policy: never;
+    -fx-vbar-policy: as-needed;
 }
