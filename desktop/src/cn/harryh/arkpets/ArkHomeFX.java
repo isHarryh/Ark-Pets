@@ -52,34 +52,11 @@ public class ArkHomeFX extends Application {
         Logger.info("Launcher", "Starting");
         this.stage = stage;
 
-        // Initialize socket server and HostTray.
-        HostTray hostTray = HostTray.getInstance();
-        hostTray.bindStage(stage);
-        try {
-            SocketServer.getInstance().startServer(hostTray);
-            hostTray.applyTrayIcon();
-        } catch (PortUtils.NoPortAvailableException ignored) {
-            Logger.error("SocketServer", "No available port, thus server cannot be started");
-            // No HostTray icon will be applied when this situation happens.
-        } catch (PortUtils.ServerCollisionException ignored) {
-            Logger.error("SocketServer", "Server is already running");
-            SocketClient socketClient = new SocketClient();
-            socketClient.connect(() -> {
-                        Logger.info("Launcher", "Request to start an existed Launcher");
-                        socketClient.sendRequest(SocketData.ofOperation(UUID.randomUUID(), SocketData.Operation.ACTIVATE_LAUNCHER));
-                        socketClient.disconnect();
-                    },
-                    new SocketClient.ClientSocketSession(socketClient, null));
-            // Explicitly cancel the followed initialization in this start method.
-            Platform.exit();
-            return;
-        }
-
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
         fxml0.initializeWith(this);
-        root = (StackPane) fxml0.content();
-        rootModule = (RootModule) fxml0.controller();
+        root = (StackPane)fxml0.content();
+        rootModule = (RootModule)fxml0.controller();
 
         // Setup scene and primary stage.
         Logger.info("Launcher", "Creating main scene");
@@ -92,9 +69,35 @@ public class ArkHomeFX extends Application {
         stage.setTitle(desktopTitle);
         rootModule.titleText.setText(desktopTitle);
 
-        // After the stage is shown, do initialize modules.
+        // After the stage is shown, do initialization.
         stage.show();
         rootModule.popSplashScreen(e -> {
+            // Initialize socket server and HostTray.
+            try {
+                HostTray hostTray = HostTray.getInstance();
+                hostTray.bindStage(stage);
+                SocketServer.getInstance().startServer(hostTray);
+                hostTray.applyTrayIcon();
+            } catch (PortUtils.NoPortAvailableException ex) {
+                Logger.error("SocketServer", "No available port, thus server cannot be started");
+                // No HostTray icon will be applied when this situation happens.
+            } catch (PortUtils.ServerCollisionException ex) {
+                Logger.error("SocketServer", "Server is already running");
+                SocketClient socketClient = new SocketClient();
+                socketClient.connect(() -> {
+                            Logger.info("Launcher", "Request to start an existed Launcher");
+                            socketClient.sendRequest(SocketData.ofOperation(UUID.randomUUID(), SocketData.Operation.ACTIVATE_LAUNCHER));
+                            socketClient.disconnect();
+                        },
+                        new SocketClient.ClientSocketSession(socketClient, null));
+                // Explicitly cancel the followed initialization in this start method.
+                Platform.exit();
+                return;
+            } catch (Exception ex) {
+                Logger.error("Launcher", "Failed to initialize socket server or HostTray, details see below.", ex);
+            }
+
+            // Initialize modules.
             Logger.info("Launcher", "Loading modules");
             try {
                 LoadFXMLResult<ArkHomeFX> fxml1 = FXMLHelper.loadFXML("/UI/ModelsModule.fxml");

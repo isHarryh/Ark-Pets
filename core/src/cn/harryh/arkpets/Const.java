@@ -26,9 +26,9 @@ public final class Const {
     public static final String desktopTitle = appName + " Launcher " + appVersion;
 
     // IO presets
-    public static final int zipBufferSizeDefault      = 8 * 1024;
-    public static final int httpBufferSizeDefault     = 8 * 1024;
-    public static final int httpTimeoutDefault        = 30 * 1000;
+    public static final int zipBufferSizeDefault      = 16 * 1024;
+    public static final int httpBufferSizeDefault     = 16 * 1024;
+    public static final int httpTimeoutDefault        = 20 * 1000;
     public static final long diskFreeSpaceRecommended = 1024 * 1024 * 1024L;
 
     // Graphics presets
@@ -71,7 +71,6 @@ public final class Const {
     public static final String serverHost           = "localhost";
     public static final int[] serverPorts           = {8686, 8866, 8989, 8899, 8800};
     public static final int reconnectDelayMillis    = 5 * 1000;
-    public static final int reconnectPeriodMillis   = 5 * 1000;
 
     // Misc constants
     public static String ipPortRegex = "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$";

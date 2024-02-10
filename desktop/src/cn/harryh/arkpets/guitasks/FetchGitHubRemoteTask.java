@@ -76,6 +76,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
+                            selectedSource.receiveError();
                             break;
                         }
                     }

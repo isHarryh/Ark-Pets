@@ -18,7 +18,7 @@ import java.util.*;
 public class NetUtils {
     private static final int k = 1024;
     private static final int delayTestPort = 443;
-    private static final int delayUpThreshold = 2000;
+    private static final int delayUpThreshold = 1500;
     private static final DecimalFormat df = new DecimalFormat("0.0");
 
     public static final ArrayList<Source> ghSources;
@@ -56,18 +56,17 @@ public class NetUtils {
         return "Unknown size";
     }
 
-    /** Opens the given URL in the browser.
+    /**
+     * Opens the given URL in the browser.
+     *
      * @param url The URL to browse.
-     * @return true if success, otherwise false.
      */
-    public static boolean browseWebpage(String url) {
+    public static void browseWebpage(String url) {
         try {
             Logger.debug("Network", "Opening the URL " + url + " in the browser");
             Desktop.getDesktop().browse(URI.create(url));
-            return true;
         } catch (IOException e) {
             Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
-            return false;
         }
     }
 

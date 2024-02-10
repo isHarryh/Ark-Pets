@@ -464,7 +464,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         selectedModelName.setText(asset.name);
         selectedModelAppellation.setText(asset.appellation);
         selectedModelSkinGroupName.setText(asset.skinGroupName);
-        selectedModelType.setText(asset.type);
+        selectedModelType.setText(app.modelsDataset.sortTags == null ?
+                asset.type : app.modelsDataset.sortTags.getOrDefault(asset.type, asset.type));
         Tooltip selectedModelNameTip = new Tooltip(asset.name);
         Tooltip selectedModelAppellationTip = new Tooltip(asset.appellation);
         Tooltip selectedModelSkinGroupNameTip = new Tooltip(asset.skinGroupName);
@@ -481,7 +482,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         infoPaneTagFlow.getChildren().clear();
         asset.sortTags.forEach(o -> {
             String s = o.toString();
-            String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
+            String t = app.modelsDataset.sortTags == null ?
+                    s : app.modelsDataset.sortTags.getOrDefault(s, s);
             JFXButton tag = new JFXButton(t);
             tag.getStyleClass().add("info-tag-badge-active");
             tag.setOnAction(e -> {

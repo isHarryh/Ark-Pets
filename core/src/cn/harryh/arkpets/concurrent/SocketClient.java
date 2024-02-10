@@ -33,7 +33,7 @@ public class SocketClient {
                            }
                        },
                 reconnectDelayMillis,
-                reconnectPeriodMillis
+                reconnectDelayMillis
         );
     }
 

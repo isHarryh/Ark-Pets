@@ -33,7 +33,7 @@ public class MemberTrayProxy extends MemberTray {
 
     public void onCanChangeStage() {
         Logger.info("ProxyTray", "Can change stage");
-        popMenu.add(optChangeStage, popMenu.getSubElements().length - 2);
+        popMenu.add(optChangeStage, 3);
     }
 
     @Override
