@@ -1,5 +1,22 @@
 # 更新日志 / CHANGELOG
 
+## v3.0
+| **新增**                                                      |                                                                             |
+|:------------------------------------------------------------|:----------------------------------------------------------------------------|
+| [`#40`]<br>[`#59`]<br>[`#60`]<br>[`3253706`]<br>[`7b2e856`] | 新增了**集成托盘**功能和 Socket C/S 通信架构，现在可以通过一个集成托盘来管理已启动的桌宠。<br>新增了启动器**单实例化**的特性。 |
+| [`ff82a1e`]                                                 | 新增了**标签筛选**功能，现在可以通过选择角色标签来筛选模型列表。                                          |
+| [`ff82a1e`]                                                 | 新增了可以**导出模型仓库的压缩包**的功能。<br>重构了模型页面，并将模型下载等功能集成为了**模型库管理**面板。                |
+| [`ff82a1e`]                                                 | 新增了内置的启动器窗口**标题栏**，取代了默认的系统标题栏，以使观感更加统一。<br>新增了启动和退出启动器的**闪屏画面**。           |
+| [`938ecbb`]                                                 | 新增了鼠标点击透明区域后，鼠标事件可以传递到某些下层窗口的功能。                                            |
+| [`741cf00`]                                                 | 新增了关闭启动器界面时的确认弹窗。<br>新增了支持设置是否在退出启动器的同时退出已启动的桌宠的功能。<br>新增了模型库管理中的一个帮助链接。    |
+| [`0672739`]                                                 | 新增了应用于桌宠位置和图形变换的三次缓入（EaseOutCubic），取代了原来的线性缓动（Linear），以使观感更加丝滑。             |
+
+| **优化**                     |                                           |
+|:---------------------------|:------------------------------------------|
+| [`d47e424`]<br>[`e1e5439`] | 优化了启动器界面的样式表，统一了复选框和滑动条组件的配色，微调了部分配色的颜色值。 |
+| [`3d86cf6`]                | 微调了网络连接超时的时间阈值。                           |
+| [`f261c35`]                | 优化了数据集不兼容的提示的显示逻辑和位置。                     |
+
 ## v2.4
 | **新增**      |                                                     |
 |:------------|:----------------------------------------------------|
@@ -304,3 +321,18 @@
 [`727a34e`]: https://github.com/isHarryh/Ark-Pets/commit/727a34eed5d1a41ee3e6f153726f2bcf92a28958
 [`f2683f9`]: https://github.com/isHarryh/Ark-Pets/commit/f2683f9d40bfb09fdacee719df9a001f55fa9d8f
 [`5e15d00`]: https://github.com/isHarryh/Ark-Pets/commit/5e15d000bd77006da596696de2e41024fb4183d4
+
+<!-- Links to v3.x References -->
+[`#40`]: https://github.com/isHarryh/Ark-Pets/issues/40
+[`#59`]: https://github.com/isHarryh/Ark-Pets/issues/59
+[`#60`]: https://github.com/isHarryh/Ark-Pets/issues/60
+[`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
+[`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
+[`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
+[`938ecbb`]: https://github.com/isHarryh/Ark-Pets/commit/938ecbbd4c010cd74088763c2124d68cee9d8042
+[`741cf00`]: https://github.com/isHarryh/Ark-Pets/commit/741cf005040bcdc128d2a50bae0f314b3a6a54ad
+[`0672739`]: https://github.com/isHarryh/Ark-Pets/commit/06727395c00116b15208b3201b31308727655ac7
+[`d47e424`]: https://github.com/isHarryh/Ark-Pets/commit/d47e424cca356942d6033c5d8445dd4682975454
+[`e1e5439`]: https://github.com/isHarryh/Ark-Pets/commit/e1e54390f9cb43d56cdbc68e7a5c8baf50f23764
+[`3d86cf6`]: https://github.com/isHarryh/Ark-Pets/commit/3d86cf683296e6ab4ea5058c74a200150a4eb982
+[`f261c35`]: https://github.com/isHarryh/Ark-Pets/commit/f261c353d4b5b9aa2c679096a406aeb0ccf6d66a

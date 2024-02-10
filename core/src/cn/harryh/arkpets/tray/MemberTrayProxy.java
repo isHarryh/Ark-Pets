@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2024, Harry Huang, Half Nothing
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.tray;
 
 import cn.harryh.arkpets.concurrent.SocketData;

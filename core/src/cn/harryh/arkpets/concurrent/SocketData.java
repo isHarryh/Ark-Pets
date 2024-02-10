@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2024, Harry Huang, Half Nothing
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.concurrent;
 
 import com.alibaba.fastjson.JSONObject;
@@ -9,6 +12,8 @@ import java.util.UUID;
 
 
 public class SocketData implements Serializable {
+    /** ArkPets cross-process-communication operations.
+     */
     public enum Operation {
         LOGIN,
         LOGOUT,
@@ -23,8 +28,17 @@ public class SocketData implements Serializable {
         ACTIVATE_LAUNCHER
     }
 
+    /** The UUID for identification.
+     */
     public UUID uuid;
+
+    /** The {@link Operation} of this request.
+     */
     public Operation operation;
+
+    /** The optional message string.
+     * Note that using {@link #getMsgString()} is recommended.
+     */
     public StringDTO msg;
 
     private SocketData(UUID uuid, Operation operation, StringDTO msg) {

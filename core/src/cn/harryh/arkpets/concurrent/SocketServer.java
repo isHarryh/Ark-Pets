@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2024, Harry Huang, Half Nothing
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.concurrent;
 
 import cn.harryh.arkpets.tray.HostTray;
@@ -33,6 +36,11 @@ public final class SocketServer {
     private SocketServer() {
     }
 
+    /** Starts the server.
+     * @param hostTray The bound HostTray.
+     * @throws PortUtils.NoPortAvailableException If every port is busy.
+     * @throws PortUtils.ServerCollisionException If a server is already running.
+     */
     public synchronized void startServer(HostTray hostTray)
             throws PortUtils.NoPortAvailableException, PortUtils.ServerCollisionException {
         Logger.info("SocketServer", "Request to start server");
@@ -59,6 +67,8 @@ public final class SocketServer {
         ProcessPool.getInstance().execute(listener);
     }
 
+    /** Stops the server and close all the sessions.
+     */
     public synchronized void stopServer() {
         Logger.info("SocketServer", "Request to stop server");
         if (listener != null)

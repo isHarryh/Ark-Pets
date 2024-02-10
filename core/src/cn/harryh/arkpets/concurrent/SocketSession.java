@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2024, Harry Huang, Half Nothing
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.concurrent;
 
 import cn.harryh.arkpets.utils.Logger;
@@ -21,6 +24,9 @@ abstract public class SocketSession implements Runnable {
     public SocketSession() {
     }
 
+    /** Sets the target socket to I/O.
+     * @param target The target socket.
+     */
     public final void setTarget(Socket target) {
         try {
             this.target = target;
@@ -40,6 +46,8 @@ abstract public class SocketSession implements Runnable {
         return target != null ? target.getPort() : 0;
     }
 
+    /** Closes this session together with the socket and the I/O stream.
+     */
     public final void close() {
         if (!hasTarget || hasClosed)
             return;
@@ -83,6 +91,9 @@ abstract public class SocketSession implements Runnable {
         }
     }
 
+    /** Sends a request via this session.
+     * @param request The request to be sent.
+     */
     public final void send(Object request) {
         if (!hasTarget)
             throw new IllegalStateException("The target socket has not been set yet.");
@@ -90,11 +101,18 @@ abstract public class SocketSession implements Runnable {
         out.println(request);
     }
 
+    /** Handles a received request from this session.
+     * @param request The received request.
+     */
     abstract public void receive(String request);
 
+    /** When the session is to be closed.
+     */
     protected void onClosed() {
     }
 
+    /** When the listener of this session is broken due to some socket issues.
+     */
     protected void onBroken() {
     }
 
