@@ -21,21 +21,14 @@
 /* Drop shadow for Nodes */
 .shadowed {
     /* Note: dropshadow(type, color, radius, spread, x, y) */
-    -fx-effect: dropshadow(gaussian, derive(black, 80%), 10, 0.1, 0, 0.5);
-}
-
-/* Fluorescent strokes for Shapes */
-.fluorescent {
-    -fx-stroke: #80DFFF;
-    -fx-stroke-type: outside;
-    -fx-stroke-width: 0.382px;
+    -fx-effect: dropshadow(gaussian, derive(black, 90%), 10, 0.1, 0, 0.5);
 }
 
 .root {
     -text-normal: #242424;
     -theme-color: #2A528C;
     -theme-color-dim: #8492A5;
-    -theme-color-light: #82A6D8;
+    -theme-color-light: #86ABDE;
 }
 
 /*******************************************************************************
@@ -145,13 +138,16 @@ JFXSlider {
     -fx-fill: -theme-color;
     -fx-font-size: 24px;
     -fx-font-weight: bold;
+    -fx-stroke: #80DFFF;
+    -fx-stroke-type: outside;
+    -fx-stroke-width: 0.5px;
 }
 
 .menu-btn {
     /* Regular */
     -fx-padding: 0 0 0 20px;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: normal;
     -fx-fill: -theme-color;
     -fx-text-fill: -theme-color;
     -fx-text-alignment: left;
@@ -170,11 +166,11 @@ JFXSlider {
     -fx-background-color: -theme-color;
 }
 
-#Start-btn {
+#Launch-btn {
     /* Regular */
     -fx-padding: 0 0 0 20px;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: normal;
     -fx-fill: white;
     -fx-text-fill: white;
     -fx-text-alignment: left;
@@ -351,7 +347,7 @@ JFXSlider {
     -fx-text-fill: white;
     -fx-background-radius: 0;
     -fx-max-height: 14px;
-    -fx-effect: dropshadow(gaussian, derive(black, 80%), 2.5, 0.25, 0.5, 1);
+    -fx-effect: dropshadow(gaussian, derive(black, 90%), 2.5, 0.25, 0.5, 1);
 }
 
 .info-tag-badge {

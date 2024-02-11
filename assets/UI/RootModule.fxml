@@ -5,16 +5,16 @@
     At GPL-3.0 License
 -->
 
-<!-- ***** Root Node of ArkPets GUI Scene ***** -->
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
-<?import javafx.scene.effect.DropShadow?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.*?>
 <?import javafx.scene.shape.*?>
-<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.*?>
+
+<!-- ***** Root Node of ArkPets GUI Scene ***** -->
 <StackPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
            prefHeight="400.0" prefWidth="600.0" styleClass="root" stylesheets="@Main.css"
            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
@@ -27,8 +27,9 @@
         <Pane id="Sidebar" fx:id="sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
               minWidth="-Infinity" prefHeight="376.0" prefWidth="140.0" styleClass="shadowed"
               AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" StackPane.alignment="TOP_LEFT">
-            <Text id="Title" layoutX="12.0" layoutY="55.0" styleClass="fluorescent" text="ArkPets"
-                  textAlignment="CENTER" wrappingWidth="117.0"/>
+            <Text id="Title" layoutX="12.0" layoutY="55.0" text="ArkPets" textAlignment="CENTER"
+                  wrappingWidth="117.0">
+            </Text>
             <Line endX="128.0" layoutY="66.0" startX="12.0" stroke="#0000009e"/>
             <GridPane alignment="CENTER" layoutY="88.0" prefHeight="180.0" prefWidth="140.0" styleClass="menu">
                 <columnConstraints>
@@ -79,7 +80,7 @@
                     </graphic>
                 </JFXButton>
             </GridPane>
-            <JFXButton id="Start-btn" fx:id="launchBtn" layoutX="25.0" layoutY="310.0" mnemonicParsing="false"
+            <JFXButton id="Launch-btn" fx:id="launchBtn" layoutX="25.0" layoutY="310.0" mnemonicParsing="false"
                        prefHeight="36.0" prefWidth="90.0" text="启动" textAlignment="CENTER">
                 <graphic>
                     <AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="24.0" prefWidth="2.0"
@@ -140,7 +141,7 @@
                 <HBox.margin>
                     <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
                 </HBox.margin>
-                <Image url="@/icons/icon.png" requestedHeight="512.0" requestedWidth="512.0"/>
+                <Image requestedHeight="512.0" requestedWidth="512.0" url="@/icons/icon.png"/>
             </ImageView>
             <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" text="ArkPets Launcher">
                 <HBox.margin>
