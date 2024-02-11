@@ -136,7 +136,7 @@
             <Label text="筛选" styleClass="info-type-badge"/>
         </VBox>
         <VBox AnchorPane.bottomAnchor="0.0" prefWidth="${_infoPaneW}">
-            <ScrollPane prefHeight="165.0" styleClass="flow-wrapper">
+            <ScrollPane prefHeight="180.0" styleClass="flow-wrapper">
                 <FlowPane fx:id="filterPaneTagFlow" styleClass="tag-flow"/>
             </ScrollPane>
             <HBox spacing="8" alignment="CENTER_RIGHT">

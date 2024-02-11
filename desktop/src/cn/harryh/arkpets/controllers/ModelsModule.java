@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -460,7 +461,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             });
             filterPaneTagFlow.getChildren().clear();
             if (assetItemList != null && app.modelsDataset != null) {
-                assetItemList.extract(AssetItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS).forEach(s -> {
+                ArrayList<String> sortTags = new ArrayList<>(assetItemList.extract(AssetItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS));
+                sortTags.sort(Comparator.naturalOrder());
+                sortTags.forEach(s -> {
                     String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
                     JFXButton tag = new JFXButton(t);
                     tag.getStyleClass().add("info-tag-badge");
