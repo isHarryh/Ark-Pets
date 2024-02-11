@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.concurrent.ProcessPool;
 import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
 import javafx.collections.ObservableList;
@@ -209,7 +210,7 @@ public class GuiPrefabs {
             layout.setActions(DialogUtil.getOkayButton(dialog, root));
             dialog.setContent(layout);
 
-            if (e instanceof JavaProcess.UnexpectedExitCodeException) {
+            if (e instanceof ProcessPool.UnexpectedExitCodeException) {
                 h2.setText("检测到桌宠异常退出");
                 h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
             } else if (e instanceof FileNotFoundException) {

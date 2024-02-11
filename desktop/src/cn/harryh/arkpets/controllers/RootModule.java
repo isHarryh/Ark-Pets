@@ -11,7 +11,6 @@ import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.JavaProcess;
 import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -42,7 +41,7 @@ import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
 
 public final class RootModule implements Controller<ArkHomeFX> {
     public Handbook trayExitHandbook = new TrayExitHandBook();
-    public JavaProcess.UnexpectedExitCodeException lastLaunchFailed;
+    public ProcessPool.UnexpectedExitCodeException lastLaunchFailed;
     public GuiPrefabs.PeerNodeComposer moduleWrapperComposer;
 
     @FXML
@@ -158,7 +157,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 // ArkPets core finalized.
                 if (!future.get().isSuccess()) {
                     Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code -1). Please check the log file for details.");
-                    lastLaunchFailed = new JavaProcess.UnexpectedExitCodeException(-1);
+                    lastLaunchFailed = new ProcessPool.UnexpectedExitCodeException(-1);
                     return false;
                 }
                 Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
