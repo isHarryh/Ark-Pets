@@ -25,6 +25,7 @@ public class HWndCtrl {
     public final int posRight;
     public final int windowWidth;
     public final int windowHeight;
+
     public static final HWndCtrl EMPTY = new HWndCtrl();
 
     public static final int WS_EX_TOPMOST       = 0x00000008;
@@ -195,14 +196,20 @@ public class HWndCtrl {
      */
     public void sendMouseEvent(int msg, int x, int y) {
         int wParam = switch (msg) {
-            case WM_LBUTTONDOWN, WM_LBUTTONUP -> MK_LBUTTON;
-            case WM_RBUTTONDOWN, WM_RBUTTONUP -> MK_RBUTTON;
-            case WM_MBUTTONDOWN, WM_MBUTTONUP -> MK_MBUTTON;
+            case WM_LBUTTONDOWN -> MK_LBUTTON;
+            case WM_RBUTTONDOWN -> MK_RBUTTON;
+            case WM_MBUTTONDOWN -> MK_MBUTTON;
             default -> 0;
         };
-        int lParam = (y << 16) | (x & 0xFFFF);
-        User32.INSTANCE.SendMessage(hWnd, msg, new WinDef.WPARAM(0x0021), new WinDef.LPARAM(0));
+        int lParam = (y << 16) | x;
         User32.INSTANCE.SendMessage(hWnd, msg, new WinDef.WPARAM(wParam), new WinDef.LPARAM(lParam));
+    }
+
+    /** Gets a new HWndCtrl which contains the updated information of this window.
+     * @return The up-to-dated HWndCtrl.
+     */
+    public HWndCtrl updated() {
+        return new HWndCtrl(hWnd);
     }
 
     /** Gets the current list of windows.

@@ -182,49 +182,43 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 			if (!isMouseAtSolidPixel()) {
 				// Transfer mouse event
 				RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
-				if (rwp != null) {
-					int msg = switch (button) {
+				if (rwp != null)
+					rwp.sendMouseEvent(switch (button) {
 						case Input.Buttons.LEFT -> HWndCtrl.WM_LBUTTONDOWN;
 						case Input.Buttons.RIGHT -> HWndCtrl.WM_RBUTTONDOWN;
 						case Input.Buttons.MIDDLE -> HWndCtrl.WM_MBUTTONDOWN;
 						default -> 0;
-					};
-					if (msg != 0)
-						rwp.sendMouseEvent(msg);
-				}
+					});
 			} else {
 				if (button == Input.Buttons.LEFT) {
-					Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+					// Left Click: Play the specified animation
 					changeAnimation(behavior.clickStart());
 					tray.hideDialog();
-					return true;
 				} else if (button == Input.Buttons.RIGHT) {
-					// Toggle tray dialog:
-					tray.toggleDialog((int) (plane.getX() + screenX), (int) (-plane.getY() - WD_H));
-					return true;
+					// Right Click: Toggle the menu
+					tray.toggleDialog((int)(plane.getX() + screenX), (int)(-plane.getY() - WD_H));
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
-		if (!isMouseAtSolidPixel()) {
-			// Transfer mouse event
-			RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
-			if (rwp != null)
-				rwp.sendMouseEvent(HWndCtrl.WM_MOUSEMOVE);
-		} else {
-			mouse_drag = true;
-			int t = (int) Math.signum(screenX - mouse_pos.x);
-			mouse_intention_x = t == 0 ? mouse_intention_x : t;
-			int x = (int) (windowPosition.now().x + screenX - mouse_pos.x);
-			int y = (int) (windowPosition.now().y + screenY - mouse_pos.y);
-			plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(WD_H + y));
-			windowPosition.setToEnd();
-			return true;
+		Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
+		if (pointer <= 0) {
+			if (isMouseAtSolidPixel()) {
+				mouse_drag = true;
+				int t = (int)Math.signum(screenX - mouse_pos.x);
+				mouse_intention_x = t == 0 ? mouse_intention_x : t;
+				// Update window position
+				int x = (int)(windowPosition.now().x + screenX - mouse_pos.x);
+				int y = (int)(windowPosition.now().y + screenY - mouse_pos.y);
+				plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(WD_H + y));
+				windowPosition.setToEnd();
+				tray.hideDialog();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -234,20 +228,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		Logger.debug("Input", "Click- Btn " + button +" @ " + screenX + ", " + screenY);
 		mouse_pos.set(screenX, screenY);
 		if (pointer <= 0) {
-			if (!isMouseAtSolidPixel()) {
-				// Transfer mouse event
-				RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
-				if (rwp != null) {
-					int msg = switch (button) {
-						case Input.Buttons.LEFT -> HWndCtrl.WM_LBUTTONUP;
-						case Input.Buttons.RIGHT -> HWndCtrl.WM_RBUTTONUP;
-						case Input.Buttons.MIDDLE -> HWndCtrl.WM_MBUTTONUP;
-						default -> 0;
-					};
-					if (msg != 0)
-						rwp.sendMouseEvent(msg);
-				}
-			} else if (mouse_drag) {
+			if (mouse_drag) {
+				// Update the z-axis of the character
 				cha.position.reset(cha.position.end().x, cha.position.end().y, mouse_intention_x);
 				if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
 					AnimData anim = cha.getPlaying();
@@ -257,8 +239,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                     AnimData anim = tray.keepAnim;
 					tray.keepAnim = anim.derive(anim.offsetY(), Math.abs(anim.mobility()) * mouse_intention_x);
                 }
-            } else if (button == Input.Buttons.LEFT) {
+            } else if (!isMouseAtSolidPixel()) {
+				// Transfer mouse event
+				RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+				if (rwp != null)
+					rwp.sendMouseEvent(switch (button) {
+						case Input.Buttons.LEFT -> HWndCtrl.WM_LBUTTONUP;
+						case Input.Buttons.RIGHT -> HWndCtrl.WM_RBUTTONUP;
+						case Input.Buttons.MIDDLE -> HWndCtrl.WM_MBUTTONUP;
+						default -> 0;
+					});
+			} else if (button == Input.Buttons.LEFT) {
+				// Left Click: Play the specified animation
 				changeAnimation(behavior.clickEnd());
+				tray.hideDialog();
 			}
         }
 		mouse_drag = false;
@@ -278,6 +272,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public boolean keyTyped(char character) {
 		Logger.debug("Plane Debug Msg", plane.getDebugMsg());
+		Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
 		return false;
 	}
 
@@ -516,8 +511,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
 		public void sendMouseEvent(int msg) {
-			//Logger.debug("Input", "Transfer mouse event to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
-			hWndCtrl.sendMouseEvent(msg, relX, relY);
+			if (msg == 0)
+				return;
+			//Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
+			hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
 		}
 	}
 }
