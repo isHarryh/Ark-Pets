@@ -97,12 +97,6 @@ JFXButton>AnchorPane>SVGPath {
     -fx-border-color: -theme-color;
 }
 
-.btn-secondary .btn-icon,
-.btn-iconified-secondary .btn-icon {
-    /* Regular */
-    -fx-fill: -theme-color;
-}
-
 .btn-iconified-secondary {
     /* Regular */
     -fx-text-fill: -theme-color;
@@ -112,6 +106,12 @@ JFXButton>AnchorPane>SVGPath {
     -fx-border-radius: 38.2%;
     -fx-border-width: 1px;
     -fx-border-style: solid;
+}
+
+.btn-secondary .btn-icon,
+.btn-iconified-secondary .btn-icon {
+    /* Regular */
+    -fx-fill: -theme-color;
 }
 
 JFXCheckBox {

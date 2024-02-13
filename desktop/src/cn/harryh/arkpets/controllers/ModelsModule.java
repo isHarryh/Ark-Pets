@@ -431,19 +431,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             Logger.info("ModelManager", "Reloading");
             initModelAssets(doPopNotice);
             initModelSearch();
-            modelSearch("");
-            // Select recent model
-            if (assetItemList != null && !modelCellList.isEmpty() &&
-                    app.config.character_asset != null && !app.config.character_asset.isEmpty()) {
-                // Scroll to recent selected model
-                AssetItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
-                if (recentSelected != null)
-                    for (JFXListCell<AssetItem> cell : searchModelView.getItems())
-                        if (recentSelected.equals(cell.getItem())) {
-                            searchModelView.scrollTo(cell);
-                            searchModelView.getSelectionModel().select(cell);
-                        }
-            }
             // Setup filter pane
             filterTagSet = FXCollections.observableSet();
             filterTagSet.addListener((SetChangeListener<String>)change -> {
@@ -477,6 +464,21 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     filterPaneTagFlow.getChildren().add(tag);
                 });
             }
+            // Update model list
+            modelSearch("");
+            // Select recent model
+            if (assetItemList != null && !modelCellList.isEmpty() &&
+                    app.config.character_asset != null && !app.config.character_asset.isEmpty()) {
+                // Scroll to recent selected model
+                AssetItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
+                if (recentSelected != null)
+                    for (JFXListCell<AssetItem> cell : searchModelView.getItems())
+                        if (recentSelected.equals(cell.getItem())) {
+                            searchModelView.scrollTo(cell);
+                            searchModelView.getSelectionModel().select(cell);
+                        }
+            }
+            toggleFilterPane.getStyleClass().add("btn-noticeable");
             // Finish reload
             loadFailureTip.setVisible(modelCellList.isEmpty());
             app.rootModule.launchBtn.setDisable(modelCellList.isEmpty());
