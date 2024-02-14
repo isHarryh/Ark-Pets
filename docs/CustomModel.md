@@ -42,7 +42,7 @@ ArkPets 添加自定义 Spine 模型的方法。
 3. 在数据集文件中的 `data` 字段中，仿照其他模型对象的格式，加入你所要添加的新模型的信息，示例如下（标注星号 `*` 者为必需条目）：
    ```json lines
    "my_model": { // * 单模型文件夹的名称
-       "assetId": "build_my_model", // * 模型资源文件的纯文件名称（去掉扩展名）
+       "assetId": "build_my_model", // (此字段已弃用，可忽略)
        "type": "Operator", // * 模型类型
        "style": "BuildingDefault", // 模型子类型
        "name": "My Model", // * 角色名称
@@ -53,10 +53,14 @@ ArkPets 添加自定义 Spine 模型的方法。
        "appellation": "My Model", // 角色代号
        "skinGroupId": "ILLUST", // 时装系列编号
        "skinGroupName": "默认服装", // 时装系列名称
-       "checksum": { // 文件 MD5 校验和
-            ".atlas": "xxxxx",
-            ".png": "xxxxx",
-            ".skel": "xxxxx"
+       "assetList": { // * 资源文件列表
+            ".atlas": "mymodel.atlas", // 对应的文件名称
+            ".png": [
+                // 如果对应的文件不止一个，可使用列表来表示
+                "mymodel1.png",
+                "mymodel2.png"
+            ],
+            ".skel": "mymodel.skel"
        }
    }
    ```
