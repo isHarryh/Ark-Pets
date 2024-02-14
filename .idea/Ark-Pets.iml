@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4">
+  <component name="AdditionalModuleElements">
+    <content url="file://$MODULE_DIR$" dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/logs" />
+      <excludeFolder url="file://$MODULE_DIR$/models" />
+      <excludeFolder url="file://$MODULE_DIR$/models_enemies" />
+      <excludeFolder url="file://$MODULE_DIR$/models_illust" />
+      <excludeFolder url="file://$MODULE_DIR$/temp" />
+    </content>
+  </component>
+</module>

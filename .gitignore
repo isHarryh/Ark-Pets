@@ -24,5 +24,3 @@ test*/
 # Exclude runtime files
 /ArkPetsConfig.json
 /models_data.json
-/desktop/src/main/resource/assets/models/
-/desktop/src/main/resource/assets/models_data.json

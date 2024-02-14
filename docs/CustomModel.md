@@ -16,6 +16,7 @@ ArkPets 添加自定义 Spine 模型的方法。
 1. 在程序工作目录（下简称“根目录”）中创建一个数据集文件 `models_data.json` 和一个总模型文件夹 `models`。  
    数据集文件的格式如下（标注星号 `*` 者为必需条目）：
    ```json
+   // modelsdata.json 示例：
    {
        "storageDirectory": {
            // * 每种模型类型所对应的总模型文件夹名称
@@ -38,29 +39,35 @@ ArkPets 添加自定义 Spine 模型的方法。
    > 提示：
    > 1. 也可以通过启动器 “选项” 页的模型下载或导入功能来导入 ArkModels 仓库的数据集文件和总模型文件夹。
    > 2. 总资源文件夹的名称可以是其他名称，但是需要为数据集文件中的 `storageDirectory` 字段中添加一个键值对 `"角色类型" : "总资源文件夹名"`。
+   > 3. 以上示例中的注释文本（`//`）仅作说明使用，实际上正规的 JSON 语法不支持注释，所以请不要将注释写入文件。
 2. 将所要添加的模型的资源文件（包括 .atlas .png .skel 文件）放入同一个文件夹（下称“单模型文件夹”）中，然后将单模型文件夹放入总资源文件夹中。
 3. 在数据集文件中的 `data` 字段中，仿照其他模型对象的格式，加入你所要添加的新模型的信息，示例如下（标注星号 `*` 者为必需条目）：
-   ```json lines
-   "my_model": { // * 单模型文件夹的名称
-       "assetId": "build_my_model", // (此字段已弃用，可忽略)
-       "type": "Operator", // * 模型类型
-       "style": "BuildingDefault", // 模型子类型
-       "name": "My Model", // * 角色名称
-       "sortTags": [
-            // 模型标签
-           "Operator"
-       ],
-       "appellation": "My Model", // 角色代号
-       "skinGroupId": "ILLUST", // 时装系列编号
-       "skinGroupName": "默认服装", // 时装系列名称
-       "assetList": { // * 资源文件列表
-            ".atlas": "mymodel.atlas", // 对应的文件名称
-            ".png": [
-                // 如果对应的文件不止一个，可使用列表来表示
-                "mymodel1.png",
-                "mymodel2.png"
-            ],
-            ".skel": "mymodel.skel"
+   ```json
+   { // data 字段中的对象示例：
+       "my_model": { // * 单模型文件夹的名称
+           "assetId": "build_my_model", // (此字段已弃用，可忽略)
+           "type": "Operator", // * 模型类型
+           "style": "BuildingDefault", // 模型子类型
+           "name": "My Model", // * 角色名称
+           "sortTags": [
+               // 模型标签
+               "Operator"
+           ],
+           "appellation": "My Model", // 角色代号
+           "skinGroupId": "ILLUST", // 时装系列编号
+           "skinGroupName": "默认服装", // 时装系列名称
+           "assetList": { // * 资源文件列表
+               ".atlas": "mymodel.atlas", // 对应的文件名称
+               ".png": [
+                   // 如果对应的文件不止一个，可使用列表来表示
+                   "mymodel1.png",
+                   "mymodel2.png"
+               ],
+               ".skel": "mymodel.skel"
+           }
+       },
+       "my_next_model": {
+           // ...
        }
    }
    ```
