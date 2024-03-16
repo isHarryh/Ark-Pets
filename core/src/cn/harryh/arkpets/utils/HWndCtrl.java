@@ -10,7 +10,6 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser;
-import com.sun.jna.win32.W32APIOptions;
 
 import java.util.ArrayList;
 
@@ -287,13 +286,6 @@ public class HWndCtrl {
 
     @Override
     public String toString() {
-        return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight;
-    }
-
-
-    private interface GDI32Extended extends com.sun.jna.platform.win32.GDI32 {
-        GDI32Extended INSTANCE = Native.load("gdi32", GDI32Extended.class, W32APIOptions.DEFAULT_OPTIONS);
-
-        int GetPixel(WinDef.HDC hdc, int x, int y);
+        return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight + " style=" + getWindowExStyle();
     }
 }

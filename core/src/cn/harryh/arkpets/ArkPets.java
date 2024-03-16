@@ -88,7 +88,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		ArkConfig.Monitor primaryMonitor = ArkConfig.Monitor.getMonitors()[0];
 		initWindow((int)(primaryMonitor.size[0] * 0.1f), (int)(primaryMonitor.size[0] * 0.1f));
 		// 5.Tray icon setup
-		tray = new MemberTrayImpl(this, new SocketClient(), UUID.randomUUID());
+		tray = new MemberTrayImpl(this, new SocketClient());
 		// Setup complete
 		Logger.info("App", "Render");
 	}
@@ -166,11 +166,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	}
 
 	private void changeAnimation(AnimData animData) {
-		if (animData != null && !animData.isEmpty()) {
-			// If it is needed to change animation:
-			if (cha.setAnimation(animData))
-				offsetY = (int)(animData.offsetY() * config.display_scale);
-		}
+		if (cha.setAnimation(animData))
+			offsetY = (int)(animData.offsetY() * config.display_scale);
 	}
 
 	/* INPUT PROCESS */
@@ -209,7 +206,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
+		//Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
 		if (pointer <= 0) {
 			if (isMouseAtSolidPixel()) {
 				mouse_drag = true;

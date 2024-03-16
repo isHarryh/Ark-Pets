@@ -249,7 +249,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
 
         @Override
         public String toString() {
-            return "^" + top + "\tv" + bottom + "\t<" + left + "\t>" + right;
+            return "^" + top + " v" + bottom + " <" + left + " >" + right;
         }
     }
 }

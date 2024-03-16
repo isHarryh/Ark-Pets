@@ -85,8 +85,8 @@ public class ArkChar {
         animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
         // 4.Animation mixing
         AnimationStateData asd = new AnimationStateData(skeletonData);
-        for (AnimClip i: animList)
-            for (AnimClip j: animList)
+        for (AnimClip i : animList)
+            for (AnimClip j : animList)
                 if (!i.fullName.equals(j.fullName))
                     asd.setMix(i.fullName, j.fullName, easingDuration);
         // 5.Animation state setup
@@ -105,6 +105,7 @@ public class ArkChar {
         setCanvas(new Color(0, 0, 0, 0));
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
+            // Figure out the suitable canvas size
             AnimClipGroup stageClips = animList.findAnimations(stage);
             double maxHypSize = 0;
             for (int i = 0; i < stageClips.size(); i++) {
@@ -118,12 +119,16 @@ public class ArkChar {
                     stageInsertMap.put(stage, camera.getInsert().clone());
                 }
             }
+            // See if it succeeded
             if (!stageInsertMap.containsKey(stage)) {
                 stageInsertMap.put(stage, new Insert((canvasReserveLength << 1) - (canvasMaxSize >> 1)));
                 Logger.warn("Character", stage + " figuring camera size failed");
+            } else {
+                camera.setInsert(stageInsertMap.get(stage));
+                Logger.info("Character", stage + " using " + camera);
             }
-            Logger.info("Character", stage + " using " + camera);
         }
+        camera.setInsertMaxed();
     }
 
     /** Sets the canvas with the specified background color.
@@ -220,7 +225,7 @@ public class ArkChar {
     }
 
 
-    public static class AnimComposer {
+    protected static class AnimComposer {
         protected final AnimationState state;
         protected AnimData playing;
 

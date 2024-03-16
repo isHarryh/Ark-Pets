@@ -18,7 +18,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
 import static cn.harryh.arkpets.Const.iconFilePng;
 import static cn.harryh.arkpets.Const.easingDuration;
@@ -32,12 +31,13 @@ public class MemberTrayImpl extends MemberTray {
     private TrayIcon icon;
     public AnimData keepAnim;
 
-    /** Initializes the ArkPets tray icon instance. <br/>
+    /** Initializes a per-character tray icon instance for an ArkPets. <br/>
      * Must be used after Gdx.app was initialized.
      * @param boundArkPets The ArkPets instance that bound to the tray icon.
+     * @param client The socket client that bound to the tray icon.
      */
-    public MemberTrayImpl(ArkPets boundArkPets, SocketClient client, UUID uuid) {
-        super(uuid, getName(boundArkPets));
+    public MemberTrayImpl(ArkPets boundArkPets, SocketClient client) {
+        super(getName(boundArkPets));
         arkPets = boundArkPets;
         this.client = client;
 

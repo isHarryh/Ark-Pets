@@ -15,10 +15,10 @@ package cn.harryh.arkpets.utils;
  * @see <a href="https://semver.org/">semver.org</a>
  */
 public class Version {
-    protected int major;
-    protected int minor;
-    protected int patch;
-    protected static final int defaultNumber = 0;
+    private final int major;
+    private final int minor;
+    private final int patch;
+    private static final int defaultNumber = 0;
 
     public Version(int major, int minor, int patch) {
         this.major = major;

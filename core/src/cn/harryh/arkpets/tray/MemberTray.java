@@ -24,8 +24,11 @@ public abstract class MemberTray {
         Const.FontsConfig.loadFontsToSwing();
     }
 
-    public MemberTray(UUID uuid, String name) {
-        this.uuid = uuid;
+    /** Initializes a tray icon instance for a ArkPets.
+     * @param name The name to be displayed in the menu, in the icon tooltip, etc.
+     */
+    public MemberTray(String name) {
+        this.uuid = UUID.randomUUID();
         this.name = name;
         
         optKeepAnimEn       .addActionListener(e -> onKeepAnimEn());

@@ -15,8 +15,13 @@ public class MemberTrayProxy extends MemberTray {
     private final HostTray hostTray;
     private final JMenu popMenu;
 
+    /** Initializes a host-proxy tray icon instance for a registering ArkPets.
+     * @param socketData The ArkPets login data.
+     * @param session The session to communicate with that ArkPets.
+     * @param hostTray The host tray to apply this tray instance.
+     */
     public MemberTrayProxy(SocketData socketData, SocketSession session, HostTray hostTray) {
-        super(socketData.uuid, socketData.getMsgString());
+        super(socketData.getMsgString());
         this.session = session;
         this.hostTray = hostTray;
 
