@@ -4,45 +4,48 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimClip;
+import cn.harryh.arkpets.animations.AnimClip.AnimStage;
 import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.AssetItem;
-import cn.harryh.arkpets.utils.*;
-import cn.harryh.arkpets.transitions.*;
+import cn.harryh.arkpets.transitions.TernaryFunction;
+import cn.harryh.arkpets.transitions.TransitionFloat;
+import cn.harryh.arkpets.transitions.TransitionVector3;
+import cn.harryh.arkpets.utils.DynamicOrthographicCamara;
+import cn.harryh.arkpets.utils.DynamicOrthographicCamara.Insert;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.SerializationException;
 import com.esotericsoftware.spine.*;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
+import java.util.HashMap;
+
 import static cn.harryh.arkpets.Const.*;
 import static java.io.File.separator;
 
 
 public class ArkChar {
-    protected final OrthographicCamera camera;
-    protected final TwoColorPolygonBatch batch;
-    protected final FrameBuffer fbo;
-    protected Texture bgTexture;
-
-    protected final AnimComposer composer;
+    protected final DynamicOrthographicCamara camera;
     protected final TransitionVector3 position;
-    protected final TransitionFloat offsetY;
 
-    protected final Skeleton skeleton;
-    protected final SkeletonRenderer renderer;
-    protected final SkeletonData skeletonData;
-    protected final AnimationState animationState;
+    private final TwoColorPolygonBatch batch;
+    private Texture bgTexture;
+    private final AnimComposer composer;
+    private final TransitionFloat offsetY;
 
-    public final CroppingCtrl flexibleLayout;
-    public final AnimClipGroup animList;
+    private final Skeleton skeleton;
+    private final SkeletonRenderer renderer;
+    private final AnimationState animationState;
+
+    protected final AnimClipGroup animList;
+    protected final HashMap<AnimStage, Insert> stageInsertMap;
 
     /** Initializes an ArkPets character.
      * @param assetLocation The path string to the model's directory.
@@ -51,9 +54,10 @@ public class ArkChar {
      */
     public ArkChar(String assetLocation, AssetItem.AssetAccessor assetAccessor, float scale) {
         // 1.Graphics setup
-        camera = new OrthographicCamera();
+        camera = new DynamicOrthographicCamara(canvasMaxSize, canvasMaxSize, Math.round(canvasReserveLength * scale));
+        camera.setMaxInsert(0);
+        camera.setMinInsert(canvasReserveLength - canvasMaxSize);
         batch = new TwoColorPolygonBatch();
-        fbo = new FrameBuffer(Format.RGBA8888, canvasMaxSize, canvasMaxSize, false);
         renderer = new SkeletonRenderer();
         /* Pre-multiplied alpha shouldn't be applied to models released in Arknights 2.1.41 or later,
         otherwise you may get a corrupted rendering result. */
@@ -61,8 +65,8 @@ public class ArkChar {
         // 2.Geometry setup
         position = new TransitionVector3(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
         offsetY = new TransitionFloat(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
-        flexibleLayout = new CroppingCtrl(new Vector2(canvasMaxSize, canvasMaxSize), 0);
         // 3.Skeleton setup
+        SkeletonData skeletonData;
         try {
             String path2atlas = assetLocation + separator + assetAccessor.getFirstFileOf(".atlas");
             String path2skel = assetLocation + separator + assetAccessor.getFirstFileOf(".skel");
@@ -98,56 +102,40 @@ public class ArkChar {
             }
         };
         // 6.Canvas setup
-        for (int i = 0; i < animList.size(); i++)
-            adjustCanvas(Math.round(canvasReserveLength * scale), animList.get(i), i == 0);
-        Logger.info("Character", "Canvas size " + flexibleLayout.getWidth() + " * " + flexibleLayout.getHeight());
-        updateCanvas();
-    }
-
-    /** Sets the canvas with transparent background.
-     */
-    public void setCanvas() {
-        this.setCanvas(new Color(0, 0, 0, 0));
+        setCanvas(new Color(0, 0, 0, 0));
+        stageInsertMap = new HashMap<>();
+        for (AnimStage stage : animList.clusterByStage().keySet()) {
+            AnimClipGroup stageClips = animList.findAnimations(stage);
+            double maxHypSize = 0;
+            for (int i = 0; i < stageClips.size(); i++) {
+                camera.setInsertMaxed();
+                adjustCanvas(stageClips.get(i));
+                if (camera.isInsertMaxed())
+                    continue;
+                double hypSize = Math.hypot(camera.getWidth(), camera.getHeight());
+                if (hypSize > maxHypSize) {
+                    maxHypSize = hypSize;
+                    stageInsertMap.put(stage, camera.getInsert().clone());
+                }
+            }
+            if (!stageInsertMap.containsKey(stage)) {
+                stageInsertMap.put(stage, new Insert((canvasReserveLength << 1) - (canvasMaxSize >> 1)));
+                Logger.warn("Character", stage + " figuring camera size failed");
+            }
+            Logger.info("Character", stage + " using " + camera);
+        }
     }
 
     /** Sets the canvas with the specified background color.
      */
     public void setCanvas(Color bgColor) {
         // Set position (centered)
-        position.reset(canvasMaxSize >> 1, 0, 1);
-        updateCanvas();
+        position.reset(camera.getWidth() >> 1, 0, 1);
         // Set background texture
         Pixmap pixmap = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         pixmap.setColor(bgColor);
         pixmap.fill();
         bgTexture = new Texture(pixmap);
-    }
-
-    /** Updates the canvas and the camera to keep the character in the center.
-     */
-    public void updateCanvas() {
-        camera.setToOrtho(false, flexibleLayout.getWidth(), flexibleLayout.getHeight());
-        camera.translate((canvasMaxSize - flexibleLayout.getWidth()) >> 1, 0);
-        camera.update();
-        batch.getProjectionMatrix().set(camera.combined);
-    }
-
-    /** Adjusts the canvas to fit the character's size.
-     */
-    public void adjustCanvas(int reserved_length, AnimClip anim_clip, boolean initialize) {
-        setCanvas();
-        composer.reset();
-        composer.offer(new AnimData(anim_clip));
-        position.addProgress(Float.MAX_VALUE);
-        animationState.update(animationState.getCurrent(0).getAnimation().getDuration() / 2); // Take the middle frame as sample
-        Pixmap snapshot = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
-        renderToPixmap(snapshot);
-        flexibleLayout.fitToBestCroppedSize(
-                snapshot,
-                1, reserved_length,
-                false, true, initialize
-        );
-        snapshot.dispose();
     }
 
     /** Requests to set the current animation of the character.
@@ -178,26 +166,34 @@ public class ArkChar {
         return pixel;
     }
 
-    /** Saves the current framebuffer contents as an image file. (Only test-use)
-     * Note that the image may be flipped along the y-axis.
-     * @param debug Whether to show debug additions in the pixmap. Note that this will modify the original pixmap.
-     */
-    @Deprecated
-    protected void saveCurrentTexture(boolean debug) {
-        Pixmap pixmap = Pixmap.createFromFrameBuffer(0, 0, flexibleLayout.getWidth(), flexibleLayout.getHeight());
-        if (debug) {
-            pixmap.setColor(new Color(1, 0, 0, 0.75f));
-            if (flexibleLayout.curInsert.bottom > 0)
-                pixmap.drawRectangle(0, 0, pixmap.getWidth(), flexibleLayout.curInsert.bottom);
-            if (flexibleLayout.curInsert.top > 0)
-                pixmap.drawRectangle(0, pixmap.getHeight() - flexibleLayout.curInsert.top, pixmap.getWidth(), flexibleLayout.curInsert.top);
-            if (flexibleLayout.curInsert.left > 0)
-                pixmap.drawRectangle(0, 0, flexibleLayout.curInsert.left, pixmap.getHeight());
-            if (flexibleLayout.curInsert.right > 0)
-                pixmap.drawRectangle(pixmap.getWidth() - flexibleLayout.curInsert.right, 0, flexibleLayout.curInsert.right, pixmap.getHeight());
-        }
-        PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);
-        pixmap.dispose();
+    private void adjustCanvas(AnimClip animClip) {
+        composer.reset();
+        composer.offer(new AnimData(animClip));
+        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
+        position.setToEnd();
+        animationState.update(animationState.getCurrent(0).getAnimation().getDuration() / 2); // Take the middle frame as sample
+
+        FrameBuffer fbo = new FrameBuffer(Format.RGBA8888, camera.getWidth(), camera.getHeight(), false);
+        fbo.begin();
+        renderToBatch();
+        Pixmap snapshot = new Pixmap(camera.getWidth(), camera.getHeight(), Format.RGBA8888);
+        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Gdx.gl.glReadPixels(0, 0, snapshot.getWidth(), snapshot.getHeight(),
+                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, snapshot.getPixels());
+        fbo.end();
+
+        if (camera.isInsertMaxed())
+            camera.cropTo(snapshot, false, true);
+        else
+            camera.extendTo(snapshot, false, true);
+        fbo.dispose();
+        snapshot.dispose();
+    }
+
+    protected void adjustCanvas(AnimStage animStage) {
+        if (!stageInsertMap.containsKey(animStage))
+            throw new IndexOutOfBoundsException("No such key " + animStage);
+        camera.setInsert(stageInsertMap.get(animStage));
     }
 
     /** Renders the character to the Gdx 2D Batch.
@@ -205,6 +201,7 @@ public class ArkChar {
      */
     protected void renderToBatch() {
         // Apply Animation
+        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
         position.addProgress(Gdx.graphics.getDeltaTime());
         offsetY.addProgress(Gdx.graphics.getDeltaTime());
         skeleton.setPosition(position.now().x, position.now().y + offsetY.now());
@@ -213,27 +210,15 @@ public class ArkChar {
         animationState.apply(skeleton);
         animationState.update(Gdx.graphics.getDeltaTime());
         // Render the skeleton to the batch
-        updateCanvas();
         ScreenUtils.clear(0, 0, 0, 0, true);
+        camera.update();
+        batch.getProjectionMatrix().set(camera.combined);
         batch.begin();
-        if (bgTexture != null)
-            batch.draw(bgTexture, 0, 0);
+        batch.draw(bgTexture, 0, 0);
         renderer.draw(batch, skeleton);
         batch.end();
     }
 
-    /** Renders the character to a given Pixmap.
-     * Note that the mismatch of the Pixmap's size and the screen's size may cause data loss;
-     * @param pixmap The reference of the given Pixmap object.
-     */
-    protected void renderToPixmap(Pixmap pixmap) {
-        fbo.begin();
-        renderToBatch();
-        Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
-        Gdx.gl.glReadPixels(0, 0, pixmap.getWidth(), pixmap.getHeight(),
-                GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixmap.getPixels());
-        fbo.end();
-    }
 
     public static class AnimComposer {
         protected final AnimationState state;

@@ -67,17 +67,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		// 2.Character setup
 		Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
 		cha = new ArkChar(config.character_asset, new AssetItem.AssetAccessor(config.character_files), skelBaseScale);
-		cha.setCanvas();
 		behavior = new GeneralBehavior(config, cha.animList);
+		cha.adjustCanvas(behavior.defaultAnim().animClip().stage);
 		cha.setAnimation(behavior.defaultAnim());
-		Logger.info("Animation", "Animation stages " + behavior.getStages());
+		Logger.info("Animation", "Available animation stages " + behavior.getStages());
 		// 3.Window params setup
 		windowPosition = new TransitionVector2(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
 		windowAlpha = new TransitionFloat(TernaryFunction.EASE_OUT_CUBIC, easingDuration);
 		windowAlpha.reset(1f);
 		WD_SCALE = config.display_scale;
-		WD_W = (int)(WD_SCALE * cha.flexibleLayout.getWidth());
-		WD_H = (int)(WD_SCALE * cha.flexibleLayout.getHeight());
+		WD_W = (int)(WD_SCALE * cha.camera.getWidth());
+		WD_H = (int)(WD_SCALE * cha.camera.getHeight());
 		// 4.Plane setup
 		plane = new Plane(new ArrayList<>());
 		plane.setGravity(config.physic_gravity_acc);
@@ -152,6 +152,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 	public void changeStage() {
 		if (canChangeStage()) {
 			behavior.nextStage();
+			cha.adjustCanvas(behavior.getCurrentStage());
+			WD_W = (int)(WD_SCALE * cha.camera.getWidth());
+			WD_H = (int)(WD_SCALE * cha.camera.getHeight());
+			plane.setObjSize(WD_W, WD_H);
 			Logger.info("Animation", "Changed to " + behavior.getCurrentStage());
 			changeAnimation(behavior.defaultAnim());
 		}
