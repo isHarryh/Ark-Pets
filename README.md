@@ -7,7 +7,7 @@
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v2.x/assets/icons/icon.png"/>
    <p>
       Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code><b> v3.0 </b></code>
+      <code><b> v3.1 </b></code>
    </p>
    <p>
       <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/isHarryh/Ark-Pets?label=Java">
