@@ -235,12 +235,14 @@ public class ArkChar {
             state.addListener(new AnimationState.AnimationStateAdapter() {
                 @Override
                 public void complete(AnimationState.TrackEntry entry) {
-                    AnimData completed = composer.playing;
-                    if (completed != null && !completed.isEmpty()) {
-                        if (!completed.isLoop()) {
-                            composer.reset();
-                            if (completed.animNext() != null && !completed.animNext().isEmpty()) {
-                                composer.offer(completed.animNext());
+                    if (composer.playing != null && !composer.playing.isEmpty() && entry.getAnimation() != null) {
+                        if (entry.getAnimation().getName().equals(composer.playing.animClip().fullName)) {
+                            AnimData completed = composer.playing;
+                            if (!completed.isLoop()) {
+                                composer.reset();
+                                if (completed.animNext() != null && !completed.animNext().isEmpty()) {
+                                    composer.offer(completed.animNext());
+                                }
                             }
                         }
                     }

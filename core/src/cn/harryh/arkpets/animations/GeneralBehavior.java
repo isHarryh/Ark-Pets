@@ -77,7 +77,7 @@ public class GeneralBehavior extends Behavior {
     public AnimData clickEnd() {
         AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
         AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);
-        return (a2.isEmpty() ? a1 : a2).derive(false, false).join(defaultAnim());
+        return (a2.isEmpty() ? a1 : a2).derive(false, true).join(defaultAnim());
     }
 
     @Override
