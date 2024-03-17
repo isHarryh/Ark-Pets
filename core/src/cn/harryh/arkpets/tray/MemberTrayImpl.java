@@ -192,7 +192,7 @@ public class MemberTrayImpl extends MemberTray {
 
     /** Hides the menu.
      */
-    public void hideDialog() {
+    public synchronized void hideDialog() {
         if (popMenu.isVisible()) {
             popMenu.setVisible(false);
             Logger.debug("MemberTray", "Hidden");
@@ -201,7 +201,7 @@ public class MemberTrayImpl extends MemberTray {
 
     /** Shows the menu at the given coordinate.
      */
-    public void showDialog(int x, int y) {
+    public synchronized void showDialog(int x, int y) {
         /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
         Here we will adapt the coordinate for system scaling artificially. See below. */
         AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
