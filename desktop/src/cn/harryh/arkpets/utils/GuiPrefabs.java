@@ -7,6 +7,9 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -17,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 import javax.net.ssl.SSLException;
@@ -74,6 +78,26 @@ public class GuiPrefabs {
         fadeT.setFromValue(1);
         fadeT.setToValue(0);
         fadeT.playFromStart();
+    }
+
+    public static void fadeInWindow(Window window, Duration duration, EventHandler<ActionEvent> onFinished) {
+        if (window.opacityProperty().getValue() != 0 && window.opacityProperty().getValue() != 1)
+            return;
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().setAll(new KeyFrame(Duration.ZERO, new KeyValue(window.opacityProperty(), 0)),
+                new KeyFrame(duration, new KeyValue(window.opacityProperty(), 1)));
+        timeline.setOnFinished(onFinished);
+        timeline.playFromStart();
+    }
+
+    public static void fadeOutWindow(Window window, Duration duration, EventHandler<ActionEvent> onFinished) {
+        if (window.opacityProperty().getValue() != 0 && window.opacityProperty().getValue() != 1)
+            return;
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().setAll(new KeyFrame(Duration.ZERO, new KeyValue(window.opacityProperty(), 1)),
+                new KeyFrame(duration, new KeyValue(window.opacityProperty(), 0)));
+        timeline.setOnFinished(onFinished);
+        timeline.playFromStart();
     }
 
     public static void replaceStyleClass(Node node, String from, String to) {

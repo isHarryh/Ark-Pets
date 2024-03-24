@@ -92,6 +92,14 @@ public final class RootModule implements Controller<ArkHomeFX> {
         initLaunchButton();
         initLaunchingStatusListener();
 
+        app.stage.setOnShown(e -> {
+            Logger.debug("Launcher", "Window on shown");
+            app.stage.setIconified(false);
+            app.stage.toFront();
+            GuiPrefabs.fadeInWindow(app.stage, durationFast, ev -> {});
+        });
+        app.stage.setOnHidden(e -> Logger.debug("Launcher", "Window on hidden"));
+
         // Load config file.
         app.config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         isNewcomer = app.config.isNewcomer();
@@ -177,6 +185,15 @@ public final class RootModule implements Controller<ArkHomeFX> {
         new CheckAppUpdateTask(app.root, GuiTask.GuiTaskStyle.HIDDEN, "auto").start();
     }
 
+    /** Plays the exit animation and then invokes {@link Platform#exit()}.
+     */
+    public void exit() {
+        popSplashScreen(e -> {
+            Logger.info("Launcher", "User close request");
+            GuiPrefabs.fadeOutWindow(app.stage, durationNormal, ev -> Platform.exit());
+        }, durationFast, Duration.ZERO);
+    }
+
     @FXML
     public void titleBarPressed(MouseEvent event) {
         xOffset = event.getSceneX();
@@ -191,7 +208,10 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
     @FXML
     public void windowMinimize(MouseEvent event) {
-        app.stage.setIconified(true);
+        GuiPrefabs.fadeOutWindow(app.stage, durationFast, e -> {
+            app.stage.hide();
+            app.stage.setIconified(true);
+        });
     }
 
     @FXML
@@ -203,10 +223,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 "确认退出",
                 "现在退出 " + appName + " 吗？",
                 "根据您的设置，" + solidExitTip + "\n使用最小化 [-] 按钮可以隐藏窗口到系统托盘。",
-                () -> popSplashScreen(e -> {
-                    Logger.info("Launcher", "User close request");
-                    Platform.exit();
-                }, durationNormal, Duration.ZERO)).show();
+                this::exit).show();
     }
 
     private void initLaunchButton() {

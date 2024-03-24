@@ -5,8 +5,6 @@ package cn.harryh.arkpets.tray;
 
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.Logger;
-import javafx.application.Platform;
-import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -27,7 +25,9 @@ public class HostTray {
     private JDialog popWindow;
     private JPopupMenu popMenu;
     private JMenu playerMenu;
-    private Stage stage;
+
+    private Runnable onShowStage;
+    private Runnable onCloseStage;
 
     private static HostTray instance;
 
@@ -43,8 +43,6 @@ public class HostTray {
 
     private HostTray() {
         if (SystemTray.isSupported()) {
-            Platform.setImplicitExit(false);
-
             // Ui Components:
             popWindow = new JDialog();
             popWindow.setUndecorated(true);
@@ -56,7 +54,8 @@ public class HostTray {
             JMenuItem optExit = new JMenuItem("退出程序");
             optExit.addActionListener(e -> {
                 Logger.info("HostTray", "Request to exit");
-                Platform.exit();
+                if (onCloseStage != null)
+                    onCloseStage.run();
             });
 
             popMenu = new JPopupMenu() {
@@ -93,15 +92,6 @@ public class HostTray {
         }
     }
 
-    public void bindStage(Stage stage) {
-        this.stage = stage;
-        this.stage.iconifiedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue)
-                stage.hide();
-        }));
-        this.stage.setOnCloseRequest(e -> stage.setIconified(true));
-    }
-
     public void applyTrayIcon() {
         if (initialized)
             return;
@@ -133,11 +123,16 @@ public class HostTray {
         if (!initialized)
             return;
         Logger.info("HostTray", "Request to show stage");
-        Platform.runLater(() -> {
-            stage.setIconified(false);
-            stage.show();
-            stage.toFront();
-        });
+        if (onShowStage != null)
+            onShowStage.run();
+    }
+
+    public void setOnShowStage(Runnable handler) {
+        onShowStage = handler;
+    }
+
+    public void setOnCloseStage(Runnable handler) {
+        onCloseStage = handler;
     }
 
     public MemberTray getMemberTray(UUID uuid) {

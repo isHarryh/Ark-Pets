@@ -51,6 +51,7 @@ public class ArkHomeFX extends Application {
     public void start(Stage stage) throws Exception {
         Logger.info("Launcher", "Starting");
         this.stage = stage;
+        Platform.setImplicitExit(false);
 
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
@@ -75,7 +76,8 @@ public class ArkHomeFX extends Application {
             // Initialize socket server and HostTray.
             try {
                 HostTray hostTray = HostTray.getInstance();
-                hostTray.bindStage(stage);
+                hostTray.setOnCloseStage(() -> Platform.runLater(rootModule::exit));
+                hostTray.setOnShowStage(() -> Platform.runLater(stage::show));
                 SocketServer.getInstance().startServer(hostTray);
                 hostTray.applyTrayIcon();
             } catch (PortUtils.NoPortAvailableException ex) {
