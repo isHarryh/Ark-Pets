@@ -73,15 +73,15 @@ abstract public class SocketSession implements Runnable {
                 try {
                     String request = in.readLine();
                     if (request == null) {
-                        Logger.debug("SocketSession", this + " -x");
+                        Logger.debug("SocketSession", "x- " + this);
                         this.onBroken();
                         this.close();
                     } else {
-                        Logger.debug("SocketSession", this + " -> " + request);
+                        Logger.debug("SocketSession", "<- " + this + " " + request);
                         receive(request);
                     }
                 } catch (SocketException e) {
-                    Logger.debug("SocketSession", this + " -x (" + e.getMessage() + ")");
+                    Logger.debug("SocketSession", "x- " + this + " (" + e.getMessage() + ")");
                     this.onBroken();
                     this.close();
                 }
@@ -97,7 +97,7 @@ abstract public class SocketSession implements Runnable {
     public final void send(Object request) {
         if (!hasTarget)
             throw new IllegalStateException("The target socket has not been set yet.");
-        Logger.debug("SocketSession", this + " <- " + request);
+        Logger.debug("SocketSession", "-> " + this + " " + request);
         out.println(request);
     }
 

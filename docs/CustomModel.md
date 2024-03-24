@@ -33,7 +33,7 @@ ArkPets 添加自定义 Spine 模型的方法。
             // * 每个模型的信息
             // ...
         },
-        "arkPetsCompatibility": [2, 0, 0] // ArkPets 兼容性版本标识
+        "arkPetsCompatibility": [2, 2, 0] // ArkPets 兼容性版本标识
    }
    ```
    > 提示：

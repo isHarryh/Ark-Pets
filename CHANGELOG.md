@@ -1,6 +1,10 @@
 # 更新日志 / CHANGELOG
 
 ## v3.1
+| **新增**      |                               |
+|:------------|:------------------------------|
+| [`cccb494`] | 新增了启动器在被最小化、呼出或关闭时的窗口级别的动画效果。 |
+
 | **修复**                |                                                                   |
 |:----------------------|:------------------------------------------------------------------|
 | [`#4`]<br>[`93d6975`] | 缓解了角色的渲染超出窗口边界的问题。<br>缓解了部分多形态敌人窗口边界过大的问题，现在会为每个阶段形态分别进行窗口边界动态调整。 |
@@ -358,3 +362,4 @@
 [`93d6975`]: https://github.com/isHarryh/Ark-Pets/commit/93d6975cd34ee9ca10165530b1de5283f68221f1
 [`762970f`]: https://github.com/isHarryh/Ark-Pets/commit/762970facf2cf407731f39a840f10765a19819c9
 [`0ec49d5`]: https://github.com/isHarryh/Ark-Pets/commit/0ec49d5a972fbbaf11fa869e53891f537da81f70
+[`cccb494`]: https://github.com/isHarryh/Ark-Pets/commit/cccb494e539edea38374491e78930093d0c800d3
