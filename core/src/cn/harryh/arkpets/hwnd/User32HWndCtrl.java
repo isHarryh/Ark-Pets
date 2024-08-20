@@ -1,7 +1,7 @@
 /** Copyright (c) 2022-2024, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.hwnd;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;

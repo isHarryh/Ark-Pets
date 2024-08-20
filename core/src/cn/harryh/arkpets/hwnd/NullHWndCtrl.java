@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.hwnd;
 
 public class NullHWndCtrl extends HWndCtrl<Object>{
     @Override

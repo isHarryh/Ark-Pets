@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.utils.HWndCtrl.NumberedTitleManager;
+import cn.harryh.arkpets.hwnd.HWndCtrl.NumberedTitleManager;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import javafx.util.Duration;

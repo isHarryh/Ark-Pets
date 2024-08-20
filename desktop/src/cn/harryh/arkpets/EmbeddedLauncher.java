@@ -4,7 +4,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.utils.ArgPending;
-import cn.harryh.arkpets.utils.HWndCtrlFactory;
+import cn.harryh.arkpets.hwnd.HWndCtrlFactory;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;

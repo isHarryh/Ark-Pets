@@ -1,5 +1,6 @@
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.hwnd;
 
+import cn.harryh.arkpets.utils.Logger;
 import com.sun.jna.Platform;
 import com.sun.jna.platform.win32.WinDef;
 
@@ -16,7 +17,6 @@ public class HWndCtrlFactory {
         X11,
         MUTTER,
         KWIN,
-        WLROOTS,
         QUARTZ,
         NULL
     }
@@ -32,8 +32,6 @@ public class HWndCtrlFactory {
                 return WindowSystem.MUTTER;
             } else if (desktop.equals("KDE")) {
                 return WindowSystem.KWIN;
-            } else if (type.equals("wayland")) {
-                return WindowSystem.WLROOTS;
             } else if (type.equals("x11")) {
                 return WindowSystem.X11;
             }
