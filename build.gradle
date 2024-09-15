@@ -31,6 +31,8 @@ allprojects {
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.8"
+        dbusVersion = "5.0.0"
+        lwjglVersion = "3.3.4"
     }
 
     repositories {
@@ -62,15 +64,30 @@ project(":core") {
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
         // JavaFX
-        api "org.openjfx:javafx-base:$javaFXVersion:win"
-        api "org.openjfx:javafx-controls:$javaFXVersion:win"
-        api "org.openjfx:javafx-graphics:$javaFXVersion:win"
-        api "org.openjfx:javafx-fxml:$javaFXVersion:win"
+        def javaFXPlatforms = ["win", "mac", "linux"]
+        javaFXPlatforms.each {
+            api "org.openjfx:javafx-base:$javaFXVersion:$it"
+            api "org.openjfx:javafx-controls:$javaFXVersion:$it"
+            api "org.openjfx:javafx-graphics:$javaFXVersion:$it"
+            api "org.openjfx:javafx-fxml:$javaFXVersion:$it"
+        }
         // JFoenix
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
         api "com.alibaba:fastjson:2.0.39"
         // Log4j
         api "apache-log4j:log4j:1.2.15"
+        // dbus-java
+        api "com.github.hypfvieh:dbus-java-core:$dbusVersion"
+        api "com.github.hypfvieh:dbus-java-transport-native-unixsocket:$dbusVersion"
+        // LWJGL
+        def lwjglList = ["lwjgl", "lwjgl-opengl", "lwjgl-stb", "lwjgl-openal", "lwjgl-jemalloc", "lwjgl-glfw"]
+        lwjglList.each {
+            api("org.lwjgl:" + it) {
+                version {
+                    strictly lwjglVersion
+                }
+            }
+        }
     }
 }
