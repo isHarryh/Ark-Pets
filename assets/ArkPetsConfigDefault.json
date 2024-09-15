@@ -22,5 +22,6 @@
     "physic_speed_limit_y":1000.0,
     "physic_static_friction_acc":500.0,
     "window_style_toolwindow":true,
-    "window_style_topmost":true
+    "window_style_topmost":true,
+    "window_system":0
 }

@@ -56,15 +56,22 @@ public class EmbeddedLauncher {
         Logger.info("System", "Entering the app of EmbeddedLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
-
+        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
+        WindowSystem windowSystem;
         try {
-            WindowSystem.init();
+            windowSystem = WindowSystem.values()[appConfig.window_system];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Logger.warn("System", "Invalid window system,using auto detect");
+            windowSystem = WindowSystem.AUTO;
+        }
+        try {
+            WindowSystem.init(windowSystem);
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);
             // Configure window layout
-            config.setDecorated(false);
+            config.setDecorated(WindowSystem.getWindowSystem() == WindowSystem.NULL);
             config.setResizable(false);
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);

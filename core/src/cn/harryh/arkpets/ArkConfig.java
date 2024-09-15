@@ -88,6 +88,8 @@ public class ArkConfig implements Serializable {
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_topmost;
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "0")
+    public int          window_system;
 
     private ArkConfig() {
     }
