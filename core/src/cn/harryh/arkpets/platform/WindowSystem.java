@@ -53,6 +53,9 @@ public enum WindowSystem {
             case MUTTER -> {
                 MutterHWndCtrl.init();
             }
+            case KWIN -> {
+                KWinHWndCtrl.init();
+            }
             case X11 -> {
                 X11HWndCtrl.init();
             }
@@ -79,6 +82,9 @@ public enum WindowSystem {
             case MUTTER -> {
                 return MutterHWndCtrl.find(className, windowText);
             }
+            case KWIN -> {
+                return KWinHWndCtrl.find(className, windowText);
+            }
             case X11 -> {
                 return X11HWndCtrl.find(className, windowText);
             }
@@ -100,6 +106,9 @@ public enum WindowSystem {
             case MUTTER -> {
                 return MutterHWndCtrl.getWindowList(onlyVisible);
             }
+            case KWIN -> {
+                return KWinHWndCtrl.getWindowList(onlyVisible);
+            }
             case X11 -> {
                 return X11HWndCtrl.getWindowList(onlyVisible);
             }
@@ -120,6 +129,9 @@ public enum WindowSystem {
             case MUTTER -> {
                 return MutterHWndCtrl.getTopmostWindow();
             }
+            case KWIN -> {
+                return KWinHWndCtrl.getTopmostWindow();
+            }
             case X11 -> {
                 return X11HWndCtrl.getTopmost();
             }
@@ -135,6 +147,9 @@ public enum WindowSystem {
         switch (PLATFORM) {
             case MUTTER -> {
                 MutterHWndCtrl.free();
+            }
+            case KWIN -> {
+                KWinHWndCtrl.free();
             }
             case X11 -> {
                 X11HWndCtrl.free();
