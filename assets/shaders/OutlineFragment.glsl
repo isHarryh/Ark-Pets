@@ -4,12 +4,13 @@
 
 // Gap Seaming and Ouline Effect Fragment Shader for TwoColorPolygonBatch.
 
-#version 130
+#version 120
 
 varying vec2 v_texCoords;       // From VS
 uniform sampler2D u_texture;    // From TCPB
 uniform vec3 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
+uniform ivec2 u_textureSize;
 
 const float c_alphaLv0 = 0.1;
 const float c_alphaLv1 = 0.5;
@@ -31,7 +32,7 @@ vec4[8] getNeighbors(sampler2D tex, vec2 texCoords, vec2 offset) {
 
 void main() {
     vec4 texColor = texture2D(u_texture, v_texCoords);
-    ivec2 texSize = textureSize(u_texture, 0);
+    ivec2 texSize = u_textureSize;
 
     if (texColor.a < c_alphaLv0) {
         // Outline effect apply on transparent areas

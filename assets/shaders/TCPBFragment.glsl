@@ -4,7 +4,7 @@
 
 // Common Fragment Shader for TwoColorPolygonBatch.
 
-#version 130
+#version 120
 
 #ifdef GL_ES
     #define LOWP lowp

@@ -227,6 +227,7 @@ public class ArkChar {
         shader2.bind();
         shader2.setUniformf("u_outlineColor", 1f, 1f, 0f);
         shader2.setUniformf("u_outlineWidth", outlineWidth.now());
+        shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
         batch.setShader(shader2);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
