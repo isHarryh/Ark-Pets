@@ -111,4 +111,17 @@ public enum WindowSystem {
     public static void free() {
         // TODO
     }
+
+    /** Return current WindowSystem should enable resize.
+     */
+    public static boolean needResize() {
+        switch (PLATFORM) {
+            case X11, MUTTER, KWIN -> {
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
 }

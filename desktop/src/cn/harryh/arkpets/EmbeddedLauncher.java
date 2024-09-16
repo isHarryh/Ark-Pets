@@ -72,7 +72,7 @@ public class EmbeddedLauncher {
             config.setIdleFPS(fpsDefault);
             // Configure window layout
             config.setDecorated(WindowSystem.getWindowSystem() == WindowSystem.NULL);
-            config.setResizable(false);
+            config.setResizable(WindowSystem.needResize());
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);
             // Configure window title
