@@ -4,9 +4,25 @@
 package cn.harryh.arkpets.platform;
 
 
+import com.badlogic.gdx.Gdx;
+
+
 public class NullHWndCtrl extends HWndCtrl {
+    private static boolean startupFind;
+    private int lastw, lasth;
+
     public NullHWndCtrl() {
         super("", new WindowRect());
+    }
+
+    public static NullHWndCtrl find(String className, String windowName){
+        if(windowName.equals("ArkPets")){
+            if(!NullHWndCtrl.startupFind){
+                NullHWndCtrl.startupFind=true;
+                return null;
+            }
+        }
+        return new NullHWndCtrl();
     }
 
     @Override
@@ -39,6 +55,11 @@ public class NullHWndCtrl extends HWndCtrl {
 
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
+        if(lasth!=h||lastw!=w){
+            lasth=h;
+            lastw=w;
+            Gdx.graphics.setWindowedMode(w,h);
+        }
     }
 
     @Override

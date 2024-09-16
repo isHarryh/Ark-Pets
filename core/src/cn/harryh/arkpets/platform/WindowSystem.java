@@ -72,7 +72,7 @@ public enum WindowSystem {
                 return User32HWndCtrl.find(className, windowText);
             }
             default -> {
-                return new NullHWndCtrl();
+                return NullHWndCtrl.find(className, windowText);
             }
         }
     }
