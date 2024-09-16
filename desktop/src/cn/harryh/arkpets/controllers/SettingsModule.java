@@ -11,6 +11,7 @@ import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.jfoenix.controls.*;
+import com.sun.jna.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -22,6 +23,7 @@ import org.apache.log4j.Level;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -59,6 +61,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXCheckBox configWindowToolwindow;
     @FXML
     private JFXButton configWindowToolwindowHelp;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configWindowSystem;
+    @FXML
+    private JFXButton configWindowSystemHelp;
     @FXML
     private Label aboutQueryUpdate;
     @FXML
@@ -261,6 +267,62 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+
+        NamedItem<Integer>[] items = getWindowSystemItems().toArray(new NamedItem[0]);
+        new ComboBoxSetup<>(configWindowSystem).setItems(items)
+                .selectValue(app.config.window_system, "自动")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.window_system = newValue.value();
+                    app.config.save();
+                });
+        new HandbookEntrance(app.body, configWindowSystemHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHandbook((Labeled) configWindowSystem.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return getWindowSystemInfo();
+                    }
+                };
+            }
+        };
+    }
+
+    private static ArrayList<NamedItem<Integer>> getWindowSystemItems() {
+        ArrayList<NamedItem<Integer>> windowSystemItems = new ArrayList<>();
+        windowSystemItems.add(new NamedItem<>("自动", 0));
+        if (Platform.isWindows()) {
+            windowSystemItems.add(new NamedItem<>("User32", 1));
+        }
+        if (Platform.isLinux()) {
+            windowSystemItems.add(new NamedItem<>("X11", 2));
+            windowSystemItems.add(new NamedItem<>("Mutter", 3));
+            windowSystemItems.add(new NamedItem<>("KWin", 4));
+        }
+        if (Platform.isMac()) {
+            windowSystemItems.add(new NamedItem<>("Quartz", 5));
+        }
+        windowSystemItems.add(new NamedItem<>("NULL", 6));
+        return windowSystemItems;
+    }
+
+    private static String getWindowSystemInfo() {
+        String content = "不同平台对于窗口查询、操作有不同的 API，除非你遇到了桌宠窗口的问题，否则通常不需要更改。以下是对 API 的简单介绍：\n";
+        if (Platform.isWindows()) {
+            content += "User32 —— Windows 窗口系统。\n";
+        }
+        if (Platform.isLinux()) {
+            content += """
+                    Mutter —— GNOME 环境，需要安装集成扩展。
+                    KWin —— KDE 环境，需要安装集成插件。
+                    X11 —— 通用 X11 环境支持，适用于 Xfce,Mate,LXDE 等环境。
+                    """;
+        }
+        if (Platform.isMac()) {
+            content += "Quartz —— MacOS Quartz 窗口系统。\n";
+        }
+        content += "NULL —— 空实现，桌宠不会有任何窗口交互。";
+        return content;
     }
 
     private void initAbout() {

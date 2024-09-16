@@ -46,6 +46,11 @@
                     <JFXCheckBox fx:id="configWindowToolwindow" mnemonicParsing="false" text="桌宠作为后台程序启动"/>
                     <JFXButton fx:id="configWindowToolwindowHelp"/>
                 </HBox>
+                <HBox>
+                    <Label text="窗口系统"/>
+                    <JFXComboBox fx:id="configWindowSystem" prefWidth="100.0"/>
+                    <JFXButton fx:id="configWindowSystemHelp"/>
+                </HBox>
                 <Separator/>
                 <HBox>
                     <Label text="日志级别"/>
