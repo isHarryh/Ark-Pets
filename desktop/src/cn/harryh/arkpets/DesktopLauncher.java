@@ -6,6 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
+import org.lwjgl.glfw.GLFW;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
@@ -57,7 +58,8 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
-
+        // Disable libdecor to avoid glfw and javafx problem
+        GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, args);
         Logger.info("System", "Exited from DesktopLauncher successfully");
