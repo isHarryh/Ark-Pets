@@ -50,7 +50,9 @@ public enum WindowSystem {
         }
         Logger.info("System", "Using " + PLATFORM.toString() + " Window System");
         switch (PLATFORM) {
-            // TODO
+            case MUTTER -> {
+                MutterHWndCtrl.init();
+            }
         }
     }
 
@@ -71,6 +73,9 @@ public enum WindowSystem {
             case USER32 -> {
                 return User32HWndCtrl.find(className, windowText);
             }
+            case MUTTER -> {
+                return MutterHWndCtrl.find(className, windowText);
+            }
             default -> {
                 return NullHWndCtrl.find(className, windowText);
             }
@@ -86,6 +91,9 @@ public enum WindowSystem {
             case USER32 -> {
                 return User32HWndCtrl.getWindowList(onlyVisible);
             }
+            case MUTTER -> {
+                return MutterHWndCtrl.getWindowList(onlyVisible);
+            }
             default -> {
                 return new ArrayList<>();
             }
@@ -100,6 +108,9 @@ public enum WindowSystem {
             case USER32 -> {
                 return User32HWndCtrl.getTopmostWindow();
             }
+            case MUTTER -> {
+                return MutterHWndCtrl.getTopmostWindow();
+            }
             default -> {
                 return new NullHWndCtrl();
             }
@@ -109,7 +120,11 @@ public enum WindowSystem {
     /** Frees all the resources.
      */
     public static void free() {
-        // TODO
+        switch (PLATFORM) {
+            case MUTTER -> {
+                MutterHWndCtrl.free();
+            }
+        }
     }
 
     /** Return current WindowSystem should enable resize.
