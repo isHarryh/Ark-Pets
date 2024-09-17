@@ -104,7 +104,7 @@ public class X11HWndCtrl extends HWndCtrl {
         int finy = yVal - netFrame[2] + gtkFrame[2];
         int finh = height.getValue() + addHeight - removeHeight;
         int finw = width.getValue() + addWidth - removeWidth;
-        return new WindowRect(finy, finy + finh, finx + finw, finx);
+        return new WindowRect(finy, finy + finh, finx, finx + finw);
     }
 
     @Override
@@ -158,13 +158,13 @@ public class X11HWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setWindowTransparent(boolean transparent) {
+    public void setTransparent(boolean transparent) {
         // unnecessary in X11.
     }
 
     @Override
-    public void setToolWindow(boolean enable) {
-        if (enable) {
+    public void setTaskbar(boolean enable) {
+        if (!enable) {
             clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
         } else {
             clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);

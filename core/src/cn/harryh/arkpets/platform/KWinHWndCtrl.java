@@ -23,7 +23,7 @@ public class KWinHWndCtrl extends HWndCtrl {
     private static ArkPetsInterface dBusInterface;
 
     protected KWinHWndCtrl(DetailsStruct details) {
-        super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x + details.w.intValue(), details.x));
+        super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
         this.hWnd = details.id;
         this.details = details;
     }
@@ -64,12 +64,12 @@ public class KWinHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setWindowTransparent(boolean enable) {
+    public void setTransparent(boolean enable) {
 
     }
 
     @Override
-    public void setToolWindow(boolean enable) {
+    public void setTaskbar(boolean enable) {
 
     }
 
