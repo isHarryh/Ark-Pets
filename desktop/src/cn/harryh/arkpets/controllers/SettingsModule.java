@@ -8,6 +8,7 @@ import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
+import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.badlogic.gdx.graphics.Color;
@@ -302,19 +303,19 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
     private static ArrayList<NamedItem<Integer>> getWindowSystemItems() {
         ArrayList<NamedItem<Integer>> windowSystemItems = new ArrayList<>();
-        windowSystemItems.add(new NamedItem<>("自动", 0));
+        windowSystemItems.add(new NamedItem<>("自动", WindowSystem.AUTO.ordinal()));
         if (Platform.isWindows()) {
-            windowSystemItems.add(new NamedItem<>("User32", 1));
+            windowSystemItems.add(new NamedItem<>("User32", WindowSystem.USER32.ordinal()));
         }
         if (Platform.isLinux()) {
-            windowSystemItems.add(new NamedItem<>("X11", 2));
-            windowSystemItems.add(new NamedItem<>("Mutter", 3));
-            windowSystemItems.add(new NamedItem<>("KWin", 4));
+            windowSystemItems.add(new NamedItem<>("X11", WindowSystem.X11.ordinal()));
+            windowSystemItems.add(new NamedItem<>("Mutter", WindowSystem.MUTTER.ordinal()));
+            windowSystemItems.add(new NamedItem<>("KWin", WindowSystem.KWIN.ordinal()));
         }
         if (Platform.isMac()) {
-            windowSystemItems.add(new NamedItem<>("Quartz", 5));
+            windowSystemItems.add(new NamedItem<>("Quartz", WindowSystem.QUARTZ.ordinal()));
         }
-        windowSystemItems.add(new NamedItem<>("NULL", 6));
+        windowSystemItems.add(new NamedItem<>("NULL", WindowSystem.NULL.ordinal()));
         return windowSystemItems;
     }
 
