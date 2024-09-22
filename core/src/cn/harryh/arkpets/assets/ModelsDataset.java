@@ -13,6 +13,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static cn.harryh.arkpets.ArkConfig.getWorkingDirectory;
+
 
 public class ModelsDataset {
     public final HashMap<String, File> storageDirectory;
@@ -48,7 +50,7 @@ public class ModelsDataset {
             // Make up for `assetDir` field
             if (assetItem == null || !storageDirectory.containsKey(assetItem.type))
                 throw new DatasetKeyException("type");
-            assetItem.assetDir = Path.of(storageDirectory.get(assetItem.type).toString(), key).toFile();
+            assetItem.assetDir = Path.of(getWorkingDirectory(), storageDirectory.get(assetItem.type).toString(), key).toFile();
             // Compatible to lower version dataset
             if (assetItem.assetList == null && assetItem.assetId != null && assetItem.checksum != null) {
                 HashMap<String, Object> defaultFileMap = new HashMap<>();
