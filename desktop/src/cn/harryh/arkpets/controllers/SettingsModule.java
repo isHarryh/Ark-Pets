@@ -188,10 +188,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         configLoggingLevel.getSelectionModel().select(level);
 
         exploreLogDir.setOnMouseClicked(e -> {
-            // Only available in Windows OS
             try {
                 Logger.debug("Config", "Request to explore the log dir");
-                Runtime.getRuntime().exec("explorer logs");
+                if (Platform.isWindows()) {
+                    Runtime.getRuntime().exec("explorer logs");
+                } else if (Platform.isLinux()) {
+                    Runtime.getRuntime().exec("xdg-open logs");
+                } else if (Platform.isMac()) {
+                    Runtime.getRuntime().exec("open logs");
+                }
             } catch (IOException ex) {
                 Logger.warn("Config", "Exploring log dir failed");
             }
