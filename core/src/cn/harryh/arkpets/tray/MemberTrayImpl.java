@@ -85,6 +85,12 @@ public class MemberTrayImpl extends MemberTray {
                 if (e.getButton() == 3 && e.isPopupTrigger())
                     showDialog(e.getX() + 5, e.getY());
             }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == 3 && e.isPopupTrigger())
+                    showDialog(e.getX() + 5, e.getY());
+            }
         });
         return icon;
     }
