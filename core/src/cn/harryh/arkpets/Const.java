@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
+import static cn.harryh.arkpets.ArkConfig.getWorkingDirectory;
+
 
 /** Constants definition class.
  */
@@ -92,9 +94,9 @@ public final class Const {
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
         public static final String urlModelsZip     = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
         public static final String urlModelsData    = "isHarryh/Ark-Models/main/models_data.json";
-        public static final String tempDirPath      = "temp/";
+        public static final String tempDirPath      = getWorkingDirectory() + "temp/";
         public static final String fileModelsZipName            = "ArkModels";
-        public static final String fileModelsDataPath           = "models_data.json";
+        public static final String fileModelsDataPath           = getWorkingDirectory() + "models_data.json";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
         public static final String tempModelsZipCachePath       = tempDirPath + fileModelsZipName + ".zip";
         public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
@@ -107,8 +109,8 @@ public final class Const {
         public static final int logCoreMaxKeep      = 32;
         public static final int logDesktopMaxKeep   = 8;
 
-        public static final String logCorePath      = "logs/core";
-        public static final String logDesktopPath   = "logs/desktop";
+        public static final String logCorePath      = getWorkingDirectory() + "logs/core";
+        public static final String logDesktopPath   = getWorkingDirectory() + "logs/desktop";
 
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";

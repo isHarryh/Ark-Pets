@@ -8,7 +8,6 @@ import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.badlogic.gdx.graphics.Color;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.MemoryUtil;

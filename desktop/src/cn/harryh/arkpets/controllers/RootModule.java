@@ -30,11 +30,11 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static cn.harryh.arkpets.ArkConfig.getWorkingDirectory;
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
 
@@ -146,6 +146,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
             protected Boolean call() throws InterruptedException, ExecutionException {
                 // Update the logging level arg to match the custom value of the Launcher.
                 ArrayList<String> args = new ArrayList<>(Arrays.asList(ArgPending.argCache.clone()));
+                ArrayList<String> jvmArgs = new ArrayList<>();
                 args.remove(LogConfig.errorArg);
                 args.remove(LogConfig.warnArg);
                 args.remove(LogConfig.infoArg);
@@ -158,10 +159,14 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     default -> "";
                 };
                 args.add(temp);
+                // Set working directory.
+                if(System.getProperty("arkpets.workdir") != null){
+                    jvmArgs.add("-Darkpets.workdir="+getWorkingDirectory());
+                }
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
-                Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, List.of(), args);
+                Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, jvmArgs, args);
                 // ArkPets core finalized.
                 if (!future.get().isSuccess()) {
                     int exitCode = future.get().exitValue();

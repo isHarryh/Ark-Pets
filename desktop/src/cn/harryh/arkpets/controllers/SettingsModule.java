@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static cn.harryh.arkpets.ArkConfig.getWorkingDirectory;
 import static cn.harryh.arkpets.Const.*;
 
 
@@ -191,11 +192,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             try {
                 Logger.debug("Config", "Request to explore the log dir");
                 if (Platform.isWindows()) {
-                    Runtime.getRuntime().exec("explorer logs");
+                    Runtime.getRuntime().exec(new String[]{"explorer",getWorkingDirectory()+"logs"});
                 } else if (Platform.isLinux()) {
-                    Runtime.getRuntime().exec("xdg-open logs");
+                    Runtime.getRuntime().exec(new String[]{"xdg-open",getWorkingDirectory()+"logs"});
                 } else if (Platform.isMac()) {
-                    Runtime.getRuntime().exec("open logs");
+                    Runtime.getRuntime().exec(new String[]{"open",getWorkingDirectory()+"logs"});
                 }
             } catch (IOException ex) {
                 Logger.warn("Config", "Exploring log dir failed");

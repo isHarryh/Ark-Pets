@@ -24,7 +24,7 @@ import static cn.harryh.arkpets.Const.*;
 public class ArkConfig implements Serializable {
     public static final ArkConfig defaultConfig;
     private static final URL configDefault = Objects.requireNonNull(ArkConfig.class.getResource(Const.configInternal));
-    private static final File configCustom = new File(Const.configExternal);
+    private static final File configCustom = new File(getWorkingDirectory() + Const.configExternal);
     private static boolean isNewcomer = false;
 
     static {
@@ -128,6 +128,13 @@ public class ArkConfig implements Serializable {
             backgroundColor = Color.CLEAR;
         }
         return backgroundColor;
+    }
+
+    /** Returns working directory, ends up with separator.
+     */
+    @JSONField(serialize = false)
+    public static String getWorkingDirectory() {
+        return System.getProperty("arkpets.workdir", "");
     }
 
     /** Gets the custom ArkConfig object by reading the external config file.
