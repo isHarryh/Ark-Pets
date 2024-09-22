@@ -35,6 +35,10 @@
                     <Label text="高亮描边"/>
                     <JFXComboBox fx:id="configRenderOutline" prefWidth="120.0"/>
                 </HBox>
+                <HBox>
+                    <Label text="背景颜色"/>
+                    <JFXComboBox fx:id="configBackgroundColor" prefWidth="120.0"/>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>

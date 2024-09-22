@@ -10,6 +10,7 @@ import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
+import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
 import com.sun.jna.Platform;
 import javafx.concurrent.ScheduledService;
@@ -41,6 +42,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXComboBox<NamedItem<Integer>> configCanvasSize;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configBackgroundColor;
     @FXML
     private JFXCheckBox configWindowTopmost;
     @FXML
@@ -144,6 +147,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 .selectValue(app.config.display_render_outline, "未知")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.display_render_outline = newValue.value();
+                    app.config.save();
+                });
+        new ComboBoxSetup<>(configBackgroundColor).setItems(new NamedItem<>("透明", 0x00000000),
+                        new NamedItem<>("绿色", 0x00ff00ff),
+                        new NamedItem<>("蓝色", 0x0000ffff),
+                        new NamedItem<>("品红色", 0xff00ffff))
+                .selectValue(Color.rgba8888(app.config.getBackgroundColor()), app.config.background_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.background_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
         configWindowTopmost.setSelected(app.config.window_style_topmost);

@@ -1,4 +1,5 @@
 {
+    "background_color":"#00000000",
     "behavior_ai_activation":8,
     "behavior_allow_interact":true,
     "behavior_allow_sit":true,

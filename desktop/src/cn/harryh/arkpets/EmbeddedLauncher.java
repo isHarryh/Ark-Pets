@@ -26,11 +26,12 @@ public class EmbeddedLauncher {
     // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 
     public static void main (String[] args) {
+        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig());
         ArgPending.argCache = args;
         // Logger
         Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
         try {
-            Logger.setLevel(Objects.requireNonNull(ArkConfig.getConfig()).logging_level);
+            Logger.setLevel(appConfig.logging_level);
         } catch (Exception ignored) {
         }
         new ArgPending(LogConfig.errorArg, args) {
@@ -56,7 +57,6 @@ public class EmbeddedLauncher {
         Logger.info("System", "Entering the app of EmbeddedLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
-        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         WindowSystem windowSystem;
         try {
             windowSystem = WindowSystem.values()[appConfig.window_system];
@@ -81,7 +81,7 @@ public class EmbeddedLauncher {
             // Configure window display
             config.setInitialVisible(true);
             config.setTransparentFramebuffer(true);
-            config.setInitialBackgroundColor(Color.CLEAR);
+            config.setInitialBackgroundColor(appConfig.getBackgroundColor());
             // Handle GLFW error
             GLFW.glfwSetErrorCallback(new GLFWErrorCallback() {
                 @Override
