@@ -62,12 +62,14 @@ public class NetUtils {
      * @param url The URL to browse.
      */
     public static void browseWebpage(String url) {
-        try {
-            Logger.debug("Network", "Opening the URL " + url + " in the browser");
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (IOException e) {
-            Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
-        }
+        new Thread(() -> {
+            try {
+                Logger.debug("Network", "Opening the URL " + url + " in the browser");
+                Desktop.getDesktop().browse(URI.create(url));
+            } catch (IOException e) {
+                Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
+            }
+        }).start();
     }
 
 
