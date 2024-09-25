@@ -29,3 +29,4 @@ ArkPets附加说明文档
 |    [JNA](https://github.com/java-native-access/jna)     | Java Native Access 接口      |
 | [Alibaba FastJSON](https://github.com/alibaba/fastjson) | JSON 工具                    |
 |    [Apache log4j](https://logging.apache.org/log4j)     | 日志工具                       |
+|   [dbus-java](https://github.com/hypfvieh/dbus-java)    | D-Bus 通信接口                 |
