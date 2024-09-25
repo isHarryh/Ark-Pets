@@ -11,6 +11,7 @@ uniform sampler2D u_texture;    // From TCPB
 uniform vec3 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
 uniform ivec2 u_textureSize;
+uniform float u_alpha;
 
 const float c_alphaLv0 = 0.1;
 const float c_alphaLv1 = 0.5;
@@ -77,4 +78,6 @@ void main() {
         // No effect apply on other areas
         gl_FragColor = texColor;
     }
+    // Alpha
+    gl_FragColor.a -= (1 - u_alpha);
 }

@@ -28,7 +28,6 @@ import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
 import java.util.HashMap;
 
-import static cn.harryh.arkpets.ArkConfig.getWorkingDirectory;
 import static cn.harryh.arkpets.Const.*;
 import static java.io.File.separator;
 
@@ -51,6 +50,8 @@ public class ArkChar {
     private final AnimationState animationState;
     protected final AnimClipGroup animList;
     protected final HashMap<AnimStage, Insert> stageInsertMap;
+
+    protected float alpha;
 
     /** Initializes an ArkPets character.
      * @param config The ArkPets Config instance which contains the asset's information and other essential settings.
@@ -230,6 +231,7 @@ public class ArkChar {
         shader2.setUniformf("u_outlineColor", 1f, 1f, 0f);
         shader2.setUniformf("u_outlineWidth", outlineWidth.now());
         shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
+        shader2.setUniformf("u_alpha", alpha);
         batch.setShader(shader2);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();

@@ -106,7 +106,7 @@ public class MemberTrayImpl extends MemberTray {
             public void run() {
                 Gdx.app.exit();
             }
-        }, (int)durationNormal.toSeconds());
+        }, (int)durationNormal.toMillis());
     }
 
     @Override

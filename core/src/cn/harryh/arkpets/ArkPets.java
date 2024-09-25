@@ -145,7 +145,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 		setWindowPos();
 		if (!windowAlpha.isEnded()) {
 			windowAlpha.addProgress(Gdx.graphics.getDeltaTime());
-			hWndMine.setWindowAlpha(windowAlpha.now());
+			cha.alpha = windowAlpha.now();
 		}
 		promiseToolwindowStyle(1);
 
