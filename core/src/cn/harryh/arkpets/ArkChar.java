@@ -288,6 +288,7 @@ public class ArkChar {
                     }
                 }
             }
+            skeleton.setToSetupPose();
         }
         // Take down the snapshot from the rendered FBO
         Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, camera.getWidth(), camera.getHeight());
