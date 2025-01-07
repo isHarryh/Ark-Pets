@@ -1,6 +1,6 @@
 # Keep repository files
 /*/
-!/.idea/
+.idea/
 !/assets/
 !/core/
 !/desktop/
@@ -23,7 +23,7 @@ test*/
 # Exclude runtime files
 /ArkPetsConfig.json
 /models_data.json
-/assets/models
+/assets/models**
 /assets/logs
 /assets/ArkPetsConfig.json
 /assets/models_data.json

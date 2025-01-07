@@ -4,14 +4,15 @@
 ; Download Inno Setup: https://jrsoftware.org/isdl.php
 
 #define MyAppName "ArkPets"
-#define MyAppVersion "3.5.0"
+#define MyAppVersion GetEnv("APP_VERSION")
+#define AppCopyright GetEnv("APP_COPYRIGHT")
 #define MyAppPublisher "Harry Huang"
 #define MyAppURL "https://arkpets.harryh.cn/"
 
 [Setup]
 ; WARN: The value of AppId uniquely identifies this app. Do not use the same AppId value in installers for other apps.
 ; (To generate a new GUID, click Tools | Generate GUID inside the Inno Setup IDE.)
-AppCopyright        = Copyright (C) 2022-2025 {#MyAppPublisher}
+AppCopyright        ={#AppCopyright}
 AppId               ={{213DB689-8F8A-4DEA-BE79-545FAD7769A6}
 AppName             ={#MyAppName}
 AppVersion          ={#MyAppVersion}
@@ -25,7 +26,7 @@ Compression         =lzma2/max
 DefaultDirName      ="{userpf}\{#MyAppName}"
 DefaultGroupName    ={#MyAppName}
 PrivilegesRequired  =lowest
-OutputBaseFilename  ={#MyAppName}-v{#MyAppVersion}-Setup
+OutputBaseFilename  ={#MyAppName}-Setup-v{#MyAppVersion}
 OutputDir           =..\..\desktop\build\dist
 SetupIconFile       =..\..\assets\icons\icon.ico
 SolidCompression    =yes

@@ -26,8 +26,14 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URL;
+import java.security.CodeSource;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import static cn.harryh.arkpets.Const.*;
 
@@ -58,7 +64,7 @@ public class ArkHomeFX extends Application {
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
         fxml0.initializeWith(this);
-        rootModule = (RootModule)fxml0.controller();
+        rootModule = (RootModule) fxml0.controller();
         body = rootModule.body;
 
         // Setup scene and primary stage.
@@ -70,8 +76,9 @@ public class ArkHomeFX extends Application {
         stage.initStyle(StageStyle.TRANSPARENT);
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.setTitle(desktopTitle);
-        rootModule.titleText.setText(desktopTitle);
+        String title = desktopTitle + getVersionType();
+        stage.setTitle(title);
+        rootModule.titleText.setText(title);
 
         // After the stage is shown, do initialization.
         stage.show();
@@ -135,6 +142,26 @@ public class ArkHomeFX extends Application {
         SocketServer.getInstance().stopServer();
         ProcessPool.getInstance().shutdown();
         Logger.debug("Launcher", "Finished stopping");
+    }
+
+    public String getVersionType() {
+        Class<?> clazz = this.getClass();
+        try {
+            CodeSource codeSource = clazz.getProtectionDomain().getCodeSource();
+            if (codeSource == null) {
+                return "+unknown";
+            }
+            URL jarUrl = codeSource.getLocation();
+            JarFile jarFile = new JarFile(new File(jarUrl.toURI()));
+            Manifest manifest = jarFile.getManifest();
+            jarFile.close();
+            return manifest.getMainAttributes().getValue("Version-Type");
+        } catch (FileNotFoundException ignored) {
+            // this mean run through gradle or IDEA
+            return "+dev";
+        } catch (Exception ignored) {
+            return "+unknown";
+        }
     }
 
     public void popLoading(EventHandler<ActionEvent> handler) {
