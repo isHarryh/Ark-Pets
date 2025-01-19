@@ -3,6 +3,8 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.kt.repository.ModelRepository;
+import cn.harryh.arkpets.kt.repository.VoiceRepository;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
@@ -59,6 +61,16 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
+
+        if (Objects.equals(System.getenv("VCS_DEBUG"), "TRUE")) {
+            Logger.setLevel(Logger.DEBUG);
+            Long startTime = System.currentTimeMillis();
+            ModelRepository.INSTANCE.initRepository();
+            VoiceRepository.INSTANCE.initRepository();
+            Long endTime = System.currentTimeMillis();
+            Logger.info("System", "VCS_DEBUG: " + (endTime - startTime) + " ms");
+            return;
+        }
 
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, args);

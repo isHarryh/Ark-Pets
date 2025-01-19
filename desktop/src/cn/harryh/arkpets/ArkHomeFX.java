@@ -41,13 +41,13 @@ import static cn.harryh.arkpets.Const.*;
 /** ArkPets Homepage the JavaFX app.
  */
 public class ArkHomeFX extends Application {
-    public Stage stage;
-    public ArkConfig config;
+    public Stage         stage;
+    public ArkConfig     config;
     public ModelsDataset modelsDataset;
-    public StackPane body;
+    public StackPane     body;
 
-    public RootModule rootModule;
-    public ModelsModule modelsModule;
+    public RootModule     rootModule;
+    public ModelsModule   modelsModule;
     public BehaviorModule behaviorModule;
     public SettingsModule settingsModule;
 

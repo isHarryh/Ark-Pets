@@ -22,10 +22,6 @@ buildscript {
     }
 }
 
-dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
-}
-
 val appName: String by project
 
 allprojects {
@@ -41,6 +37,7 @@ allprojects {
         plugin("java-library")
         plugin("org.openjfx.javafxplugin")
         plugin("org.jetbrains.kotlin.jvm")
+        plugin("io.gitlab.arturbosch.detekt")
     }
 
     version = "$appVersion${getVersionMetadata()}"
@@ -61,6 +58,7 @@ allprojects {
     }
 
     dependencies {
+        detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
         implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
@@ -97,14 +95,15 @@ allprojects {
             }
         }
     }
+
+    // code style check for kotlin
+    detekt {
+        buildUponDefaultConfig = true
+        autoCorrect = true
+        config.setFrom(rootProject.files("detekt.yml"))
+    }
 }
 
-// code style check for kotlin
-detekt {
-    buildUponDefaultConfig = true
-    autoCorrect = true
-    config.setFrom(rootProject.files("detekt.yml"))
-}
 
 // git hooks for automatically checking code style
 gitHooks {

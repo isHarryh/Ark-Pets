@@ -9,6 +9,10 @@ sourceSets {
     }
 }
 
+detekt {
+    source.setFrom("src/")
+}
+
 dependencies {
     val gdxVersion: String by rootProject
 
@@ -18,6 +22,10 @@ dependencies {
     api("com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop")
     // sqlite jdbc driver
     implementation("org.xerial:sqlite-jdbc:3.47.2.0")
+    // kotlin orm framework
+    implementation("org.ktorm:ktorm-core:4.1.1")
+    // kotlin orm sqlite extension
+    implementation("org.ktorm:ktorm-support-sqlite:4.1.1")
 }
 
 tasks {
@@ -30,6 +38,7 @@ tasks {
             "**/models_enemies/**",
             "**/models/**",
             "**/logs/**",
+            "**/data/**",
             "models_data.json"
         )
     }
@@ -77,7 +86,7 @@ tasks {
     val jlinkRuntimeDir = "$buildDir/jlink"
     val jlinkRuntimeImg = "$jlinkRuntimeDir/runtime"
     val jlinkModuleList =
-        "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
+        "java.base,java.desktop,java.logging,java.management,java.scripting,java.sql,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
     val jlinkLocalesList = "en-US,zh-CN"
     val jpackageDir = "$buildDir/jpackage"
     val issFileRel = "$rootDir/docs/scripts/ExePacking.iss"
