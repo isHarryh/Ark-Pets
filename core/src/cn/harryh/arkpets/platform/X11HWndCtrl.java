@@ -143,6 +143,7 @@ public class X11HWndCtrl extends HWndCtrl {
 
         // 0000 0000 1111 0001
         //clientMsg(hWnd,"_NET_MOVERESIZE_WINDOW",3840,x,y,w,h);
+        x11.XSync(display, false);
         x11.XMoveResizeWindow(display, hWnd, x, y, w, h);
     }
 
@@ -227,8 +228,7 @@ public class X11HWndCtrl extends HWndCtrl {
         if (x11.XGetWindowProperty(display, win, xa_prop_name, long_offset, long_length, false,
                 xa_prop_type, xa_ret_type_ref, ret_format_ref,
                 ret_nitems_ref, ret_bytes_after_ref, ret_prop_ref) != X11.Success) {
-            String prop_name = x11.XGetAtomName(display, xa_prop_name);
-            throw new RuntimeException("Cannot get " + prop_name + " property.");
+            return new byte[] {};
         }
 
         X11.Atom xa_ret_type = xa_ret_type_ref.getValue();
@@ -236,14 +236,14 @@ public class X11HWndCtrl extends HWndCtrl {
 
         if (xa_ret_type == null) {
             //the specified property does not exist for the specified window
-            throw new RuntimeException("Type not found");
+            return new byte[] {};
         }
 
         if (xa_prop_type == null ||
                 !xa_ret_type.toNative().equals(xa_prop_type.toNative())) {
             x11.XFree(ret_prop);
             String prop_name = x11.XGetAtomName(display, xa_prop_name);
-            throw new RuntimeException("Invalid type of " + prop_name + " property");
+            return new byte[] {};
         }
 
         int ret_format = ret_format_ref.getValue();
@@ -260,7 +260,7 @@ public class X11HWndCtrl extends HWndCtrl {
         else if (ret_format == 0)
             nbytes = 0;
         else
-            throw new RuntimeException("Invalid return format");
+            return new byte[] {};
         int length = Math.min((int) ret_nitems * nbytes, MAX_PROPERTY_VALUE_LEN);
 
         byte[] ret = ret_prop.getByteArray(0, length);
