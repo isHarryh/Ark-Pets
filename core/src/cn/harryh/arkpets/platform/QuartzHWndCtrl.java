@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class QuartzHWndCtrl extends HWndCtrl{
+public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsapp;
     private static CFStringRef kCGWindowNumber;
     private static CFStringRef kCGWindowLayer;
@@ -29,8 +29,8 @@ public class QuartzHWndCtrl extends HWndCtrl{
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private byte nsWinUnavailable;
 
-    public QuartzHWndCtrl(CFDictionaryRef dict){
-        super(getWindowName(dict.getValue(kCGWindowOwnerName),dict.getValue(kCGWindowName)),getWindowRect(dict.getValue(kCGWindowBounds)));
+    public QuartzHWndCtrl(CFDictionaryRef dict) {
+        super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict.getValue(kCGWindowBounds)));
         windowID = new CFNumberRef(dict.getValue(kCGWindowNumber)).longValue();
         layer = new CFNumberRef(dict.getValue(kCGWindowLayer)).longValue();
     }
@@ -78,13 +78,13 @@ public class QuartzHWndCtrl extends HWndCtrl{
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APResizeOnMain(nsWin,x,y,w,h);
+        GoldenGlow.INSTANCE.APResizeOnMain(nsWin, x, y, w, h);
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        GoldenGlow.INSTANCE.APSetDock(nsapp,enable);
+        GoldenGlow.INSTANCE.APSetDock(nsapp, enable);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class QuartzHWndCtrl extends HWndCtrl{
     @Override
     public void setTopmost(boolean enable) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APSetTopmost(nsWin,enable);
+        GoldenGlow.INSTANCE.APSetTopmost(nsWin, enable);
     }
 
     @Override
@@ -107,6 +107,7 @@ public class QuartzHWndCtrl extends HWndCtrl{
     public void sendMouseEvent(MouseEvent msg, int x, int y) {
 
     }
+
     protected static void init() {
         Logger.info("System", "Objective-C bridge library version " + GoldenGlow.INSTANCE.APVersion());
         CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
@@ -134,12 +135,12 @@ public class QuartzHWndCtrl extends HWndCtrl{
         ArrayList<QuartzHWndCtrl> list = new ArrayList<>();
         //todo
         int opt;
-        if(onlyVisible) {
+        if (onlyVisible) {
             opt = kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements;
         } else {
             opt = kCGWindowListExcludeDesktopElements;
         }
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(opt,0);
+        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
         int numWindows = windows.getCount();
         for (int i = 0; i < numWindows; i++) {
             Pointer result = windows.getValueAtIndex(i);
@@ -150,12 +151,11 @@ public class QuartzHWndCtrl extends HWndCtrl{
             }
         }
         windows.release();
-        //Collections.reverse(list);
         return list;
     }
 
     protected static QuartzHWndCtrl find(String className, String windowText) {
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements,0);
+        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements, 0);
         int numWindows = windows.getCount();
         QuartzHWndCtrl win = null;
         for (int i = 0; i < numWindows; i++) {
@@ -169,7 +169,7 @@ public class QuartzHWndCtrl extends HWndCtrl{
                     break;
                 }
             } else {
-                if(cname.equals(className) && wname.equals(windowText)) {
+                if (cname.equals(className) && wname.equals(windowText)) {
                     win = new QuartzHWndCtrl(windowRef);
                     break;
                 }
@@ -194,28 +194,28 @@ public class QuartzHWndCtrl extends HWndCtrl{
     }
 
     private void checkNSApp() {
-        if(nsapp == null) {
+        if (nsapp == null) {
             nsapp = GoldenGlow.INSTANCE.APGetApp();
-            Logger.debug("System", "get NSApplication");
         }
     }
 
     private void getNSWindow(long CGWindowId) {
         checkNSApp();
         if (nsWinUnavailable == 0) {
-            Pointer nswin = GoldenGlow.INSTANCE.APGetNSWindow(nsapp,CGWindowId);
-            if(nswin == null) {
+            Pointer nswin = GoldenGlow.INSTANCE.APGetNSWindow(nsapp, CGWindowId);
+            if (nswin == null) {
                 nsWinUnavailable = -1;
             }
-            Logger.debug("System","get NSWindow");
-            this.nsWin =nswin;
+            this.nsWin = nswin;
             nsWinUnavailable = 1;
         }
     }
+
     private static String getWindowName(Pointer value) {
         return value == null ? "" : new CFStringRef(value).stringValue();
     }
-    private static String getWindowName(Pointer own,Pointer title) {
+
+    private static String getWindowName(Pointer own, Pointer title) {
         String ownName;
         String titleName;
         ownName = own == null ? "" : new CFStringRef(own).stringValue();
@@ -227,17 +227,17 @@ public class QuartzHWndCtrl extends HWndCtrl{
     private static WindowRect getWindowRect(Pointer value) {
         if (value != null) {
             CGRect.ByReference rect = new CGRect.ByReference();
-            boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value),rect);
+            boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
             if (success) {
                 return new WindowRect(
-                        (int)Math.round(rect.origin.y),
-                        (int)Math.round(rect.origin.y+rect.size.height),
-                        (int)Math.round(rect.origin.x),
-                        (int)Math.round(rect.origin.x+rect.size.width)
+                        (int) Math.round(rect.origin.y),
+                        (int) Math.round(rect.origin.y + rect.size.height),
+                        (int) Math.round(rect.origin.x),
+                        (int) Math.round(rect.origin.x + rect.size.width)
                 );
             }
         }
-        return new WindowRect(0,0,0,0);
+        return new WindowRect(0, 0, 0, 0);
     }
 
     // JNA Definition
@@ -246,39 +246,48 @@ public class QuartzHWndCtrl extends HWndCtrl{
         CoreGraphics INSTANCE = Native.load("CoreGraphics", CoreGraphics.class);
 
         CFArrayRef CGWindowListCopyWindowInfo(int option, int relativeToWindow);
+
         CFArrayRef CGWindowListCreateDescriptionFromArray(CFArrayRef windowArray);
-        boolean CGRectMakeWithDictionaryRepresentation(CFDictionaryRef dict,CGRect.ByReference rect);
+
+        boolean CGRectMakeWithDictionaryRepresentation(CFDictionaryRef dict, CGRect.ByReference rect);
+
         CFDictionaryRef CGSessionCopyCurrentDictionary();
     }
 
     private interface GoldenGlow extends Library {
-        GoldenGlow INSTANCE =Native.load(System.getProperty("user.dir")+"/libgoldenglow.dylib", GoldenGlow.class);
+        GoldenGlow INSTANCE = Native.load(System.getProperty("user.dir") + "/libgoldenglow.dylib", GoldenGlow.class);
 
-        void APResize(Pointer p,int x,int y,int w,int h);
-        void APResizeOnMain(Pointer p,int x,int y,int w,int h);
+        void APResizeOnMain(Pointer p, int x, int y, int w, int h);
+
         Pointer APGetApp();
-        void APSetDock(Pointer app,boolean enable);
-        void APSetTopmost(Pointer win,boolean enable);
-        Pointer APGetNSWindow(Pointer app,long cgid);
+
+        void APSetDock(Pointer app, boolean enable);
+
+        void APSetTopmost(Pointer win, boolean enable);
+
+        Pointer APGetNSWindow(Pointer app, long cgid);
+
         void APActive(Pointer win);
+
         int APVersion();
     }
 
-    @Structure.FieldOrder({"origin","size"})
+    @Structure.FieldOrder({"origin", "size"})
     public static class CGRect extends Structure {
         public CGPoint origin;
         public CGSize size;
 
-        public static class ByReference extends CGRect implements Structure.ByReference {}
+        public static class ByReference extends CGRect implements Structure.ByReference {
+        }
     }
 
-    @Structure.FieldOrder({"x","y"})
+    @Structure.FieldOrder({"x", "y"})
     public static class CGPoint extends Structure {
         public double x;
         public double y;
     }
 
-    @Structure.FieldOrder({"width","height"})
+    @Structure.FieldOrder({"width", "height"})
     public static class CGSize extends Structure {
         public double width;
         public double height;
