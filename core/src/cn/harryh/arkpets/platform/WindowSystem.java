@@ -63,6 +63,9 @@ public enum WindowSystem {
             case X11 -> {
                 X11HWndCtrl.init();
             }
+            case QUARTZ -> {
+                QuartzHWndCtrl.init();
+            }
         }
     }
 
@@ -92,6 +95,9 @@ public enum WindowSystem {
             case X11 -> {
                 return X11HWndCtrl.find(className, windowText);
             }
+            case QUARTZ -> {
+                return QuartzHWndCtrl.find(className, windowText);
+            }
             default -> {
                 return NullHWndCtrl.find(className, windowText);
             }
@@ -115,6 +121,9 @@ public enum WindowSystem {
             }
             case X11 -> {
                 return X11HWndCtrl.getWindowList(onlyVisible);
+            }
+            case QUARTZ -> {
+                return QuartzHWndCtrl.getWindowList(onlyVisible);
             }
             default -> {
                 return new ArrayList<>();
@@ -157,6 +166,9 @@ public enum WindowSystem {
             }
             case X11 -> {
                 X11HWndCtrl.free();
+            }
+            case QUARTZ -> {
+                QuartzHWndCtrl.free();
             }
         }
     }
