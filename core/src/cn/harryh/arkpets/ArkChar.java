@@ -125,7 +125,7 @@ public class ArkChar {
             protected void onApply(AnimData playing) {
                 Logger.debug("Animation", "Apply " + playing);
                 // Sync skeleton position data
-                offsetY.reset(playing.offsetY() * scale);
+                offsetY.reset(playing.animClip().type.offsetY * scale);
                 position.reset(position.end().x, position.end().y, playing.mobility() != 0 ? playing.mobility() : position.end().z);
             }
         };

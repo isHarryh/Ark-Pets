@@ -123,7 +123,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 if (willReachBorder(cha.getPlaying().mobility())) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
-                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), newAnim.offsetY(), -newAnim.mobility());
+                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
                 walkWindow(0.85f * cha.getPlaying().mobility());
@@ -187,7 +187,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     private void changeAnimation(AnimData animData) {
         if (cha.setAnimation(animData))
-            offsetY = (int)(animData.offsetY() * config.display_scale);
+            offsetY = (int)(animData.animClip().type.offsetY * config.display_scale);
     }
 
     /* INPUT PROCESS */
@@ -251,11 +251,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 cha.position.reset(cha.position.end().x, cha.position.end().y, mouseStatus.intentionX);
                 if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
                     AnimData anim = cha.getPlaying();
-                    cha.setAnimation(anim.derive(anim.offsetY(), Math.abs(anim.mobility()) * mouseStatus.intentionX));
+                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX));
                 }
                 if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
                     AnimData anim = tray.keepAnim;
-                    tray.keepAnim = anim.derive(anim.offsetY(), Math.abs(anim.mobility()) * mouseStatus.intentionX);
+                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX);
                 }
             } else if (!isMouseAtSolidPixel()) {
                 // Transfer mouse event

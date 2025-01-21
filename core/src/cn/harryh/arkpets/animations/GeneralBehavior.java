@@ -58,12 +58,30 @@ public class GeneralBehavior extends Behavior {
 
     private AnimDataWeight[] getActionList(AnimClipGroup animList) {
         ArrayList<AnimDataWeight> actionList = new ArrayList<>(List.of(
-                new AnimDataWeight(animList.getLoopAnimData(AnimType.IDLE), (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))),
-                new AnimDataWeight(animList.getLoopAnimData(AnimType.SIT).derive(50, 0), config.behavior_allow_sit  ? 1 << 6 : 0),
-                new AnimDataWeight(animList.getLoopAnimData(AnimType.SLEEP).derive(50, 0), config.behavior_allow_sleep ? 1 << 5 : 0),
-                new AnimDataWeight(animList.getLoopAnimData(AnimType.MOVE).derive(0, +1), config.behavior_allow_walk ? 1 << 5 : 0),
-                new AnimDataWeight(animList.getLoopAnimData(AnimType.MOVE).derive(0, -1), config.behavior_allow_walk ? 1 << 5 : 0),
-                new AnimDataWeight(animList.getStrictAnimData(AnimType.SPECIAL).join(animList.getLoopAnimData(AnimType.IDLE)), config.behavior_allow_walk ? 1 << 4 : 0)
+                new AnimDataWeight(
+                        animList.getLoopAnimData(AnimType.IDLE),
+                        (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))
+                ),
+                new AnimDataWeight(
+                        animList.getLoopAnimData(AnimType.SIT),
+                        config.behavior_allow_sit  ? 1 << 6 : 0
+                ),
+                new AnimDataWeight(
+                        animList.getLoopAnimData(AnimType.SLEEP),
+                        config.behavior_allow_sleep ? 1 << 5 : 0
+                ),
+                new AnimDataWeight(
+                        animList.getLoopAnimData(AnimType.MOVE).derive(+1),
+                        config.behavior_allow_walk ? 1 << 5 : 0
+                ),
+                new AnimDataWeight(
+                        animList.getLoopAnimData(AnimType.MOVE).derive(-1),
+                        config.behavior_allow_walk ? 1 << 5 : 0),
+                new AnimDataWeight(
+                        animList.getStrictAnimData(AnimType.SPECIAL)
+                                .join(animList.getLoopAnimData(AnimType.IDLE)),
+                        config.behavior_allow_walk ? 1 << 4 : 0
+                )
         ));
         actionList.removeIf(e -> e.anim().isEmpty());
         return actionList.toArray(new AnimDataWeight[0]);
@@ -78,7 +96,8 @@ public class GeneralBehavior extends Behavior {
     public AnimData clickEnd() {
         AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
         AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);
-        return (a2.isEmpty() ? a1 : a2).derive(false, true).join(defaultAnim());
+        AnimData a3 = a2.isEmpty() ? a1 : a2;
+        return new AnimData(a3.animClip(), a3.animNext(), false, true, a3.mobility()).join(defaultAnim());
     }
 
     @Override
