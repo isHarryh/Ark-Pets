@@ -9,11 +9,15 @@ import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
+import com.sun.jna.Platform;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
+import javax.swing.*;
+import java.awt.*;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -101,6 +105,13 @@ public class EmbeddedLauncher {
             config.setInitialVisible(true);
             config.setTransparentFramebuffer(true);
             config.setInitialBackgroundColor(Color.CLEAR);
+            // Use async GLFW on macOS
+            if (Platform.isMac()) {
+                Logger.info("System", "Running on macOS, using async GLFW.");
+                SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);
+                Configuration.GLFW_CHECK_THREAD0.set(false);
+                Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
+            }
             // Handle GLFW error
             GLFW.glfwSetErrorCallback(new GLFWErrorCallback() {
                 @Override

@@ -78,7 +78,7 @@ public class QuartzHWndCtrl extends HWndCtrl{
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APResize(nsWin,x,y,w,h);
+        GoldenGlow.INSTANCE.APResizeOnMain(nsWin,x,y,w,h);
     }
 
     @Override
@@ -255,6 +255,7 @@ public class QuartzHWndCtrl extends HWndCtrl{
         GoldenGlow INSTANCE =Native.load(System.getProperty("user.dir")+"/libgoldenglow.dylib", GoldenGlow.class);
 
         void APResize(Pointer p,int x,int y,int w,int h);
+        void APResizeOnMain(Pointer p,int x,int y,int w,int h);
         Pointer APGetApp();
         void APSetDock(Pointer app,boolean enable);
         void APSetTopmost(Pointer win,boolean enable);
