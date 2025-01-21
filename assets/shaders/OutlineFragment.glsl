@@ -16,11 +16,19 @@ uniform ivec2 u_textureSize;    // Required
 uniform float u_alpha;          // Required
 
 const float c_alphaLv0 = 0.1;
-const float c_alphaLv1 = 0.45;
+const float c_alphaLv1 = 0.4;
 const float c_alphaLv2 = 0.9;
-const float c_seamCoef = 0.55;
+const float c_seamCoef = 0.6;
 const float c_outlineOverstate = 10.0;
 const float c_shadowOffset = 2.0;
+
+const float gaussianNeighborKernel[25] = float[25] (
+0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
+0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
+0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,
+0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
+0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
+);
 
 vec4[24] getSimpleNeighbors(vec2 unitLength) {
     vec4 neighbors[24];
@@ -38,13 +46,6 @@ vec4[24] getSimpleNeighbors(vec2 unitLength) {
 }
 
 vec4[24] getGaussianNeighbors(vec2 unitLength) {
-    float kernel[25] = float[25] (
-        0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
-        0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
-        0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,
-        0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
-        0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
-    );
     vec4 neighbors[24];
     int ni = 0;
     int ki = 0;
@@ -52,7 +53,7 @@ vec4[24] getGaussianNeighbors(vec2 unitLength) {
         for (int x = -2; x <= 2; x++) {
             if (!(y == 0 && x == 0)) {
                 vec2 offset = vec2(x, y) * unitLength;
-                neighbors[ni] = texture2D(u_texture, v_texCoords + offset) * kernel[ki];
+                neighbors[ni] = texture2D(u_texture, v_texCoords + offset) * gaussianNeighborKernel[ki];
                 ni++;
             }
             ki++;
@@ -72,7 +73,7 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
 
 vec4 getOutlined() {
     vec4 texColor = texture2D(u_texture, v_texCoords);
-    if (u_outlineWidth > 0.0) {
+    if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
         vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
         vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
         if (neighbor.a > c_alphaLv0) {
@@ -97,7 +98,7 @@ vec4 getSeamed() {
     }
     if (sampleSize > 0) {
         texColor.rgb = mix(sampleColor.rgb / sampleSize, texColor.rgb, c_seamCoef);
-        texColor.a = sampleSize / sampleSize;
+        texColor.a = min(1.0, texColor.a * 2.0);
     } else {
         texColor.a = c_alphaLv2;
     }
@@ -105,6 +106,9 @@ vec4 getSeamed() {
 }
 
 vec4 getBoxShadow() {
+    if (u_shadowColor.a <= 0.0) {
+        return vec4(0.0);
+    }
     vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
     vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
     return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
