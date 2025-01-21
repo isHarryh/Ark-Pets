@@ -60,7 +60,7 @@ public class GeneralBehavior extends Behavior {
         ArrayList<AnimDataWeight> actionList = new ArrayList<>(List.of(
                 new AnimDataWeight(
                         animList.getLoopAnimData(AnimType.IDLE),
-                        (int)(behaviorBaseWeight / Math.sqrt(config.behavior_ai_activation))
+                        Math.round(behaviorBaseWeight / (float) Math.sqrt(config.behavior_ai_activation))
                 ),
                 new AnimDataWeight(
                         animList.getLoopAnimData(AnimType.SIT),
@@ -80,7 +80,7 @@ public class GeneralBehavior extends Behavior {
                 new AnimDataWeight(
                         animList.getStrictAnimData(AnimType.SPECIAL)
                                 .join(animList.getLoopAnimData(AnimType.IDLE)),
-                        config.behavior_allow_walk ? 1 << 4 : 0
+                        config.behavior_allow_special ? 1 << 4 : 0
                 )
         ));
         actionList.removeIf(e -> e.anim().isEmpty());

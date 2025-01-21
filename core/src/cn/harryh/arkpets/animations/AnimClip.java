@@ -27,19 +27,19 @@ public class AnimClip {
     /** An animation type represents a series of identical animation.
      */
     public enum AnimType {
-        NONE("", 0),
-        DEFAULT("^Default.?$", 0),
-        IDLE("^((Idle)|(Relax)).?$", 0),
-        MOVE("^Move.?$", 0),
+        NONE("", 5),
+        DEFAULT("^Default.?$", 5),
+        IDLE("^((Idle)|(Relax)).?$", 5),
+        MOVE("^Move.?$", 5),
         SIT("^Sit$", 50),
-        SLEEP("^Sleep$", 50),
-        SPECIAL("^Special$", 0),
-        INTERACT("^Interact$", 0),
-        ATTACK("^((Attack)|(Combat)).?$", 0),
-        SKILL("^Skill.?$", 0),
-        START("^Start.?$", 0),
-        DIE("^Die.?$", 0),
-        REVIVE("^((Revive)|(Reborn)).?$", 0);
+        SLEEP("^Sleep$", 25),
+        SPECIAL("^Special$", 5),
+        INTERACT("^Interact$", 5),
+        ATTACK("^((Attack)|(Combat)).?$", 5),
+        SKILL("^Skill.?$", 5),
+        START("^Start.?$", 5),
+        DIE("^Die.?$", 5),
+        REVIVE("^((Revive)|(Reborn)).?$", 5);
 
         /** The regex pattern of this type of animation, which is case-insensitive. */
         public final Pattern pattern;
