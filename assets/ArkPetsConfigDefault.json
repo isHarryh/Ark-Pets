@@ -30,6 +30,7 @@
     "render_outline":1,
     "render_outline_color":"#FFFF00FF",
     "render_outline_width":2.0,
+    "render_shadow_color":"#000000BB",
     "transition_duration":0.3,
     "transition_type":"EASE_OUT_CUBIC",
     "window_style_toolwindow":true,

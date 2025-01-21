@@ -41,6 +41,7 @@ public class ArkChar {
     private Texture bgTexture;
     private final float outlineWidth;
     private final Color outlineColor;
+    private final Color shadowColor;
     private final TransitionFloat offsetY;
     private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
@@ -132,6 +133,7 @@ public class ArkChar {
         setCanvas(ArkConfig.getGdxColorFrom(config.canvas_color));
         outlineWidth = config.render_outline_width;
         outlineColor = ArkConfig.getGdxColorFrom(config.render_outline_color);
+        shadowColor = ArkConfig.getGdxColorFrom(config.render_shadow_color);
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
@@ -242,12 +244,13 @@ public class ArkChar {
         batch.end();
         batch.setShader(null);
         camera.getFBO().end();
-        // Render Pass 2: Render the outline
+        // Render Pass 2: Render additional effects
         Texture passedTexture = camera.getFBO().getColorBufferTexture();
         shader2.bind();
         shader2.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
         shader2.setUniformf("u_outlineWidth", outlineWidth);
         shader2.setUniformf("u_outlineAlpha", outlineAlpha.now());
+        shader2.setUniformf("u_shadowColor", shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
         shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
         shader2.setUniformf("u_alpha", alpha.now());
         batch.setShader(shader2);

@@ -78,6 +78,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXSlider configRenderOpacityDim;
     @FXML
     private Label configRenderOpacityDimValue;
+    @FXML
+    private JFXButton toggleConfigRenderShadow;
+    @FXML
+    private HBox wrapperConfigRenderShadow;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
 
     @FXML
     private JFXCheckBox configWindowTopmost;
@@ -243,6 +249,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 });
         setupRenderOpacityDim.setRange(minOpacity, setupRenderOpacityNormal.getValidatedValue());
         setupRenderOpacityDim.setDisable(minOpacity >= setupRenderOpacityNormal.getValidatedValue());
+
+        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderShadow, wrapperConfigRenderShadow, durationFast);
+        new ComboBoxSetup<>(configRenderShadowColor).setItems(new NamedItem<>("禁用", 0x00000000),
+                        new NamedItem<>("轻微", 0x00000077),
+                        new NamedItem<>("标准", 0x000000BB),
+                        new NamedItem<>("重墨", 0x000000FF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_shadow_color)), app.config.render_shadow_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_shadow_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
     }
 
     private void initConfigAdvanced() {

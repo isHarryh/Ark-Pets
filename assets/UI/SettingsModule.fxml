@@ -105,6 +105,31 @@
                         </HBox>
                     </VBox>
                 </HBox>
+                <HBox>
+                    <Label text="光照效果"/>
+                    <JFXButton fx:id="toggleConfigRenderShadow" minHeight="-Infinity" minWidth="-Infinity"
+                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
+                        <graphic>
+                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
+                                <SVGPath
+                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
+                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
+                            </AnchorPane>
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="btn-secondary"/>
+                            <String fx:value="btn-with-icon"/>
+                        </styleClass>
+                    </JFXButton>
+                </HBox>
+                <HBox fx:id="wrapperConfigRenderShadow" managed="false" visible="false">
+                    <VBox>
+                        <HBox>
+                            <Label text="阴影强度"/>
+                            <JFXComboBox fx:id="configRenderShadowColor" prefWidth="120.0"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>

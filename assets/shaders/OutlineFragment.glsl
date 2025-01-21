@@ -11,6 +11,7 @@ uniform sampler2D u_texture;    // From TCPB
 uniform vec4 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
 uniform float u_outlineAlpha;   // Required
+uniform vec4 u_shadowColor;     // Required
 uniform ivec2 u_textureSize;    // Required
 uniform float u_alpha;          // Required
 
@@ -19,6 +20,7 @@ const float c_alphaLv1 = 0.45;
 const float c_alphaLv2 = 0.9;
 const float c_seamCoef = 0.55;
 const float c_outlineOverstate = 10.0;
+const float c_shadowOffset = 2.0;
 
 vec4[24] getSimpleNeighbors(vec2 unitLength) {
     vec4 neighbors[24];
@@ -94,7 +96,7 @@ vec4 getSeamed() {
         }
     }
     if (sampleSize > 0) {
-        texColor.rgb = sampleColor.rgb / sampleSize * c_seamCoef + texColor.rgb * (1.0 - c_seamCoef);
+        texColor.rgb = mix(sampleColor.rgb / sampleSize, texColor.rgb, c_seamCoef);
         texColor.a = sampleSize / sampleSize;
     } else {
         texColor.a = c_alphaLv2;
@@ -102,17 +104,27 @@ vec4 getSeamed() {
     return texColor;
 }
 
+vec4 getBoxShadow() {
+    vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
+    vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
+    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
+}
+
 void main() {
     vec4 texColor = texture2D(u_texture, v_texCoords);
 
-    if (texColor.a < c_alphaLv0) {
-        // Outline effect apply on transparent areas
-        texColor = getOutlined();
-    } else if (texColor.a < c_alphaLv1) {
-        // No effect apply on these areas
-    } else if (texColor.a < c_alphaLv2) {
-        // Seaming apply on gap areas
-        texColor = getSeamed();
+    if (texColor.a < c_alphaLv2) {
+        if (texColor.a < c_alphaLv0) {
+            // Outline effect apply on transparent areas
+            texColor = getOutlined();
+        } else if (texColor.a < c_alphaLv1) {
+            // No effect apply on these areas
+        } else {
+            // Seaming apply on gap areas
+            texColor = getSeamed();
+        }
+        // Box shadow
+        texColor = mix(getBoxShadow(), texColor, texColor.a);
     } else {
         // No effect apply on other areas
     }
