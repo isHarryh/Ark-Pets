@@ -29,11 +29,15 @@ public enum WindowSystem {
         } else if (Platform.isLinux()) {
             String desktop = System.getenv("XDG_CURRENT_DESKTOP");
             String type = System.getenv("XDG_SESSION_TYPE");
-            if (desktop.equals("GNOME")) {
-                return WindowSystem.MUTTER;
-            } else if (desktop.equals("KDE")) {
-                return WindowSystem.KWIN;
-            } else if (type.equals("x11")) {
+            if (desktop != null && type != null) {
+                if (desktop.equals("GNOME")) {
+                    return WindowSystem.MUTTER;
+                } else if (desktop.equals("KDE") && type.equals("wayland")) {
+                    return WindowSystem.KWIN;
+                } else if (type.equals("x11")) {
+                    return WindowSystem.X11;
+                }
+            } else {
                 return WindowSystem.X11;
             }
         }
