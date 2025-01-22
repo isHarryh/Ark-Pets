@@ -84,7 +84,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        GoldenGlow.INSTANCE.APSetDock(nsapp, enable);
+        GoldenGlow.INSTANCE.APSetDockOnMain(nsapp, enable);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setTopmost(boolean enable) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APSetTopmost(nsWin, enable);
+        GoldenGlow.INSTANCE.APSetTopmostOnMain(nsWin, enable);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static QuartzHWndCtrl find(String className, String windowText) {
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListExcludeDesktopElements, 0);
+        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
         int numWindows = windows.getCount();
         QuartzHWndCtrl win = null;
         for (int i = 0; i < numWindows; i++) {
@@ -164,7 +164,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
             String cname = getWindowName(windowRef.getValue(kCGWindowOwnerName));
             String wname = getWindowName(windowRef.getValue(kCGWindowName));
             if (className == null) {
-                if (wname.equals(windowText)) {
+                if (wname.equals(windowText) || cname.equals(windowText)) {
                     win = new QuartzHWndCtrl(windowRef);
                     break;
                 }
@@ -261,9 +261,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
         Pointer APGetApp();
 
-        void APSetDock(Pointer app, boolean enable);
+        void APSetDockOnMain(Pointer app, boolean enable);
 
-        void APSetTopmost(Pointer win, boolean enable);
+        void APSetTopmostOnMain(Pointer win, boolean enable);
 
         Pointer APGetNSWindow(Pointer app, long cgid);
 

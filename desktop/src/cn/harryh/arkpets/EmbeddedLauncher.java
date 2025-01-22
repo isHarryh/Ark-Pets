@@ -108,6 +108,7 @@ public class EmbeddedLauncher {
             // Use async GLFW on macOS
             if (Platform.isMac()) {
                 Logger.info("System", "Running on macOS, using async GLFW.");
+                System.setProperty("apple.awt.application.name", TITLE);
                 SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);
                 Configuration.GLFW_CHECK_THREAD0.set(false);
                 Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
