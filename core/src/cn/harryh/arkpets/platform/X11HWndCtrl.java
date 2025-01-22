@@ -156,8 +156,10 @@ public class X11HWndCtrl extends HWndCtrl {
     public void setTaskbar(boolean enable) {
         if (!enable) {
             clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
+            clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
         } else {
             clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
+            clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
         }
     }
 
