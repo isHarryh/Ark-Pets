@@ -13,6 +13,8 @@ public abstract class StartupConfig {
     public static StartupConfig getInstance() {
         if (Platform.isWindows()) {
             return new WindowsStartupConfig();
+        } else if (Platform.isLinux()) {
+            return new XDGStartupConfig();
         }
         return new NullStartupConfig();
     }
