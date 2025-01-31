@@ -65,7 +65,7 @@ public class KWinHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTaskbar(boolean enable) {
-
+        dBusInterface.Stick(hWnd, enable);
     }
 
     @Override
@@ -75,11 +75,7 @@ public class KWinHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTopmost(boolean enable) {
-        if (enable) {
-            dBusInterface.Above(hWnd);
-        } else {
-            dBusInterface.Unabove(hWnd);
-        }
+        dBusInterface.Above(hWnd, enable);
     }
 
     @Override
@@ -148,9 +144,9 @@ public class KWinHWndCtrl extends HWndCtrl {
 
         void Activate(String uuid);
 
-        void Above(String uuid);
+        void Above(String uuid, boolean enable);
 
-        void Unabove(String uuid);
+        void Stick(String uuid, boolean enable);
 
         List<DetailsStruct> List();
 
