@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=ArkPetsStartup
+Exec={{ARKPETS_EXECUTABLE}}
+Type=Application
+Path={{ARKPETS_WORKING_DIR}}

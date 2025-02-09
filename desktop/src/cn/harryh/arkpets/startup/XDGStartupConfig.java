@@ -13,16 +13,10 @@ import static cn.harryh.arkpets.Const.charsetDefault;
 public class XDGStartupConfig extends StartupConfig {
     private boolean available;
     private File startupFile;
+    private String desktopContent;
 
     private static final String startupTarget    = "ArkPets-" + Const.appVersion + ".AppImage";
     private static final String startupShortcut  = "ArkPetsStartup.desktop";
-    private static final String desktopContent   = """
-                                                   [Desktop Entry]
-                                                   Name=ArkPetsStartup
-                                                   Exec=%s
-                                                   Type=Application
-                                                   Path=%s
-                                                   """;
 
     public XDGStartupConfig() {
         try {
@@ -31,7 +25,7 @@ public class XDGStartupConfig extends StartupConfig {
                 throw new FileNotFoundException("Startup dir not found: " + startupDir.getAbsolutePath());
             if (!new File(startupTarget).exists())
                 throw new FileNotFoundException("Executable not found.");
-
+            this.desktopContent = new String(XDGStartupConfig.class.getResourceAsStream("/utils/xdgstartup.desktop").readAllBytes());
             this.startupFile = new File(startupDir.getAbsolutePath(), startupShortcut);
             this.available = true;
         } catch (Exception e) {
@@ -46,7 +40,9 @@ public class XDGStartupConfig extends StartupConfig {
         if (!this.available) return false;
         try {
             String cd = System.getProperty("user.dir");
-            String content = String.format(desktopContent, cd + "/" + startupTarget + " --direct-start", cd);
+            String content = desktopContent
+                    .replace("{{ARKPETS_WORKING_DIR}}",cd)
+                    .replace("{{ARKPETS_EXECUTABLE}}",cd + "/" + startupTarget + " --direct-start");
             IOUtils.FileUtil.writeString(startupFile, charsetDefault, content, false);
             Logger.info("Config", "Auto-startup added.");
             return true;
