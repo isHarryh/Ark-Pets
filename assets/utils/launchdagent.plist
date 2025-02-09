@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>cn.harryh.arkpets.agent</string>
+	<key>LimitLoadToSessionType</key>
+	<string>Aqua</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Applications/ArkPets.app/Contents/MacOS/ArkPets</string>
+		<string>--direct-start</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>{{ARKPETS_WORKING_DIR}}</string>
+	<key>StandardErrorPath</key>
+	<string>/dev/null</string>
+	<key>StandardOutPath</key>
+	<string>/dev/null</string>
+</dict>
+</plist>
