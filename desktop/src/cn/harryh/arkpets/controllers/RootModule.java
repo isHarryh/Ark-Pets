@@ -5,7 +5,7 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.EmbeddedLauncher;
+import cn.harryh.arkpets.BootstrapLauncher;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
@@ -135,7 +135,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
     /** Runs the EmbeddedLauncher to launch the ArkPets app.
      * It will run in multi-threading mode.
-     * @see EmbeddedLauncher
+     * @see BootstrapLauncher
      */
     public void startArkPetsCore() {
         Task<Boolean> task = new Task<>() {
@@ -155,10 +155,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     default -> "";
                 };
                 args.add(temp);
+                args.add("--direct-start");
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
-                Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, List.of(), args);
+                Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(BootstrapLauncher.class, List.of(), args);
                 // ArkPets core finalized.
                 if (!future.get().isSuccess()) {
                     int exitCode = future.get().exitValue();
