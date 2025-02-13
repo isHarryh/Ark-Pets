@@ -70,6 +70,11 @@ project(":core") {
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
         api "com.alibaba:fastjson:2.0.39"
+        // CommonMark
+        api "org.commonmark:commonmark:0.24.0"
+        api "org.commonmark:commonmark-ext-autolink:0.24.0"
+        api "org.commonmark:commonmark-ext-gfm-strikethrough:0.24.0"
+        api "org.commonmark:commonmark-ext-gfm-tables:0.24.0"
         // Log4j
         api "apache-log4j:log4j:1.2.15"
         // TiniPinyin
