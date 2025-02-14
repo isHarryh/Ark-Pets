@@ -11,6 +11,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 
 /** The helper class for Markdown-to-FXML document conversion.
@@ -21,9 +22,13 @@ public class FxmlConvertor {
      * @return The converted FXML content.
      */
     public static String toFxml(String markdown) {
-        Parser parser = Parser.builder().build();
+        Parser parser = Parser.builder()
+                .extensions(List.of(TablesExtension.create()))
+                .build();
         org.commonmark.node.Node document = parser.parse(markdown);
-        HtmlRenderer renderer = HtmlRenderer.builder().nodeRendererFactory(CoreFxmlNodeRenderer::new).build();
+        HtmlRenderer renderer = HtmlRenderer.builder()
+                .extensions(List.of(TablesExtension.create()))
+                .nodeRendererFactory(CoreFxmlNodeRenderer::new).build();
         return renderer.render(document);
     }
 

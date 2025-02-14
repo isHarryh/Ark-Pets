@@ -58,10 +58,10 @@ public enum FxmlPrefabs {
             "style", "-fx-padding:0 10px;"
     )),
     TABLE(Map.of(
-            "style", "-fx-padding:10px 5px;-fx-hgap:0;-fx-vgap:0;-fx-wrap-text:true;"
+            "style", "-fx-padding:10px 5px;-fx-hgap:0;-fx-vgap:0;"
     )),
     TABLE_CELL(Map.of(
-            "style", "-fx-padding:5px 10px;-fx-wrap-text:true;" +
+            "style", "-fx-padding:5px 10px;" +
                     "-fx-border-color:#2482;-fx-border-width:1px;-fx-border-radius:0;"
     ));
 
