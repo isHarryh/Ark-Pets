@@ -5,6 +5,7 @@ package cn.harryh.arkpets.utils.markdown;
 
 import cn.harryh.arkpets.utils.IOUtils;
 import javafx.fxml.FXMLLoader;
+import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
@@ -21,11 +22,11 @@ public class FxmlConvertor {
      * @param markdown The Markdown content.
      * @return The converted FXML content.
      */
-    public static String toFxml(String markdown) {
+    public static String toFxmlString(String markdown) {
         Parser parser = Parser.builder()
                 .extensions(List.of(TablesExtension.create()))
                 .build();
-        org.commonmark.node.Node document = parser.parse(markdown);
+        Node document = parser.parse(markdown);
         HtmlRenderer renderer = HtmlRenderer.builder()
                 .extensions(List.of(TablesExtension.create()))
                 .nodeRendererFactory(CoreFxmlNodeRenderer::new).build();
@@ -34,15 +35,19 @@ public class FxmlConvertor {
 
     /** Converts a Markdown document to an FXML document.
      * @param markdown The Markdown content.
-     * @return The converted JavaFX Node that contains the given content.
+     * @return The {@link FxmlDocumentController} that bound with the converted FXML document.
      */
-    public static javafx.scene.Node toFxmlVBox(String markdown) {
-        String fxml = toFxml(markdown);
+    public static FxmlDocumentController toFxmlController(String markdown) {
+        String fxml = toFxmlString(markdown);
         try {
             // TODO Debug only
             IOUtils.FileUtil.writeString(new File("temp.fxml"), "UTF-8", fxml, false);
+            FxmlDocumentController controller = new FxmlDocumentController();
             FXMLLoader loader = new FXMLLoader();
-            return loader.load(new ByteArrayInputStream(fxml.getBytes()));
+            loader.setClassLoader(FxmlConvertor.class.getClassLoader());
+            loader.setController(controller);
+            loader.load(new ByteArrayInputStream(fxml.getBytes()));
+            return controller;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

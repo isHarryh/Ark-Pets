@@ -8,10 +8,7 @@ import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 
 /** The modded node renderer that renders all the core nodes to FXML used by JavaFX.
@@ -21,11 +18,13 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     protected final HtmlNodeRendererContext context;
     private final HtmlWriter writer;
     private final Map<ListBlock, Integer> listItemCount;
+    private String lastHref;
 
     public CoreFxmlNodeRenderer(HtmlNodeRendererContext context) {
         this.context = context;
         this.writer = context.getWriter();
         this.listItemCount = new HashMap<>(4);
+        this.lastHref = null;
     }
 
     @Override
@@ -161,12 +160,17 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(Link link) {
-        // TODO Not implemented
-        writer.tag("Hyperlink");
+        writer.tag("/Text");
         writer.line();
+
+        lastHref = link.getDestination();
+        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
         visitChildren(link);
-        writer.tag("/Hyperlink");
+        lastHref = null;
+        writer.tag("/Text");
         writer.line();
+
+        writer.tag("Text");
     }
 
     @Override
@@ -212,19 +216,19 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     @Override
     public void visit(Emphasis emphasis) {
         writer.tag("/Text");
-        writer.tag("Text", FxmlPrefabs.EMPHASIS.getAttrs());
+        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.EMPHASIS.getAttrs()));
         visitChildren(emphasis);
         writer.tag("/Text");
-        writer.tag("Text");
+        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
     }
 
     @Override
     public void visit(StrongEmphasis strongEmphasis) {
         writer.tag("/Text");
-        writer.tag("Text", FxmlPrefabs.STRONG_EMPHASIS.getAttrs());
+        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.STRONG_EMPHASIS.getAttrs()));
         visitChildren(strongEmphasis);
         writer.tag("/Text");
-        writer.tag("Text");
+        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
     }
 
     @Override
@@ -326,6 +330,19 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     private Map<String, String> getAttrs(Node node, String tagName, Map<String, String> defaultAttributes) {
         return context.extendAttributes(node, tagName, defaultAttributes);
+    }
+
+    private Map<String, String> getHyperlinkAttachedAttrs(Map<String, String> defaultAttrs) {
+        if (lastHref != null && !lastHref.isBlank()) {
+            Map<String, String> attrs = new HashMap<>(8);
+            attrs.putAll(defaultAttrs);
+            attrs.putAll(FxmlPrefabs.HYPERLINK.getAttrs());
+            attrs.put("onMouseClicked", "#handleHyperlinkClick");
+            attrs.put("userData", lastHref);
+            return attrs;
+        } else {
+            return defaultAttrs;
+        }
     }
 
 
