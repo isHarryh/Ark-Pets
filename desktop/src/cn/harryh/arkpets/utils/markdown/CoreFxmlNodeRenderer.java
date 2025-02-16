@@ -17,12 +17,14 @@ import java.util.*;
 public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRenderer {
     protected final HtmlNodeRendererContext context;
     private final HtmlWriter writer;
+    private final TextFlowCoordinator textFlow;
     private final Map<ListBlock, Integer> listItemCount;
     private String lastHref;
 
     public CoreFxmlNodeRenderer(HtmlNodeRendererContext context) {
         this.context = context;
         this.writer = context.getWriter();
+        this.textFlow = new TextFlowCoordinator(writer);
         this.listItemCount = new HashMap<>(4);
         this.lastHref = null;
     }
@@ -69,36 +71,27 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(Heading heading) {
-        writer.tag("TextFlow", switch (heading.getLevel()) {
+        textFlow.openTextFlow();
+
+        textFlow.openText(switch (heading.getLevel()) {
             case 1 -> FxmlPrefabs.H1.getAttrs();
             case 2 -> FxmlPrefabs.H2.getAttrs();
             case 3 -> FxmlPrefabs.H3.getAttrs();
             default -> FxmlPrefabs.H4.getAttrs();
         });
-        writer.line();
-
-        writer.tag("Text", FxmlPrefabs.TEXT.getAttrs());
         visitChildren(heading);
-        writer.tag("/Text");
-        writer.line();
 
-        writer.tag("/TextFlow");
-        writer.line();
+        textFlow.closeTextFlow();
     }
 
     @Override
     public void visit(Paragraph paragraph) {
-        writer.tag("TextFlow");
-        writer.line();
-        writer.tag("Text");
-        writer.line();
+        textFlow.openTextFlow();
 
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
         visitChildren(paragraph);
 
-        writer.tag("/Text");
-        writer.line();
-        writer.tag("/TextFlow");
-        writer.line();
+        textFlow.closeTextFlow();
     }
 
     @Override
@@ -160,17 +153,13 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(Link link) {
-        writer.tag("/Text");
-        writer.line();
+        textFlow.openTextFlow();
 
         lastHref = link.getDestination();
-        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
         visitChildren(link);
+        textFlow.closeText();
         lastHref = null;
-        writer.tag("/Text");
-        writer.line();
-
-        writer.tag("Text");
     }
 
     @Override
@@ -215,29 +204,31 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(Emphasis emphasis) {
-        writer.tag("/Text");
-        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.EMPHASIS.getAttrs()));
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.EMPHASIS.getAttrs()));
         visitChildren(emphasis);
-        writer.tag("/Text");
-        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
+        textFlow.closeText();
     }
 
     @Override
     public void visit(StrongEmphasis strongEmphasis) {
-        writer.tag("/Text");
-        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.STRONG_EMPHASIS.getAttrs()));
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.STRONG_EMPHASIS.getAttrs()));
         visitChildren(strongEmphasis);
-        writer.tag("/Text");
-        writer.tag("Text", getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
+        textFlow.closeText();
     }
 
     @Override
     public void visit(Text text) {
+        if (!textFlow.isTextFlowContinuing()) {
+            textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
+        }
         writer.text(text.getLiteral());
     }
 
     @Override
     public void visit(Code code) {
+        if (!textFlow.isTextFlowContinuing()) {
+            textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
+        }
         writer.text(code.getLiteral());
     }
 
@@ -248,24 +239,12 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(SoftLineBreak softLineBreak) {
-        writer.tag("/Text");
-        writer.line();
-        writer.tag("/TextFlow");
-        writer.line();
-        writer.tag("TextFlow");
-        writer.line();
-        writer.tag("Text", FxmlPrefabs.TEXT.getAttrs());
+        textFlow.closeTextFlow();
     }
 
     @Override
     public void visit(HardLineBreak hardLineBreak) {
-        writer.tag("/Text");
-        writer.line();
-        writer.tag("/TextFlow");
-        writer.line();
-        writer.tag("TextFlow");
-        writer.line();
-        writer.tag("Text", FxmlPrefabs.TEXT.getAttrs());
+        textFlow.closeTextFlow();
     }
 
     protected void visitChildren(Node parent) {
@@ -279,17 +258,12 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     private void renderCodeBlock(String literal) {
         writer.tag("VBox", FxmlPrefabs.CODE_BLOCK.getAttrs());
         writer.line();
+        textFlow.openTextFlow();
 
-        writer.tag("TextFlow");
-        writer.line();
-        writer.tag("Text", FxmlPrefabs.TEXT.getAttrs());
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
         writer.text(literal);
-        writer.tag("/Text");
-        writer.line();
-        writer.tag("/TextFlow");
-        writer.line();
 
-        writer.line();
+        textFlow.closeTextFlow();
         writer.tag("/VBox");
         writer.line();
     }
