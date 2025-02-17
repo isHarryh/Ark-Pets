@@ -3,9 +3,13 @@
  */
 package cn.harryh.arkpets.utils.markdown;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.util.function.Consumer;
@@ -21,6 +25,7 @@ public final class FxmlDocumentController {
 
     public FxmlDocumentController() {
         hyperlinkConsumer = null;
+        Platform.runLater(this::setupWidthListener);
     }
 
     /** This method is used to bind to the {@code onMouseClicked} attribute in the rendered FXML document.
@@ -49,5 +54,36 @@ public final class FxmlDocumentController {
      */
     public VBox getBodyNode() {
         return body;
+    }
+
+    private void setupWidthListener() {
+        if (body != null) {
+            body.maxWidthProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null && newValue.doubleValue() > 0.0) {
+                    updateAllGridPanes(body, newValue.doubleValue());
+                }
+            });
+            if (body.getMaxWidth() > 0.0) {
+                updateAllGridPanes(body, body.getMaxWidth());
+            }
+        }
+    }
+
+    private void updateAllGridPanes(Parent node, double containerWidth) {
+        for (Node child : node.getChildrenUnmodifiable()) {
+            if (child instanceof GridPane gridPane) {
+                // Update the `maxWidth` of all columns according to the container width
+                for (ColumnConstraints column : gridPane.getColumnConstraints()) {
+                    // Weight data is temporarily stored through the 'minWidth' attribute
+                    double percentage = column.getMinWidth();
+                    if (percentage > 0.0) {
+                        column.setMaxWidth(containerWidth * percentage);
+                    }
+                }
+            }
+            if (child instanceof Parent parent) {
+                updateAllGridPanes(parent, containerWidth);
+            }
+        }
     }
 }

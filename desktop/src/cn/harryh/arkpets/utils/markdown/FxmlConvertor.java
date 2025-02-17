@@ -5,6 +5,7 @@ package cn.harryh.arkpets.utils.markdown;
 
 import cn.harryh.arkpets.utils.IOUtils;
 import javafx.fxml.FXMLLoader;
+import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -28,7 +29,6 @@ public class FxmlConvertor {
                 .build();
         Node document = parser.parse(markdown);
         HtmlRenderer renderer = HtmlRenderer.builder()
-                .extensions(List.of(TablesExtension.create()))
                 .nodeRendererFactory(CoreFxmlNodeRenderer::new).build();
         return renderer.render(document);
     }

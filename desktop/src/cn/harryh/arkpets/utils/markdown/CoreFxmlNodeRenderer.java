@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.utils.markdown;
 
+import org.commonmark.ext.gfm.tables.*;
 import org.commonmark.node.*;
 import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
@@ -19,6 +20,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     private final HtmlWriter writer;
     private final TextFlowCoordinator textFlow;
     private final Map<ListBlock, Integer> listItemCount;
+    private final Map<TableBlock, RowColumnValue> rowColumnCount;
     private String lastHref;
 
     public CoreFxmlNodeRenderer(HtmlNodeRendererContext context) {
@@ -26,6 +28,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         this.writer = context.getWriter();
         this.textFlow = new TextFlowCoordinator(writer);
         this.listItemCount = new HashMap<>(4);
+        this.rowColumnCount = new HashMap<>(4);
         this.lastHref = null;
     }
 
@@ -38,14 +41,30 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
                 Link.class, ListItem.class, OrderedList.class,
                 Image.class, Emphasis.class, StrongEmphasis.class,
                 Text.class, Code.class, HtmlInline.class,
-                SoftLineBreak.class, HardLineBreak.class
+                SoftLineBreak.class, HardLineBreak.class, TableBlock.class,
+                TableHead.class, TableBody.class, TableRow.class,
+                TableCell.class
         );
     }
 
     @Override
     public void render(Node node) {
-        node.accept(this);
+        if (node instanceof TableBlock tableBlock) {
+            renderBlock(tableBlock);
+        } else if (node instanceof TableHead tableHead) {
+            renderHead(tableHead);
+        } else if (node instanceof TableBody tableBody) {
+            renderBody(tableBody);
+        } else if (node instanceof TableRow tableRow) {
+            renderRow(tableRow);
+        } else if (node instanceof TableCell tableCell) {
+            renderCell(tableCell);
+        } else {
+            node.accept(this);
+        }
     }
+
+    // REGION: BASIC NODES
 
     @Override
     public void visit(Document document) {
@@ -247,6 +266,76 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         textFlow.closeTextFlow();
     }
 
+    // REGION: TABLE EXTENSION
+
+    protected void renderBlock(TableBlock tableBlock) {
+        writer.tag("GridPane", FxmlPrefabs.TABLE.getAttrs());
+        writer.line();
+
+        RowColumnValue rc = new RowColumnValue();
+        rowColumnCount.put(tableBlock, rc);
+
+        visitChildren(tableBlock);
+
+        double weightSum = rc.columnWeight.stream().mapToDouble(Double::doubleValue).sum();
+        if (weightSum > 0.0) {
+            writer.tag("columnConstraints");
+            writer.line();
+            rc.columnWeight.forEach(w -> {
+                // Weight data is temporarily stored through the 'minWidth' attribute
+                writer.tag("ColumnConstraints", Map.of(
+                        "minWidth", "%.6f".formatted(w / weightSum)
+                ), true);
+                writer.line();
+            });
+            writer.tag("/columnConstraints");
+            writer.line();
+        }
+
+        rowColumnCount.remove(tableBlock);
+
+        writer.tag("/GridPane");
+        writer.line();
+    }
+
+    protected void renderHead(TableHead tableHead) {
+        visitChildren(tableHead);
+    }
+
+    protected void renderBody(TableBody tableBody) {
+        visitChildren(tableBody);
+    }
+
+    protected void renderRow(TableRow tableRow) {
+        if (tableRow.getParent().getParent() instanceof TableBlock tableBlock) {
+            visitChildren(tableRow);
+            rowColumnCount.get(tableBlock).increaseRow();
+        } else {
+            throw new RuntimeException("Illegal parent of table row");
+        }
+    }
+
+    protected void renderCell(TableCell tableCell) {
+        if (tableCell.getParent().getParent().getParent() instanceof TableBlock tableBlock) {
+            writer.tag("VBox", getCellAttrs(tableCell));
+            writer.line();
+
+            visitChildren(tableCell);
+            textFlow.closeTextFlow();
+
+            writer.tag("/VBox");
+            writer.line();
+
+            RowColumnValue rc = rowColumnCount.get(tableBlock);
+            rc.setColumnWeight(Math.sqrt(tableCell.getWidth() / ((getChildrenLength(tableCell) / 2.0 + 1))));
+            rc.increaseColumn();
+        } else {
+            throw new RuntimeException("Illegal parent of table cell");
+        }
+    }
+
+    // REGION: INTERNAL METHODS
+
     protected void visitChildren(Node parent) {
         Node next;
         for (Node node = parent.getFirstChild(); node != null; node = next) {
@@ -298,6 +387,14 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         return false;
     }
 
+    private int getChildrenLength(Node parent) {
+        int count = 0;
+        for (Node node = parent.getFirstChild(); node != null; node = node.getNext()) {
+            count += 1;
+        }
+        return count;
+    }
+
     private Map<String, String> getAttrs(Node node, String tagName) {
         return getAttrs(node, tagName, Map.of());
     }
@@ -316,6 +413,57 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
             return attrs;
         } else {
             return defaultAttrs;
+        }
+    }
+
+    private Map<String, String> getCellAttrs(TableCell tableCell) {
+        if (tableCell.getParent().getParent().getParent() instanceof TableBlock tableBlock) {
+            RowColumnValue rc = rowColumnCount.get(tableBlock);
+            Map<String, String> attrs = new HashMap<>(8);
+            attrs.put("GridPane.rowIndex", String.valueOf(rc.row));
+            attrs.put("GridPane.columnIndex", String.valueOf(rc.column));
+            attrs.put("alignment", switch (tableCell.getAlignment()) {
+                case LEFT -> "CENTER_LEFT";
+                case CENTER -> "CENTER";
+                case RIGHT -> "CENTER_RIGHT";
+            });
+            attrs.putAll(FxmlPrefabs.TABLE_CELL.getAttrs());
+            return attrs;
+        } else {
+            throw new RuntimeException("Illegal parent of table cell");
+        }
+    }
+
+    // REGION: INTERNAL CLASSES
+
+    private static class RowColumnValue {
+        private int row;
+        private int column;
+        private final ArrayList<Double> columnWeight;
+
+        private RowColumnValue() {
+            row = 0;
+            column = 0;
+            columnWeight = new ArrayList<>(8);
+        }
+
+        public void increaseRow() {
+            row += 1;
+            column = 0;
+        }
+
+        public void increaseColumn() {
+            column += 1;
+        }
+
+        public void setColumnWeight(double weight) {
+            if (column > columnWeight.size()) {
+                throw new RuntimeException("Inconsistent column index");
+            } else if (column == columnWeight.size()) {
+                columnWeight.add(weight);
+            } else {
+                columnWeight.set(column, columnWeight.get(column) + weight);
+            }
         }
     }
 
