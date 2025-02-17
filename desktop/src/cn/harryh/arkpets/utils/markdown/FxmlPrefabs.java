@@ -40,6 +40,9 @@ public enum FxmlPrefabs {
     STRONG_EMPHASIS(Map.of(
             "style", "-fx-font-weight:bold;-fx-font-style:normal;"
     )),
+    STRIKETHROUGH(Map.of(
+            "style", "-fx-strikethrough:true;"
+    )),
     TEXT(Map.of(
     )),
     CODE_BLOCK(Map.of(

@@ -49,6 +49,15 @@ public final class FxmlDocumentController {
     }
 
     /** Sets the consumer that accepts the URL of the hyperlink the user clicked.
+     * <p>
+     * Remember to verify the security of the URL. The URL may be:
+     * <ul>
+     *     <li>Web "http://" link</li>
+     *     <li>Web "https://" link</li>
+     *     <li>Email "mailto:" link</li>
+     *     <li>Relative file link</li>
+     *     <li>Other unknown link</li>
+     * </ul>
      * @param consumer A string consumer.
      */
     public void setHyperlinkConsumer(Consumer<String> consumer) {

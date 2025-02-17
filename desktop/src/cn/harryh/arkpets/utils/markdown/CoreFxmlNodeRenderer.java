@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.utils.markdown;
 
+import org.commonmark.ext.gfm.strikethrough.Strikethrough;
 import org.commonmark.ext.gfm.tables.*;
 import org.commonmark.node.*;
 import org.commonmark.renderer.NodeRenderer;
@@ -43,15 +44,17 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
                 Link.class, ListItem.class, OrderedList.class,
                 Image.class, Emphasis.class, StrongEmphasis.class,
                 Text.class, Code.class, HtmlInline.class,
-                SoftLineBreak.class, HardLineBreak.class, TableBlock.class,
-                TableHead.class, TableBody.class, TableRow.class,
-                TableCell.class
+                SoftLineBreak.class, HardLineBreak.class, Strikethrough.class,
+                TableBlock.class, TableHead.class, TableBody.class,
+                TableRow.class, TableCell.class
         );
     }
 
     @Override
     public void render(Node node) {
-        if (node instanceof TableBlock tableBlock) {
+        if (node instanceof Strikethrough strikethrough) {
+            renderStrikethrough(strikethrough);
+        } else if (node instanceof TableBlock tableBlock) {
             renderBlock(tableBlock);
         } else if (node instanceof TableHead tableHead) {
             renderHead(tableHead);
@@ -164,7 +167,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     public void visit(Link link) {
         textFlow.openTextFlow();
 
-        lastHref = link.getDestination();
+        lastHref = context.urlSanitizer().sanitizeLinkUrl(link.getDestination());
         textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
         visitChildren(link);
         textFlow.closeText();
@@ -215,7 +218,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         String altText = altTextVisitor.getAltText();
 
         if (lastHref == null) {
-            lastHref = image.getDestination();
+            lastHref = context.urlSanitizer().sanitizeImageUrl(image.getDestination());
         }
         textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.HYPERLINK.getAttrs()));
         writer.text("! ");
@@ -269,6 +272,14 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     @Override
     public void visit(HardLineBreak hardLineBreak) {
         textFlow.closeTextFlow();
+    }
+
+    // REGION: MISC EXTENSION
+
+    protected void renderStrikethrough(Strikethrough strikethrough) {
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.STRIKETHROUGH.getAttrs()));
+        visitChildren(strikethrough);
+        textFlow.closeText();
     }
 
     // REGION: TABLE EXTENSION
