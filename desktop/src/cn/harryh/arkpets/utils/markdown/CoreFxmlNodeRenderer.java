@@ -10,6 +10,7 @@ import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 
 /** The modded node renderer that renders all the core nodes to FXML used by JavaFX.
@@ -70,12 +71,14 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     public void visit(Document document) {
         // FXML headers
         writer.raw(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<?import javafx.scene.control.*?>\n" +
-                        "<?import javafx.scene.layout.*?>\n" +
-                        "<?import javafx.scene.shape.*?>\n" +
-                        "<?import javafx.scene.text.*?>\n" +
-                        "<?import java.lang.*?>\n"
+                """
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <?import javafx.scene.control.*?>
+                        <?import javafx.scene.layout.*?>
+                        <?import javafx.scene.shape.*?>
+                        <?import javafx.scene.text.*?>
+                        <?import java.lang.*?>
+                        """
         );
 
         // Use VBox to wrap the whole document
@@ -150,7 +153,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(HtmlBlock htmlBlock) {
-        // TODO Not implemented
+        renderHtml(htmlBlock.getLiteral());
     }
 
     @Override
@@ -218,7 +221,22 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(Image image) {
-        // TODO Not implemented
+        textFlow.openTextFlow();
+
+        AltTextVisitor altTextVisitor = new AltTextVisitor();
+        image.accept(altTextVisitor);
+        String altText = altTextVisitor.getAltText();
+
+        if (lastHref == null) {
+            lastHref = image.getDestination();
+        }
+        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.HYPERLINK.getAttrs()));
+        writer.text("! ");
+        writer.text(altText);
+        textFlow.closeText();
+        lastHref = null;
+
+        textFlow.closeTextFlow();
     }
 
     @Override
@@ -253,7 +271,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(HtmlInline htmlInline) {
-        // TODO Not implemented
+        renderHtml(htmlInline.getLiteral());
     }
 
     @Override
@@ -342,6 +360,18 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
             next = node.getNext();
             this.context.render(node);
         }
+    }
+
+    private void renderHtml(String literal) {
+        if (Pattern.matches("^ *<br */?> *$", literal)) {
+            // <br> -> line break
+            textFlow.closeTextFlow();
+        } else if(Pattern.matches(" *<hr */?> *$", literal)) {
+            // <hr> -> separator
+            writer.tag("Separator", Map.of(), true);
+            writer.line();
+        }
+        // Other -> not implemented
     }
 
     private void renderCodeBlock(String literal) {
@@ -474,18 +504,21 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         private AltTextVisitor() {
         }
 
-        String getAltText() {
+        public String getAltText() {
             return sb.toString();
         }
 
+        @Override
         public void visit(Text text) {
             sb.append(text.getLiteral());
         }
 
+        @Override
         public void visit(SoftLineBreak softLineBreak) {
             sb.append('\n');
         }
 
+        @Override
         public void visit(HardLineBreak hardLineBreak) {
             sb.append('\n');
         }
