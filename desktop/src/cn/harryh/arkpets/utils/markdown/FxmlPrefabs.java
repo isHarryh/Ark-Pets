@@ -43,6 +43,7 @@ public enum FxmlPrefabs {
     TEXT(Map.of(
     )),
     CODE_BLOCK(Map.of(
+            "editable", "false",
             "style", "-fx-background-color:#2481;-fx-background-radius:7.5px;" +
                     "-fx-border-color:#2484;-fx-border-width:1px;-fx-border-radius:7.5px;" +
                     "-fx-padding:10px;-fx-font-family:monospace;-fx-font-size:13px;"

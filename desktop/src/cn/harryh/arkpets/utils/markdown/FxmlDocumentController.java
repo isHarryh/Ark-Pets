@@ -7,11 +7,14 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.function.Consumer;
 
 
@@ -25,7 +28,10 @@ public final class FxmlDocumentController {
 
     public FxmlDocumentController() {
         hyperlinkConsumer = null;
-        Platform.runLater(this::setupWidthListener);
+        Platform.runLater(() -> {
+            setupWidthListener();
+            updateAllCodeBlock(body);
+        });
     }
 
     /** This method is used to bind to the {@code onMouseClicked} attribute in the rendered FXML document.
@@ -83,6 +89,19 @@ public final class FxmlDocumentController {
             }
             if (child instanceof Parent parent) {
                 updateAllGridPanes(parent, containerWidth);
+            }
+        }
+    }
+
+    private void updateAllCodeBlock(Parent node) {
+        for (Node child : node.getChildrenUnmodifiable()) {
+            if (child instanceof TextArea textArea) {
+                if (textArea.getUserData() instanceof String string) {
+                    textArea.setText(new String(Base64.getDecoder().decode(string), StandardCharsets.UTF_8));
+                }
+            }
+            if (child instanceof Parent parent) {
+                updateAllCodeBlock(parent);
             }
         }
     }

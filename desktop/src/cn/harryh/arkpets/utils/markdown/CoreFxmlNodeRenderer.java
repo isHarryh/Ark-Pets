@@ -9,6 +9,7 @@ import org.commonmark.renderer.NodeRenderer;
 import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -140,15 +141,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(FencedCodeBlock fencedCodeBlock) {
-        String literal = fencedCodeBlock.getLiteral();
-        Map<String, String> attrs = new LinkedHashMap<>();
-        String info = fencedCodeBlock.getInfo();
-        if (info != null && !info.isEmpty()) {
-            int space = info.indexOf(" ");
-            String language = space == -1 ? info : info.substring(0, space);
-            attrs.put("class", "language-" + language);
-        }
-        renderCodeBlock(literal);
+        renderCodeBlock(fencedCodeBlock.getLiteral());
     }
 
     @Override
@@ -164,13 +157,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     @Override
     public void visit(IndentedCodeBlock indentedCodeBlock) {
-        writer.tag("VBox", FxmlPrefabs.BLOCK_QUOTE.getAttrs());
-        writer.line();
-
-        visitChildren(indentedCodeBlock);
-
-        writer.tag("/VBox");
-        writer.line();
+        renderCodeBlock(indentedCodeBlock.getLiteral());
     }
 
     @Override
@@ -375,15 +362,15 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
     }
 
     private void renderCodeBlock(String literal) {
-        writer.tag("VBox", FxmlPrefabs.CODE_BLOCK.getAttrs());
+        writer.tag("TextArea", FxmlPrefabs.CODE_BLOCK.getAttrs());
         writer.line();
-        textFlow.openTextFlow();
 
-        textFlow.openText(getHyperlinkAttachedAttrs(FxmlPrefabs.TEXT.getAttrs()));
-        writer.text(literal);
+        writer.tag("userData");
+        writer.raw(Base64.getEncoder().encodeToString(literal.getBytes(StandardCharsets.UTF_8)));
+        writer.tag("/userData");
+        writer.line();
 
-        textFlow.closeTextFlow();
-        writer.tag("/VBox");
+        writer.tag("/TextArea");
         writer.line();
     }
 
@@ -405,32 +392,12 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         writer.line();
     }
 
-    private boolean isInTightList(Paragraph paragraph) {
-        Node parent = paragraph.getParent();
-        if (parent != null) {
-            Node gramps = parent.getParent();
-            if (gramps instanceof ListBlock) {
-                ListBlock list = (ListBlock) gramps;
-                return list.isTight();
-            }
-        }
-        return false;
-    }
-
     private int getChildrenLength(Node parent) {
         int count = 0;
         for (Node node = parent.getFirstChild(); node != null; node = node.getNext()) {
             count += 1;
         }
         return count;
-    }
-
-    private Map<String, String> getAttrs(Node node, String tagName) {
-        return getAttrs(node, tagName, Map.of());
-    }
-
-    private Map<String, String> getAttrs(Node node, String tagName, Map<String, String> defaultAttributes) {
-        return context.extendAttributes(node, tagName, defaultAttributes);
     }
 
     private Map<String, String> getHyperlinkAttachedAttrs(Map<String, String> defaultAttrs) {
