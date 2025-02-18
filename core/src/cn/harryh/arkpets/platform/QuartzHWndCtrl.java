@@ -1,6 +1,7 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.utils.ObjCWrapper;
+import cn.harryh.arkpets.natives.CoreGraphicsHelper;
+import cn.harryh.arkpets.natives.ObjCHelper;
 import com.sun.jna.*;
 import com.sun.jna.platform.mac.CoreFoundation;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
@@ -12,18 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cn.harryh.arkpets.natives.CoreGraphicsHelper.*;
+
 
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
-    private static CFStringRef kCGWindowNumber;
-    private static CFStringRef kCGWindowLayer;
-    private static CFStringRef kCGWindowBounds;
-    private static CFStringRef kCGWindowName;
-    private static CFStringRef kCGWindowOwnerName;
-    private static final int kCGWindowListExcludeDesktopElements = (1 << 4);
-    private static final int kCGWindowListOptionOnScreenOnly = 1;
-    private static final int NSStatusWindowLevel = 25;
-    private static final int NSNormalWindowLevel = 0;
 
     private boolean trans = true;
     private static final boolean isArm = Platform.isARM();
@@ -78,9 +72,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setForeground() {
         getNSWindow(windowID);
-        ObjCWrapper.msgSend.invokeVoid(new Object[]{
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
-                ObjCWrapper.sel("orderFrontRegardless:")
+                ObjCHelper.sel("orderFrontRegardless:")
         });
     }
 
@@ -93,22 +87,20 @@ public class QuartzHWndCtrl extends HWndCtrl {
         newRect.origin.y = rect.size.height - y - h;
         newRect.size.width = w;
         newRect.size.height = h;
-        ObjCWrapper.runOnAppKit(() -> {
-            ObjCWrapper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCWrapper.sel("setFrame:display:animate:"),
-                    newRect,
-                    1, 0
-            });
-        });
+        ObjCHelper.runOnAppKit(() -> ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("setFrame:display:animate:"),
+                newRect,
+                1, 0
+        }));
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        ObjCWrapper.msgSend.invokeVoid(new Object[]{
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsApp,
-                ObjCWrapper.sel("setActivationPolicy:"),
+                ObjCHelper.sel("setActivationPolicy:"),
                 enable ? 0 : 1
         });
     }
@@ -121,9 +113,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setTopmost(boolean enable) {
         getNSWindow(windowID);
-        ObjCWrapper.msgSend.invokeVoid(new Object[]{
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
-                ObjCWrapper.sel("setLevel:"),
+                ObjCHelper.sel("setLevel:"),
                 enable ? NSStatusWindowLevel : NSNormalWindowLevel
         });
     }
@@ -132,13 +124,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void setTransparent(boolean enable) {
         if (trans == enable) return;
         getNSWindow(windowID);
-        ObjCWrapper.runOnAppKit(() -> {
-            ObjCWrapper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCWrapper.sel("setIgnoresMouseEvents:"),
-                    enable ? 1 : 0
-            });
-        });
+        ObjCHelper.runOnAppKit(() -> ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("setIgnoresMouseEvents:"),
+                enable ? 1 : 0
+        }));
         trans = enable;
     }
 
@@ -148,26 +138,18 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static void init() {
-        CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
+        CFDictionaryRef server = CGInterface.INSTANCE.CGSessionCopyCurrentDictionary();
         if (server == null) {
             throw new RuntimeException("No window server connection.");
         } else {
             CoreFoundation.INSTANCE.CFRelease(server);
         }
-        kCGWindowNumber = CFStringRef.createCFString("kCGWindowNumber");
-        kCGWindowBounds = CFStringRef.createCFString("kCGWindowBounds");
-        kCGWindowLayer = CFStringRef.createCFString("kCGWindowLayer");
-        kCGWindowName = CFStringRef.createCFString("kCGWindowName");
-        kCGWindowOwnerName = CFStringRef.createCFString("kCGWindowOwnerName");
-        ObjCWrapper.init();
+        CoreGraphicsHelper.initCG();
+        ObjCHelper.init();
     }
 
     protected static void free() {
-        kCGWindowNumber.release();
-        kCGWindowLayer.release();
-        kCGWindowName.release();
-        kCGWindowBounds.release();
-        kCGWindowOwnerName.release();
+        CoreGraphicsHelper.freeCG();
     }
 
     protected static List<QuartzHWndCtrl> getWindowList(boolean onlyVisible) {
@@ -179,7 +161,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
         } else {
             opt = kCGWindowListExcludeDesktopElements;
         }
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
+        CFArrayRef windows = CGInterface.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
         int numWindows = windows.getCount();
         for (int i = 0; i < numWindows; i++) {
             Pointer result = windows.getValueAtIndex(i);
@@ -194,7 +176,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static QuartzHWndCtrl find(String className, String windowText) {
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
+        CFArrayRef windows = CGInterface.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
         int numWindows = windows.getCount();
         QuartzHWndCtrl win = null;
         for (int i = 0; i < numWindows; i++) {
@@ -234,9 +216,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private void checkNSApp() {
         if (nsApp == null) {
-            nsApp = ObjCWrapper.msgSend.invokePointer(new Object[]{
-                    ObjCWrapper.cls("NSApplication"),
-                    ObjCWrapper.sel("sharedApplication")
+            nsApp = ObjCHelper.msgSend.invokePointer(new Object[]{
+                    ObjCHelper.cls("NSApplication"),
+                    ObjCHelper.sel("sharedApplication")
             });
         }
     }
@@ -244,9 +226,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private void getNSWindow(long CGWindowId) {
         checkNSApp();
         if (nsWinUnavailable == 0) {
-            Pointer nswin = ObjCWrapper.msgSend.invokePointer(new Object[]{
+            Pointer nswin = ObjCHelper.msgSend.invokePointer(new Object[]{
                     nsApp,
-                    ObjCWrapper.sel("windowWithWindowNumber:"),
+                    ObjCHelper.sel("windowWithWindowNumber:"),
                     CGWindowId
             });
             if (nswin == null) {
@@ -259,9 +241,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private void getNSScreen() {
         if (this.nsWinUnavailable != 1 || this.nsScreen != null) return;
-        this.nsScreen = ObjCWrapper.msgSend.invokePointer(new Object[]{
+        this.nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
                 nsWin,
-                ObjCWrapper.sel("screen")
+                ObjCHelper.sel("screen")
         });
     }
 
@@ -281,7 +263,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private static WindowRect getWindowRect(Pointer value) {
         if (value != null) {
             CGRect.ByReference rect = new CGRect.ByReference();
-            boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
+            boolean success = CGInterface.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
             if (success) {
                 return new WindowRect(
                         (int) Math.round(rect.origin.y),
@@ -297,56 +279,18 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private CGRect getScreenSize() {
         getNSScreen();
         if (isArm) {
-            return (CGRect.ByValue) ObjCWrapper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
+            return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
                     nsScreen,
-                    ObjCWrapper.sel("frame")
+                    ObjCHelper.sel("frame")
             });
         } else {
-            CGRect.ByReference rect = new CGRect.ByReference();
-            ObjCWrapper.msgSend_stret.invokeVoid(new Object[]{
+            CoreGraphicsHelper.CGRect.ByReference rect = new CoreGraphicsHelper.CGRect.ByReference();
+            ObjCHelper.msgSend_stret.invokeVoid(new Object[]{
                     rect,
                     nsScreen,
-                    ObjCWrapper.sel("frame")
+                    ObjCHelper.sel("frame")
             });
             return rect;
         }
-    }
-
-    // JNA Definition
-
-    private interface CoreGraphics extends Library {
-        CoreGraphics INSTANCE = Native.load("CoreGraphics", CoreGraphics.class);
-
-        CFArrayRef CGWindowListCopyWindowInfo(int option, int relativeToWindow);
-
-        CFArrayRef CGWindowListCreateDescriptionFromArray(CFArrayRef windowArray);
-
-        boolean CGRectMakeWithDictionaryRepresentation(CFDictionaryRef dict, CGRect.ByReference rect);
-
-        CFDictionaryRef CGSessionCopyCurrentDictionary();
-    }
-
-    @Structure.FieldOrder({"origin", "size"})
-    public static class CGRect extends Structure {
-        public CGPoint origin;
-        public CGSize size;
-
-        public static class ByReference extends CGRect implements Structure.ByReference {
-        }
-
-        public static class ByValue extends CGRect implements Structure.ByValue {
-        }
-    }
-
-    @Structure.FieldOrder({"x", "y"})
-    public static class CGPoint extends Structure {
-        public double x;
-        public double y;
-    }
-
-    @Structure.FieldOrder({"width", "height"})
-    public static class CGSize extends Structure {
-        public double width;
-        public double height;
     }
 }

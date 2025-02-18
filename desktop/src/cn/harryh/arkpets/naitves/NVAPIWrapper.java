@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.naitves;
 
 import com.sun.jna.*;
 import com.sun.jna.ptr.PointerByReference;

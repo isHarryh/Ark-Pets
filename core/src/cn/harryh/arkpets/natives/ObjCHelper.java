@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.natives;
 
 import com.sun.jna.*;
 
@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class ObjCWrapper {
-    private static Map<String, Pointer> selMap = new HashMap<>();
-    private static Map<String, Pointer> clsMap = new HashMap<>();
+public class ObjCHelper {
+    private static final Map<String, Pointer> selMap = new HashMap<>();
+    private static final Map<String, Pointer> clsMap = new HashMap<>();
     public static Function msgSend;
     public static Function msgSend_stret;
     private static Method lwtOnMain;

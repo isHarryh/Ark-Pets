@@ -1,13 +1,10 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.natives.MutterDBusInterface;
 import cn.harryh.arkpets.utils.Logger;
-import org.freedesktop.dbus.Struct;
-import org.freedesktop.dbus.annotations.DBusInterfaceName;
-import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
 
 import java.io.IOException;
@@ -18,11 +15,11 @@ import java.util.List;
 
 public class MutterHWndCtrl extends HWndCtrl {
     protected final UInt32 hWnd;
-    protected DetailsStruct details;
+    protected MutterDBusInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
-    private static ArkPetsInterface dBusInterface;
+    private static MutterDBusInterface dBusInterface;
 
-    protected MutterHWndCtrl(DetailsStruct details) {
+    protected MutterHWndCtrl(MutterDBusInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
         this.hWnd = details.id;
         this.details = details;
@@ -87,7 +84,7 @@ public class MutterHWndCtrl extends HWndCtrl {
         try {
             dBusConnection = DBusConnectionBuilder.forSessionBus().build();
             Logger.info("System", "Connected to DBus");
-            dBusInterface = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell/Extensions/ArkPets", ArkPetsInterface.class);
+            dBusInterface = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell/Extensions/ArkPets", MutterDBusInterface.class);
             Logger.info("System", "GNOME Integration extension version " + dBusInterface.Version());
         } catch (DBusException e) {
             throw new RuntimeException(e);
@@ -120,7 +117,7 @@ public class MutterHWndCtrl extends HWndCtrl {
     }
 
     protected static MutterHWndCtrl getTopmostWindow() {
-        List<DetailsStruct> list = dBusInterface.List();
+        List<MutterDBusInterface.DetailsStruct> list = dBusInterface.List();
         return new MutterHWndCtrl(list.get(list.size() - 1));
     }
 
@@ -136,54 +133,5 @@ public class MutterHWndCtrl extends HWndCtrl {
     @Override
     public int hashCode() {
         return hWnd.hashCode();
-    }
-
-    @DBusInterfaceName("org.gnome.Shell.Extensions.ArkPets")
-    private interface ArkPetsInterface extends DBusInterface {
-        void MoveResize(UInt32 winid, int x, int y, UInt32 width, UInt32 height);
-
-        void Activate(UInt32 winid);
-
-        void Above(UInt32 winid, boolean above);
-
-        void Stick(UInt32 winid, boolean stick);
-
-        List<DetailsStruct> List();
-
-        DetailsStruct Details(UInt32 winid);
-
-        boolean IsActive(UInt32 winid);
-
-        String Version();
-    }
-
-    public static class DetailsStruct extends Struct {
-        @Position(0)
-        public final int x;
-        @Position(1)
-        public final int y;
-        @Position(2)
-        public final UInt32 w;
-        @Position(3)
-        public final UInt32 h;
-        @Position(4)
-        public final String title;
-        @Position(5)
-        public final String wclass;
-        @Position(6)
-        public final boolean visible;
-        @Position(7)
-        public final UInt32 id;
-
-        public DetailsStruct(int x, int y, UInt32 w, UInt32 h, String title, String wClass, boolean visible, UInt32 id) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-            this.title = title;
-            this.wclass = wClass;
-            this.visible = visible;
-            this.id = id;
-        }
     }
 }

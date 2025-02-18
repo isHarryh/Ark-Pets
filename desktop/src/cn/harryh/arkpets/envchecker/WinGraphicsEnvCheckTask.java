@@ -2,7 +2,7 @@ package cn.harryh.arkpets.envchecker;
 
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NVAPIWrapper;
+import cn.harryh.arkpets.naitves.NVAPIWrapper;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.WString;
