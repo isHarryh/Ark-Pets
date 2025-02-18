@@ -3,7 +3,6 @@
  */
 package cn.harryh.arkpets.utils.markdown;
 
-import cn.harryh.arkpets.utils.IOUtils;
 import javafx.fxml.FXMLLoader;
 import org.commonmark.ext.autolink.AutolinkExtension;
 import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension;
@@ -13,7 +12,6 @@ import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -46,8 +44,6 @@ public class FxmlConvertor {
     public static FxmlDocumentController toFxmlController(String markdown) {
         String fxml = toFxmlString(markdown);
         try {
-            // TODO Debug only
-            IOUtils.FileUtil.writeString(new File("temp.fxml"), "UTF-8", fxml, false);
             FxmlDocumentController controller = new FxmlDocumentController();
             FXMLLoader loader = new FXMLLoader();
             loader.setClassLoader(FxmlConvertor.class.getClassLoader());

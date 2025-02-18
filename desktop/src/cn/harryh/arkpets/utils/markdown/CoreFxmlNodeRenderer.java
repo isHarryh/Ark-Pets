@@ -364,7 +364,7 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
         if (Pattern.matches("^ *<br */?> *$", literal)) {
             // <br> -> line break
             textFlow.closeTextFlow();
-        } else if(Pattern.matches(" *<hr */?> *$", literal)) {
+        } else if (Pattern.matches(" *<hr */?> *$", literal)) {
             // <hr> -> separator
             writer.tag("Separator", Map.of(), true);
             writer.line();

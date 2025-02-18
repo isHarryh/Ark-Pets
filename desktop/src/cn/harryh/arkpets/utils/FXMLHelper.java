@@ -26,7 +26,7 @@ public class FXMLHelper {
      * @return A record containing the controller and the FXML object hierarchy.
      * @throws IOException If an I/O exception occurs during loading.
      */
-    public static <T extends Application> LoadFXMLResult<T> loadFXML( URL location)
+    public static <T extends Application> LoadFXMLResult<T> loadFXML(URL location)
             throws IOException {
         FXMLLoader fxml = new FXMLLoader(location);
         Node content = Objects.requireNonNull(fxml.load());

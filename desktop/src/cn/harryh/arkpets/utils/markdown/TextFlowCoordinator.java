@@ -13,7 +13,7 @@ import java.util.Map;
 public class TextFlowCoordinator {
     private final HtmlWriter writer;
     private TextFlowStatus status;
-    
+
     public TextFlowCoordinator(HtmlWriter writer) {
         this.writer = writer;
         this.status = TextFlowStatus.CLOSED;
