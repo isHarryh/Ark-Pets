@@ -9,23 +9,23 @@ import org.freedesktop.dbus.types.UInt32;
 import java.util.List;
 
 
-@DBusInterfaceName("org.gnome.Shell.Extensions.ArkPets")
-public interface MutterDBusInterface extends DBusInterface {
-    void MoveResize(UInt32 winid, int x, int y, UInt32 width, UInt32 height);
+@DBusInterfaceName("org.kde.KWin.ArkPets")
+public interface KWinInterface extends DBusInterface {
+    void MoveResize(String uuid, int x, int y, UInt32 width, UInt32 height);
 
-    void Activate(UInt32 winid);
+    void Activate(String uuid);
 
-    void Above(UInt32 winid, boolean above);
+    void Above(String uuid, boolean enable);
 
-    void Stick(UInt32 winid, boolean stick);
+    void Stick(String uuid, boolean enable);
 
     List<DetailsStruct> List();
 
-    DetailsStruct Details(UInt32 winid);
+    DetailsStruct Details(String winid);
 
-    boolean IsActive(UInt32 winid);
+    boolean IsActive(String uuid);
 
-    String Version();
+    UInt32 Version();
 
     class DetailsStruct extends Struct {
         @Position(0)
@@ -43,9 +43,9 @@ public interface MutterDBusInterface extends DBusInterface {
         @Position(6)
         public final boolean visible;
         @Position(7)
-        public final UInt32 id;
+        public final String id;
 
-        public DetailsStruct(int x, int y, UInt32 w, UInt32 h, String title, String wClass, boolean visible, UInt32 id) {
+        public DetailsStruct(int x, int y, UInt32 w, UInt32 h, String title, String wClass, boolean visible, String id) {
             this.x = x;
             this.y = y;
             this.w = w;

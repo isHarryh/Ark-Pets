@@ -1,6 +1,6 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.natives.KWinDBusInterface;
+import cn.harryh.arkpets.natives.KWinInterface;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
@@ -15,11 +15,11 @@ import java.util.List;
 
 public class KWinHWndCtrl extends HWndCtrl {
     protected final String hWnd;
-    protected KWinDBusInterface.DetailsStruct details;
+    protected KWinInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
-    private static KWinDBusInterface dBusInterface;
+    private static KWinInterface dBusInterface;
 
-    protected KWinHWndCtrl(KWinDBusInterface.DetailsStruct details) {
+    protected KWinHWndCtrl(KWinInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
         this.hWnd = details.id;
         this.details = details;
@@ -84,7 +84,7 @@ public class KWinHWndCtrl extends HWndCtrl {
         try {
             dBusConnection = DBusConnectionBuilder.forSessionBus().build();
             Logger.info("System", "Connected to DBus");
-            dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinDBusInterface.class);
+            dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinInterface.class);
             Logger.info("System", "KDE Integration plugin version " + dBusInterface.Version());
         } catch (DBusException e) {
             throw new RuntimeException(e);
@@ -117,7 +117,7 @@ public class KWinHWndCtrl extends HWndCtrl {
     }
 
     protected static KWinHWndCtrl getTopmostWindow() {
-        List<KWinDBusInterface.DetailsStruct> list = dBusInterface.List();
+        List<KWinInterface.DetailsStruct> list = dBusInterface.List();
         return new KWinHWndCtrl(list.get(list.size() - 1));
     }
 

@@ -1,25 +1,29 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.natives.MutterDBusInterface;
+import cn.harryh.arkpets.natives.MutterInterface;
 import cn.harryh.arkpets.utils.Logger;
+import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
+import org.freedesktop.dbus.types.Variant;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 public class MutterHWndCtrl extends HWndCtrl {
     protected final UInt32 hWnd;
-    protected MutterDBusInterface.DetailsStruct details;
+    protected MutterInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
-    private static MutterDBusInterface dBusInterface;
+    private static MutterInterface dBusInterface;
 
-    protected MutterHWndCtrl(MutterDBusInterface.DetailsStruct details) {
+    protected MutterHWndCtrl(MutterInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
         this.hWnd = details.id;
         this.details = details;
@@ -84,7 +88,8 @@ public class MutterHWndCtrl extends HWndCtrl {
         try {
             dBusConnection = DBusConnectionBuilder.forSessionBus().build();
             Logger.info("System", "Connected to DBus");
-            dBusInterface = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell/Extensions/ArkPets", MutterDBusInterface.class);
+            checkAndEnablePlugin();
+            dBusInterface = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell/Extensions/ArkPets", MutterInterface.class);
             Logger.info("System", "GNOME Integration extension version " + dBusInterface.Version());
         } catch (DBusException e) {
             throw new RuntimeException(e);
@@ -97,6 +102,21 @@ public class MutterHWndCtrl extends HWndCtrl {
             Logger.info("System", "Disconnected from DBus");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void checkAndEnablePlugin() throws DBusException {
+        PluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", PluginInterface.class);
+        Map<String, Variant<?>> ext = pi.GetExtensionInfo("arkpets-integration@harryh.cn");
+        if (ext.isEmpty()) throw new RuntimeException("GNOME Integration plugin not found.");
+        Variant<Boolean> enable = (Variant<Boolean>) ext.get("enabled");
+        if (!enable.getValue()) {
+            Logger.info("System","Enabling GNOME Integration plugin");
+            pi.EnableExtension("arkpets-integration@harryh.cn");
+            try {
+                Thread.sleep(500); // wait for loaded
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -117,7 +137,7 @@ public class MutterHWndCtrl extends HWndCtrl {
     }
 
     protected static MutterHWndCtrl getTopmostWindow() {
-        List<MutterDBusInterface.DetailsStruct> list = dBusInterface.List();
+        List<MutterInterface.DetailsStruct> list = dBusInterface.List();
         return new MutterHWndCtrl(list.get(list.size() - 1));
     }
 
@@ -133,5 +153,12 @@ public class MutterHWndCtrl extends HWndCtrl {
     @Override
     public int hashCode() {
         return hWnd.hashCode();
+    }
+
+    @DBusInterfaceName("org.gnome.Shell.Extensions")
+    private interface PluginInterface extends DBusInterface {
+        boolean EnableExtension(String uuid);
+
+        Map<String, Variant<?>> GetExtensionInfo(String uuid);
     }
 }
