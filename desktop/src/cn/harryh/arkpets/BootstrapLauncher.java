@@ -25,6 +25,8 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class BootstrapLauncher {
+    private static boolean useCustomGLFW;
+
     public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
@@ -56,6 +58,8 @@ public class BootstrapLauncher {
                 Logger.setLevel(Logger.DEBUG);
             }
         };
+        Logger.info("System", "ArkPets version is " + appVersion);
+        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
         // If requested to start the core app directly
         new ArgPending("--direct-start", args) {
             protected void process(String command, String addition) {
@@ -71,8 +75,6 @@ public class BootstrapLauncher {
      */
     private static void startDesktop() {
         Logger.info("System", "Entering the app of DesktopLauncher");
-        Logger.info("System", "ArkPets version is " + appVersion);
-        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
         // Change ui style
         new ArgPending("--ui-style", ArgPending.argCache) {
             @Override
@@ -99,6 +101,7 @@ public class BootstrapLauncher {
      * @see ArkPets
      */
     private static void startCore(ArkConfig appConfig) {
+        Logger.info("System", "Entering the app of EmbeddedLauncher");
         new ArgPending("--load-lib", ArgPending.argCache) {
             @Override
             protected void process(String command, String addition) {
@@ -108,6 +111,14 @@ public class BootstrapLauncher {
                 } catch (UnsatisfiedLinkError e) {
                     Logger.error("System", "Failed to load the specified library, details see below.", e);
                 }
+            }
+        };
+        new ArgPending("--glfw-lib", ArgPending.argCache) {
+            @Override
+            protected void process(String command, String addition) {
+                Logger.info("System", "Using the specified GLFW library \"" + addition +"\"");
+                Configuration.GLFW_LIBRARY_NAME.set(addition);
+                useCustomGLFW = true;
             }
         };
         new ArgPending("--enable-snapshot", ArgPending.argCache) {
@@ -121,9 +132,6 @@ public class BootstrapLauncher {
                 }
             }
         };
-        Logger.info("System", "Entering the app of EmbeddedLauncher");
-        Logger.info("System", "ArkPets version is " + appVersion);
-        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
         WindowSystem windowSystem = ArkConfig.getWindowSystemFrom(appConfig.window_system);
         try {
             WindowSystem.init(windowSystem);
@@ -149,7 +157,7 @@ public class BootstrapLauncher {
                 System.setProperty("apple.awt.application.name", TITLE);
                 SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);
                 Configuration.GLFW_CHECK_THREAD0.set(false);
-                Configuration.GLFW_LIBRARY_NAME.set("/Users/abc/glfwasync.dylib");
+                if (!useCustomGLFW) Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
             }
             // Handle GLFW error
             GLFW.glfwSetErrorCallback(new GLFWErrorCallback() {
