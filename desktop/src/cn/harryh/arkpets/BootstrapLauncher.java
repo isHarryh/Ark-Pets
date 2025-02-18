@@ -26,34 +26,44 @@ import static cn.harryh.arkpets.Const.*;
 
 public class BootstrapLauncher {
     private static boolean useCustomGLFW;
+    private static boolean isDirectStart = false;
 
     public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
-        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         // Logger
-        Logger.initialize(Const.LogConfig.logCorePath, Const.LogConfig.logCoreMaxKeep);
+        new ArgPending("--direct-start", args) {
+            protected void process(String command, String addition) {
+                isDirectStart = true;
+            }
+        };
+        if (isDirectStart) {
+            Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
+        } else {
+            Logger.initialize(LogConfig.logDesktopPath, LogConfig.logDesktopMaxKeep);
+        }
+        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         try {
             Logger.setLevel(appConfig.logging_level);
         } catch (Exception ignored) {
         }
-        new ArgPending(Const.LogConfig.errorArg, args) {
+        new ArgPending(LogConfig.errorArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.ERROR);
             }
         };
-        new ArgPending(Const.LogConfig.warnArg, args) {
+        new ArgPending(LogConfig.warnArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.WARN);
             }
         };
-        new ArgPending(Const.LogConfig.infoArg, args) {
+        new ArgPending(LogConfig.infoArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.INFO);
             }
         };
-        new ArgPending(Const.LogConfig.debugArg, args) {
+        new ArgPending(LogConfig.debugArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.DEBUG);
             }
@@ -61,13 +71,12 @@ public class BootstrapLauncher {
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
         // If requested to start the core app directly
-        new ArgPending("--direct-start", args) {
-            protected void process(String command, String addition) {
-                startCore(appConfig);
-                System.exit(0);
-            }
-        };
-        startDesktop();
+        if (isDirectStart) {
+            startCore(appConfig);
+        } else {
+            startDesktop();
+        }
+        System.exit(0);
     }
 
     /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
@@ -126,7 +135,7 @@ public class BootstrapLauncher {
             protected void process(String command, String addition) {
                 Logger.info("System", "Enable the snapshot feature");
                 ArkChar.enableSnapshot = true;
-                File temp = new File(Const.PathConfig.tempDirPath);
+                File temp = new File(PathConfig.tempDirPath);
                 if (!(temp.exists() || temp.mkdir())) {
                     Logger.error("System", "Failed to create the temporary directory.");
                 }
