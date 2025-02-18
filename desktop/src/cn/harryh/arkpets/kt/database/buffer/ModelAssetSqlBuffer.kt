@@ -28,7 +28,7 @@ class ModelAssetSqlBuffer(database: Database) : SqlBuffer<ModelAsset>(database) 
     }
 
     private fun AssignmentsBuilder.setData(it: ModelAssets, info: ModelAsset) {
-        set(it.modelId, info.charInfo.id)
+        set(it.modelId, info.charInfo.assetId)
         set(it.type, info.type)
         set(it.filename, info.filename)
         set(it.md5, info.md5)

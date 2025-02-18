@@ -105,6 +105,31 @@
                         </HBox>
                     </VBox>
                 </HBox>
+                <HBox>
+                    <Label text="光照效果"/>
+                    <JFXButton fx:id="toggleConfigRenderShadow" minHeight="-Infinity" minWidth="-Infinity"
+                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
+                        <graphic>
+                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
+                                <SVGPath
+                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
+                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
+                            </AnchorPane>
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="btn-secondary"/>
+                            <String fx:value="btn-with-icon"/>
+                        </styleClass>
+                    </JFXButton>
+                </HBox>
+                <HBox fx:id="wrapperConfigRenderShadow" managed="false" visible="false">
+                    <VBox>
+                        <HBox>
+                            <Label text="阴影强度"/>
+                            <JFXComboBox fx:id="configRenderShadowColor" prefWidth="120.0"/>
+                        </HBox>
+                    </VBox>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>
@@ -116,6 +141,11 @@
                     <JFXCheckBox fx:id="configWindowToolwindow" mnemonicParsing="false" text="桌宠作为后台程序启动"/>
                     <JFXButton fx:id="configWindowToolwindowHelp"/>
                 </HBox>
+                <HBox>
+                    <Label text="窗口系统"/>
+                    <JFXComboBox fx:id="configWindowSystem" prefWidth="100.0"/>
+                    <JFXButton fx:id="configWindowSystemHelp"/>
+                </HBox>
                 <Separator/>
                 <HBox>
                     <Label text="日志级别"/>
@@ -126,6 +156,9 @@
                     <Label text="网络代理（仅本次有效）"/>
                     <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0"/>
                     <Label fx:id="configNetworkAgentStatus" alignment="TOP_CENTER" text="-"/>
+                </HBox>
+                <HBox spacing="22.5">
+                    <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="关于软件"/>

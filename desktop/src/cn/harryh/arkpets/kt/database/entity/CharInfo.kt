@@ -13,6 +13,7 @@ interface CharInfo : Entity<CharInfo> {
     var appellation: String?
     var skinGroupId: String
     var skinGroupName: String
+    var syllable: String
     var md5: String
 
     companion object : Entity.Factory<CharInfo>()

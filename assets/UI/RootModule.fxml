@@ -140,41 +140,7 @@
         </AnchorPane>
 
         <!-- ********** 3. Title Bar ********** -->
-        <AnchorPane id="Title-bar" fx:id="titleBar" maxHeight="-Infinity" minHeight="-Infinity"
-                    onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" prefHeight="24.0"
-                    styleClass="shadowed" StackPane.alignment="TOP_CENTER">
-            <HBox prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="3.0">
-                <ImageView cache="true" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true">
-                    <HBox.margin>
-                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
-                    </HBox.margin>
-                    <Image requestedHeight="512.0" requestedWidth="512.0" url="@/icons/icon.png"/>
-                </ImageView>
-                <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" text="ArkPets Launcher">
-                    <HBox.margin>
-                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
-                    </HBox.margin>
-                </Text>
-            </HBox>
-            <HBox alignment="TOP_RIGHT" prefHeight="24.0" prefWidth="200.0" AnchorPane.rightAnchor="0.0">
-                <JFXButton id="Title-minimize-btn" fx:id="titleMinimizeBtn" mnemonicParsing="false"
-                           onMouseClicked="#windowMinimize" text=" ">
-                    <graphic>
-                        <SVGPath
-                                content="m21 11.75c0-.414-.336-.75-.75-.75h-16.5c-.414 0-.75.336-.75.75s.336.75.75.75h16.5c.414 0 .75-.336.75-.75z"
-                                scaleX="0.75" scaleY="0.75" translateX="-5.0"/>
-                    </graphic>
-                </JFXButton>
-                <JFXButton id="Title-close-btn" fx:id="titleCloseBtn" mnemonicParsing="false"
-                           onMouseClicked="#windowClose" text=" ">
-                    <graphic>
-                        <SVGPath
-                                content="m12 10.93 5.719-5.72c.146-.146.339-.219.531-.219.404 0 .75.324.75.749 0 .193-.073.385-.219.532l-5.72 5.719 5.719 5.719c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.385-.073-.531-.219l-5.719-5.719-5.719 5.719c-.146.146-.339.219-.531.219-.401 0-.75-.323-.75-.75 0-.192.073-.384.22-.531l5.719-5.719-5.72-5.719c-.146-.147-.219-.339-.219-.532 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"
-                                scaleX="0.75" scaleY="0.75" translateX="-3"/>
-                    </graphic>
-                </JFXButton>
-            </HBox>
-        </AnchorPane>
-
+        <Pane fx:id="wrapper4" maxHeight="-Infinity" minHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity"
+              prefHeight="24.0" prefWidth="600.0" StackPane.alignment="TOP_CENTER"/>
     </StackPane>
 </StackPane>

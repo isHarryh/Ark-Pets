@@ -5,7 +5,8 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.utils.GuiComponents;
+import cn.harryh.arkpets.transitions.EasingFunction;
+import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
@@ -28,6 +29,10 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXCheckBox configBehaviorAllowSit;
     @FXML
+    private JFXCheckBox configBehaviorAllowSleep;
+    @FXML
+    private JFXCheckBox configBehaviorAllowSpecial;
+    @FXML
     private JFXSlider configBehaviorAiActivation;
     @FXML
     private Label configBehaviorAiActivationValue;
@@ -49,6 +54,26 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private HBox wrapperConfigDeployPosition;
     @FXML
     private Canvas configDeployPosition;
+
+    @FXML
+    private Label configTransitionAnimationLabel;
+    @FXML
+    private JFXComboBox<NamedItem<Float>> configTransitionAnimation;
+    @FXML
+    private JFXButton configTransitionAnimationHelp;
+    @FXML
+    private Label configTransitionDurationLabel;
+    @FXML
+    private JFXComboBox<NamedItem<Float>> configTransitionDuration;
+    @FXML
+    private JFXButton configTransitionDurationHelp;
+    @FXML
+    private Label configTransitionFunctionLabel;
+    @FXML
+    private JFXComboBox<NamedItem<String>> configTransitionFunction;
+    @FXML
+    private JFXButton configTransitionFunctionHelp;
+
     @FXML
     private JFXSlider configPhysicGravity;
     @FXML
@@ -92,8 +117,18 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
             app.config.behavior_allow_sit = configBehaviorAllowSit.isSelected();
             app.config.save();
         });
+        configBehaviorAllowSleep.setSelected(app.config.behavior_allow_sleep);
+        configBehaviorAllowSleep.setOnAction(e -> {
+            app.config.behavior_allow_sleep = configBehaviorAllowSleep.isSelected();
+            app.config.save();
+        });
+        configBehaviorAllowSpecial.setSelected(app.config.behavior_allow_special);
+        configBehaviorAllowSpecial.setOnAction(e -> {
+            app.config.behavior_allow_special = configBehaviorAllowSpecial.isSelected();
+            app.config.save();
+        });
 
-        GuiComponents.SliderSetup<Integer> setupBehaviorAiActivation = new GuiComponents.SimpleIntegerSliderSetup(configBehaviorAiActivation);
+        SliderSetup<Integer> setupBehaviorAiActivation = new SimpleIntegerSliderSetup(configBehaviorAiActivation);
         setupBehaviorAiActivation
                 .setDisplay(configBehaviorAiActivationValue, "%d 级", "活跃级别 (activation level)")
                 .setRange(0, 8)
@@ -121,7 +156,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
             app.config.save();
         });
 
-        GuiComponents.SliderSetup<Integer> setupDeployMarginBottom = new GuiComponents.SimpleIntegerSliderSetup(configDeployMarginBottom);
+        SliderSetup<Integer> setupDeployMarginBottom = new SimpleIntegerSliderSetup(configDeployMarginBottom);
         setupDeployMarginBottom
                 .setDisplay(configDeployMarginBottomValue, "%d px", "像素 (pixel)")
                 .setRange(0, 120)
@@ -133,7 +168,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                 });
 
         GuiPrefabs.bindToggleAndWrapper(toggleConfigDeployPosition, wrapperConfigDeployPosition, durationFast);
-        GuiComponents.DotPickerSetup setupDeployPosition = new GuiComponents.DotPickerSetup(configDeployPosition);
+        DotPickerSetup setupDeployPosition = new DotPickerSetup(configDeployPosition);
         setupDeployPosition.setRelXY(app.config.initial_position_x, app.config.initial_position_y);
         setupDeployPosition.setOnDotPicked(e -> {
             float x = (float)setupDeployPosition.getRelX();
@@ -144,7 +179,71 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
             app.config.save();
         });
 
-        GuiComponents.SliderSetup<Integer> setupPhysicGravity = new GuiComponents.SimpleMultipleIntegerSliderSetup(configPhysicGravity, 10);
+        new ComboBoxSetup<>(configTransitionAnimation).setItems(new NamedItem<>("禁用", 0f),
+                        new NamedItem<>("快速", 0.1f),
+                        new NamedItem<>("标准", 0.3f),
+                        new NamedItem<>("慢速", 0.6f))
+                .selectValue(app.config.render_animation_mixture, app.config.render_animation_mixture + "s（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_animation_mixture = newValue.value();
+                    app.config.save();
+                });
+        new HelpHandbookEntrance(app.body, configTransitionAnimationHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configTransitionAnimationLabel) {
+                    @Override
+                    public String getContent() {
+                        return "此选项控制的是动画间切换的过渡速度，越慢的过渡会使得动画间切换越平滑。" +
+                                "如果禁用过渡，那么动画间切换将会立即完成，而不会进行交叉过渡。";
+                    }
+                };
+            }
+        };
+        new ComboBoxSetup<>(configTransitionDuration).setItems(new NamedItem<>("禁用", 0f),
+                        new NamedItem<>("快速", 0.1f),
+                        new NamedItem<>("标准", 0.3f),
+                        new NamedItem<>("慢速", 0.6f))
+                .selectValue(app.config.transition_duration, app.config.transition_duration + "s（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.transition_duration = newValue.value();
+                    app.config.save();
+                });
+        new HelpHandbookEntrance(app.body, configTransitionDurationHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configTransitionDurationLabel) {
+                    @Override
+                    public String getContent() {
+                        return "此选项控制角色的位置、透明度、水平翻转、高亮描边等属性的过渡速度，越慢的过渡会使得这些属性变化得越平滑。" +
+                                "如果禁用过渡，这些属性的变化可能会表现得不自然。";
+                    }
+                };
+            }
+        };
+        new ComboBoxSetup<>(configTransitionFunction).setItems(new NamedItem<>("线性（Linear）", EasingFunction.LINEAR.name()),
+                        new NamedItem<>("正弦缓出（EaseOutSine）", EasingFunction.EASE_OUT_SINE.name()),
+                        new NamedItem<>("三次方缓出（EaseOutCubic）", EasingFunction.EASE_OUT_CUBIC.name()),
+                        new NamedItem<>("五次方缓出（EaseOutQuint）", EasingFunction.EASE_OUT_QUINT.name()))
+                .selectValue(app.config.transition_type, app.config.transition_type)
+                .setOnNonNullValueUpdated((observableValue, oldValue, newValue) -> {
+                    app.config.transition_type = newValue.value();
+                    app.config.save();
+                });
+        new HelpHandbookEntrance(app.body, configTransitionFunctionHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configTransitionFunctionLabel) {
+                    @Override
+                    public String getContent() {
+                        return "缓动函数决定了属性随时间变化的快慢。" +
+                                "线性函数使得属性按照固定的速度变化；缓入/缓出函数会在变化开始/结束时降低速度，从而使变化更加自然。";
+                    }
+                };
+            }
+        };
+
+        SliderSetup<Integer> setupPhysicGravity = new SimpleMultipleIntegerSliderSetup(configPhysicGravity, 10);
         setupPhysicGravity
                 .setDisplay(configPhysicGravityValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
                 .setRange(0, 2000)
@@ -154,7 +253,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.physic_gravity_acc = setupPhysicGravity.getValidatedValue();
                     app.config.save();
                 });
-        GuiComponents.SliderSetup<Integer> setupPhysicAirFriction = new GuiComponents.SimpleMultipleIntegerSliderSetup(configPhysicAirFriction, 10);
+        SliderSetup<Integer> setupPhysicAirFriction = new SimpleMultipleIntegerSliderSetup(configPhysicAirFriction, 10);
         setupPhysicAirFriction
                 .setDisplay(configPhysicAirFrictionValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
                 .setRange(0, 2000)
@@ -164,7 +263,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.physic_air_friction_acc = setupPhysicAirFriction.getValidatedValue();
                     app.config.save();
                 });
-        GuiComponents.SliderSetup<Integer> setupPhysicStaticFriction = new GuiComponents.SimpleMultipleIntegerSliderSetup(configPhysicStaticFriction, 10);
+        SliderSetup<Integer> setupPhysicStaticFriction = new SimpleMultipleIntegerSliderSetup(configPhysicStaticFriction, 10);
         setupPhysicStaticFriction
                 .setDisplay(configPhysicStaticFrictionValue, "%d px/s²", "像素每平方秒 (pixel/s²)")
                 .setRange(0, 2000)
@@ -174,7 +273,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.physic_static_friction_acc = setupPhysicStaticFriction.getValidatedValue();
                     app.config.save();
                 });
-        GuiComponents.SliderSetup<Integer> setupPhysicSpeedLimitX = new GuiComponents.SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitX, 10);
+        SliderSetup<Integer> setupPhysicSpeedLimitX = new SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitX, 10);
         setupPhysicSpeedLimitX
                 .setDisplay(configPhysicSpeedLimitXValue, "%d px/s", "像素每秒 (pixel/s)")
                 .setRange(0, 2000)
@@ -184,7 +283,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.physic_speed_limit_x = setupPhysicSpeedLimitX.getValidatedValue();
                     app.config.save();
                 });
-        GuiComponents.SliderSetup<Integer> setupPhysicSpeedLimitY = new GuiComponents.SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitY, 10);
+        SliderSetup<Integer> setupPhysicSpeedLimitY = new SimpleMultipleIntegerSliderSetup(configPhysicSpeedLimitY, 10);
         setupPhysicSpeedLimitY
                 .setDisplay(configPhysicSpeedLimitYValue, "%d px/s", "像素每秒 (pixel/s)")
                 .setRange(0, 2000)
@@ -194,6 +293,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.physic_speed_limit_y = setupPhysicSpeedLimitY.getValidatedValue();
                     app.config.save();
                 });
+
         EventHandler<MouseEvent> configPhysicRestoreEvent = e -> {
             ArkConfig defaults = ArkConfig.getDefaultConfig();
             if (defaults != null) {

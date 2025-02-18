@@ -7,24 +7,32 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
+import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.platform.StartupConfig;
+import cn.harryh.arkpets.startup.StartupConfig;
+import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
+import com.sun.jna.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,6 +80,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXSlider configRenderOpacityDim;
     @FXML
     private Label configRenderOpacityDimValue;
+    @FXML
+    private JFXButton toggleConfigRenderShadow;
+    @FXML
+    private HBox wrapperConfigRenderShadow;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
 
     @FXML
     private JFXCheckBox configWindowTopmost;
@@ -91,7 +105,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXCheckBox configWindowToolwindow;
     @FXML
     private JFXButton configWindowToolwindowHelp;
-
+    @FXML
+    private JFXComboBox<NamedItem<String>> configWindowSystem;
+    @FXML
+    private JFXButton configWindowSystemHelp;
+    @FXML
+    private Label runEnvCheck;
     @FXML
     private Label aboutQueryUpdate;
     @FXML
@@ -233,6 +252,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 });
         setupRenderOpacityDim.setRange(minOpacity, setupRenderOpacityNormal.getValidatedValue());
         setupRenderOpacityDim.setDisable(minOpacity >= setupRenderOpacityNormal.getValidatedValue());
+
+        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderShadow, wrapperConfigRenderShadow, durationFast);
+        new ComboBoxSetup<>(configRenderShadowColor).setItems(new NamedItem<>("禁用", 0x00000000),
+                        new NamedItem<>("轻微", 0x00000077),
+                        new NamedItem<>("标准", 0x000000BB),
+                        new NamedItem<>("重墨", 0x000000FF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_shadow_color)), app.config.render_shadow_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_shadow_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
     }
 
     private void initConfigAdvanced() {
@@ -257,20 +287,21 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         configLoggingLevel.getSelectionModel().select(level);
 
         exploreLogDir.setOnMouseClicked(e -> {
-            // Only available in Windows OS
-            try {
-                Logger.debug("Config", "Request to explore the log dir");
-                Runtime.getRuntime().exec("explorer logs");
-            } catch (IOException ex) {
-                Logger.warn("Config", "Exploring log dir failed");
-            }
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    Logger.debug("Config", "Request to explore the log dir");
+                    Desktop.getDesktop().open(new File("logs"));
+                } catch (IOException ex) {
+                    Logger.warn("Config", "Exploring log dir failed");
+                }
+            });
         });
 
         configNetworkAgent.setPromptText("示例：0.0.0.0:0");
         configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
                 configNetworkAgentStatus.setText("未使用代理");
-                configNetworkAgentStatus.setStyle("-fx-text-fill:" + GuiPrefabs.Colors.COLOR_LIGHT_GRAY);
+                configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
                 Logger.info("Network", "Set proxy to none");
                 NetUtils.setProxy("", "");
             } else {
@@ -278,16 +309,16 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     String[] ipPort = newValue.split(":");
                     NetUtils.setProxy(ipPort[0], ipPort[1]);
                     configNetworkAgentStatus.setText("代理生效中");
-                    configNetworkAgentStatus.setStyle("-fx-text-fill:" + GuiPrefabs.Colors.COLOR_SUCCESS);
+                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
                     Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
                 } else {
                     configNetworkAgentStatus.setText("输入不合法");
-                    configNetworkAgentStatus.setStyle("-fx-text-fill:" + GuiPrefabs.Colors.COLOR_DANGER);
+                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_DANGER);
                 }
             }
         });
         configNetworkAgentStatus.setText("未使用代理");
-        configNetworkAgentStatus.setStyle("-fx-text-fill:" + GuiPrefabs.Colors.COLOR_LIGHT_GRAY);
+        configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
 
         StartupConfig startup = StartupConfig.getInstance();
         configAutoStartup.setSelected(startup.isSetStartup());
@@ -295,7 +326,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             if (configAutoStartup.isSelected()) {
                 if (startup.addStartup()) {
                     GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_SUCCESS_ALT, GuiPrefabs.Colors.COLOR_SUCCESS),
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
                             "开机自启动",
                             "开机自启动设置成功。",
                             "下次开机时将会自动生成您最后一次启动的桌宠。",
@@ -303,14 +334,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 } else {
                     if (!startup.isStartupAvailable())
                         GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                                 "开机自启动",
                                 "开机自启动设置失败。",
                                 "无法确认目标程序的位置，其原因和相关解决方案如下：",
                                 "为确保自启动服务的稳定性，直接打开的ArkPets的\".jar\"版启动器，是不支持配置自启动的。请使用exe版的安装包安装ArkPets后运行，或使用zip版的压缩包解压程序文件后运行。另外，当您使用错误的工作目录运行启动器时也可能出现此情况。").show();
                     else
                         GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                                 "开机自启动",
                                 "开机自启动设置失败。",
                                 "无法写入系统的启动目录，其原因可参见日志文件。",
@@ -350,6 +381,64 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+
+        NamedItem<String>[] items = getWindowSystemItems().toArray(new NamedItem[0]);
+        new ComboBoxSetup<>(configWindowSystem).setItems(items)
+                .selectValue(app.config.window_system, app.config.window_system)
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.window_system = newValue.value();
+                    app.config.save();
+                });
+        new HelpHandbookEntrance(app.body, configWindowSystemHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configWindowSystem.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return getWindowSystemInfo();
+                    }
+                };
+            }
+        };
+
+        runEnvCheck.setOnMouseClicked(e -> new CheckEnvironmentTask(app.body, EnvCheckTask.getAvailableTasks()).start());
+    }
+
+    private static ArrayList<NamedItem<String>> getWindowSystemItems() {
+        ArrayList<NamedItem<String>> windowSystemItems = new ArrayList<>();
+        windowSystemItems.add(new NamedItem<>("自动", WindowSystem.AUTO.name()));
+        if (Platform.isWindows()) {
+            windowSystemItems.add(new NamedItem<>("User32", WindowSystem.USER32.name()));
+        }
+        if (Platform.isLinux()) {
+            windowSystemItems.add(new NamedItem<>("X11", WindowSystem.X11.name()));
+            windowSystemItems.add(new NamedItem<>("Mutter", WindowSystem.MUTTER.name()));
+            windowSystemItems.add(new NamedItem<>("KWin", WindowSystem.KWIN.name()));
+        }
+        if (Platform.isMac()) {
+            windowSystemItems.add(new NamedItem<>("Quartz", WindowSystem.QUARTZ.name()));
+        }
+        windowSystemItems.add(new NamedItem<>("NULL", WindowSystem.NULL.name()));
+        return windowSystemItems;
+    }
+
+    private static String getWindowSystemInfo() {
+        String content = "不同平台对于窗口查询、操作有不同的 API，除非你遇到了桌宠窗口的问题，否则通常不需要更改。以下是对 API 的简单介绍：\n";
+        if (Platform.isWindows()) {
+            content += "User32 —— Windows 窗口系统。\n";
+        }
+        if (Platform.isLinux()) {
+            content += """
+                    Mutter —— GNOME 环境，需要安装集成扩展。
+                    KWin —— KDE 环境，需要安装集成插件。
+                    X11 —— 通用 X11 环境支持，适用于 Xfce,Mate,LXDE 等环境。
+                    """;
+        }
+        if (Platform.isMac()) {
+            content += "Quartz —— MacOS Quartz 窗口系统。\n";
+        }
+        content += "NULL —— 空实现，桌宠不会有任何窗口交互。";
+        return content;
     }
 
     private void initAbout() {
@@ -370,13 +459,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
 
             @Override
-            protected String getColorString() {
-                return GuiPrefabs.Colors.COLOR_INFO;
+            protected javafx.scene.paint.Color getColor() {
+                return GuiPrefabs.COLOR_INFO;
             }
 
             @Override
             protected String getIconSVGPath() {
-                return GuiPrefabs.Icons.ICON_UPDATE;
+                return GuiPrefabs.Icons.SVG_UPDATE;
             }
 
             @Override
@@ -397,13 +486,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
 
             @Override
-            protected String getColorString() {
-                return GuiPrefabs.Colors.COLOR_WARNING;
+            protected javafx.scene.paint.Color getColor() {
+                return GuiPrefabs.COLOR_WARNING;
             }
 
             @Override
             protected String getIconSVGPath() {
-                return GuiPrefabs.Icons.ICON_WARNING_ALT;
+                return GuiPrefabs.Icons.SVG_WARNING_ALT;
             }
 
             @Override
@@ -493,5 +582,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private void clearData() {
     }
 }

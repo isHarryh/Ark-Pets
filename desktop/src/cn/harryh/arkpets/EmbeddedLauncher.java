@@ -9,11 +9,15 @@ import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
+import com.sun.jna.Platform;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
+import javax.swing.*;
+import java.awt.*;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -32,7 +36,7 @@ public class EmbeddedLauncher {
         ArgPending.argCache = args;
         // Logger
         Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
-        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig());
+        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         try {
             Logger.setLevel(appConfig.logging_level);
         } catch (Exception ignored) {
@@ -82,16 +86,16 @@ public class EmbeddedLauncher {
         Logger.info("System", "Entering the app of EmbeddedLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
-
+        WindowSystem windowSystem = ArkConfig.getWindowSystemFrom(appConfig.window_system);
         try {
-            WindowSystem.init();
+            WindowSystem.init(windowSystem);
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);
             // Configure window layout
-            config.setDecorated(false);
-            config.setResizable(false);
+            config.setDecorated(WindowSystem.needDecorated());
+            config.setResizable(WindowSystem.needResize());
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);
             // Configure window title
@@ -101,6 +105,14 @@ public class EmbeddedLauncher {
             config.setInitialVisible(true);
             config.setTransparentFramebuffer(true);
             config.setInitialBackgroundColor(Color.CLEAR);
+            // Use async GLFW on macOS
+            if (Platform.isMac()) {
+                Logger.info("System", "Running on macOS, using async GLFW.");
+                System.setProperty("apple.awt.application.name", TITLE);
+                SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);
+                Configuration.GLFW_CHECK_THREAD0.set(false);
+                Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
+            }
             // Handle GLFW error
             GLFW.glfwSetErrorCallback(new GLFWErrorCallback() {
                 @Override

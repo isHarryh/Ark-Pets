@@ -8,7 +8,7 @@ import cn.harryh.arkpets.animations.AnimClip.AnimStage;
 import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
-import cn.harryh.arkpets.assets.AssetItem.AssetAccessor;
+import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
@@ -39,9 +39,11 @@ public class ArkChar {
 
     private final TwoColorPolygonBatch batch;
     private Texture bgTexture;
+    private final float outlineWidth;
     private final Color outlineColor;
+    private final Color shadowColor;
     private final TransitionFloat offsetY;
-    private final TransitionFloat outlineWidth;
+    private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
 
     private final ShaderProgram shader1;
@@ -67,9 +69,7 @@ public class ArkChar {
         camera.setMinInsert(canvasReserveLength - canvasMaxSize);
         batch = new TwoColorPolygonBatch();
         renderer = new SkeletonRenderer();
-        /* Pre-multiplied alpha shouldn't be applied to models released in Arknights 2.1.41 or later,
-        otherwise you may get a corrupted rendering result. */
-        renderer.setPremultipliedAlpha(false);
+        renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
         shader1 = getShader(pass1VShader, pass1FShader);
@@ -80,15 +80,15 @@ public class ArkChar {
         float easingDuration = Math.max(0, config.transition_duration);
         position = new TransitionVector3(easingFunction, easingDuration);
         offsetY = new TransitionFloat(easingFunction, easingDuration);
-        outlineWidth = new TransitionFloat(easingFunction, easingDuration);
+        outlineAlpha = new TransitionFloat(easingFunction, easingDuration);
         alpha = new TransitionFloat(easingFunction, easingDuration);
         // 3.Skeleton setup
         SkeletonData skeletonData;
         try {
             String assetLocation = config.character_asset;
-            AssetAccessor assetAccessor = new AssetAccessor(config.character_files);
-            String path2atlas = assetLocation + separator + assetAccessor.getFirstFileOf(".atlas");
-            String path2skel = assetLocation + separator + assetAccessor.getFirstFileOf(".skel");
+            ModelAssetAccessor modelAssetAccessor = new ModelAssetAccessor(config.character_files);
+            String path2atlas = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".atlas");
+            String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
             // Load atlas
             TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
             // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
@@ -114,22 +114,24 @@ public class ArkChar {
         for (AnimClip i : animList)
             for (AnimClip j : animList)
                 if (!i.fullName.equals(j.fullName))
-                    asd.setMix(i.fullName, j.fullName, (float)durationNormal.toSeconds());
+                    asd.setMix(i.fullName, j.fullName, config.render_animation_mixture);
         // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);
-        composer = new AnimComposer(animationState){
+        composer = new AnimComposer(animationState) {
             @Override
             protected void onApply(AnimData playing) {
                 Logger.debug("Animation", "Apply " + playing);
                 // Sync skeleton position data
-                offsetY.reset(playing.offsetY() * scale);
+                offsetY.reset(playing.animClip().type.offsetY * scale);
                 position.reset(position.end().x, position.end().y, playing.mobility() != 0 ? playing.mobility() : position.end().z);
             }
         };
         // 6.Canvas setup
         setCanvas(ArkConfig.getGdxColorFrom(config.canvas_color));
+        outlineWidth = config.render_outline_width;
         outlineColor = ArkConfig.getGdxColorFrom(config.render_outline_color);
+        shadowColor = ArkConfig.getGdxColorFrom(config.render_shadow_color);
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
@@ -139,8 +141,8 @@ public class ArkChar {
                 stageInsertMap.put(stage, camera.getInsert().clone());
                 Logger.info("Character", stage + " using " + camera);
             } else {
-                Logger.error("Character", stage + " canvas size exceeded limit.");
-                throw new RuntimeException("Launch ArkPets failed, canvas setup failsafe triggered.");
+                // Failed, then not to put into stageInsertMap
+                Logger.warn("Character", stage + " unable to find a proper canvas size");
             }
         }
         camera.setInsertMaxed();
@@ -167,11 +169,11 @@ public class ArkChar {
         return composer.offer(animData);
     }
 
-    /** Requests to set the outline width of the character.
-     * @param width The outline width in pixel.
+    /** Requests to set the outline's alpha value of the character.
+     * @param newAlpha The new alpha value ranging in [0,1].
      */
-    public void setOutlineWidth(float width) {
-        outlineWidth.reset(Math.max(0f, width));
+    public void setOutlineAlpha(float newAlpha) {
+        outlineAlpha.reset(Math.max(0f, Math.min(1f, newAlpha)));
     }
 
     /** Requests to set the alpha value of the ultimate rendering process.
@@ -206,8 +208,10 @@ public class ArkChar {
      * @throws IndexOutOfBoundsException If the given stage isn't in the internal stage map.
      */
     public void adjustCanvas(AnimStage animStage) {
-        if (!stageInsertMap.containsKey(animStage))
+        if (!stageInsertMap.containsKey(animStage)) {
+            Logger.error("Character", "Failed to adjust the canvas because the given stage corrupted");
             throw new IndexOutOfBoundsException("No such key " + animStage);
+        }
         camera.setInsert(stageInsertMap.get(animStage));
     }
 
@@ -219,7 +223,7 @@ public class ArkChar {
         position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
         position.addProgress(Gdx.graphics.getDeltaTime());
         offsetY.addProgress(Gdx.graphics.getDeltaTime());
-        outlineWidth.addProgress(Gdx.graphics.getDeltaTime());
+        outlineAlpha.addProgress(Gdx.graphics.getDeltaTime());
         alpha.addProgress(Gdx.graphics.getDeltaTime());
         skeleton.setPosition(position.now().x, position.now().y + offsetY.now());
         skeleton.setScaleX(position.now().z);
@@ -238,16 +242,19 @@ public class ArkChar {
         batch.end();
         batch.setShader(null);
         camera.getFBO().end();
-        // Render Pass 2: Render the outline
+        // Render Pass 2: Render additional effects
         Texture passedTexture = camera.getFBO().getColorBufferTexture();
         shader2.bind();
         shader2.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        shader2.setUniformf("u_outlineWidth", outlineWidth.now());
+        shader2.setUniformf("u_outlineWidth", outlineWidth);
+        shader2.setUniformf("u_outlineAlpha", outlineAlpha.now());
+        shader2.setUniformf("u_shadowColor", shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
         shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
         shader2.setUniformf("u_alpha", alpha.now());
         batch.setShader(shader2);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         batch.draw(bgTexture, 0, 0);
         batch.draw(passedTexture,
                 0, 0, 0, 0, camera.getWidth(), camera.getHeight(),
@@ -302,10 +309,10 @@ public class ArkChar {
         Insert insert = camera.getFittedInsert(snapshot, false, true);
         if (enableSnapshot) {
             snapshot.setColor(Color.RED);
-            snapshot.drawLine(0,-insert.bottom,camera.getWidth(),-insert.bottom);
-            snapshot.drawLine(0,camera.getHeight()+insert.top,camera.getWidth(),camera.getHeight()+insert.top);
-            snapshot.drawLine(-insert.left,0,-insert.left,camera.getHeight());
-            snapshot.drawLine(camera.getWidth()+insert.right,0,camera.getWidth()+insert.right,camera.getHeight());
+            snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
+            snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);
+            snapshot.drawLine(-insert.left, 0, -insert.left, camera.getHeight());
+            snapshot.drawLine(camera.getWidth() + insert.right, 0, camera.getWidth() + insert.right, camera.getHeight());
             PixmapIO.writePNG(new FileHandle("temp/adjustCanvasSnapshot.png"), snapshot);
         }
         camera.setInsert(insert);

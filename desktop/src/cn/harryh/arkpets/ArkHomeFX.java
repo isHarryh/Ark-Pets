@@ -5,10 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.concurrent.*;
-import cn.harryh.arkpets.controllers.BehaviorModule;
-import cn.harryh.arkpets.controllers.ModelsModule;
-import cn.harryh.arkpets.controllers.RootModule;
-import cn.harryh.arkpets.controllers.SettingsModule;
+import cn.harryh.arkpets.controllers.*;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
@@ -50,6 +47,7 @@ public class ArkHomeFX extends Application {
     public ModelsModule   modelsModule;
     public BehaviorModule behaviorModule;
     public SettingsModule settingsModule;
+    public Titlebar titleBar;
 
     static {
         FontsConfig.loadFontsToJavafx();
@@ -66,6 +64,10 @@ public class ArkHomeFX extends Application {
         fxml0.initializeWith(this);
         rootModule = (RootModule) fxml0.controller();
         body = rootModule.body;
+        LoadFXMLResult<ArkHomeFX> fxmlTitlebar = FXMLHelper.loadFXML(getClass().getResource("/UI/Titlebar.fxml"));
+        fxmlTitlebar.initializeWith(this);
+        titleBar = (Titlebar) fxmlTitlebar.controller();
+        fxmlTitlebar.addToNode(rootModule.wrapper4);
 
         // Setup scene and primary stage.
         Logger.info("Launcher", "Creating main scene");
@@ -78,7 +80,7 @@ public class ArkHomeFX extends Application {
         stage.setScene(scene);
         String title = desktopTitle + getVersionType();
         stage.setTitle(title);
-        rootModule.titleText.setText(title);
+        titleBar.titleText.setText(title);
 
         // After the stage is shown, do initialization.
         stage.show();

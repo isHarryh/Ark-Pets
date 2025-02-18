@@ -4,11 +4,12 @@
 package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.assets.AssetItem;
-import cn.harryh.arkpets.assets.AssetItemGroup;
+import cn.harryh.arkpets.assets.ModelItem;
+import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import javafx.collections.FXCollections;
@@ -39,10 +40,11 @@ import java.util.function.Predicate;
 
 import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.Const.PathConfig.*;
-import static cn.harryh.arkpets.utils.GuiPrefabs.tooltipStyle;
 
 
 public final class ModelsModule implements Controller<ArkHomeFX> {
+    @FXML
+    private Label loadEmptyAction;
     @FXML
     private Pane loadFailureTip;
     @FXML
@@ -58,7 +60,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label searchModelStatus;
     @FXML
-    private JFXListView<JFXListCell<AssetItem>> searchModelView;
+    private JFXListView<JFXListCell<ModelItem>> searchModelView;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -106,16 +108,18 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label modelHelp;
 
-    private AssetItemGroup assetItemList;
-    private JFXListCell<AssetItem> selectedModelCell;
-    private ArrayList<JFXListCell<AssetItem>> modelCellList = new ArrayList<>();
+    private ModelItemGroup assetItemList;
+    private JFXListCell<ModelItem> selectedModelCell;
+    private ArrayList<JFXListCell<ModelItem>> modelCellList = new ArrayList<>();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
+
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
     private GuiPrefabs.PeerNodeComposer mngBtnComposer;
-    private GuiComponents.NoticeBar datasetTooLowVerNotice;
-    private GuiComponents.NoticeBar datasetTooHighVerNotice;
-    private final SVGPath favIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_STAR, GuiPrefabs.Colors.COLOR_LIGHT_GRAY);
-    private final SVGPath favFillIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_STAR_FILL, GuiPrefabs.Colors.COLOR_WARNING);
+    private NoticeBar datasetTooLowVerNotice;
+    private NoticeBar datasetTooHighVerNotice;
+
+    private final SVGPath favIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR, GuiPrefabs.COLOR_LIGHT_GRAY);
+    private final SVGPath favFillIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
     private boolean filterFavorite;
 
     private ArkHomeFX app;
@@ -154,7 +158,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                                 IOUtils.FileUtil.readString(new File(PathConfig.fileModelsDataPath), charsetDefault)
                         )
                 );
-                app.modelsDataset.data.removeIf(Predicate.not(AssetItem::isValid));
+                app.modelsDataset.data.removeIf(Predicate.not(ModelItem::isValid));
                 try {
                     // Check the dataset compatibility
                     Version compatibleVersion = app.modelsDataset.arkPetsCompatibility;
@@ -188,7 +192,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
             if (doPopNotice) {
                 JFXDialog dialog = GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：未找到数据集。",
                         "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。",
@@ -199,7 +203,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
             if (doPopNotice)
                 GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：数据集解析失败。",
                         "模型数据集可能不完整，或无法被启动器正确识别。请尝试更新模型或更新软件。",
@@ -208,7 +212,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             Logger.error("ModelManager", "Failed to initialize model dataset due to unknown reasons, details see below.", e);
             if (doPopNotice)
                 GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：发生意外错误。",
                         "失败原因概要：" + e.getLocalizedMessage(),
@@ -234,12 +238,20 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         searchModelConfirm.setOnAction(e -> modelSearch(searchModelInput.getText()));
 
         searchModelReset.setOnAction(e -> app.popLoading(ev -> {
+            Logger.debug("ModelManager", "Reset search and filter conditions");
             searchModelInput.clear();
             searchModelInput.requestFocus();
             filterTagSet.clear();
             modelSearch("");
             infoPaneComposer.activate(0);
         }));
+
+        loadEmptyAction.setOnMouseClicked(e -> {
+            Logger.debug("ModelManager", "Reset requested from placeholder");
+            if (filterFavorite)
+                topFavorite.getOnAction().handle(new ActionEvent(loadEmptyAction, topFavorite));
+            searchModelReset.getOnAction().handle(new ActionEvent(loadEmptyAction, searchModelReset));
+        });
 
         searchModelRandom.setOnAction(e -> modelRandom());
 
@@ -255,15 +267,15 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initModelManage() {
-        datasetTooLowVerNotice = new GuiComponents.NoticeBar(noticeBox) {
+        datasetTooLowVerNotice = new NoticeBar(noticeBox) {
             @Override
-            protected String getColorString() {
-                return GuiPrefabs.Colors.COLOR_WARNING;
+            protected Color getColor() {
+                return GuiPrefabs.COLOR_WARNING;
             }
 
             @Override
             protected String getIconSVGPath() {
-                return GuiPrefabs.Icons.ICON_WARNING_ALT;
+                return GuiPrefabs.Icons.SVG_WARNING_ALT;
             }
 
             @Override
@@ -271,15 +283,15 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 return "模型库版本太旧，可能不被软件兼容，请您重新下载模型。";
             }
         };
-        datasetTooHighVerNotice = new GuiComponents.NoticeBar(noticeBox) {
+        datasetTooHighVerNotice = new NoticeBar(noticeBox) {
             @Override
-            protected String getColorString() {
-                return GuiPrefabs.Colors.COLOR_WARNING;
+            protected Color getColor() {
+                return GuiPrefabs.COLOR_WARNING;
             }
 
             @Override
             protected String getIconSVGPath() {
-                return GuiPrefabs.Icons.ICON_WARNING_ALT;
+                return GuiPrefabs.Icons.SVG_WARNING_ALT;
             }
 
             @Override
@@ -403,7 +415,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 modelFavorite.setGraphic(favIcon);
                 Logger.debug("ModelManager", "Remove favorite model " + key);
             } else {
-                app.config.character_favorites.put(key, new AssetItem.AssetPrefab());
+                app.config.character_favorites.put(key, new ModelItem.AssetPrefab());
                 selectedModelCell.getStyleClass().add("Search-models-item-favorite");
                 modelFavorite.setGraphic(favFillIcon);
                 Logger.debug("ModelManager", "Add favorite model " + key);
@@ -412,6 +424,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         });
 
         topFavorite.setOnAction(e -> {
+            Logger.debug("ModelManager", "Toggle favorite display");
             searchModelView.scrollTo(0);
             if (filterFavorite) {
                 GuiPrefabs.replaceStyleClass(topFavorite, "btn-primary", "btn-secondary");
@@ -420,9 +433,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             }
             filterFavorite = !filterFavorite;
             modelSearch(searchModelInput.getText());
-            AssetItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
+            ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
             if (recentSelected != null)
-                for (JFXListCell<AssetItem> cell : searchModelView.getItems())
+                for (JFXListCell<ModelItem> cell : searchModelView.getItems())
                     if (recentSelected.equals(cell.getItem())) {
                         searchModelView.scrollTo(cell);
                         searchModelView.getSelectionModel().select(cell);
@@ -434,21 +447,25 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         searchModelView.getItems().clear();
         searchModelStatus.setText("");
         if (assertModelLoaded(false)) {
-            // Filter and search assets
+            // Filter assets
             int rawSize = assetItemList.size();
-            AssetItemGroup favoured = !filterFavorite ? assetItemList :
-                    assetItemList.filter(AssetItem.PropertyExtractor.ASSET_ITEM_KEY, app.config.character_favorites.keySet(), AssetItemGroup.FilterMode.MATCH_ANY);
-            AssetItemGroup filtered = filterTagSet.isEmpty() ? favoured :
-                    favoured.filter(AssetItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS, filterTagSet);
-            AssetItemGroup searched = filtered.searchByKeyWords(keyWords);
+            ModelItemGroup favoured = !filterFavorite ? assetItemList :
+                    assetItemList.filter(ModelItem.PropertyExtractor.ASSET_ITEM_KEY, app.config.character_favorites.keySet(), ModelItemGroup.FilterMode.MATCH_ANY);
+            ModelItemGroup filtered = filterTagSet.isEmpty() ? favoured :
+                    favoured.filter(ModelItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS, filterTagSet);
+            // Search assets
+            long tStart = System.nanoTime();
+            ModelItemGroup searched = filtered.searchByKeyWords(keyWords);
+            long tEnd = System.nanoTime();
             int curSize = searched.size();
             searchModelStatus.setText((rawSize == curSize ? rawSize : curSize + " / " + rawSize) + " 个模型");
             // Add cells
-            for (JFXListCell<AssetItem> cell : modelCellList)
+            for (JFXListCell<ModelItem> cell : modelCellList)
                 if (searched.contains(cell.getItem()))
                     searchModelView.getItems().add(cell);
+            Logger.info("ModelManager", "Search \"%s\" (%d results, %.1f ms)"
+                    .formatted(keyWords, curSize, (tEnd - tStart) / 1000000f));
         }
-        Logger.info("ModelManager", "Search \"" + keyWords + "\" (" + searchModelView.getItems().size() + ")");
         searchModelView.refresh();
     }
 
@@ -466,19 +483,19 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             Logger.info("ModelManager", "Reloading");
             boolean willGc = modelCellList != null;
             modelCellList = new ArrayList<>();
-            assetItemList = new AssetItemGroup();
+            assetItemList = new ModelItemGroup();
 
             if (initModelsDataset(doPopNotice)) {
                 // 1. Update list cells and asset items:
                 try {
                     // Find every model assets.
-                    assetItemList.addAll(app.modelsDataset.data.filter(AssetItem::isExisted));
+                    assetItemList.addAll(app.modelsDataset.data.filter(ModelItem::isExisted));
                     if (assetItemList.isEmpty())
                         throw new IOException("Found no assets in the target directories.");
                     // Initialize list view.
                     searchModelView.getSelectionModel().getSelectedItems().addListener(
-                            (ListChangeListener<JFXListCell<AssetItem>>) (observable -> observable.getList().forEach(
-                                    (Consumer<JFXListCell<AssetItem>>) cell -> selectModel(cell.getItem(), cell))
+                            (ListChangeListener<JFXListCell<ModelItem>>) (observable -> observable.getList().forEach(
+                                    (Consumer<JFXListCell<ModelItem>>) cell -> selectModel(cell.getItem(), cell))
                             )
                     );
                     searchModelView.setFixedCellSize(30);
@@ -489,10 +506,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     // Explicitly set all lists to empty.
                     Logger.error("ModelManager", "Failed to initialize model assets due to unknown reasons, details see below.", ex);
                     modelCellList = new ArrayList<>();
-                    assetItemList = new AssetItemGroup();
+                    assetItemList = new ModelItemGroup();
                     if (doPopNotice)
                         GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                                 "模型载入失败",
                                 "模型未成功载入：读取模型列表失败。",
                                 "失败原因概要：" + ex.getLocalizedMessage(),
@@ -516,7 +533,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 });
                 filterPaneTagFlow.getChildren().clear();
                 if (assetItemList != null && app.modelsDataset != null) {
-                    ArrayList<String> sortTags = new ArrayList<>(assetItemList.extract(AssetItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS));
+                    ArrayList<String> sortTags = new ArrayList<>(assetItemList.extract(ModelItem.PropertyExtractor.ASSET_ITEM_SORT_TAGS));
                     sortTags.sort(Comparator.naturalOrder());
                     sortTags.forEach(s -> {
                         String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
@@ -540,9 +557,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 if (assetItemList != null && !modelCellList.isEmpty() &&
                         app.config.character_asset != null && !app.config.character_asset.isEmpty()) {
                     // Scroll to recent selected model and then select it.
-                    AssetItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
+                    ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
                     if (recentSelected != null) {
-                        for (JFXListCell<AssetItem> cell : searchModelView.getItems())
+                        for (JFXListCell<ModelItem> cell : searchModelView.getItems())
                             if (recentSelected.equals(cell.getItem())) {
                                 searchModelView.scrollTo(cell);
                                 searchModelView.getSelectionModel().select(cell);
@@ -564,21 +581,21 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         });
     }
 
-    private JFXListCell<AssetItem> getMenuItem(AssetItem assetItem, JFXListView<JFXListCell<AssetItem>> container) {
+    private JFXListCell<ModelItem> getMenuItem(ModelItem modelItem, JFXListView<JFXListCell<ModelItem>> container) {
         double width = container.getPrefWidth() - 50;
         double height = 30;
         double divide = 0.618;
-        JFXListCell<AssetItem> item = new JFXListCell<>();
+        JFXListCell<ModelItem> item = new JFXListCell<>();
         item.getStyleClass().addAll("Search-models-item");
-        Label name = new Label(assetItem.toString());
+        Label name = new Label(modelItem.toString());
         name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
-        name.setPrefSize(assetItem.skinGroupName == null ? width : width * divide, height);
+        name.setPrefSize(modelItem.skinGroupName == null ? width : width * divide, height);
         name.setLayoutX(15);
-        Label alias1 = new Label(assetItem.skinGroupName);
+        Label alias1 = new Label(modelItem.skinGroupName);
         alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
         alias1.setPrefSize(width * (1 - divide), height);
-        alias1.setLayoutX(assetItem.skinGroupName == null ? 0 : width * divide);
-        SVGPath fav = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_STAR_FILL,GuiPrefabs.Colors.COLOR_WARNING);
+        alias1.setLayoutX(modelItem.skinGroupName == null ? 0 : width * divide);
+        SVGPath fav = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
         fav.getStyleClass().add("Search-models-star");
         fav.setLayoutX(0);
         fav.setLayoutY(3);
@@ -586,14 +603,14 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         fav.setScaleY(0.75);
         item.setPrefSize(width, height);
         item.setGraphic(new Group(fav, name, alias1));
-        item.setItem(assetItem);
-        item.setId(assetItem.getLocation());
-        if (app.config.character_favorites.containsKey(assetItem.key))
+        item.setItem(modelItem);
+        item.setId(modelItem.getLocation());
+        if (app.config.character_favorites.containsKey(modelItem.key))
             item.getStyleClass().add("Search-models-item-favorite");
         return item;
     }
 
-    private void selectModel(AssetItem asset, JFXListCell<AssetItem> item) {
+    private void selectModel(ModelItem asset, JFXListCell<ModelItem> item) {
         // Reset
         if (selectedModelCell != null) {
             selectedModelCell.getStyleClass().setAll("Search-models-item");
@@ -608,18 +625,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         selectedModelSkinGroupName.setText(asset.skinGroupName);
         selectedModelType.setText(app.modelsDataset.sortTags == null ?
                 asset.type : app.modelsDataset.sortTags.getOrDefault(asset.type, asset.type));
-        Tooltip selectedModelNameTip = new Tooltip(asset.name);
-        Tooltip selectedModelAppellationTip = new Tooltip(asset.appellation);
-        Tooltip selectedModelSkinGroupNameTip = new Tooltip(asset.skinGroupName);
-        Tooltip selectedModelTypeTip = new Tooltip(asset.type);
-        selectedModelNameTip.setStyle(tooltipStyle);
-        selectedModelAppellationTip.setStyle(tooltipStyle);
-        selectedModelSkinGroupNameTip.setStyle(tooltipStyle);
-        selectedModelTypeTip.setStyle(tooltipStyle);
-        selectedModelName.setTooltip(selectedModelNameTip);
-        selectedModelAppellation.setTooltip(selectedModelAppellationTip);
-        selectedModelSkinGroupName.setTooltip(selectedModelSkinGroupNameTip);
-        selectedModelType.setTooltip(selectedModelTypeTip);
+        GuiPrefabs.addTooltip(selectedModelName, asset.name);
+        GuiPrefabs.addTooltip(selectedModelAppellation, asset.appellation);
+        GuiPrefabs.addTooltip(selectedModelSkinGroupName, asset.skinGroupName);
+        GuiPrefabs.addTooltip(selectedModelType, asset.type);
         // Setup tag flow pane
         infoPaneTagFlow.getChildren().clear();
         asset.sortTags.forEach(o -> {
@@ -656,7 +665,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             // Not loaded:
             if (doPopNotice)
                 GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "未能加载模型",
                         "请确保模型加载成功后再进行此操作。",
                         "请先在[选项]中进行模型下载。\n如您已下载模型，请尝试点击[重载]按钮。",

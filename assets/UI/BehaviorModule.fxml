@@ -25,6 +25,10 @@
                     <JFXCheckBox fx:id="configBehaviorAllowSit" mnemonicParsing="false" text="允许坐下"/>
                 </HBox>
                 <HBox>
+                    <JFXCheckBox fx:id="configBehaviorAllowSleep" mnemonicParsing="false" text="允许躺下"/>
+                    <JFXCheckBox fx:id="configBehaviorAllowSpecial" mnemonicParsing="false" text="允许特殊动作"/>
+                </HBox>
+                <HBox>
                     <Label text="动作活跃度"/>
                     <JFXSlider fx:id="configBehaviorAiActivation"/>
                     <Label fx:id="configBehaviorAiActivationValue" text="0"/>
@@ -67,6 +71,23 @@
                 <HBox fx:id="wrapperConfigDeployPosition" managed="false" visible="false">
                     <Label styleClass="config-help-text" text="在矩形区域内单击以选定桌宠生成时在屏幕中的初始位置"/>
                     <Canvas fx:id="configDeployPosition" height="150.0" width="150.0"/>
+                </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="过渡"/>
+                <HBox>
+                    <Label fx:id="configTransitionAnimationLabel" text="动画交叉过渡"/>
+                    <JFXComboBox fx:id="configTransitionAnimation" prefWidth="120.0"/>
+                    <JFXButton fx:id="configTransitionAnimationHelp"/>
+                </HBox>
+                <HBox>
+                    <Label fx:id="configTransitionDurationLabel" text="常规属性过渡"/>
+                    <JFXComboBox fx:id="configTransitionDuration" prefWidth="120.0"/>
+                    <JFXButton fx:id="configTransitionDurationHelp"/>
+                </HBox>
+                <HBox>
+                    <Label fx:id="configTransitionFunctionLabel" text="缓动函数"/>
+                    <JFXComboBox fx:id="configTransitionFunction" prefWidth="120.0"/>
+                    <JFXButton fx:id="configTransitionFunctionHelp"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="物理"/>

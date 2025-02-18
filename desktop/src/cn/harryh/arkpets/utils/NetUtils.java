@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.utils;
 
 import javax.net.ssl.*;
+import javax.swing.*;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.net.*;
@@ -60,12 +61,14 @@ public class NetUtils {
      * @param url The URL to browse.
      */
     public static void browseWebpage(String url) {
-        try {
-            Logger.debug("Network", "Opening the URL " + url + " in the browser");
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (IOException e) {
-            Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
-        }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Logger.debug("Network", "Opening the URL " + url + " in the browser");
+                Desktop.getDesktop().browse(URI.create(url));
+            } catch (IOException e) {
+                Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
+            }
+        });
     }
 
     /** Sets the system's proxy property, applying on both HTTP and HTTPS.

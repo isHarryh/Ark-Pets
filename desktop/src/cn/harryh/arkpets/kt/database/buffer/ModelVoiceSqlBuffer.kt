@@ -27,7 +27,7 @@ class ModelVoiceSqlBuffer(database: Database) : SqlBuffer<ModelVoice>(database) 
     }
 
     private fun AssignmentsBuilder.setData(it: ModelVoices, info: ModelVoice) {
-        set(it.modelId, info.charInfo.id)
+        set(it.modelId, info.charInfo.assetId)
         set(it.duration, info.duration)
         set(it.language, info.language)
         set(it.md5, info.md5)

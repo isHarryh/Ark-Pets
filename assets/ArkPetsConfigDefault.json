@@ -2,6 +2,8 @@
     "behavior_ai_activation":8,
     "behavior_allow_interact":true,
     "behavior_allow_sit":true,
+    "behavior_allow_sleep":false,
+    "behavior_allow_special":true,
     "behavior_allow_walk":true,
     "behavior_do_peer_repulsion":true,
     "canvas_color":"#00000000",
@@ -24,9 +26,14 @@
     "physic_speed_limit_x":1000.0,
     "physic_speed_limit_y":1000.0,
     "physic_static_friction_acc":500.0,
+    "render_animation_mixture":0.3,
     "render_outline":1,
     "render_outline_color":"#FFFF00FF",
     "render_outline_width":2.0,
+    "render_shadow_color":"#000000BB",
+    "transition_duration":0.3,
+    "transition_type":"EASE_OUT_CUBIC",
     "window_style_toolwindow":true,
-    "window_style_topmost":true
+    "window_style_topmost":true,
+    "window_system":"AUTO"
 }

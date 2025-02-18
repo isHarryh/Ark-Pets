@@ -6,12 +6,13 @@
    <h1> Ark-Pets </h1>
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v3.x/assets/icons/icon.png">
    <p>
-      Arknights Desktop Pets | 明日方舟桌宠 <br>
-      <code><b> v3.5 </b></code>
+      Arknights Desktop Pets | 明日方舟桌宠 (ArkPets) <br>
+      <code><b> v3.6 </b></code>
    </p>
    <p>
       <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/isHarryh/Ark-Pets?label=Java">
       <img alt="GitHub License" src="https://img.shields.io/github/license/isHarryh/Ark-Pets?label=License">
+      <img alt="Code Factor Grade" src="https://img.shields.io/codefactor/grade/github/isHarryh/Ark-Pets?label=CodeFactor">
       <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/isHarryh/Ark-Pets/build.yml?label=Build">
    </p>
    <sub>
@@ -29,17 +30,17 @@
     2. 干员动态立绘（含时装）；
     3. 敌方战斗小人。
 2. **启动器提供图形用户界面以便浏览模型和调整桌宠设置。** <details><summary>查看详情</summary>
-    1. 可以按名称搜索或按类别筛选以查找模型；
+    1. 可以按名称、拼音、时装品牌搜索，或按类别筛选以查找模型；
     2. 可以从互联网中下载由社区维护的模型库；
     3. 可以自定义桌宠的动作交互、部署位置和物理参数等行为设置；
     4. 可以自定义桌宠的图像缩放、最大帧率和窗口边界等显示设置。
 3. **支持模拟游戏内干员基建小人的行为。** <details><summary>查看详情</summary>
-    1. 能够执行行走和坐下的动作；
-    2. 能够被鼠标交互以执行戳一戳动作；
-    3. 拥有特殊基建动作的干员，有概率执行特殊基建动作。
+    1. 支持行走、坐下和躺下的动作；
+    2. 能够被鼠标交互以执行戳一戳或攻击动作；
+    3. 拥有特殊基建动作的干员，有小概率触发这类动作。
 4. **支持模拟游戏内敌方小人的行为。** <details><summary>查看详情</summary>
-    1. 拥有行走动作的敌人，能够执行行走动作；
-    2. 拥有攻击动作的敌人，能够被鼠标交互。
+    1. 拥有行走动作的敌人能够行走；
+    2. 拥有攻击动作的敌人能够被鼠标交互。
 5. **实现了模拟平面重力场** <details><summary>查看详情</summary>
     1. 桌宠支持自由落体等物理现象；
     2. 桌宠可以被拖拽到扩展显示屏上；
@@ -68,7 +69,8 @@
 
 以下内容可能在遥远的将来被实现：
 
-- 国际化
+- 国际化与响应布局
+- 支持按需下载资源
 - 支持干员语音功能
 - 全面更新依赖库的版本
 - 支持透明模式等配置的记忆
@@ -81,9 +83,9 @@
 
 ## 使用方法 <sub>Usage</sub>
 
-|                                            **[目前最新版本](https://github.com/isHarryh/Ark-Pets/releases)**                                             |                                  **支持的操作系统**                                  |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
-| ![GitHub Latest Release](https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Release&sort=semver&include_prereleases) | ![Windows](https://img.shields.io/badge/7%2B-blue?logo=Windows&label=Windows) |
+|                                                                                             **目前最新版本**                                                                                              |                                  **支持的操作系统**                                  |
+|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
+| [![GitHub Latest Release](https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Release&sort=semver&include_prereleases)](https://github.com/isHarryh/Ark-Pets/releases) | ![Windows](https://img.shields.io/badge/7%2B-blue?logo=Windows&label=Windows) |
 
 ### 快速上手
 
@@ -99,10 +101,13 @@
 
 ### 其他特性
 
+以下列出了一部分额外的功能，更多内容请在启动器中自行探索。
+
 - **检查模型库更新** ：我们的模型库不定期更新，如果您想体验新实装进游戏的模型，可以在 “模型库管理” 面板点击 “检查更新” 按钮。如果提示有更新，则可点击 “重新下载” 按钮来下载模型。
 - **开机自启动** ：进入启动器 “选项” 页面可以设置开机自启动，设置后下一次电脑开机会自动生成最后一次启动的桌宠。
 - **透明模式** ：为防止用户在游戏、观看视频等情景下误触到桌宠，特增加了此模式。在托盘菜单中打开 “透明模式”，即可屏蔽桌宠和鼠标的一切交互（点击、拖动操作都将穿透到下层窗口），并且桌宠会变得透明。
 - **下边界距离** ：桌宠在部分用户的电脑上无法正常检测任务栏位置（桌宠会沉入任务栏），此时您可以手动设置任务栏高度。进入启动器 “行为” 页面可以调整下边界距离，通常会将其设置为15的正整数倍。
+- **高亮描边与阴影** ：高亮描边效果旨在复现游戏中基建系统的角色选中特效，阴影效果则提供了更加立体的视觉体验。在启动器 “选项” 中禁用这两种渲染特效可以降低性能消耗。
 
 ### 高级用法
 
@@ -114,7 +119,7 @@
 - 如果您想添加自定义的模型，[点击查看](docs/CustomModel.md)说明。
 - 如果您想使用直播流软件捕捉桌宠窗口，可以在启动器 “选项” 页面禁用 “桌宠作为后台程序启动”。
 
-由于需要调用 Win32 特有的 API，目前本程序不支持在其他操作系统运行。
+目前本程序不支持在其他操作系统运行。好消息是，对于 MacOS 和 Linux 的支持已处于开发阶段，敬请期待。
 
 ## 关 于 <sub>About</sub>
 
@@ -133,6 +138,16 @@
 您可以通过提交 [Issues](https://github.com/isHarryh/Ark-Pets/issues) 等各种方式参与本项目的贡献。 提交 Issues 前，请确认您的议题与已有的议题不重复。提交 Issues 时，请您完整地填写议题模板。
 
 - 另见 ~~很久没更新的~~ [开发者 Wiki](https://github.com/isHarryh/Ark-Pets/wiki)
+
+### 友情链接
+
+以下项目是 ArkPets 的关联或衍生项目：
+
+- [isHarryh / Ark-Models](https://github.com/isHarryh/Ark-Models)：明日方舟 Spine 模型库
+- [litwak913 / Ark-Pets-Integration](https://github.com/litwak913/Ark-Pets-Integration)：ArkPets 针对其他桌面系统的集成库
+- [fuyufjh / ArkPets-Web](https://github.com/fuyufjh/ArkPets-Web)：ArkPets 在网页渲染器上的独立实现
+- [isHarryh / Ark-Unpacker](https://github.com/isHarryh/Ark-Unpacker)：用于解包游戏资源的实用工具
+- [Aloento / SuperSpineViewer](https://github.com/Aloento/SuperSpineViewer)：用于查看 Spine 模型的实用工具
 
 -----
 

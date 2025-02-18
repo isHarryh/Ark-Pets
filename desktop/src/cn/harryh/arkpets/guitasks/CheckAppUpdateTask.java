@@ -56,7 +56,7 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
                     Const.isUpdateAvailable = true;
                     if (style != GuiTaskStyle.HIDDEN)
                         GuiPrefabs.Dialogs.createCommonDialog(parent,
-                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_INFO_ALT, GuiPrefabs.Colors.COLOR_INFO),
+                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
                                 "检查软件更新",
                                 "检测到软件有新的版本！",
                                 "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n请访问ArkPets官网或GitHub下载新的安装包。",
@@ -66,7 +66,7 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
                     Const.isUpdateAvailable = false;
                     if (style != GuiTaskStyle.HIDDEN)
                         GuiPrefabs.Dialogs.createCommonDialog(parent,
-                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_SUCCESS_ALT, GuiPrefabs.Colors.COLOR_SUCCESS),
+                                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
                                 "检查软件更新",
                                 "尚未发现新的正式版本。",
                                 "当前版本 " + appVersion + " 已是最新",
@@ -78,7 +78,7 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
                 Logger.warn("Checker", "Application version check failed (api failed)");
                 if (style != GuiTaskStyle.HIDDEN)
                     GuiPrefabs.Dialogs.createCommonDialog(parent,
-                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_DANGER, GuiPrefabs.Colors.COLOR_DANGER),
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER),
                             "检查软件更新",
                             "服务器返回了无效的消息。",
                             "可能是兼容性问题或服务器不可用。\n您可以访问ArkPets官网或GitHub仓库以查看是否有新版本。",

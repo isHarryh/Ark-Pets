@@ -35,6 +35,7 @@ class CharInfoSqlBuffer(database: Database) : SqlBuffer<CharInfo>(database) {
         set(it.appellation, info.appellation)
         set(it.skinGroupId, info.skinGroupId)
         set(it.skinGroupName, info.skinGroupName)
+        set(it.syllable, info.syllable)
         set(it.md5, info.md5)
     }
 }

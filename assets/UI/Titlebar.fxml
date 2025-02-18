@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Copyright (c) 2022-2024, Litwak913
+    At GPL-3.0 License
+-->
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="cn.harryh.arkpets.controllers.Titlebar"
+            id="Title-bar" maxHeight="-Infinity" minHeight="-Infinity"
+            onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" prefHeight="24.0" prefWidth="600.0"
+            styleClass="shadowed" stylesheets="@Main.css">
+    <HBox fx:id="title" prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="3.0">
+        <ImageView cache="true" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true">
+            <HBox.margin>
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+            </HBox.margin>
+            <Image requestedHeight="512.0" requestedWidth="512.0" url="@/icons/icon.png"/>
+        </ImageView>
+        <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" text="ArkPets Launcher">
+            <HBox.margin>
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+            </HBox.margin>
+        </Text>
+    </HBox>
+    <HBox fx:id="titleButtons" alignment="TOP_RIGHT" prefHeight="24.0" prefWidth="200.0" AnchorPane.rightAnchor="0.0">
+        <JFXButton id="Title-minimize-btn" mnemonicParsing="false"
+                   onMouseClicked="#windowMinimize" text=" ">
+            <graphic>
+                <SVGPath
+                        content="m21 11.75c0-.414-.336-.75-.75-.75h-16.5c-.414 0-.75.336-.75.75s.336.75.75.75h16.5c.414 0 .75-.336.75-.75z"
+                        scaleX="0.75" scaleY="0.75" translateX="-5.0"/>
+            </graphic>
+        </JFXButton>
+        <JFXButton id="Title-close-btn" mnemonicParsing="false"
+                   onMouseClicked="#windowClose" text=" ">
+            <graphic>
+                <SVGPath
+                        content="m12 10.93 5.719-5.72c.146-.146.339-.219.531-.219.404 0 .75.324.75.749 0 .193-.073.385-.219.532l-5.72 5.719 5.719 5.719c.147.147.22.339.22.531 0 .427-.349.75-.75.75-.192 0-.385-.073-.531-.219l-5.719-5.719-5.719 5.719c-.146.146-.339.219-.531.219-.401 0-.75-.323-.75-.75 0-.192.073-.384.22-.531l5.719-5.719-5.72-5.719c-.146-.147-.219-.339-.219-.532 0-.425.346-.749.75-.749.192 0 .385.073.531.219z"
+                        scaleX="0.75" scaleY="0.75" translateX="-3"/>
+            </graphic>
+        </JFXButton>
+    </HBox>
+    <HBox fx:id="macTitleButtons" prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0"
+          visible="false" onMouseEntered="#mouseEnterBtnBoxMac" onMouseExited="#mouseExitBtnBoxMac">
+        <JFXButton id="Title-close-btn-mac" mnemonicParsing="false" ripplerFill="#2A528C"
+                   onMousePressed="#closePressedMac" onMouseReleased="#closeReleasedMac" onMouseClicked="#windowClose" text=" ">
+            <graphic>
+                <ImageView fx:id="titleMacCloseImage" translateX="-3">
+                    <viewport>
+                        <Rectangle2D width="16" height="16"/>
+                    </viewport>
+                    <Image url="@/icons/macos/close.png"/>
+                </ImageView>
+            </graphic>
+        </JFXButton>
+        <JFXButton id="Title-minimize-btn-mac" mnemonicParsing="false" ripplerFill="#2A528C"
+                   onMousePressed="#minimizePressedMac" onMouseReleased="#minimizeReleasedMac" onMouseClicked="#windowMinimize" text=" ">
+            <graphic>
+                <ImageView translateX="-5" fx:id="titleMacMinimizeImage">
+                    <viewport>
+                        <Rectangle2D width="16" height="16"/>
+                    </viewport>
+                    <Image url="@/icons/macos/minimize.png"/>
+                </ImageView>
+            </graphic>
+        </JFXButton>
+    </HBox>
+</AnchorPane>

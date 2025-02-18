@@ -12,7 +12,7 @@ class ModelTagSqlBuffer(database: Database) : SqlBuffer<ModelTag>(database) {
         database.batchInsert(ModelTags) {
             pendingInserts.forEach { info ->
                 item {
-                    set(it.modelId, info.charInfo.id)
+                    set(it.modelId, info.charInfo.assetId)
                     set(it.tag, info.tag)
                 }
             }
@@ -23,7 +23,7 @@ class ModelTagSqlBuffer(database: Database) : SqlBuffer<ModelTag>(database) {
         database.batchUpdate(ModelTags) {
             pendingUpdates.forEach { info ->
                 item {
-                    set(it.modelId, info.charInfo.id)
+                    set(it.modelId, info.charInfo.assetId)
                     set(it.tag, info.tag)
                     where { it.id eq info.id }
                 }

@@ -30,7 +30,7 @@ public class Plane {
     public Plane() {
         barriers        = new ArrayList<>();
         pointCharges    = new ArrayList<>();
-        this.world      = new ArrayList<>();
+        world           = new ArrayList<>();
         obj             = new Vector2(0, 0);
         position        = new Vector2(0, 0);
         speed           = new Vector2(0, 0);
@@ -207,7 +207,7 @@ public class Plane {
             float dx = position.x + obj.x / 2f - pc.x;
             float dy = position.y + obj.y / 2f - pc.y;
             float hypot = (float)Math.hypot(dx, dy);
-            speed.x = applyElectrostaticEffect(speed.x, pc.z,  hypot, dx / hypot, deltaTime);
+            speed.x = applyElectrostaticEffect(speed.x, pc.z, hypot, dx / hypot, deltaTime);
             speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , deltaTime);
         }
         // Ground friction
@@ -248,9 +248,10 @@ public class Plane {
      * @return New velocity (px/s).
      */
     private float applyElectrostaticEffect(float speed, float quantityProduct, float distance, float cosine, float deltaTime){
-        final float k   = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
-        final float dm  = 20; // Min distance
+        final float k = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
+        final float dm = 20; // Min distance
         distance = Math.max(Math.abs(distance), dm); // Limit the distance
+        cosine = Float.isNaN(cosine) ? 0 : Math.max(0, Math.min(1, cosine)); // Limit the cosine
         float delta = k * quantityProduct / distance / distance * cosine * deltaTime;
         return speed + delta;
     }

@@ -10,38 +10,26 @@ varying vec2 v_texCoords;       // From VS
 uniform sampler2D u_texture;    // From TCPB
 uniform vec4 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
+uniform float u_outlineAlpha;   // Required
+uniform vec4 u_shadowColor;     // Required
 uniform ivec2 u_textureSize;    // Required
 uniform float u_alpha;          // Required
 
-const float c_alphaLv0 = 0.1;
-const float c_alphaLv1 = 0.45;
-const float c_alphaLv2 = 0.9;
-const float c_seamCoef = 0.55;
+const float c_alphaLow = 0.1;
+const float c_alphaHigh = 0.9;
+const float c_seamCoef = 0.6;
 const float c_outlineOverstate = 10.0;
+const float c_shadowOffset = 2.0;
 
-vec4[24] getSimpleNeighbors(vec2 unitLength) {
-    vec4 neighbors[24];
-    int i = 0;
-    for (int y = -2; y <= 2; y++) {
-        for (int x = -2; x <= 2; x++) {
-            if (!(y == 0 && x == 0)) {
-                vec2 offset = vec2(x, y) * unitLength;
-                neighbors[i] = texture2D(u_texture, v_texCoords + offset);
-                i++;
-            }
-        }
-    }
-    return neighbors;
-}
+const float gaussianNeighborKernel[25] = float[25] (
+0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
+0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
+0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,
+0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
+0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
+);
 
 vec4[24] getGaussianNeighbors(vec2 unitLength) {
-    float kernel[25] = float[25] (
-        0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
-        0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
-        0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,
-        0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
-        0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
-    );
     vec4 neighbors[24];
     int ni = 0;
     int ki = 0;
@@ -49,7 +37,7 @@ vec4[24] getGaussianNeighbors(vec2 unitLength) {
         for (int x = -2; x <= 2; x++) {
             if (!(y == 0 && x == 0)) {
                 vec2 offset = vec2(x, y) * unitLength;
-                neighbors[ni] = texture2D(u_texture, v_texCoords + offset) * kernel[ki];
+                neighbors[ni] = texture2D(u_texture, v_texCoords + offset) * gaussianNeighborKernel[ki];
                 ni++;
             }
             ki++;
@@ -69,51 +57,38 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
 
 vec4 getOutlined() {
     vec4 texColor = texture2D(u_texture, v_texCoords);
-    if (u_outlineWidth > 0.0) {
+    if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
         vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
         vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
-        if (neighbor.a > c_alphaLv0) {
+        if (neighbor.a > c_alphaLow) {
             texColor.rgb = u_outlineColor.rgb;
-            texColor.a = min(1.0, neighbor.a) * u_outlineColor.a;
+            texColor.a = min(1.0, neighbor.a) * u_outlineColor.a * u_outlineAlpha;
         }
     }
     return texColor;
 }
 
-vec4 getSeamed() {
-    vec4 texColor = texture2D(u_texture, v_texCoords);
-    vec2 relPixelSize = vec2(1.0) / u_textureSize;
-    vec4[24] neighbors = getSimpleNeighbors(relPixelSize);
-    vec4 sampleColor = vec4(0.0);
-    int sampleSize = 0;
-    for (int i = 0; i < neighbors.length(); i++) {
-        if (neighbors[i].a > c_alphaLv2) {
-            sampleColor += neighbors[i];
-            sampleSize++;
-        }
+vec4 getBoxShadow() {
+    if (u_shadowColor.a <= 0.0) {
+        return vec4(0.0);
     }
-    if (sampleSize > 0) {
-        texColor.rgb = sampleColor.rgb / sampleSize * c_seamCoef + texColor.rgb * (1.0 - c_seamCoef);
-        texColor.a = sampleSize / sampleSize;
-    } else {
-        texColor.a = c_alphaLv2;
-    }
-    return texColor;
+    vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
+    vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
+    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
 }
 
 void main() {
     vec4 texColor = texture2D(u_texture, v_texCoords);
 
-    if (texColor.a < c_alphaLv0) {
-        // Outline effect apply on transparent areas
-        texColor = getOutlined();
-    } else if (texColor.a < c_alphaLv1) {
-        // No effect apply on these areas
-    } else if (texColor.a < c_alphaLv2) {
-        // Seaming apply on gap areas
-        texColor = getSeamed();
+    if (texColor.a < c_alphaHigh) {
+        if (texColor.a < c_alphaLow) {
+            // Outline effect
+            texColor = getOutlined();
+        }
+        // Box shadow effect
+        texColor = mix(getBoxShadow(), texColor, texColor.a);
     } else {
-        // No effect apply on other areas
+        // No effect
     }
 
     // Ultimate composing

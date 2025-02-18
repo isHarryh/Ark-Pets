@@ -1,17 +1,13 @@
 package cn.harryh.arkpets.kt.repository
 
-import cn.harryh.arkpets.Const.RepositoryConfig.ModelRepository
+import cn.harryh.arkpets.kt.database.buffer.CharInfoSqlBuffer
+import cn.harryh.arkpets.kt.database.buffer.ModelAssetSqlBuffer
+import cn.harryh.arkpets.kt.database.buffer.ModelTagSqlBuffer
+import cn.harryh.arkpets.kt.database.entity.CharInfo
 import cn.harryh.arkpets.kt.database.entity.Metadata
 import cn.harryh.arkpets.kt.database.entity.ModelAsset
-import cn.harryh.arkpets.kt.database.entity.CharInfo
 import cn.harryh.arkpets.kt.database.entity.ModelTag
-import cn.harryh.arkpets.kt.database.buffer.ModelAssetSqlBuffer
-import cn.harryh.arkpets.kt.database.buffer.CharInfoSqlBuffer
-import cn.harryh.arkpets.kt.database.buffer.ModelTagSqlBuffer
-import cn.harryh.arkpets.kt.extension.md5
-import cn.harryh.arkpets.kt.extension.metadata
-import cn.harryh.arkpets.kt.extension.charInfo
-import cn.harryh.arkpets.kt.extension.updateInfo
+import cn.harryh.arkpets.kt.extension.*
 import cn.harryh.arkpets.kt.json.ModelConfig
 import cn.harryh.arkpets.kt.json.ModelData
 import com.alibaba.fastjson2.JSON
@@ -20,17 +16,17 @@ import java.io.File
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-object ModelRepository : Repository() {
-    init {
-        repoName = ModelRepository.repoName
-        localPath = ModelRepository.repoPath
+object ModelRepository : Repository<ModelData>() {
+    object MetadataGroup {
+        const val DEFAULT: String = "default"
+        const val SORT_TAG: String = "sortTag"
     }
 
     private val metadataCache: MutableMap<String, Metadata> = mutableMapOf()
 
     private val charInfoCache: MutableMap<String, CharInfo> = mutableMapOf()
 
-    private lateinit var storageDirectory: Map<String, String>
+    private lateinit var cachedJsonData: ModelConfig
 
     private val pattern = Pattern.compile("build_((char_\\d+_\\w+)([\\s\\S#]+)*)?", Pattern.CASE_INSENSITIVE)
 
@@ -41,17 +37,22 @@ object ModelRepository : Repository() {
     private val modelTagRepository: ModelTagSqlBuffer = ModelTagSqlBuffer(database)
 
     override fun initRepository() {
-        val json = JSON.parseObject(File(ModelRepository.metadataFilePath).readText(), ModelConfig::class.java)
+        check(isConfigInitialized()) { "Config not initialized yet!" }
+        config.localPath.checkFolderExist(true)
+        cachedJsonData = JSON.parseObject(File(config.metadataFilePath).readText(), ModelConfig::class.java)
         database.metadata.map {
             metadataCache.put("${it.repo}.${it.group}.${it.key}", it)
         }
         database.charInfo.map {
             charInfoCache.put(it.assetId, it)
         }
-        storageDirectory = json.storageDirectory
-        checkMetadata(json)
-        checkModelData(json.data)
+        checkMetadata(cachedJsonData)
+        checkModelData(cachedJsonData.data)
         executePendingOperations()
+    }
+
+    override fun getAllEntities(): List<ModelData> {
+        return cachedJsonData.data.values.toList()
     }
 
     private fun executePendingOperations() {
@@ -64,31 +65,31 @@ object ModelRepository : Repository() {
     }
 
     private fun handleMetadata(group: String, key: String, value: String) {
-        metadataCache["${ModelRepository.repoName}.$group.$key"]?.let {
+        metadataCache["${config.repositoryName}.$group.$key"]?.let {
             if (it.value != value) {
                 it.value = value
                 updateMetaData(it)
             }
-            metadataCache.remove("${ModelRepository.repoName}.$group.$key")
+            metadataCache.remove("${config.repositoryName}.$group.$key")
             return
         }
         addMetaData(group, key, value)
     }
 
     private fun checkMetadata(data: ModelConfig) {
-        data.sortTags.forEach { handleMetadata(ModelRepository.MetadataGroup.sortTagGroup, it.key, it.value) }
+        data.sortTags.forEach { handleMetadata(MetadataGroup.SORT_TAG, it.key, it.value) }
         handleMetadata(
-            ModelRepository.MetadataGroup.defaultGroup,
+            MetadataGroup.DEFAULT,
             ModelConfig::gameDataVersionDescription.name,
             data.gameDataVersionDescription
         )
         handleMetadata(
-            ModelRepository.MetadataGroup.defaultGroup,
+            MetadataGroup.DEFAULT,
             ModelConfig::gameDataServerRegion.name,
             data.gameDataServerRegion
         )
         handleMetadata(
-            ModelRepository.MetadataGroup.defaultGroup,
+            MetadataGroup.DEFAULT,
             ModelConfig::arkPetsCompatibility.name,
             data.arkPetsCompatibility.joinToString(".")
         )
@@ -98,7 +99,7 @@ object ModelRepository : Repository() {
 
     private fun handleModel(key: String, data: ModelData) {
         val md5 = data.md5(key)
-        val storePath = "${storageDirectory.getOrDefault(data.type, ".")}/$key"
+        val storePath = "${cachedJsonData.storageDirectory.getOrDefault(data.type, ".")}/$key"
         matcher.reset(data.assetId)
         if (matcher.find() && matcher.groupCount() >= 2) {
             data.assetId = matcher.group(1)

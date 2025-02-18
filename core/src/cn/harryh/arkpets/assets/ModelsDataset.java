@@ -19,7 +19,7 @@ public class ModelsDataset {
     public final HashMap<String, String> sortTags;
     public final String gameDataVersionDescription;
     public final String gameDataServerRegion;
-    public final AssetItemGroup data;
+    public final ModelItemGroup data;
     public final Version arkPetsCompatibility;
 
     public ModelsDataset(JSONObject jsonObject) {
@@ -41,23 +41,23 @@ public class ModelsDataset {
 
         if (bean.data == null || bean.data.isEmpty())
             throw new DatasetKeyException("data");
-        data = new AssetItemGroup();
+        data = new ModelItemGroup();
         for (String key : bean.data.keySet()) {
             // Pre deserialization
-            AssetItem assetItem = bean.data.get(key).toJavaObject(AssetItem.class);
+            ModelItem modelItem = bean.data.get(key).toJavaObject(ModelItem.class);
             // Make up for `assetDir` field
-            if (assetItem == null || !storageDirectory.containsKey(assetItem.type))
+            if (modelItem == null || !storageDirectory.containsKey(modelItem.type))
                 throw new DatasetKeyException("type");
-            assetItem.key = key;
-            assetItem.assetDir = Path.of(storageDirectory.get(assetItem.type).toString(), key).toFile();
+            modelItem.key = key;
+            modelItem.assetDir = Path.of(storageDirectory.get(modelItem.type).toString(), key).toFile();
             // Compatible to lower version dataset
-            if (assetItem.assetList == null && assetItem.assetId != null && assetItem.checksum != null) {
+            if (modelItem.assetList == null && modelItem.assetId != null && modelItem.checksum != null) {
                 HashMap<String, Object> defaultFileMap = new HashMap<>();
-                for (String fileType : AssetItem.extensions)
-                    defaultFileMap.put(fileType, assetItem.assetId + fileType);
-                assetItem.assetList = new JSONObject(defaultFileMap);
+                for (String fileType : ModelItem.extensions)
+                    defaultFileMap.put(fileType, modelItem.assetId + fileType);
+                modelItem.assetList = new JSONObject(defaultFileMap);
             }
-            data.add(assetItem);
+            data.add(modelItem);
         }
         data.sort();
 

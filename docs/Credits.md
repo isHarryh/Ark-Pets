@@ -48,6 +48,9 @@ ArkPets附加说明文档
 <a href="https://esotericsoftware.com">
     <img alt="Spine" src="https://img.shields.io/badge/spine-%23FF4400?style=for-the-badge&logo=spine&logoColor=white">
 </a>
+<a href="https://www.jetbrains.com">
+    <img alt="JetBrains" src="https://img.shields.io/badge/jetbrains-%238473FF?style=for-the-badge&logo=jetbrains&logoColor=white">
+</a>
 <a href="https://iconmonstr.com">
     <img alt="IconMonstr" src="https://img.shields.io/badge/iconmonstr-%23000000?style=for-the-badge&logo=iconmonstr&logoColor=white">
 </a>
@@ -64,3 +67,6 @@ ArkPets附加说明文档
 |    [JNA](https://github.com/java-native-access/jna)     | Java Native Access 接口      |
 | [Alibaba FastJSON](https://github.com/alibaba/fastjson) | JSON 工具                    |
 |    [Apache log4j](https://logging.apache.org/log4j)     | 日志工具                       |
+|   [TinyPinyin](https://github.com/promeG/TinyPinyin)    | 汉语拼音转换工具                   |
+|      [Opencc4j](https://github.com/houbb/opencc4j)      | 中文简繁体转换工具                  |
+|   [Dbus-java](https://github.com/hypfvieh/dbus-java)    | D-Bus 通信接口                 |

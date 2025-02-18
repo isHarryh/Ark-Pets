@@ -55,7 +55,7 @@ public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
                 versionDescription = "unknown";
                 Logger.error("Checker", "Unable to parse remote model repo version, details see below.", e);
                 GuiPrefabs.Dialogs.createCommonDialog(parent,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "检查模型更新",
                         "无法判断模型仓库版本。",
                         "因发生错误，无法解析远程模型仓库的版本。",
@@ -68,7 +68,7 @@ public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
             if (IOUtils.FileUtil.getMD5(new File(PathConfig.fileModelsDataPath)).equals(IOUtils.FileUtil.getMD5(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath)))) {
                 Logger.info("Checker", "Model repo version check finished (up-to-dated)");
                 GuiPrefabs.Dialogs.createCommonDialog(parent,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_SUCCESS_ALT, GuiPrefabs.Colors.COLOR_SUCCESS),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
                         "检查模型更新",
                         "无需进行模型库更新。",
                         "本地模型库的版本与远程模型库的一致。",
@@ -85,14 +85,14 @@ public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
                     oldVersionDescription = "unknown";
                     Logger.error("Checker", "Unable to parse local model repo version, details see below.", e);
                     GuiPrefabs.Dialogs.createCommonDialog(parent,
-                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING),
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                             "检查模型更新",
                             "无法判断模型库版本。",
                             "因发生错误，无法解析本地模型库的版本。",
                             null).show();
                 }
                 GuiPrefabs.Dialogs.createCommonDialog(parent,
-                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_INFO_ALT, GuiPrefabs.Colors.COLOR_INFO),
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
                         "检查模型更新",
                         "模型库似乎有更新！",
                         "您可以 [重新下载] 模型，以更新模型库版本。",

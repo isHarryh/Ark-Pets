@@ -18,7 +18,6 @@ gradle-*-bin/
 out/
 tmp*/
 temp*/
-test*/
 
 # Exclude runtime files
 /ArkPetsConfig.json

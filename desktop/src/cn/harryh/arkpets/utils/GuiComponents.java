@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -71,10 +72,7 @@ public class GuiComponents {
 
         public final SliderSetup<N> setDisplay(Labeled display, String format, String tooltipText) {
             this.display = display;
-            // Initialize the tooltip for the display node.
-            Tooltip tooltip = new Tooltip(tooltipText);
-            tooltip.setStyle(GuiPrefabs.tooltipStyle);
-            display.setTooltip(tooltip);
+            GuiPrefabs.addTooltip(display, tooltipText);
             // Add the listener to update the display's text.
             if (listenerForDisplay != null)
                 proxy.removeListener(listenerForDisplay);
@@ -129,7 +127,7 @@ public class GuiComponents {
      * @param <N> The value type of the items.
      */
     @SuppressWarnings("UnusedReturnValue")
-    public static class ComboBoxSetup<N extends Number> {
+    public static class ComboBoxSetup<N extends Serializable> {
         protected final ComboBox<NamedItem<N>> comboBox;
 
         public ComboBoxSetup(ComboBox<NamedItem<N>> comboBox) {
@@ -165,8 +163,8 @@ public class GuiComponents {
      * which is called "the relative position".
      */
     public static class DotPickerSetup {
-        public static final Color themeColor = Color.valueOf(GuiPrefabs.Colors.COLOR_INFO);
-        public static final Color alarmColor = Color.valueOf(GuiPrefabs.Colors.COLOR_WARNING);
+        public static final Color themeColor = GuiPrefabs.COLOR_INFO;
+        public static final Color alarmColor = GuiPrefabs.COLOR_WARNING;
         public static final double metaLengthFactor = 0.025;
         public static final double referLineThreshold = 0.025;
 
@@ -299,13 +297,13 @@ public class GuiComponents {
     }
 
 
-    public record NamedItem<N extends Number>(String name, N value) {
+    public record NamedItem<N extends Serializable>(String name, N value) {
         @Override
         public String toString() {
             return name;
         }
 
-        public static <N extends Number> NamedItem<N> match(List<NamedItem<N>> candidateOptions, N targetValue) {
+        public static <N extends Serializable> NamedItem<N> match(List<NamedItem<N>> candidateOptions, N targetValue) {
             for (NamedItem<N> i : candidateOptions)
                 if (targetValue.equals(i.value))
                     return i;
@@ -357,7 +355,7 @@ public class GuiComponents {
             }
         }
 
-        abstract protected String getColorString();
+        abstract protected Color getColor();
 
         abstract protected String getIconSVGPath();
 
@@ -379,7 +377,7 @@ public class GuiComponents {
 
         protected Pane getNoticeBar(double width, double height) {
             // Colors
-            Color color = Color.valueOf(getColorString());
+            Color color = getColor();
             BackgroundFill bgFill = new BackgroundFill(
                     color.deriveColor(0, 0.5, 1.5, 0.25),
                     new CornerRadii(borderRadius),
@@ -472,7 +470,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_DANGER, GuiPrefabs.Colors.COLOR_DANGER);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER);
         }
     }
 
@@ -489,7 +487,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING_ALT, GuiPrefabs.Colors.COLOR_WARNING);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING);
         }
     }
 
@@ -514,7 +512,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_HELP_ALT, GuiPrefabs.Colors.COLOR_INFO);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP_ALT, GuiPrefabs.COLOR_INFO);
         }
     }
 
@@ -565,7 +563,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_DANGER, GuiPrefabs.Colors.COLOR_DANGER);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER);
         }
     }
 
@@ -590,7 +588,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_WARNING, GuiPrefabs.Colors.COLOR_WARNING);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING, GuiPrefabs.COLOR_WARNING);
         }
     }
 
@@ -602,7 +600,7 @@ public class GuiComponents {
 
         @Override
         protected SVGPath getIcon() {
-            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.ICON_HELP, GuiPrefabs.Colors.COLOR_INFO);
+            return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP, GuiPrefabs.COLOR_INFO);
         }
     }
 }

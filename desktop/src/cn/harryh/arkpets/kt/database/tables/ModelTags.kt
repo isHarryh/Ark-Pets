@@ -7,6 +7,6 @@ import org.ktorm.schema.varchar
 
 object ModelTags : Table<ModelTag>("model_tags") {
     val id = int("id").bindTo { it.id }.primaryKey()
-    val modelId = int("model_id").references(CharInfos) { it.charInfo }
+    val modelId = varchar("model_id").references(CharInfos) { it.charInfo }
     val tag = varchar("tag").bindTo { it.tag }
 }

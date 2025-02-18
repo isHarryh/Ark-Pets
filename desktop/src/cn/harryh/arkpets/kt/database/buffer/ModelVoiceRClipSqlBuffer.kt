@@ -12,7 +12,7 @@ class ModelVoiceRClipSqlBuffer(database: Database) : SqlBuffer<ModelVoiceClip>(d
         database.batchInsert(ModelVoiceClips) {
             pendingInserts.forEach { info ->
                 item {
-                    set(it.modelVoiceId, info.modelVoice.id)
+                    set(it.modelVoiceId, info.modelVoice.charInfo.assetId)
                     set(it.duration, info.duration)
                     set(it.start, info.start)
                 }
@@ -24,7 +24,7 @@ class ModelVoiceRClipSqlBuffer(database: Database) : SqlBuffer<ModelVoiceClip>(d
         database.batchUpdate(ModelVoiceClips) {
             pendingUpdates.forEach { info ->
                 item {
-                    set(it.modelVoiceId, info.modelVoice.id)
+                    set(it.modelVoiceId, info.modelVoice.charInfo.assetId)
                     set(it.duration, info.duration)
                     set(it.start, info.start)
                     where { it.id eq info.id }

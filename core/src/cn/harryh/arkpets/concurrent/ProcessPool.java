@@ -6,6 +6,7 @@ package cn.harryh.arkpets.concurrent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 
@@ -67,6 +68,8 @@ public final class ProcessPool implements Executor {
                 command.addAll(args);
             // Process execution
             ProcessBuilder builder = new ProcessBuilder(command);
+            Map<String, String> env = builder.environment();
+            env.remove("GDK_BACKEND");
             Process process = builder.inheritIO().start();
             int exitValue = process.waitFor();
             return new ProcessResult(exitValue, process.pid());

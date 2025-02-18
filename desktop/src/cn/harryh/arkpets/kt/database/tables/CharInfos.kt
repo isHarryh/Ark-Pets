@@ -15,5 +15,6 @@ object CharInfos : Table<CharInfo>("char_info") {
     val appellation = varchar("appellation").bindTo { it.appellation }
     val skinGroupId = varchar("skin_group_id").bindTo { it.skinGroupId }
     val skinGroupName = varchar("skin_group_name").bindTo { it.skinGroupName }
+    val syllable = varchar("syllable").bindTo { it.syllable }
     val md5 = varchar("md5").bindTo { it.md5 }
 }

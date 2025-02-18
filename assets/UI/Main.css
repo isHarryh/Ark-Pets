@@ -388,8 +388,6 @@ JFXSlider {
     -fx-border-color: -theme-color;
 }
 
-.config-field {}
-
 .config-field JFXComboBox {
     -fx-font-size: 12px;
     -fx-text-fill: -text-normal;
@@ -477,7 +475,7 @@ ProgressBar:indeterminate>.bar {
 
 #Loading-failure-tip,
 #Loading-waiting-tip {
-    -fx-background-color: #F4F4F4D0;
+    -fx-background-color: #F4F4F4;
 }
 
 #Loading-failure-tip-text {
@@ -491,6 +489,10 @@ ProgressBar:indeterminate>.bar {
 #Loading-waiting-tip>* {
     -fx-fill: derive(-theme-color, 20%);
     -fx-font-weight: bold;
+}
+
+#Loading-empty-tip>* {
+    -fx-fill: dimgray;
 }
 
 #Title-bar {
@@ -519,6 +521,15 @@ ProgressBar:indeterminate>.bar {
 #Title-minimize-btn:hover,
 #Title-minimize-btn:focused {
     -fx-background-color: #305890;
+}
+
+#Title-minimize-btn-mac,
+#Title-close-btn-mac {
+    -fx-fill: inherit;
+}
+
+#Title-close-btn-mac {
+    -fx-background-radius: 8px 0 0 0;
 }
 
 #Title-close-btn:hover,

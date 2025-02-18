@@ -8,7 +8,7 @@ import org.ktorm.schema.varchar
 
 object ModelAssets : Table<ModelAsset>("model_assets") {
     val id = int("id").bindTo { it.id }.primaryKey()
-    val modelId = int("model_id").references(CharInfos) { it.charInfo }
+    val modelId = varchar("model_id").references(CharInfos) { it.charInfo }
     val type = varchar("type").bindTo { it.type }
     val filename = varchar("filename").bindTo { it.filename }
     val md5 = varchar("md5").bindTo { it.md5 }

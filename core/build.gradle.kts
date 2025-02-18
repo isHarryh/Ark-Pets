@@ -40,6 +40,10 @@ dependencies {
     api("com.alibaba:fastjson:2.0.39")
     // Log4j
     api("apache-log4j:log4j:1.2.15")
+    // TiniPinyin
+    implementation("com.github.promeg:tinypinyin:2.0.3")
+    // OpenCC4j
+    implementation("com.github.houbb:opencc4j:1.8.1")
     // dbus-java
     api("com.github.hypfvieh:dbus-java-core:$dbusVersion")
     api("com.github.hypfvieh:dbus-java-transport-native-unixsocket:$dbusVersion")

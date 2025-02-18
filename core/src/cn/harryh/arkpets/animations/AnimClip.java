@@ -27,24 +27,28 @@ public class AnimClip {
     /** An animation type represents a series of identical animation.
      */
     public enum AnimType {
-        NONE(""),
-        DEFAULT("^Default.?$"),
-        IDLE("^((Idle)|(Relax)).?$"),
-        MOVE("^Move.?$"),
-        SIT("^Sit$"),
-        SLEEP("^Sleep$"),
-        SPECIAL("^Special$"),
-        INTERACT("^Interact$"),
-        ATTACK("^((Attack)|(Combat)).?$"),
-        SKILL("^Skill.?$"),
-        START("^Start.?$"),
-        DIE("^Die.?$"),
-        REVIVE("^((Revive)|(Reborn)).?$");
+        NONE("", 5),
+        DEFAULT("^Default.?$", 5),
+        IDLE("^((Idle)|(Relax)).?$", 5),
+        MOVE("^Move.?$", 5),
+        SIT("^Sit$", 50),
+        SLEEP("^Sleep$", 25),
+        SPECIAL("^Special$", 5),
+        INTERACT("^Interact$", 5),
+        ATTACK("^((Attack)|(Combat)).?$", 5),
+        SKILL("^Skill.?$", 5),
+        START("^Start.?$", 5),
+        DIE("^Die.?$", 5),
+        REVIVE("^((Revive)|(Reborn)).?$", 5);
 
+        /** The regex pattern of this type of animation, which is case-insensitive. */
         public final Pattern pattern;
+        /** The y-axis offset that should be applied on this type of animation when rendering. */
+        public final int offsetY;
 
-        AnimType(String regex) {
-            pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        AnimType(String pattern, int offsetY) {
+            this.pattern = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE);
+            this.offsetY = offsetY;
         }
 
         public Matcher matcher(String input) {

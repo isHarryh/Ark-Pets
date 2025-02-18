@@ -3,11 +3,12 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.kt.repository.ModelRepository;
-import cn.harryh.arkpets.kt.repository.VoiceRepository;
+import cn.harryh.arkpets.controllers.Titlebar;
+import cn.harryh.arkpets.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
+import org.lwjgl.glfw.GLFW;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
@@ -20,7 +21,7 @@ import static cn.harryh.arkpets.Const.appVersion;
  * @see ArkHomeFX
  */
 public class DesktopLauncher {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
@@ -61,17 +62,22 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
-
-        if (Objects.equals(System.getenv("VCS_DEBUG"), "TRUE")) {
-            Logger.setLevel(Logger.DEBUG);
-            Long startTime = System.currentTimeMillis();
-            ModelRepository.INSTANCE.initRepository();
-            VoiceRepository.INSTANCE.initRepository();
-            Long endTime = System.currentTimeMillis();
-            Logger.info("System", "VCS_DEBUG: " + (endTime - startTime) + " ms");
-            return;
-        }
-
+        // Change ui style
+        new ArgPending("--ui-style", args) {
+            @Override
+            protected void process(String command, String addition) {
+                Titlebar.forceUiStyle = addition.toLowerCase();
+            }
+        };
+        // Remove NVIDIA settings on uninstall
+        new ArgPending("--remove-nvidia", args) {
+            @Override
+            protected void process(String command, String addition) {
+                new WinGraphicsEnvCheckTask().removeNvidiaSettings();
+            }
+        };
+        // Disable libdecor to avoid glfw and javafx problem
+        GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, args);
         Logger.info("System", "Exited from DesktopLauncher successfully");
