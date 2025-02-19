@@ -1,7 +1,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
-import cn.harryh.arkpets.envchecker.WinGraphicsEnvCheckTask;
+import cn.harryh.arkpets.guitasks.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;

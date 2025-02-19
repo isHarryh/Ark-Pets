@@ -1,12 +1,11 @@
 package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.MutterInterface;
+import cn.harryh.arkpets.natives.MutterPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
-import org.freedesktop.dbus.annotations.DBusInterfaceName;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
 import org.freedesktop.dbus.types.Variant;
 
@@ -106,7 +105,7 @@ public class MutterHWndCtrl extends HWndCtrl {
     }
 
     private static void checkAndEnablePlugin() throws DBusException {
-        PluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", PluginInterface.class);
+        MutterPluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", MutterPluginInterface.class);
         Map<String, Variant<?>> ext = pi.GetExtensionInfo("arkpets-integration@harryh.cn");
         if (ext.isEmpty()) throw new RuntimeException("GNOME Integration plugin not found.");
         Variant<Boolean> enable = (Variant<Boolean>) ext.get("enabled");
@@ -155,10 +154,4 @@ public class MutterHWndCtrl extends HWndCtrl {
         return hWnd.hashCode();
     }
 
-    @DBusInterfaceName("org.gnome.Shell.Extensions")
-    private interface PluginInterface extends DBusInterface {
-        boolean EnableExtension(String uuid);
-
-        Map<String, Variant<?>> GetExtensionInfo(String uuid);
-    }
 }

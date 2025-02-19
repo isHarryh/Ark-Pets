@@ -11,7 +11,7 @@ import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.envchecker.EnvCheckTask;
+import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;

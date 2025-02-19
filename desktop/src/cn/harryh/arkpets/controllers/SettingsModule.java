@@ -11,7 +11,7 @@ import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.startup.StartupConfig;
 import cn.harryh.arkpets.platform.WindowSystem;
-import cn.harryh.arkpets.envchecker.EnvCheckTask;
+import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.badlogic.gdx.graphics.Color;

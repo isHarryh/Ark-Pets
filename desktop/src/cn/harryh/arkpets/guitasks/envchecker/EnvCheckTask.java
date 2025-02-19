@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.envchecker;
+package cn.harryh.arkpets.guitasks.envchecker;
 
 import com.sun.jna.Platform;
 
