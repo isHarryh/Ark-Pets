@@ -17,6 +17,9 @@ public class X11HWndCtrl extends HWndCtrl {
     private static final X11Ext x11 = X11Ext.INSTANCE;
     protected final X11.Window hWnd;
 
+    private boolean shapeAvailable; // todo check
+    private boolean transparentEnable;
+
     public static final int MAX_PROPERTY_VALUE_LEN = 4096;
     public static final int STATE_REMOVE = 0;
     public static final int STATE_ADD = 1;
@@ -149,7 +152,16 @@ public class X11HWndCtrl extends HWndCtrl {
 
     @Override
     public void setTransparent(boolean transparent) {
-        // unnecessary in X11.
+        if (transparentEnable != transparent) {
+            if (transparent) {
+                Pointer reg = x11.XCreateRegion();
+                XextExt.INSTANCE.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
+                x11.XDestroyRegion(reg);
+            } else {
+                XextExt.INSTANCE.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
+            }
+            transparentEnable = transparent;
+        }
     }
 
     @Override
@@ -460,5 +472,15 @@ public class X11HWndCtrl extends HWndCtrl {
         X11Ext INSTANCE = Native.load("X11", X11Ext.class);
 
         void XMoveResizeWindow(Display display, Window w, int x, int y, int width, int height);
+
+        Pointer XCreateRegion();
+
+        int XDestroyRegion(Pointer r);
+    }
+
+    public interface XextExt extends X11.Xext {
+        XextExt INSTANCE = Native.load("Xext", XextExt.class);
+
+        void XShapeCombineRegion(X11.Display dpy, X11.Window dest, int destKind, int xOff, int yOff, Pointer r, int op);
     }
 }
