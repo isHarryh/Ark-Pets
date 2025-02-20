@@ -1,6 +1,6 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.natives.CoreGraphicsHelper;
+import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
 import com.sun.jna.*;
 import com.sun.jna.platform.mac.CoreFoundation;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.natives.CoreGraphicsHelper.*;
+import static cn.harryh.arkpets.natives.CoreGraphics.*;
 
 
 public class QuartzHWndCtrl extends HWndCtrl {
@@ -138,18 +138,17 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static void init() {
-        CFDictionaryRef server = CGInterface.INSTANCE.CGSessionCopyCurrentDictionary();
+        CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
         if (server == null) {
             throw new RuntimeException("No window server connection.");
         } else {
             CoreFoundation.INSTANCE.CFRelease(server);
         }
-        CoreGraphicsHelper.initCG();
         ObjCHelper.init();
     }
 
     protected static void free() {
-        CoreGraphicsHelper.freeCG();
+
     }
 
     protected static List<QuartzHWndCtrl> getWindowList(boolean onlyVisible) {
@@ -161,7 +160,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
         } else {
             opt = kCGWindowListExcludeDesktopElements;
         }
-        CFArrayRef windows = CGInterface.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
+        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
         int numWindows = windows.getCount();
         for (int i = 0; i < numWindows; i++) {
             Pointer result = windows.getValueAtIndex(i);
@@ -176,7 +175,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static QuartzHWndCtrl find(String className, String windowText) {
-        CFArrayRef windows = CGInterface.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
+        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
         int numWindows = windows.getCount();
         QuartzHWndCtrl win = null;
         for (int i = 0; i < numWindows; i++) {
@@ -263,7 +262,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private static WindowRect getWindowRect(Pointer value) {
         if (value != null) {
             CGRect.ByReference rect = new CGRect.ByReference();
-            boolean success = CGInterface.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
+            boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
             if (success) {
                 return new WindowRect(
                         (int) Math.round(rect.origin.y),
@@ -284,7 +283,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
                     ObjCHelper.sel("frame")
             });
         } else {
-            CoreGraphicsHelper.CGRect.ByReference rect = new CoreGraphicsHelper.CGRect.ByReference();
+            CGRect.ByReference rect = new CGRect.ByReference();
             ObjCHelper.msgSend_stret.invokeVoid(new Object[]{
                     rect,
                     nsScreen,
