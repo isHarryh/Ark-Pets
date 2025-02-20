@@ -1,5 +1,7 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.natives.X11Extension;
+import cn.harryh.arkpets.natives.XextExtension;
 import cn.harryh.arkpets.utils.Logger;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
@@ -12,9 +14,10 @@ import java.util.*;
 
 
 public class X11HWndCtrl extends HWndCtrl {
-    private static final HashMap<String, X11Ext.Atom> atomsHash = new HashMap<>();
+    private static final HashMap<String, X11Extension.Atom> atomsHash = new HashMap<>();
     private static X11.Display display;
-    private static final X11Ext x11 = X11Ext.INSTANCE;
+    private static final X11Extension x11 = X11Extension.INSTANCE;
+    private static final XextExtension xext = XextExtension.INSTANCE;
     protected final X11.Window hWnd;
 
     private boolean shapeAvailable; // todo check
@@ -24,7 +27,7 @@ public class X11HWndCtrl extends HWndCtrl {
     public static final int STATE_REMOVE = 0;
     public static final int STATE_ADD = 1;
 
-    public X11HWndCtrl(X11Ext.Window hWnd) {
+    public X11HWndCtrl(X11Extension.Window hWnd) {
         super(winText(hWnd), getWindowRect(hWnd));
         this.hWnd = hWnd;
     }
@@ -40,8 +43,8 @@ public class X11HWndCtrl extends HWndCtrl {
     }
 
     public static HWndCtrl find(String className, String windowName) {
-        X11Ext.Window[] wids = getWindows();
-        for (X11Ext.Window win : wids) {
+        X11Extension.Window[] wids = getWindows();
+        for (X11Extension.Window win : wids) {
             String wtitle = winText(win);
             String wclass = getUtf8Property(win, X11.XA_STRING, X11.XA_WM_CLASS);
             if (className == null) {
@@ -59,7 +62,7 @@ public class X11HWndCtrl extends HWndCtrl {
 
     public static List<X11HWndCtrl> getWindowList(boolean onlyVisible) {
         ArrayList<X11HWndCtrl> windowList = new ArrayList<>();
-        X11.Window[] wins = getWindows();
+        X11Extension.Window[] wins = getWindows();
         for (X11.Window win : wins) {
             if (!onlyVisible || visible(win)) {
                 windowList.add(new X11HWndCtrl(win));
@@ -79,7 +82,7 @@ public class X11HWndCtrl extends HWndCtrl {
         Logger.info("System", "Disconnected from X display");
     }
 
-    protected static WindowRect getWindowRect(X11Ext.Window hWnd) {
+    protected static WindowRect getWindowRect(X11Extension.Window hWnd) {
         X11.WindowByReference junkRoot = new X11.WindowByReference();
         IntByReference junkX = new IntByReference();
         IntByReference junkY = new IntByReference();
@@ -112,8 +115,8 @@ public class X11HWndCtrl extends HWndCtrl {
 
     @Override
     public boolean isForeground() {
-        X11Ext.Window rootWindow = x11.XDefaultRootWindow(display);
-        long win = getIntProperty(rootWindow, X11Ext.XA_WINDOW, getAtom("_NET_ACTIVE_WINDOW"));
+        X11Extension.Window rootWindow = x11.XDefaultRootWindow(display);
+        long win = getIntProperty(rootWindow, X11Extension.XA_WINDOW, getAtom("_NET_ACTIVE_WINDOW"));
         return hWnd.longValue() == win;
     }
 
@@ -155,10 +158,10 @@ public class X11HWndCtrl extends HWndCtrl {
         if (transparentEnable != transparent) {
             if (transparent) {
                 Pointer reg = x11.XCreateRegion();
-                XextExt.INSTANCE.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
+                xext.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
                 x11.XDestroyRegion(reg);
             } else {
-                XextExt.INSTANCE.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
+                xext.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
             }
             transparentEnable = transparent;
         }
@@ -283,11 +286,11 @@ public class X11HWndCtrl extends HWndCtrl {
         return ret;
     }
 
-    private static X11Ext.Window[] getWindows() {
-        X11Ext.Window rootWindow = x11.XDefaultRootWindow(display);
-        byte[] bytes = getProperty(rootWindow, X11Ext.XA_WINDOW, getAtom("_NET_CLIENT_LIST_STACKING"));
+    private static X11Extension.Window[] getWindows() {
+        X11Extension.Window rootWindow = x11.XDefaultRootWindow(display);
+        byte[] bytes = getProperty(rootWindow, X11Extension.XA_WINDOW, getAtom("_NET_CLIENT_LIST_STACKING"));
 
-        X11Ext.Window[] windowList = new X11Ext.Window[bytes.length / X11.Window.SIZE];
+        X11Extension.Window[] windowList = new X11Extension.Window[bytes.length / X11.Window.SIZE];
 
         for (int i = 0; i < windowList.length; i++) {
             windowList[i] = new X11.Window(bytesToInt(bytes, X11.XID.SIZE * i));
@@ -322,7 +325,7 @@ public class X11HWndCtrl extends HWndCtrl {
         return bytes;
     }
 
-    private static String winText(X11Ext.Window hWnd) {
+    private static String winText(X11Extension.Window hWnd) {
         String title;
         title = getUtf8Property(hWnd, getAtom("UTF8_STRING"), getAtom("_NET_WM_NAME"));
         return title;
@@ -466,21 +469,5 @@ public class X11HWndCtrl extends HWndCtrl {
         e.setTypedValue(event);
 
         x11.XSendEvent(display, root, 0, mask, e);
-    }
-
-    public interface X11Ext extends X11 {
-        X11Ext INSTANCE = Native.load("X11", X11Ext.class);
-
-        void XMoveResizeWindow(Display display, Window w, int x, int y, int width, int height);
-
-        Pointer XCreateRegion();
-
-        int XDestroyRegion(Pointer r);
-    }
-
-    public interface XextExt extends X11.Xext {
-        XextExt INSTANCE = Native.load("Xext", XextExt.class);
-
-        void XShapeCombineRegion(X11.Display dpy, X11.Window dest, int destKind, int xOff, int yOff, Pointer r, int op);
     }
 }
