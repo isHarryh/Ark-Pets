@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.MutterInterface;
 import cn.harryh.arkpets.natives.MutterPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
@@ -106,12 +107,12 @@ public class MutterHWndCtrl extends HWndCtrl {
 
     private static void checkAndEnablePlugin() throws DBusException {
         MutterPluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", MutterPluginInterface.class);
-        Map<String, Variant<?>> ext = pi.GetExtensionInfo("arkpets-integration@harryh.cn");
+        Map<String, Variant<?>> ext = pi.GetExtensionInfo(Const.gnomePluginName);
         if (ext.isEmpty()) throw new RuntimeException("GNOME Integration plugin not found.");
         Boolean enable = (Boolean) ext.get("enabled").getValue();
         if (!enable) {
             Logger.info("System","Enabling GNOME Integration plugin");
-            boolean result = pi.EnableExtension("arkpets-integration@harryh.cn");
+            boolean result = pi.EnableExtension(Const.gnomePluginName);
             if (!result) throw new RuntimeException("Failed to enable GNOME integration plugin.");
             try {
                 Thread.sleep(500); // wait for loaded

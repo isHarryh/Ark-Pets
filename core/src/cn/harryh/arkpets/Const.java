@@ -78,6 +78,12 @@ public final class Const {
     public static final Pattern hexColorRegex   = Pattern.compile(
             "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$");
 
+    // Plugin require version
+    public static final int gnomePluginVersion    = 2;
+    public static final int kdePluginVersion      = 2;
+    public static final String gnomePluginName    = "arkpets-integration@harryh.cn";
+    public static final String kdePluginName      = "ArkPetsIntegration";
+
     /** Paths presets definition class.
      */
     public static class PathConfig {
