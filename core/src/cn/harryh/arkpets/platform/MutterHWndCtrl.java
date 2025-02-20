@@ -108,10 +108,11 @@ public class MutterHWndCtrl extends HWndCtrl {
         MutterPluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", MutterPluginInterface.class);
         Map<String, Variant<?>> ext = pi.GetExtensionInfo("arkpets-integration@harryh.cn");
         if (ext.isEmpty()) throw new RuntimeException("GNOME Integration plugin not found.");
-        Variant<Boolean> enable = (Variant<Boolean>) ext.get("enabled");
-        if (!enable.getValue()) {
+        Boolean enable = (Boolean) ext.get("enabled").getValue();
+        if (!enable) {
             Logger.info("System","Enabling GNOME Integration plugin");
-            pi.EnableExtension("arkpets-integration@harryh.cn");
+            boolean result = pi.EnableExtension("arkpets-integration@harryh.cn");
+            if (!result) throw new RuntimeException("Failed to enable GNOME integration plugin.");
             try {
                 Thread.sleep(500); // wait for loaded
             } catch (InterruptedException ignored) {
