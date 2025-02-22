@@ -16,7 +16,7 @@
             fx:controller="cn.harryh.arkpets.controllers.Titlebar"
             id="Title-bar" maxHeight="-Infinity" minHeight="-Infinity"
             onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" prefHeight="24.0" prefWidth="600.0"
-            styleClass="shadowed" stylesheets="@Main.css">
+            stylesheets="@Main.css">
     <HBox fx:id="title" prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="3.0">
         <ImageView cache="true" fitHeight="18.0" fitWidth="18.0" pickOnBounds="true">
             <HBox.margin>
