@@ -77,7 +77,12 @@ public class MemberTrayImpl extends MemberTray {
     }
 
     private TrayIcon getTrayIcon(Image image) {
-        icon = new TrayIcon(image, name);
+        try {
+            icon = new TrayIcon(image, name);
+        } catch (Exception e) {
+            Logger.error("MemberTray", "Unable to apply MemberTray icon, details see below.", e);
+            return icon;
+        }
         icon.setImageAutoSize(true);
         icon.addMouseListener(new MouseAdapter() {
             @Override
@@ -167,7 +172,7 @@ public class MemberTrayImpl extends MemberTray {
     public void onConnected() {
         // If integration was succeeded, remove the ISOLATED tray icon.
         Logger.info("MemberTray", "Integrated tray service connected");
-        SystemTray.getSystemTray().remove(icon);
+        if (icon != null) SystemTray.getSystemTray().remove(icon);
         client.sendRequest(SocketData.ofLogin(uuid, name));
         if (arkPets.canChangeStage())
             sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
@@ -189,7 +194,7 @@ public class MemberTrayImpl extends MemberTray {
         try {
             SystemTray.getSystemTray().add(icon);
             Logger.info("MemberTray", "Isolated tray icon applied");
-        } catch (AWTException e) {
+        } catch (Exception e) {
             Logger.error("MemberTray", "Unable to apply isolated tray icon, details see below", e);
         }
     }
