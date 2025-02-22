@@ -1,6 +1,8 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.KWinInterface;
+import cn.harryh.arkpets.natives.KWinPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
@@ -84,10 +86,27 @@ public class KWinHWndCtrl extends HWndCtrl {
         try {
             dBusConnection = DBusConnectionBuilder.forSessionBus().build();
             Logger.info("System", "Connected to DBus");
+            checkAndEnablePlugin();
             dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinInterface.class);
             Logger.info("System", "KDE Integration plugin version " + dBusInterface.Version());
         } catch (DBusException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void checkAndEnablePlugin() throws DBusException {
+        KWinPluginInterface pi = dBusConnection.getRemoteObject("org.kde.KWin", "/Plugins", KWinPluginInterface.class);
+        String pluginName = Const.kdePluginName + Const.kdePluginVersion;
+        List<String> available = pi.getAvailablePlugins();
+        List<String> enabled = pi.getLoadedPlugins();
+        if (!available.contains(pluginName)) throw new RuntimeException("KDE Integration plugin not found.");
+        if (!enabled.contains(pluginName)) {
+            boolean result = pi.LoadPlugin(pluginName);
+            if (!result) throw new RuntimeException("Failed to enable KDE integration plugin.");
+            try {
+                Thread.sleep(500); // wait for loaded
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
