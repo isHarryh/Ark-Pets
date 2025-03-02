@@ -49,6 +49,8 @@ public abstract class EnvCheckTask {
                     list.add(new GNOMEPluginCheckTask());
                 } else if (type.equals("wayland") && desktop.equals("KDE")) {
                     list.add(new KWinPluginCheckTask());
+                } else {
+                    list.add(new X11CompositorCheckTask());
                 }
             }
         }

@@ -13,4 +13,6 @@ public interface X11Extension extends X11 {
     Pointer XCreateRegion();
 
     int XDestroyRegion(Pointer r);
+
+    Window XGetSelectionOwner(Display dis, Atom a);
 }
