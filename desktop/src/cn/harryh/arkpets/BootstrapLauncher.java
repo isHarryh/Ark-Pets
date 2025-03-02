@@ -84,6 +84,8 @@ public class BootstrapLauncher {
      */
     private static void startDesktop() {
         Logger.info("System", "Entering the app of DesktopLauncher");
+        // 144 FPS
+        System.getProperties().putIfAbsent("javafx.animation.pulse", "144");
         // Change ui style
         new ArgPending("--ui-style", ArgPending.argCache) {
             @Override
