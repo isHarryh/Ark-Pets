@@ -2,7 +2,8 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
-import com.sun.jna.*;
+import com.sun.jna.Platform;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.mac.CoreFoundation;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFDictionaryRef;
@@ -19,15 +20,18 @@ import static cn.harryh.arkpets.natives.CoreGraphics.*;
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
 
-    private boolean trans = true;
     private static final boolean isArm = Platform.isARM();
+    private final IgnoreMouseCallback igcb = new IgnoreMouseCallback();
+    private final FrameCallback fcb = new FrameCallback();
 
-    private long windowID;
+    private final long windowID;
     private Pointer nsWin;
     private Pointer nsScreen;
-    private long layer;
+    private final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private byte nsWinUnavailable;
+    private boolean trans;
+    private final CGRect.ByValue newRect = new CGRect.ByValue();
 
     public QuartzHWndCtrl(CFDictionaryRef dict) {
         super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict.getValue(kCGWindowBounds)));
@@ -82,17 +86,17 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
         getNSWindow(windowID);
         CGRect rect = getScreenSize();
-        CGRect.ByValue newRect = new CGRect.ByValue();
         newRect.origin.x = x;
         newRect.origin.y = rect.size.height - y - h;
         newRect.size.width = w;
         newRect.size.height = h;
-        ObjCHelper.runOnAppKit(() -> ObjCHelper.msgSend.invokeVoid(new Object[]{
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
-                ObjCHelper.sel("setFrame:display:animate:"),
-                newRect,
-                1, 0
-        }));
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitFrame"),
+                null,
+                1
+        });
     }
 
     @Override
@@ -124,12 +128,14 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void setTransparent(boolean enable) {
         if (trans == enable) return;
         getNSWindow(windowID);
-        ObjCHelper.runOnAppKit(() -> ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("setIgnoresMouseEvents:"),
-                enable ? 1 : 0
-        }));
         trans = enable;
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
+                null,
+                1
+        });
     }
 
     @Override
@@ -235,7 +241,24 @@ public class QuartzHWndCtrl extends HWndCtrl {
             }
             this.nsWin = nswin;
             nsWinUnavailable = 1;
+            registerMethods(nsWin);
         }
+    }
+
+    private void registerMethods(Pointer nsWin) {
+        Pointer cls = ObjCHelper.msgSend.invokePointer(new Object[]{
+                nsWin,
+                ObjCHelper.sel("class")
+        });
+        ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
+        ObjCHelper.addRunOnAppKitMethod(cls, igcb, "IgnoreMouse");
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
+                null,
+                1
+        });
     }
 
     private void getNSScreen() {
@@ -290,6 +313,29 @@ public class QuartzHWndCtrl extends HWndCtrl {
                     ObjCHelper.sel("frame")
             });
             return rect;
+        }
+    }
+
+    private class IgnoreMouseCallback implements ObjCHelper.ThreadCallback {
+        @Override
+        public void callback(Pointer id, Pointer _cmd) {
+            ObjCHelper.msgSend.invokeVoid(new Object[]{
+                    id,
+                    ObjCHelper.sel("setIgnoresMouseEvents:"),
+                    trans ? 1 : 0
+            });
+        }
+    }
+
+    private class FrameCallback implements ObjCHelper.ThreadCallback {
+        @Override
+        public void callback(Pointer id, Pointer _cmd) {
+            ObjCHelper.msgSend.invokeVoid(new Object[]{
+                    nsWin,
+                    ObjCHelper.sel("setFrame:display:animate:"),
+                    newRect,
+                    1, 0
+            });
         }
     }
 }

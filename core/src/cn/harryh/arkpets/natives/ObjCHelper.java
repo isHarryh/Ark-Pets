@@ -12,19 +12,11 @@ public class ObjCHelper {
     private static final Map<String, Pointer> clsMap = new HashMap<>();
     public static Function msgSend;
     public static Function msgSend_stret;
-    private static Method lwtOnMain;
 
     public static void init() {
         msgSend = Function.getFunction("objc.A", "objc_msgSend");
         if (Platform.isIntel()) {
             msgSend_stret = Function.getFunction("objc.A", "objc_msgSend_stret");
-        }
-        try {
-            Class<?> lwckit = Class.forName("sun.lwawt.macosx.LWCToolkit");
-            lwtOnMain = lwckit.getDeclaredMethod("performOnMainThreadAfterDelay", Runnable.class, long.class);
-            lwtOnMain.setAccessible(true);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -48,19 +40,21 @@ public class ObjCHelper {
         return ptr;
     }
 
-    public static void runOnAppKit(Runnable r) {
-        try {
-            lwtOnMain.invoke(null, r, 0);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private interface Runtime extends Library {
         Runtime INSTANCE = Native.load("objc.A", Runtime.class);
 
         Pointer sel_getUid(String msg);
 
         Pointer objc_lookUpClass(String name);
+
+        boolean class_addMethod(Pointer cls, Pointer name, Callback imp, String types);
+    }
+
+    public static void addRunOnAppKitMethod(Pointer targetCls, ThreadCallback cb, String name) {
+        Runtime.INSTANCE.class_addMethod(targetCls, sel("apRunOnAppKit" + name), cb, "v@:");
+    }
+
+    public interface ThreadCallback extends Callback {
+        void callback(Pointer id, Pointer _cmd);
     }
 }
