@@ -29,7 +29,6 @@ import javafx.util.Duration;
 import org.apache.log4j.Level;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +39,8 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public final class SettingsModule implements Controller<ArkHomeFX> {
+    @FXML
+    private ScrollPane moduleScroll;
     @FXML
     private Pane noticeBox;
 
@@ -136,6 +137,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initConfigAdvanced();
         initAbout();
         initScheduledListener();
+
+        javafx.application.Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
     private void initConfigDisplay() {
@@ -290,7 +293,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             SwingUtilities.invokeLater(() -> {
                 try {
                     Logger.debug("Config", "Request to explore the log dir");
-                    Desktop.getDesktop().open(new File("logs"));
+                    java.awt.Desktop.getDesktop().open(new File("logs"));
                 } catch (IOException ex) {
                     Logger.warn("Config", "Exploring log dir failed");
                 }

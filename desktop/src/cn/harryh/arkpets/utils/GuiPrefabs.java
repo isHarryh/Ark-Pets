@@ -8,14 +8,20 @@ import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
 import com.jfoenix.controls.*;
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.skin.ScrollPaneSkin;
+import javafx.scene.effect.GaussianBlur;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
@@ -25,6 +31,7 @@ import javafx.util.Duration;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -50,6 +57,8 @@ public class GuiPrefabs {
     public static final Color COLOR_DARK_GRAY  = Color.web("#222");
     public static final Color COLOR_GRAY       = Color.web("#444");
     public static final Color COLOR_LIGHT_GRAY = Color.web("#666");
+
+    private static final double BLUR_VALUE = 9.0;
 
     private static final String tooltipStyle = "-fx-text-fill:#FFF;-fx-font-size:10px;-fx-font-weight:normal;";
 
@@ -104,6 +113,30 @@ public class GuiPrefabs {
         timeline.playFromStart();
     }
 
+    public static void blurNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        GaussianBlur blur = new GaussianBlur(0);
+        node.setEffect(blur);
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().setAll(
+                new KeyFrame(Duration.ZERO, new KeyValue(blur.radiusProperty(), 0)),
+                new KeyFrame(duration, new KeyValue(blur.radiusProperty(), BLUR_VALUE))
+        );
+        timeline.setOnFinished(onFinished);
+        timeline.playFromStart();
+    }
+
+    public static void deblurNode(Node node, Duration duration, EventHandler<ActionEvent> onFinished) {
+        GaussianBlur blur = new GaussianBlur(BLUR_VALUE);
+        node.setEffect(blur);
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().setAll(
+                new KeyFrame(Duration.ZERO, new KeyValue(blur.radiusProperty(), BLUR_VALUE)),
+                new KeyFrame(duration, new KeyValue(blur.radiusProperty(), 0))
+        );
+        timeline.setOnFinished(onFinished);
+        timeline.playFromStart();
+    }
+
     public static void bindToggleAndWrapper(JFXButton toggle, Node wrapper, Duration duration) {
         toggle.setOnAction(e -> {
             if (wrapper.isVisible())
@@ -124,6 +157,19 @@ public class GuiPrefabs {
         Tooltip tooltip = new Tooltip(content);
         tooltip.setStyle(tooltipStyle);
         control.setTooltip(tooltip);
+    }
+
+    public static void disableScrollPaneCache(ScrollPane scrollPane) {
+        // https://bugs.openjdk.org/browse/JDK-8211294
+        // https://github.com/javafxports/openjdk-jfx/issues/225
+        // https://stackoverflow.com/questions/26098295/scrollpane-content-becomes-blurry-after-dragging
+        try {
+            Field field = ScrollPaneSkin.class.getDeclaredField("viewRect");
+            field.setAccessible(true);
+            StackPane stackPane = (StackPane) field.get(scrollPane.getSkin());
+            stackPane.setCache(false);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        }
     }
 
 

@@ -13,6 +13,7 @@ import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
@@ -31,6 +32,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -71,6 +73,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane sidebar;
     @FXML
+    private JFXButton annoEntrance;
+    @FXML
     private JFXButton menuBtn1;
     @FXML
     private JFXButton menuBtn2;
@@ -79,12 +83,15 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     public JFXButton launchBtn;
 
+    private AnnounceDialog announceDialog;
+
     private ArkHomeFX app;
     private boolean checkEnd;
 
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+        initAnnoEntrance();
         initMenuButtons();
         initLaunchButton();
         initLaunchingStatusListener();
@@ -230,6 +237,34 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 return;
             }
             launchArkPets();
+        });
+    }
+
+    private void initAnnoEntrance() {
+        annoEntrance.setOnAction(e -> {
+            try {
+                boolean firstOpenAnno = announceDialog == null;
+                if (firstOpenAnno) {
+                    // Lazy load the FXML of announceDialog
+                    FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
+                    announceDialog = (AnnounceDialog) fxml.initializeWith(app);
+                }
+                List<Pane> panesBelow = List.of(sidebar, wrapper1,wrapper2,wrapper3);
+                panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
+                JFXDialog popup = new JFXDialog(body, announceDialog.dialog, JFXDialog.DialogTransition.TOP, false);
+                popup.show();
+                announceDialog.dialogReturn.setOnAction(ev -> {
+                    popup.close();
+                    panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
+                });
+                if (firstOpenAnno) {
+                    // Lazy load announcement content
+                    announceDialog.fetchAnnounce();
+                }
+            } catch (IOException ex) {
+                Logger.error("Launcher", "Failed to open announcement dialog, details see below.", ex);
+                throw new RuntimeException(ex);
+            }
         });
     }
 

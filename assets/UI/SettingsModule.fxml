@@ -9,12 +9,13 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+<?import javafx.scene.shape.SVGPath?>
 <?import java.lang.*?>
 <Pane prefHeight="376.0" prefWidth="460.0" styleClass="wrapper" stylesheets="@Main.css"
       xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cn.harryh.arkpets.controllers.SettingsModule">
-    <ScrollPane layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0" styleClass="scroll-v">
+    <ScrollPane fx:id="moduleScroll" layoutX="10.0" layoutY="11.0" prefHeight="350.0" prefWidth="440.0"
+                styleClass="scroll-v">
         <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0"
                     prefWidth="425.0" styleClass="config-field">
             <VBox>

@@ -10,12 +10,13 @@ import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
@@ -24,6 +25,9 @@ import static cn.harryh.arkpets.Const.durationFast;
 
 
 public final class BehaviorModule implements Controller<ArkHomeFX> {
+    @FXML
+    private ScrollPane moduleScroll;
+
     @FXML
     private JFXCheckBox configBehaviorAllowWalk;
     @FXML
@@ -104,6 +108,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         this.app = app;
         initConfigBehavior();
         initScheduledListener();
+
+        Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
     private void initConfigBehavior() {

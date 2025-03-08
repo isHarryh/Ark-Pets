@@ -95,6 +95,7 @@ public final class Const {
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
         public static final String tempModelsZipCachePath       = tempDirPath + fileModelsZipName + ".zip";
         public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
+        public static final String tempQueryAnnounceCachePath   = tempDirPath + "ApiQueryAnnounceCache";
     }
 
 
