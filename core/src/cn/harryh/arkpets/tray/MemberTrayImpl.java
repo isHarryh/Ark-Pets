@@ -218,8 +218,8 @@ public class MemberTrayImpl extends MemberTray {
         int scaledY = (int) (y / at.getScaleY());
 
         // Show the JDialog together with the JPopupMenu.
-        popWindow.setVisible(true);
         popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
+        popWindow.setVisible(true);
         popMenu.show(popWindow, 0, 0);
         Logger.debug("MemberTray", "Shown @ " + x + ", " + y);
     }
