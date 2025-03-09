@@ -1,33 +1,37 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.*;
+import cn.harryh.arkpets.natives.CoreGraphics;
+import cn.harryh.arkpets.natives.ObjCHelper;
+import com.sun.jna.Platform;
+import com.sun.jna.Pointer;
 import com.sun.jna.platform.mac.CoreFoundation;
-import com.sun.jna.platform.mac.CoreFoundation.CFNumberRef;
-import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFDictionaryRef;
+import com.sun.jna.platform.mac.CoreFoundation.CFNumberRef;
+import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static cn.harryh.arkpets.natives.CoreGraphics.*;
+
 
 public class QuartzHWndCtrl extends HWndCtrl {
-    private static Pointer nsapp;
-    private static CFStringRef kCGWindowNumber;
-    private static CFStringRef kCGWindowLayer;
-    private static CFStringRef kCGWindowBounds;
-    private static CFStringRef kCGWindowName;
-    private static CFStringRef kCGWindowOwnerName;
-    private static final int kCGWindowListExcludeDesktopElements = (1 << 4);
-    private static final int kCGWindowListOptionOnScreenOnly = 1;
+    private static Pointer nsApp;
 
-    private long windowID;
+    private static final boolean isArm = Platform.isARM();
+    private final IgnoreMouseCallback igcb = new IgnoreMouseCallback();
+    private final FrameCallback fcb = new FrameCallback();
+
+    private final long windowID;
     private Pointer nsWin;
-    private long layer;
+    private Pointer nsScreen;
+    private final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private byte nsWinUnavailable;
+    private boolean trans;
+    private final CGRect.ByValue newRect = new CGRect.ByValue();
 
     public QuartzHWndCtrl(CFDictionaryRef dict) {
         super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict.getValue(kCGWindowBounds)));
@@ -72,19 +76,37 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setForeground() {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APActive(nsWin);
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("orderFrontRegardless:")
+        });
     }
 
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APResizeOnMain(nsWin, x, y, w, h);
+        CGRect rect = getScreenSize();
+        newRect.origin.x = x;
+        newRect.origin.y = rect.size.height - y - h;
+        newRect.size.width = w;
+        newRect.size.height = h;
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitFrame"),
+                null,
+                1
+        });
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        GoldenGlow.INSTANCE.APSetDockOnMain(nsapp, enable);
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsApp,
+                ObjCHelper.sel("setActivationPolicy:"),
+                enable ? 0 : 1
+        });
     }
 
     @Override
@@ -95,12 +117,25 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setTopmost(boolean enable) {
         getNSWindow(windowID);
-        GoldenGlow.INSTANCE.APSetTopmostOnMain(nsWin, enable);
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("setLevel:"),
+                enable ? NSStatusWindowLevel : NSNormalWindowLevel
+        });
     }
 
     @Override
     public void setTransparent(boolean enable) {
-        // not necessary in macOS.
+        if (trans == enable) return;
+        getNSWindow(windowID);
+        trans = enable;
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
+                null,
+                1
+        });
     }
 
     @Override
@@ -109,26 +144,17 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     protected static void init() {
-        Logger.info("System", "Objective-C bridge library version " + GoldenGlow.INSTANCE.APVersion());
         CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
         if (server == null) {
             throw new RuntimeException("No window server connection.");
         } else {
             CoreFoundation.INSTANCE.CFRelease(server);
         }
-        kCGWindowNumber = CFStringRef.createCFString("kCGWindowNumber");
-        kCGWindowBounds = CFStringRef.createCFString("kCGWindowBounds");
-        kCGWindowLayer = CFStringRef.createCFString("kCGWindowLayer");
-        kCGWindowName = CFStringRef.createCFString("kCGWindowName");
-        kCGWindowOwnerName = CFStringRef.createCFString("kCGWindowOwnerName");
+        ObjCHelper.init();
     }
 
     protected static void free() {
-        kCGWindowNumber.release();
-        kCGWindowLayer.release();
-        kCGWindowName.release();
-        kCGWindowBounds.release();
-        kCGWindowOwnerName.release();
+
     }
 
     protected static List<QuartzHWndCtrl> getWindowList(boolean onlyVisible) {
@@ -194,21 +220,53 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     private void checkNSApp() {
-        if (nsapp == null) {
-            nsapp = GoldenGlow.INSTANCE.APGetApp();
+        if (nsApp == null) {
+            nsApp = ObjCHelper.msgSend.invokePointer(new Object[]{
+                    ObjCHelper.cls("NSApplication"),
+                    ObjCHelper.sel("sharedApplication")
+            });
         }
     }
 
     private void getNSWindow(long CGWindowId) {
         checkNSApp();
         if (nsWinUnavailable == 0) {
-            Pointer nswin = GoldenGlow.INSTANCE.APGetNSWindow(nsapp, CGWindowId);
+            Pointer nswin = ObjCHelper.msgSend.invokePointer(new Object[]{
+                    nsApp,
+                    ObjCHelper.sel("windowWithWindowNumber:"),
+                    CGWindowId
+            });
             if (nswin == null) {
                 nsWinUnavailable = -1;
             }
             this.nsWin = nswin;
             nsWinUnavailable = 1;
+            registerMethods(nsWin);
         }
+    }
+
+    private void registerMethods(Pointer nsWin) {
+        Pointer cls = ObjCHelper.msgSend.invokePointer(new Object[]{
+                nsWin,
+                ObjCHelper.sel("class")
+        });
+        ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
+        ObjCHelper.addRunOnAppKitMethod(cls, igcb, "IgnoreMouse");
+        ObjCHelper.msgSend.invokeVoid(new Object[]{
+                nsWin,
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
+                null,
+                1
+        });
+    }
+
+    private void getNSScreen() {
+        if (this.nsWinUnavailable != 1 || this.nsScreen != null) return;
+        this.nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
+                nsWin,
+                ObjCHelper.sel("screen")
+        });
     }
 
     private static String getWindowName(Pointer value) {
@@ -240,56 +298,44 @@ public class QuartzHWndCtrl extends HWndCtrl {
         return new WindowRect(0, 0, 0, 0);
     }
 
-    // JNA Definition
-
-    private interface CoreGraphics extends Library {
-        CoreGraphics INSTANCE = Native.load("CoreGraphics", CoreGraphics.class);
-
-        CFArrayRef CGWindowListCopyWindowInfo(int option, int relativeToWindow);
-
-        CFArrayRef CGWindowListCreateDescriptionFromArray(CFArrayRef windowArray);
-
-        boolean CGRectMakeWithDictionaryRepresentation(CFDictionaryRef dict, CGRect.ByReference rect);
-
-        CFDictionaryRef CGSessionCopyCurrentDictionary();
-    }
-
-    private interface GoldenGlow extends Library {
-        GoldenGlow INSTANCE = Native.load(System.getProperty("user.dir") + "/libgoldenglow.dylib", GoldenGlow.class);
-
-        void APResizeOnMain(Pointer p, int x, int y, int w, int h);
-
-        Pointer APGetApp();
-
-        void APSetDockOnMain(Pointer app, boolean enable);
-
-        void APSetTopmostOnMain(Pointer win, boolean enable);
-
-        Pointer APGetNSWindow(Pointer app, long cgid);
-
-        void APActive(Pointer win);
-
-        int APVersion();
-    }
-
-    @Structure.FieldOrder({"origin", "size"})
-    public static class CGRect extends Structure {
-        public CGPoint origin;
-        public CGSize size;
-
-        public static class ByReference extends CGRect implements Structure.ByReference {
+    private CGRect getScreenSize() {
+        getNSScreen();
+        if (isArm) {
+            return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
+                    nsScreen,
+                    ObjCHelper.sel("frame")
+            });
+        } else {
+            CGRect.ByReference rect = new CGRect.ByReference();
+            ObjCHelper.msgSend_stret.invokeVoid(new Object[]{
+                    rect,
+                    nsScreen,
+                    ObjCHelper.sel("frame")
+            });
+            return rect;
         }
     }
 
-    @Structure.FieldOrder({"x", "y"})
-    public static class CGPoint extends Structure {
-        public double x;
-        public double y;
+    private class IgnoreMouseCallback implements ObjCHelper.ThreadCallback {
+        @Override
+        public void callback(Pointer id, Pointer _cmd) {
+            ObjCHelper.msgSend.invokeVoid(new Object[]{
+                    id,
+                    ObjCHelper.sel("setIgnoresMouseEvents:"),
+                    trans ? 1 : 0
+            });
+        }
     }
 
-    @Structure.FieldOrder({"width", "height"})
-    public static class CGSize extends Structure {
-        public double width;
-        public double height;
+    private class FrameCallback implements ObjCHelper.ThreadCallback {
+        @Override
+        public void callback(Pointer id, Pointer _cmd) {
+            ObjCHelper.msgSend.invokeVoid(new Object[]{
+                    nsWin,
+                    ObjCHelper.sel("setFrame:display:animate:"),
+                    newRect,
+                    1, 0
+            });
+        }
     }
 }

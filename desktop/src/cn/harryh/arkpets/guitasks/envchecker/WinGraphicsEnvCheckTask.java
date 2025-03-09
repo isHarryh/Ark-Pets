@@ -1,10 +1,11 @@
-package cn.harryh.arkpets.envchecker;
+package cn.harryh.arkpets.guitasks.envchecker;
 
+import cn.harryh.arkpets.naitves.NVAPIWrapper;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NVAPIWrapper;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
 import com.sun.jna.WString;
 import com.sun.jna.platform.win32.Advapi32;
 import com.sun.jna.platform.win32.Advapi32Util;
@@ -20,22 +21,12 @@ import static com.sun.jna.platform.win32.WinReg.HKEY_CURRENT_USER;
 
 
 public class WinGraphicsEnvCheckTask extends EnvCheckTask {
+    public static final String NVAPI_PROFILE_NAME = "ArkPets";
+    private final String launcherPath;
+    private final String javaBin;
     private String failureReason;
     private String failureDetail;
     private FixMode fix;
-
-    private final String launcherPath;
-    private final String javaBin;
-
-    public static final String NVAPI_PROFILE_NAME = "ArkPets";
-
-    private enum FixMode {
-        WIN_SAV,     // Windows Power-saving
-        WIN_PERF,
-        NV,          // NVIDIA OpenGL GDI and Present method
-        WIN_PERF_NV, // Windows Performance, NVIDIA OpenGL GDI and Present method
-        FAIL         // Can't Fix
-    }
 
     public WinGraphicsEnvCheckTask() {
         super();
@@ -43,6 +34,21 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
         File launcher = new File("ArkPets.exe");
         if (launcher.exists()) launcherPath = launcher.getAbsolutePath().replaceAll("\"", "\"\"");
         else launcherPath = javaBin;
+    }
+
+    private static String wmicCheck() {
+        try {
+            String result = IOUtils.CommandUtil.runCommand("wmic path win32_VideoController get Name", null, null);
+            if (result != null) {
+                return result;
+            } else {
+                Logger.warn("EnvCheck", "Failed to get graphics card info");
+                return null;
+            }
+        } catch (Exception e) {
+            Logger.warn("EnvCheck", "Failed to get graphics card info");
+            return null;
+        }
     }
 
     @Override
@@ -59,10 +65,15 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     public boolean tryFix() {
         try {
             switch (fix) {
-                case NV -> setNvidiaGLSettings(launcherPath, javaBin);
+                case NV -> setNvidiaGLSettings(true, launcherPath, javaBin);
                 case WIN_SAV -> {
                     setWinGraphicsCard(launcherPath, false);
                     setWinGraphicsCard(javaBin, false);
+                }
+                case WIN_SAV_NV -> {
+                    setWinGraphicsCard(launcherPath, false);
+                    setWinGraphicsCard(javaBin, false);
+                    setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
                 case WIN_PERF -> {
                     setWinGraphicsCard(launcherPath, true);
@@ -71,7 +82,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                 case WIN_PERF_NV -> {
                     setWinGraphicsCard(launcherPath, true);
                     setWinGraphicsCard(javaBin, true);
-                    setNvidiaGLSettings(launcherPath, javaBin);
+                    setNvidiaGLSettings(true, launcherPath, javaBin);
                 }
             }
         } catch (Exception e) {
@@ -96,6 +107,15 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                 if (cards.contains("Intel") && cards.contains("NVIDIA")) {
                     // I+N Hybrid
                     boolean card = checkWinGraphicsCard(launcherPath, false) && checkWinGraphicsCard(javaBin, false);
+                    boolean nv = checkNvidiaGLSettings();
+                    if (!card || !nv) {
+                        fix = FixMode.WIN_SAV_NV;
+                        return false;
+                    }
+                    return true;
+                } else if (cards.contains("Intel") && cards.contains("AMD")) {
+                    // I+A Hybrid
+                    boolean card = checkWinGraphicsCard(launcherPath, false) && checkWinGraphicsCard(javaBin, false);
                     if (!card) {
                         fix = FixMode.WIN_SAV;
                         return false;
@@ -116,7 +136,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     // A+A Hybrid or AMD single,Fail temporary
                     fix = FixMode.FAIL;
                     failureReason = "AMD 显卡警告";
-                    failureDetail = "检测到正在使用 AMD 显卡，ArkPets 尚未对 AMD 显卡进行充分测试。\n你仍可以强制运行，但桌宠背景可能会不透明。";
+                    failureDetail = "检测到正在使用 AMD 显卡，ArkPets 暂不支持 AMD 显卡。\n你仍可以尝试强制运行，但桌宠背景可能会不透明。";
                     return false;
                 } else if (cards.contains("NVIDIA")) {
                     // NVIDIA only
@@ -150,21 +170,6 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
         }
     }
 
-    private static String wmicCheck() {
-        try {
-            String result = IOUtils.CommandUtil.runCommand("wmic path win32_VideoController get Name", null, null);
-            if (result != null) {
-                return result;
-            } else {
-                Logger.warn("EnvCheck", "Failed to get graphics card info");
-                return null;
-            }
-        } catch (Exception e) {
-            Logger.warn("EnvCheck", "Failed to get graphics card info");
-            return null;
-        }
-    }
-
     public boolean checkNvidiaGLSettings() {
         boolean status = false;
         NVAPIWrapper.NvAPI_Initialize();
@@ -175,18 +180,20 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
         try {
             NVAPIWrapper.NvAPI_DRS_FindProfileByName(sess.getValue(), new WString(NVAPI_PROFILE_NAME), pro);
             status = true;
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            Logger.error("EnvCheck", "Failed to get NVIDIA Settings", e);
         }
         NVAPIWrapper.NvAPI_DRS_DestroySession(sess.getValue());
         NVAPIWrapper.NvAPI_Unload();
         return status;
     }
 
-    public void setNvidiaGLSettings(String... path) {
+    public void setNvidiaGLSettings(boolean performance, String... path) {
         NVAPIWrapper.NvAPI_Initialize();
         PointerByReference sess = new PointerByReference();
         NVAPIWrapper.NvAPI_DRS_CreateSession(sess);
         NVAPIWrapper.NvAPI_DRS_LoadSettings(sess.getValue());
+        removeNvidiaProfile(sess.getValue()); // clean before write
         PointerByReference prof = new PointerByReference();
         NVAPIWrapper.NVDRS_PROFILE.ByReference profile = new NVAPIWrapper.NVDRS_PROFILE.ByReference();
         NVAPIWrapper.writeStringToShortArray(NVAPI_PROFILE_NAME, profile.profileName);
@@ -197,20 +204,22 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
             NVAPIWrapper.writeStringToShortArray(p, app.userFriendlyName);
             NVAPIWrapper.NvAPI_DRS_CreateApplication(sess.getValue(), prof.getValue(), app);
         }
-        NVAPIWrapper.NVDRS_SETTING.ByReference glSetting = new NVAPIWrapper.NVDRS_SETTING.ByReference();
-        glSetting.settingId = new NativeLong(0x2072C5A3);
-        glSetting.settingType = 0;
-        glSetting.currentValue.u32 = new NativeLong(1);
-        //NVAPIWrapper.NVDRS_SETTING.ByReference dxgiSetting = new NVAPIWrapper.NVDRS_SETTING.ByReference();
-        // todo dxgiSetting.settingId= new NativeLong(0x20D690F8);
-        // todo dxgiSetting.currentValue.u32 =
-        //dxgiSetting.settingType = 0;
+        if (performance) {
+            NVAPIWrapper.NVDRS_SETTING.ByReference glSetting = new NVAPIWrapper.NVDRS_SETTING.ByReference();
+            glSetting.settingId = new NativeLong(0x2072C5A3);
+            glSetting.settingType = 0;
+            glSetting.currentValue.u32 = new NativeLong(1);
+            NVAPIWrapper.NVDRS_SETTING.ByReference dxgiSetting = new NVAPIWrapper.NVDRS_SETTING.ByReference();
+            dxgiSetting.settingId = new NativeLong(0x20D690F8);
+            dxgiSetting.currentValue.u32 = new NativeLong(0);
+            dxgiSetting.settingType = 0;
+            NVAPIWrapper.NvAPI_DRS_SetSetting(sess.getValue(), prof.getValue(), glSetting);
+            NVAPIWrapper.NvAPI_DRS_SetSetting(sess.getValue(), prof.getValue(), dxgiSetting);
+        }
         NVAPIWrapper.NVDRS_SETTING.ByReference optimusSetting = new NVAPIWrapper.NVDRS_SETTING.ByReference();
         optimusSetting.settingId = new NativeLong(0x10F9DC81);
-        optimusSetting.currentValue.u32 = new NativeLong(1);
+        optimusSetting.currentValue.u32 = performance ? new NativeLong(1) : new NativeLong(0);
         optimusSetting.settingType = 0;
-        NVAPIWrapper.NvAPI_DRS_SetSetting(sess.getValue(), prof.getValue(), glSetting);
-        //NVAPIWrapper.NvAPI_DRS_SetSetting(sess.getValue(),prof.getValue(),dxgiSetting);
         NVAPIWrapper.NvAPI_DRS_SetSetting(sess.getValue(), prof.getValue(), optimusSetting);
         NVAPIWrapper.NvAPI_DRS_SaveSettings(sess.getValue());
         NVAPIWrapper.NvAPI_DRS_DestroySession(sess.getValue());
@@ -256,15 +265,33 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                 PointerByReference sess = new PointerByReference();
                 NVAPIWrapper.NvAPI_DRS_CreateSession(sess);
                 NVAPIWrapper.NvAPI_DRS_LoadSettings(sess.getValue());
-                PointerByReference pro = new PointerByReference();
-                NVAPIWrapper.NvAPI_DRS_FindProfileByName(sess.getValue(), new WString(NVAPI_PROFILE_NAME), pro);
-                NVAPIWrapper.NvAPI_DRS_DeleteProfile(sess.getValue(), pro.getValue());
-                NVAPIWrapper.NvAPI_DRS_SaveSettings(sess.getValue());
+                removeNvidiaProfile(sess.getValue());
                 NVAPIWrapper.NvAPI_DRS_DestroySession(sess.getValue());
                 NVAPIWrapper.NvAPI_Unload();
                 Logger.info("EnvCheck", "Success remove NVIDIA GPU settings");
             }
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            Logger.error("EnvCheck", "Failed to remove NVIDIA settings,possible already remove", e);
         }
+    }
+
+    private void removeNvidiaProfile(Pointer sess) {
+        PointerByReference pro = new PointerByReference();
+        try {
+            NVAPIWrapper.NvAPI_DRS_FindProfileByName(sess, new WString(NVAPI_PROFILE_NAME), pro);
+            NVAPIWrapper.NvAPI_DRS_DeleteProfile(sess, pro.getValue());
+            NVAPIWrapper.NvAPI_DRS_SaveSettings(sess);
+        } catch (Exception e) {
+            Logger.error("EnvCheck", "Failed to remove NVIDIA settings,possible already remove", e);
+        }
+    }
+
+    private enum FixMode {
+        WIN_SAV,     // Windows Power-saving
+        WIN_SAV_NV,  // Windows and NVIDIA Power-saving
+        WIN_PERF,
+        NV,          // NVIDIA OpenGL GDI and Present method
+        WIN_PERF_NV, // Windows Performance, NVIDIA OpenGL GDI and Present method
+        FAIL         // Can't Fix
     }
 }

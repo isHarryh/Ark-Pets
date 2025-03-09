@@ -1,13 +1,12 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.natives.KWinInterface;
+import cn.harryh.arkpets.natives.KWinPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
-import org.freedesktop.dbus.Struct;
-import org.freedesktop.dbus.annotations.DBusInterfaceName;
-import org.freedesktop.dbus.annotations.Position;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.dbus.interfaces.DBusInterface;
 import org.freedesktop.dbus.types.UInt32;
 
 import java.io.IOException;
@@ -18,11 +17,11 @@ import java.util.List;
 
 public class KWinHWndCtrl extends HWndCtrl {
     protected final String hWnd;
-    protected DetailsStruct details;
+    protected KWinInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
-    private static ArkPetsInterface dBusInterface;
+    private static KWinInterface dBusInterface;
 
-    protected KWinHWndCtrl(DetailsStruct details) {
+    protected KWinHWndCtrl(KWinInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
         this.hWnd = details.id;
         this.details = details;
@@ -65,7 +64,7 @@ public class KWinHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTaskbar(boolean enable) {
-
+        dBusInterface.Stick(hWnd, enable);
     }
 
     @Override
@@ -75,11 +74,7 @@ public class KWinHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTopmost(boolean enable) {
-        if (enable) {
-            dBusInterface.Above(hWnd);
-        } else {
-            dBusInterface.Unabove(hWnd);
-        }
+        dBusInterface.Above(hWnd, enable);
     }
 
     @Override
@@ -91,10 +86,27 @@ public class KWinHWndCtrl extends HWndCtrl {
         try {
             dBusConnection = DBusConnectionBuilder.forSessionBus().build();
             Logger.info("System", "Connected to DBus");
-            dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", ArkPetsInterface.class);
+            checkAndEnablePlugin();
+            dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinInterface.class);
             Logger.info("System", "KDE Integration plugin version " + dBusInterface.Version());
         } catch (DBusException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void checkAndEnablePlugin() throws DBusException {
+        KWinPluginInterface pi = dBusConnection.getRemoteObject("org.kde.KWin", "/Plugins", KWinPluginInterface.class);
+        String pluginName = Const.kdePluginName + Const.kdePluginVersion;
+        List<String> available = pi.getAvailablePlugins();
+        List<String> enabled = pi.getLoadedPlugins();
+        if (!available.contains(pluginName)) throw new RuntimeException("KDE Integration plugin not found.");
+        if (!enabled.contains(pluginName)) {
+            boolean result = pi.LoadPlugin(pluginName);
+            if (!result) throw new RuntimeException("Failed to enable KDE integration plugin.");
+            try {
+                Thread.sleep(500); // wait for loaded
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -124,7 +136,7 @@ public class KWinHWndCtrl extends HWndCtrl {
     }
 
     protected static KWinHWndCtrl getTopmostWindow() {
-        List<DetailsStruct> list = dBusInterface.List();
+        List<KWinInterface.DetailsStruct> list = dBusInterface.List();
         return new KWinHWndCtrl(list.get(list.size() - 1));
     }
 
@@ -140,54 +152,5 @@ public class KWinHWndCtrl extends HWndCtrl {
     @Override
     public int hashCode() {
         return hWnd.hashCode();
-    }
-
-    @DBusInterfaceName("org.kde.KWin.ArkPets")
-    private interface ArkPetsInterface extends DBusInterface {
-        void MoveResize(String uuid, int x, int y, UInt32 width, UInt32 height);
-
-        void Activate(String uuid);
-
-        void Above(String uuid);
-
-        void Unabove(String uuid);
-
-        List<DetailsStruct> List();
-
-        DetailsStruct Details(String winid);
-
-        boolean IsActive(String uuid);
-
-        UInt32 Version();
-    }
-
-    public static class DetailsStruct extends Struct {
-        @Position(0)
-        public final int x;
-        @Position(1)
-        public final int y;
-        @Position(2)
-        public final UInt32 w;
-        @Position(3)
-        public final UInt32 h;
-        @Position(4)
-        public final String title;
-        @Position(5)
-        public final String wclass;
-        @Position(6)
-        public final boolean visible;
-        @Position(7)
-        public final String id;
-
-        public DetailsStruct(int x, int y, UInt32 w, UInt32 h, String title, String wClass, boolean visible, String id) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-            this.title = title;
-            this.wclass = wClass;
-            this.visible = visible;
-            this.id = id;
-        }
     }
 }

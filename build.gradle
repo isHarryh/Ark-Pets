@@ -31,7 +31,7 @@ allprojects {
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.8"
-        dbusVersion = "5.0.0"
+        dbusVersion = "5.1.0"
         lwjglVersion = "3.3.4"
     }
 

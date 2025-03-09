@@ -1,46 +1,33 @@
-/** Copyright (c) 2022-2024, Harry Huang, Litwak913
- * At GPL-3.0 License
- */
 package cn.harryh.arkpets.startup;
 
-import cn.harryh.arkpets.naitves.IPersistFile;
-import cn.harryh.arkpets.naitves.IShellLink;
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import static cn.harryh.arkpets.Const.charsetDefault;
 
-public class WindowsStartupConfig extends StartupConfig {
+
+public class XDGStartupConfig extends StartupConfig {
     private boolean available;
     private File startupFile;
+    private String desktopContent;
 
-    private static final String startupTarget    = "ArkPets.exe";
-    private static final String startupShortcut  = "ArkPetsStartup.lnk";
-    private static final String oldStartupScript = "ArkPetsStartupService.vbs";
+    private static final String startupTarget    = "ArkPets-" + Const.appVersion + ".AppImage";
+    private static final String startupShortcut  = "ArkPetsStartup.desktop";
 
-    public WindowsStartupConfig() {
+    public XDGStartupConfig() {
         try {
-            File startupDir = new File(System.getProperty("user.home") + "/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup");
+            File startupDir = new File(System.getProperty("user.home") + "/.config/autostart");
             if (!startupDir.isDirectory())
                 throw new FileNotFoundException("Startup dir not found: " + startupDir.getAbsolutePath());
             if (!new File(startupTarget).exists())
                 throw new FileNotFoundException("Executable not found.");
-
+            this.desktopContent = new String(XDGStartupConfig.class.getResourceAsStream("/utils/xdgstartup.desktop").readAllBytes());
             this.startupFile = new File(startupDir.getAbsolutePath(), startupShortcut);
             this.available = true;
-
-            File oldStartup = new File(startupDir.getAbsolutePath(), oldStartupScript);
-            try {
-                if (oldStartup.exists()) {
-                    Logger.info("Config", "Found old version startup, migrate to new approach.");
-                    if (oldStartup.delete())
-                        addStartup();
-                }
-            } catch (Exception e) {
-                Logger.error("Config", "Cannot migrate startup, details see below.", e);
-            }
         } catch (Exception e) {
             this.startupFile = null;
             this.available = false;
@@ -52,16 +39,11 @@ public class WindowsStartupConfig extends StartupConfig {
     public boolean addStartup() {
         if (!this.available) return false;
         try {
-            IShellLink lnk = IShellLink.create();
-            IPersistFile pf = lnk.getPF();
             String cd = System.getProperty("user.dir");
-            cd = cd.replaceAll("\"", "\"\"");
-            lnk.SetPath(cd + "\\" + startupTarget);
-            lnk.SetArguments("--direct-start");
-            lnk.SetWorkingDirectory(cd);
-            pf.Save(startupFile.getAbsolutePath().replaceAll("\"", "\"\""));
-            pf.Release();
-            lnk.Release();
+            String content = desktopContent
+                    .replace("{{ARKPETS_WORKING_DIR}}",cd)
+                    .replace("{{ARKPETS_EXECUTABLE}}",cd + "/" + startupTarget + " --direct-start");
+            IOUtils.FileUtil.writeString(startupFile, charsetDefault, content, false);
             Logger.info("Config", "Auto-startup added.");
             return true;
         } catch (Exception e) {

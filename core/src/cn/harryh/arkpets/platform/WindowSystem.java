@@ -30,12 +30,12 @@ public enum WindowSystem {
             String desktop = System.getenv("XDG_CURRENT_DESKTOP");
             String type = System.getenv("XDG_SESSION_TYPE");
             if (desktop != null && type != null) {
-                if (desktop.equals("GNOME")) {
-                    return WindowSystem.MUTTER;
-                } else if (desktop.equals("KDE") && type.equals("wayland")) {
-                    return WindowSystem.KWIN;
-                } else if (type.equals("x11")) {
+                if (type.equals("x11")) {
                     return WindowSystem.X11;
+                } else if (type.equals("wayland") && desktop.equals("GNOME")) {
+                    return WindowSystem.MUTTER;
+                } else if (type.equals("wayland") && desktop.equals("KDE")) {
+                    return WindowSystem.KWIN;
                 }
             } else {
                 return WindowSystem.X11;
@@ -54,18 +54,10 @@ public enum WindowSystem {
         }
         Logger.info("System", "Using " + PLATFORM.toString() + " Window System");
         switch (PLATFORM) {
-            case MUTTER -> {
-                MutterHWndCtrl.init();
-            }
-            case KWIN -> {
-                KWinHWndCtrl.init();
-            }
-            case X11 -> {
-                X11HWndCtrl.init();
-            }
-            case QUARTZ -> {
-                QuartzHWndCtrl.init();
-            }
+            case MUTTER -> MutterHWndCtrl.init();
+            case KWIN -> KWinHWndCtrl.init();
+            case X11 -> X11HWndCtrl.init();
+            case QUARTZ -> QuartzHWndCtrl.init();
         }
     }
 
@@ -158,18 +150,10 @@ public enum WindowSystem {
      */
     public static void free() {
         switch (PLATFORM) {
-            case MUTTER -> {
-                MutterHWndCtrl.free();
-            }
-            case KWIN -> {
-                KWinHWndCtrl.free();
-            }
-            case X11 -> {
-                X11HWndCtrl.free();
-            }
-            case QUARTZ -> {
-                QuartzHWndCtrl.free();
-            }
+            case MUTTER -> MutterHWndCtrl.free();
+            case KWIN -> KWinHWndCtrl.free();
+            case X11 -> X11HWndCtrl.free();
+            case QUARTZ -> QuartzHWndCtrl.free();
         }
     }
 

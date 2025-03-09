@@ -27,6 +27,8 @@ import com.badlogic.gdx.utils.SerializationException;
 import com.esotericsoftware.spine.*;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import static cn.harryh.arkpets.Const.*;
@@ -92,17 +94,22 @@ public class ArkChar {
             // Load atlas
             TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
             // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
-            try {
-                SkeletonBinary binary = new SkeletonBinary(atlas);
-                binary.setScale(scale * skelBaseScale);
-                skeletonData = binary.readSkeletonData(Gdx.files.internal(path2skel));
-            } catch (Exception e) {
-                Logger.warn("Character", "Failed to load skeleton, trying load as json");
+            FileHandle data = Gdx.files.internal(path2skel);
+            InputStream is = data.read();
+            char first = (char) is.read();
+            if (first == '{') { // Skeleton is json
+                Logger.debug("Character", "Skeleton format is JSON");
                 SkeletonJson json = new SkeletonJson(atlas);
                 json.setScale(scale * skelBaseScale);
-                skeletonData = json.readSkeletonData(Gdx.files.internal(path2skel));
+                skeletonData = json.readSkeletonData(data);
+            } else { // Skeleton is binary
+                Logger.debug("Character", "Skeleton format is binary");
+                SkeletonBinary binary = new SkeletonBinary(atlas);
+                binary.setScale(scale * skelBaseScale);
+                skeletonData = binary.readSkeletonData(data);
             }
-        } catch (SerializationException | GdxRuntimeException e) {
+            is.close();
+        } catch (SerializationException | GdxRuntimeException | IOException e) {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
             throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
         }

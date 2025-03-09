@@ -1,41 +1,48 @@
-/** Copyright (c) 2022-2025, Harry Huang
- * At GPL-3.0 License
- */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.controllers.Titlebar;
+import cn.harryh.arkpets.guitasks.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import com.sun.jna.Platform;
+import javafx.application.Application;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
-import java.io.File;
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
 
 
-/** The bootstrap for ArkPets the libGDX app.
- * @see ArkPets
- */
-public class EmbeddedLauncher {
-    // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
+public class BootstrapLauncher {
+    private static boolean useCustomGLFW;
+    private static boolean isDirectStart = false;
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
         // Logger
-        Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
+        new ArgPending("--direct-start", args) {
+            protected void process(String command, String addition) {
+                isDirectStart = true;
+            }
+        };
+        if (isDirectStart) {
+            Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
+        } else {
+            Logger.initialize(LogConfig.logDesktopPath, LogConfig.logDesktopMaxKeep);
+        }
         ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         try {
             Logger.setLevel(appConfig.logging_level);
@@ -61,7 +68,52 @@ public class EmbeddedLauncher {
                 Logger.setLevel(Logger.DEBUG);
             }
         };
-        new ArgPending("--load-lib", args) {
+        Logger.info("System", "ArkPets version is " + appVersion);
+        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
+        // If requested to start the core app directly
+        if (isDirectStart) {
+            startCore(appConfig);
+        } else {
+            startDesktop();
+        }
+        System.exit(0);
+    }
+
+    /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
+     * @see ArkHomeFX
+     */
+    private static void startDesktop() {
+        Logger.info("System", "Entering the app of DesktopLauncher");
+        // 144 FPS
+        System.getProperties().putIfAbsent("javafx.animation.pulse", "144");
+        // Change ui style
+        new ArgPending("--ui-style", ArgPending.argCache) {
+            @Override
+            protected void process(String command, String addition) {
+                Titlebar.forceUiStyle = addition.toLowerCase();
+            }
+        };
+        // Remove NVIDIA settings when uninstall on windows.
+        new ArgPending("--remove-nvidia", ArgPending.argCache) {
+            @Override
+            protected void process(String command, String addition) {
+                new WinGraphicsEnvCheckTask().removeNvidiaSettings();
+            }
+        };
+        // Disable libdecor to avoid glfw and javafx problem on linux.
+        if(Platform.isLinux()) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
+        // Java FX bootstrap
+        Application.launch(ArkHomeFX.class, ArgPending.argCache);
+        Logger.info("System", "Exited from DesktopLauncher successfully");
+        System.exit(0);
+    }
+
+    /** The bootstrap for ArkPets the libGDX app.
+     * @see ArkPets
+     */
+    private static void startCore(ArkConfig appConfig) {
+        Logger.info("System", "Entering the app of EmbeddedLauncher");
+        new ArgPending("--load-lib", ArgPending.argCache) {
             @Override
             protected void process(String command, String addition) {
                 Logger.info("System", "Loading the specified library \"" + addition +"\"");
@@ -72,7 +124,15 @@ public class EmbeddedLauncher {
                 }
             }
         };
-        new ArgPending("--enable-snapshot", args) {
+        new ArgPending("--glfw-lib", ArgPending.argCache) {
+            @Override
+            protected void process(String command, String addition) {
+                Logger.info("System", "Using the specified GLFW library \"" + addition +"\"");
+                Configuration.GLFW_LIBRARY_NAME.set(addition);
+                useCustomGLFW = true;
+            }
+        };
+        new ArgPending("--enable-snapshot", ArgPending.argCache) {
             @Override
             protected void process(String command, String addition) {
                 Logger.info("System", "Enable the snapshot feature");
@@ -83,9 +143,6 @@ public class EmbeddedLauncher {
                 }
             }
         };
-        Logger.info("System", "Entering the app of EmbeddedLauncher");
-        Logger.info("System", "ArkPets version is " + appVersion);
-        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
         WindowSystem windowSystem = ArkConfig.getWindowSystemFrom(appConfig.window_system);
         try {
             WindowSystem.init(windowSystem);
@@ -111,7 +168,7 @@ public class EmbeddedLauncher {
                 System.setProperty("apple.awt.application.name", TITLE);
                 SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);
                 Configuration.GLFW_CHECK_THREAD0.set(false);
-                Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
+                if (!useCustomGLFW) Configuration.GLFW_LIBRARY_NAME.set("glfw_async");
             }
             // Handle GLFW error
             GLFW.glfwSetErrorCallback(new GLFWErrorCallback() {

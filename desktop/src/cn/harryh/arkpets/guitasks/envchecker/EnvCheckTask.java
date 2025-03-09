@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.envchecker;
+package cn.harryh.arkpets.guitasks.envchecker;
 
 import com.sun.jna.Platform;
 
@@ -37,9 +37,22 @@ public abstract class EnvCheckTask {
 
     public static List<EnvCheckTask> getAvailableTasks() {
         ArrayList<EnvCheckTask> list = new ArrayList<>();
-        list.add(new SleepEnvCheckTask(1500));
+        list.add(new SleepEnvCheckTask(1000));
         if (Platform.isWindows()) {
             list.add(new WinGraphicsEnvCheckTask());
+        }
+        if (Platform.isLinux()) {
+            String desktop = System.getenv("XDG_CURRENT_DESKTOP");
+            String type = System.getenv("XDG_SESSION_TYPE");
+            if (desktop != null && type != null) {
+                if (type.equals("wayland") && desktop.equals("GNOME")) {
+                    list.add(new GNOMEPluginCheckTask());
+                } else if (type.equals("wayland") && desktop.equals("KDE")) {
+                    list.add(new KWinPluginCheckTask());
+                } else {
+                    list.add(new X11CompositorCheckTask());
+                }
+            }
         }
         return list;
     }

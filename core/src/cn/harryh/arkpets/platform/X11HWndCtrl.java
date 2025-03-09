@@ -1,27 +1,31 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.natives.X11Extension;
+import cn.harryh.arkpets.natives.X11Helper;
+import cn.harryh.arkpets.natives.XextExtension;
 import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Native;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.unix.X11;
-import com.sun.jna.ptr.*;
+import com.sun.jna.ptr.IntByReference;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 public class X11HWndCtrl extends HWndCtrl {
-    private static final HashMap<String, X11Ext.Atom> atomsHash = new HashMap<>();
     private static X11.Display display;
-    private static final X11Ext x11 = X11Ext.INSTANCE;
+    private static final X11Extension x11 = X11Extension.INSTANCE;
+    private static final XextExtension xext = XextExtension.INSTANCE;
     protected final X11.Window hWnd;
 
-    public static final int MAX_PROPERTY_VALUE_LEN = 4096;
+    private static boolean shapeAvailable;
+    private boolean transparentEnable;
+
     public static final int STATE_REMOVE = 0;
     public static final int STATE_ADD = 1;
 
-    public X11HWndCtrl(X11Ext.Window hWnd) {
+    public X11HWndCtrl(X11Extension.Window hWnd) {
         super(winText(hWnd), getWindowRect(hWnd));
         this.hWnd = hWnd;
     }
@@ -34,13 +38,22 @@ public class X11HWndCtrl extends HWndCtrl {
         } else {
             Logger.info("System", "Connected to X display");
         }
+        IntByReference evt = new IntByReference();
+        IntByReference err = new IntByReference();
+        boolean xshape = xext.XShapeQueryExtension(display, evt, err);
+        if (!xshape) {
+            Logger.warn("System", "No XShape extension");
+            shapeAvailable = false;
+        } else {
+            shapeAvailable = true;
+        }
     }
 
     public static HWndCtrl find(String className, String windowName) {
-        X11Ext.Window[] wids = getWindows();
-        for (X11Ext.Window win : wids) {
+        X11Extension.Window[] wids = getWindows();
+        for (X11Extension.Window win : wids) {
             String wtitle = winText(win);
-            String wclass = getUtf8Property(win, X11.XA_STRING, X11.XA_WM_CLASS);
+            String wclass = X11Helper.getUtf8Property(display, win, X11.XA_STRING, X11.XA_WM_CLASS);
             if (className == null) {
                 if (wtitle.equals(windowName)) {
                     return new X11HWndCtrl(win);
@@ -56,7 +69,7 @@ public class X11HWndCtrl extends HWndCtrl {
 
     public static List<X11HWndCtrl> getWindowList(boolean onlyVisible) {
         ArrayList<X11HWndCtrl> windowList = new ArrayList<>();
-        X11.Window[] wins = getWindows();
+        X11Extension.Window[] wins = getWindows();
         for (X11.Window win : wins) {
             if (!onlyVisible || visible(win)) {
                 windowList.add(new X11HWndCtrl(win));
@@ -76,7 +89,7 @@ public class X11HWndCtrl extends HWndCtrl {
         Logger.info("System", "Disconnected from X display");
     }
 
-    protected static WindowRect getWindowRect(X11Ext.Window hWnd) {
+    protected static WindowRect getWindowRect(X11Extension.Window hWnd) {
         X11.WindowByReference junkRoot = new X11.WindowByReference();
         IntByReference junkX = new IntByReference();
         IntByReference junkY = new IntByReference();
@@ -93,10 +106,10 @@ public class X11HWndCtrl extends HWndCtrl {
 
         int xVal = x.getValue();
         int yVal = y.getValue();
-        int[] netFrame = getWMFrameBorder(hWnd, false);
+        int[] netFrame = X11Helper.getWMFrameBorder(display, hWnd, false);
         int addHeight = netFrame[2] + netFrame[3];
         int addWidth = netFrame[0] + netFrame[1];
-        int[] gtkFrame = getWMFrameBorder(hWnd, true);
+        int[] gtkFrame = X11Helper.getWMFrameBorder(display, hWnd, true);
         int removeHeight = gtkFrame[2] + gtkFrame[3];
         int removeWidth = gtkFrame[0] + gtkFrame[1];
 
@@ -109,8 +122,8 @@ public class X11HWndCtrl extends HWndCtrl {
 
     @Override
     public boolean isForeground() {
-        X11Ext.Window rootWindow = x11.XDefaultRootWindow(display);
-        long win = getIntProperty(rootWindow, X11Ext.XA_WINDOW, getAtom("_NET_ACTIVE_WINDOW"));
+        X11Extension.Window rootWindow = x11.XDefaultRootWindow(display);
+        long win = X11Helper.getIntProperty(display, rootWindow, X11Extension.XA_WINDOW, X11Helper.getAtom(display, "_NET_ACTIVE_WINDOW"));
         return hWnd.longValue() == win;
     }
 
@@ -122,7 +135,7 @@ public class X11HWndCtrl extends HWndCtrl {
     @Override
     public boolean close(int timeout) {
         //todo timeout
-        clientMsg(hWnd, "_NET_CLOSE_WINDOW", 0, 0, 0, 0, 0);
+        X11Helper.clientMsg(display, hWnd, "_NET_CLOSE_WINDOW", 0, 0, 0, 0, 0);
         return true;
     }
 
@@ -133,7 +146,7 @@ public class X11HWndCtrl extends HWndCtrl {
 
     @Override
     public void setForeground() {
-        clientMsg(hWnd, "_NET_ACTIVE_WINDOW", 0, 0, 0, 0, 0);
+        X11Helper.clientMsg(display, hWnd, "_NET_ACTIVE_WINDOW", 0, 0, 0, 0, 0);
         x11.XMapRaised(display, hWnd);
     }
 
@@ -149,17 +162,27 @@ public class X11HWndCtrl extends HWndCtrl {
 
     @Override
     public void setTransparent(boolean transparent) {
-        // unnecessary in X11.
+        if (!shapeAvailable) return;
+        if (transparentEnable != transparent) {
+            if (transparent) {
+                Pointer reg = x11.XCreateRegion();
+                xext.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
+                x11.XDestroyRegion(reg);
+            } else {
+                xext.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
+            }
+            transparentEnable = transparent;
+        }
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         if (!enable) {
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_ADD, X11Helper.getAtom(display, "_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_ADD, X11Helper.getAtom(display, "_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
         } else {
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_REMOVE, X11Helper.getAtom(display, "_NET_WM_STATE_SKIP_TASKBAR").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_REMOVE, X11Helper.getAtom(display, "_NET_WM_STATE_STICKY").intValue(), 0, 0, 0);
         }
     }
 
@@ -171,9 +194,9 @@ public class X11HWndCtrl extends HWndCtrl {
     @Override
     public void setTopmost(boolean enable) {
         if (enable) {
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_ADD, getAtom("_NET_WM_STATE_ABOVE").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_ADD, X11Helper.getAtom(display, "_NET_WM_STATE_ABOVE").intValue(), 0, 0, 0);
         } else {
-            clientMsg(hWnd, "_NET_WM_STATE", STATE_REMOVE, getAtom("_NET_WM_STATE_ABOVE").intValue(), 0, 0, 0);
+            X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_REMOVE, X11Helper.getAtom(display, "_NET_WM_STATE_ABOVE").intValue(), 0, 0, 0);
         }
     }
 
@@ -196,178 +219,23 @@ public class X11HWndCtrl extends HWndCtrl {
         return hWnd.hashCode();
     }
 
-    private static int bytesToInt(byte[] prop, int offset) {
-        return ((prop[3 + offset] & 0xff) << 24)
-                | ((prop[2 + offset] & 0xff) << 16)
-                | ((prop[1 + offset] & 0xff) << 8)
-                | ((prop[offset] & 0xff));
-    }
+    private static X11Extension.Window[] getWindows() {
+        X11Extension.Window rootWindow = x11.XDefaultRootWindow(display);
+        byte[] bytes = X11Helper.getProperty(display, rootWindow, X11Extension.XA_WINDOW, X11Helper.getAtom(display, "_NET_CLIENT_LIST_STACKING"));
 
-    private static X11.Atom getAtom(String name) {
-        X11.Atom atom = atomsHash.get(name);
-        if (atom == null) {
-            atom = x11.XInternAtom(display, name, false);
-            atomsHash.put(name, atom);
-        }
-        return atom;
-    }
-
-    private static byte[] getProperty(X11.Window win, X11.Atom xa_prop_type, X11.Atom xa_prop_name) {
-        X11.AtomByReference xa_ret_type_ref = new X11.AtomByReference();
-        IntByReference ret_format_ref = new IntByReference();
-        NativeLongByReference ret_nitems_ref = new NativeLongByReference();
-        NativeLongByReference ret_bytes_after_ref = new NativeLongByReference();
-        PointerByReference ret_prop_ref = new PointerByReference();
-
-        NativeLong long_offset = new NativeLong(0);
-        NativeLong long_length = new NativeLong(MAX_PROPERTY_VALUE_LEN / 4);
-
-        /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
-         *
-         * long_length = Specifies the length in 32-bit multiples of the
-         *               data to be retrieved.
-         */
-        if (x11.XGetWindowProperty(display, win, xa_prop_name, long_offset, long_length, false,
-                xa_prop_type, xa_ret_type_ref, ret_format_ref,
-                ret_nitems_ref, ret_bytes_after_ref, ret_prop_ref) != X11.Success) {
-            return new byte[] {};
-        }
-
-        X11.Atom xa_ret_type = xa_ret_type_ref.getValue();
-        Pointer ret_prop = ret_prop_ref.getValue();
-
-        if (xa_ret_type == null) {
-            //the specified property does not exist for the specified window
-            return new byte[] {};
-        }
-
-        if (xa_prop_type == null ||
-                !xa_ret_type.toNative().equals(xa_prop_type.toNative())) {
-            x11.XFree(ret_prop);
-            String prop_name = x11.XGetAtomName(display, xa_prop_name);
-            return new byte[] {};
-        }
-
-        int ret_format = ret_format_ref.getValue();
-        long ret_nitems = ret_nitems_ref.getValue().longValue();
-
-        // null terminate the result to make string handling easier
-        int nbytes;
-        if (ret_format == 32)
-            nbytes = Native.LONG_SIZE;
-        else if (ret_format == 16)
-            nbytes = Native.LONG_SIZE / 2;
-        else if (ret_format == 8)
-            nbytes = 1;
-        else if (ret_format == 0)
-            nbytes = 0;
-        else
-            return new byte[] {};
-        int length = Math.min((int) ret_nitems * nbytes, MAX_PROPERTY_VALUE_LEN);
-
-        byte[] ret = ret_prop.getByteArray(0, length);
-
-        x11.XFree(ret_prop);
-        return ret;
-    }
-
-    private static X11Ext.Window[] getWindows() {
-        X11Ext.Window rootWindow = x11.XDefaultRootWindow(display);
-        byte[] bytes = getProperty(rootWindow, X11Ext.XA_WINDOW, getAtom("_NET_CLIENT_LIST_STACKING"));
-
-        X11Ext.Window[] windowList = new X11Ext.Window[bytes.length / X11.Window.SIZE];
+        X11Extension.Window[] windowList = new X11Extension.Window[bytes.length / X11.Window.SIZE];
 
         for (int i = 0; i < windowList.length; i++) {
-            windowList[i] = new X11.Window(bytesToInt(bytes, X11.XID.SIZE * i));
+            windowList[i] = new X11.Window(X11Helper.bytesToInt(bytes, X11.XID.SIZE * i));
         }
 
         return windowList;
     }
 
-    private static String getUtf8Property(X11.Window win, X11.Atom xa_prop_type, X11.Atom xa_prop_name) {
-        byte[] property = getNullReplacedStringProperty(win, xa_prop_type, xa_prop_name);
-        if (property == null) {
-            return "";
-        }
-        return new String(property, StandardCharsets.UTF_8);
-    }
-
-    public static byte[] getNullReplacedStringProperty(X11.Window win, X11.Atom xa_prop_type, X11.Atom xa_prop_name) {
-        byte[] bytes = getProperty(win, xa_prop_type, xa_prop_name);
-
-        if (bytes == null) {
-            return null;
-        }
-
-        // search for '\0'
-        int i;
-        for (i = 0; i < bytes.length; i++) {
-            if (bytes[i] == '\0') {
-                bytes[i] = '.';
-            }
-        }
-
-        return bytes;
-    }
-
-    private static String winText(X11Ext.Window hWnd) {
+    private static String winText(X11Extension.Window hWnd) {
         String title;
-        title = getUtf8Property(hWnd, getAtom("UTF8_STRING"), getAtom("_NET_WM_NAME"));
+        title = X11Helper.getUtf8Property(display, hWnd, X11Helper.getAtom(display, "UTF8_STRING"), X11Helper.getAtom(display, "_NET_WM_NAME"));
         return title;
-    }
-
-    private static int[] getWMFrameBorder(X11.Window hWnd, boolean gtkFrame) {
-        X11.Atom xa_prop_type = getAtom("CARDINAL");
-        X11.Atom xa_prop_name;
-        if (gtkFrame) {
-            xa_prop_name = getAtom("_GTK_FRAME_EXTENTS");
-        } else {
-            xa_prop_name = getAtom("_NET_FRAME_EXTENTS");
-        }
-        X11.AtomByReference xa_ret_type_ref = new X11.AtomByReference();
-        IntByReference ret_format_ref = new IntByReference();
-        NativeLongByReference ret_nitems_ref = new NativeLongByReference();
-        NativeLongByReference ret_bytes_after_ref = new NativeLongByReference();
-        PointerByReference ret_prop_ref = new PointerByReference();
-
-        NativeLong long_offset = new NativeLong(0);
-        NativeLong long_length = new NativeLong(MAX_PROPERTY_VALUE_LEN / 4);
-
-        /* MAX_PROPERTY_VALUE_LEN / 4 explanation (XGetWindowProperty manpage):
-         *
-         * long_length = Specifies the length in 32-bit multiples of the
-         *               data to be retrieved.
-         */
-        if (x11.XGetWindowProperty(display, hWnd, xa_prop_name, long_offset, long_length, false,
-                xa_prop_type, xa_ret_type_ref, ret_format_ref,
-                ret_nitems_ref, ret_bytes_after_ref, ret_prop_ref) != X11.Success) {
-            return new int[]{0, 0, 0, 0};
-        }
-
-        X11.Atom xa_ret_type = xa_ret_type_ref.getValue();
-        Pointer ret_prop = ret_prop_ref.getValue();
-
-        if (xa_ret_type == null) {
-            return new int[]{0, 0, 0, 0};
-        }
-
-        if (xa_prop_type == null ||
-                !xa_ret_type.toNative().equals(xa_prop_type.toNative())) {
-            x11.XFree(ret_prop);
-            return new int[]{0, 0, 0, 0};
-        }
-
-        int ret_nitems = ret_nitems_ref.getValue().intValue();
-
-        long[] ret = ret_prop.getLongArray(0, ret_nitems);
-        int[] intArray = Arrays.stream(ret).mapToInt(i -> (int) i).toArray();
-        x11.XFree(ret_prop);
-        return intArray;
-    }
-
-    private static Integer getIntProperty(X11.Window hWnd, X11.Atom xa_prop_type, X11.Atom xa_prop_name) {
-        byte[] property = getProperty(hWnd, xa_prop_type, xa_prop_name);
-        return bytesToInt(property, 0);
     }
 
     private static boolean visible(X11.Window hWnd) {
@@ -377,9 +245,9 @@ public class X11HWndCtrl extends HWndCtrl {
             return false;
         }
         X11.Window root = x11.XDefaultRootWindow(display);
-        boolean visible = isWMState(hWnd, getAtom("_NET_WM_STATE_HIDDEN"));
-        int winDesktop = getIntProperty(hWnd, X11.XA_CARDINAL, getAtom("_NET_WM_DESKTOP"));
-        int currentDesktop = getIntProperty(root, X11.XA_CARDINAL, getAtom("_NET_CURRENT_DESKTOP"));
+        boolean visible = X11Helper.isWMState(display, hWnd, X11Helper.getAtom(display, "_NET_WM_STATE_HIDDEN"));
+        int winDesktop = X11Helper.getIntProperty(display, hWnd, X11.XA_CARDINAL, X11Helper.getAtom(display, "_NET_WM_DESKTOP"));
+        int currentDesktop = X11Helper.getIntProperty(display, root, X11.XA_CARDINAL, X11Helper.getAtom(display, "_NET_CURRENT_DESKTOP"));
         boolean inWorkspace = winDesktop == currentDesktop;
         if (!visible || !inWorkspace) {
             return false;
@@ -388,77 +256,4 @@ public class X11HWndCtrl extends HWndCtrl {
         return attr.y != attr.y + attr.height && attr.x != attr.x + attr.width;
     }
 
-    private static boolean isWMState(X11.Window hWnd, X11.Atom wm_prop) {
-        X11.Atom xa_prop_type = getAtom("ATOM");
-        X11.Atom xa_prop_name = getAtom("_NET_WM_STATE");
-        X11.AtomByReference xa_ret_type_ref = new X11.AtomByReference();
-        IntByReference ret_format_ref = new IntByReference();
-        NativeLongByReference ret_nitems_ref = new NativeLongByReference();
-        NativeLongByReference ret_bytes_after_ref = new NativeLongByReference();
-        PointerByReference ret_prop_ref = new PointerByReference();
-
-        NativeLong long_offset = new NativeLong(0);
-        NativeLong long_length = new NativeLong(MAX_PROPERTY_VALUE_LEN / 4);
-
-        if (x11.XGetWindowProperty(display, hWnd, xa_prop_name, long_offset, long_length, false,
-                xa_prop_type, xa_ret_type_ref, ret_format_ref,
-                ret_nitems_ref, ret_bytes_after_ref, ret_prop_ref) != X11.Success) {
-            return false;
-        }
-
-        X11.Atom xa_ret_type = xa_ret_type_ref.getValue();
-        Pointer ret_prop = ret_prop_ref.getValue();
-
-        if (xa_ret_type == null) {
-            return false;
-        }
-
-        if (xa_prop_type == null ||
-                !xa_ret_type.toNative().equals(xa_prop_type.toNative())) {
-            x11.XFree(ret_prop);
-            return false;
-        }
-
-        int ret_nitems = ret_nitems_ref.getValue().intValue();
-
-        char[] ret = ret_prop.getCharArray(0, ret_nitems);
-
-        x11.XFree(ret_prop);
-        for (char c : ret) {
-            if (((long) c) == wm_prop.longValue()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void clientMsg(X11.Window hWnd, String msg, int data0, int data1, int data2, int data3, int data4) {
-        X11.XClientMessageEvent event;
-        NativeLong mask = new NativeLong(X11.SubstructureRedirectMask | X11.SubstructureNotifyMask);
-        X11.Window root = x11.XDefaultRootWindow(display);
-        event = new X11.XClientMessageEvent();
-        event.type = X11.ClientMessage;
-        event.serial = new NativeLong(0);
-        event.send_event = 1;
-        event.message_type = getAtom(msg);
-        event.window = hWnd;
-        event.format = 32;
-        event.data.setType(NativeLong[].class);
-        event.data.l[0] = new NativeLong(data0);
-        event.data.l[1] = new NativeLong(data1);
-        event.data.l[2] = new NativeLong(data2);
-        event.data.l[3] = new NativeLong(data3);
-        event.data.l[4] = new NativeLong(data4);
-
-        X11.XEvent e = new X11.XEvent();
-        e.setTypedValue(event);
-
-        x11.XSendEvent(display, root, 0, mask, e);
-    }
-
-    public interface X11Ext extends X11 {
-        X11Ext INSTANCE = Native.load("X11", X11Ext.class);
-
-        void XMoveResizeWindow(Display display, Window w, int x, int y, int width, int height);
-    }
 }

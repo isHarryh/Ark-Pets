@@ -13,6 +13,10 @@ public abstract class StartupConfig {
     public static StartupConfig getInstance() {
         if (Platform.isWindows()) {
             return new WindowsStartupConfig();
+        } else if (Platform.isLinux()) {
+            return new XDGStartupConfig();
+        } else if (Platform.isMac()) {
+            return new LaunchdStartupConfig();
         }
         return new NullStartupConfig();
     }

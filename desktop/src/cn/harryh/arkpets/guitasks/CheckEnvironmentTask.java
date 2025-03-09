@@ -1,6 +1,6 @@
 package cn.harryh.arkpets.guitasks;
 
-import cn.harryh.arkpets.envchecker.EnvCheckTask;
+import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.concurrent.Task;

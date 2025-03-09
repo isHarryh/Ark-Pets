@@ -68,8 +68,10 @@ public final class ProcessPool implements Executor {
                 command.addAll(args);
             // Process execution
             ProcessBuilder builder = new ProcessBuilder(command);
+            // Some fix on libdecor
             Map<String, String> env = builder.environment();
             env.remove("GDK_BACKEND");
+            env.put("LIBDECOR_FORCE_CSD", "1");
             Process process = builder.inheritIO().start();
             int exitValue = process.waitFor();
             return new ProcessResult(exitValue, process.pid());

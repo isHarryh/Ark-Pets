@@ -11,7 +11,7 @@ import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.startup.StartupConfig;
 import cn.harryh.arkpets.platform.WindowSystem;
-import cn.harryh.arkpets.envchecker.EnvCheckTask;
+import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.badlogic.gdx.graphics.Color;
@@ -404,7 +404,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
         };
 
-        runEnvCheck.setOnMouseClicked(e -> new CheckEnvironmentTask(app.body, EnvCheckTask.getAvailableTasks()).start());
+        runEnvCheck.setOnMouseClicked(e -> new CheckEnvironmentTask(app.body, EnvCheckTask.getAvailableTasks(),() -> {
+            GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                    "环境检查提示",
+                    "环境检查通过。",
+                    "当前系统环境可以顺利运行 ArkPets。",
+                    null).show();
+        }).start());
     }
 
     private static ArrayList<NamedItem<String>> getWindowSystemItems() {
