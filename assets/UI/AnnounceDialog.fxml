@@ -10,12 +10,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
+<?import javafx.scene.text.Text?>
 <?import java.lang.String?>
 <AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0" styleClass="wrapper" stylesheets="@Main.css"
             xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="cn.harryh.arkpets.controllers.AnnounceDialog">
-    <HBox prefHeight="50.0" spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0"
-          AnchorPane.rightAnchor="-15.0" AnchorPane.topAnchor="-15.0">
+    <HBox spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0"
+          AnchorPane.topAnchor="-15.0">
         <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
         </padding>
@@ -26,7 +27,7 @@
                 <AnchorPane prefHeight="28.0" prefWidth="28.0" styleClass="btn-icon">
                     <SVGPath
                             content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"
-                            scaleX="1.05" scaleY="1.05" translateX="28.0"/>
+                            scaleX="1.05" scaleY="1.05" translateX="27.5"/>
                 </AnchorPane>
             </graphic>
             <styleClass>
@@ -34,17 +35,29 @@
                 <String fx:value="btn-iconified"/>
             </styleClass>
         </JFXButton>
-        <VBox prefHeight="50.0" prefWidth="350.0" spacing="5.0">
+        <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="50.0" prefWidth="355.0" styleClass="tool-bar-mask">
             <Label fx:id="annoTitle" text="暂未选择任何公告">
                 <graphic>
                     <AnchorPane prefHeight="14.0" prefWidth="14.0">
                         <SVGPath
-                                content="M22 24h-17c-1.657 0-3-1.343-3-3v-18c0-1.657 1.343-3 3-3h17v24zm-2-4h-14.505c-1.375 0-1.375 2 0 2h14.505v-2zm0-18h-3v9l-2-1.547-2 1.547v-9h-8v16h15v-16z"
-                                scaleX="0.5" scaleY="0.5" translateX="5.0"/>
+                                content="M23 5v13.883l-1 .117v-16c-3.895.119-7.505.762-10.002 2.316-2.496-1.554-6.102-2.197-9.998-2.316v16l-1-.117v-13.883h-1v15h9.057c1.479 0 1.641 1 2.941 1 1.304 0 1.461-1 2.942-1h9.06v-15h-1zm-12 13.645c-1.946-.772-4.137-1.269-7-1.484v-12.051c2.352.197 4.996.675 7 1.922v11.613zm9-1.484c-2.863.215-5.054.712-7 1.484v-11.613c2.004-1.247 4.648-1.725 7-1.922v12.051z"
+                                scaleX="0.6" scaleY="0.6" translateX="5.0"/>
                     </AnchorPane>
                 </graphic>
+                <padding>
+                    <Insets top="5.0"/>
+                </padding>
             </Label>
-            <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+            <HBox spacing="5.0">
+                <Label fx:id="annoGroup" layoutX="10.0" layoutY="10.0" text="等级">
+                    <graphic>
+                        <AnchorPane prefHeight="14.0" prefWidth="14.0">
+                            <SVGPath
+                                    content="M15.929 11.517c.848-1.003 1.354-2.25 1.354-3.601s-.506-2.598-1.354-3.601l1.57-1.439c1.257 1.375 2.022 3.124 2.022 5.04s-.766 3.664-2.022 5.041l-1.57-1.44zm-10.992-10.076l-1.572-1.441c-2.086 2.113-3.365 4.876-3.365 7.916s1.279 5.802 3.364 7.916l1.572-1.441c-1.672-1.747-2.697-4.001-2.697-6.475s1.026-4.728 2.698-6.475zm1.564 11.515l1.57-1.439c-.848-1.003-1.354-2.25-1.354-3.601s.506-2.598 1.354-3.601l-1.57-1.439c-1.257 1.375-2.022 3.124-2.022 5.04s.765 3.664 2.022 5.04zm14.134-12.956l-1.571 1.441c1.672 1.747 2.697 4.001 2.697 6.475s-1.025 4.728-2.697 6.475l1.572 1.441c2.085-2.115 3.364-4.877 3.364-7.916s-1.279-5.803-3.365-7.916zm-12.564 24l2.995-7.788c.148-.386.52-.641.934-.641s.785.255.934.641l2.995 7.788h2.154l-5.083-13.268c1.162-.414 2-1.512 2-2.816 0-1.657-1.344-3-3-3s-3 1.343-3 3c0 1.304.838 2.403 2 2.816l-5.042 13.268h2.113z"
+                                    scaleX="0.5" scaleY="0.5" translateX="5.0"/>
+                        </AnchorPane>
+                    </graphic>
+                </Label>
                 <Label fx:id="annoDate" text="日期">
                     <graphic>
                         <AnchorPane prefHeight="14.0" prefWidth="14.0">
@@ -56,7 +69,7 @@
                 </Label>
                 <Label fx:id="annoGotoOrigin" text="查看原文">
                     <graphic>
-                        <AnchorPane prefHeight="14.0" prefWidth="14.0">
+                        <AnchorPane prefHeight="12.0" prefWidth="12.0">
                             <SVGPath
                                     content="M6 12c0 2.206 1.794 4 4 4 1.761 0 3.242-1.151 3.775-2.734l2.224-1.291.001.025c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6c1.084 0 2.098.292 2.975.794l-2.21 1.283c-.248-.048-.503-.077-.765-.077-2.206 0-4 1.794-4 4zm4-2c-1.105 0-2 .896-2 2s.895 2 2 2 2-.896 2-2l-.002-.015 3.36-1.95c.976-.565 2.704-.336 3.711.159l4.931-2.863-3.158-1.569.169-3.632-4.945 2.87c-.07 1.121-.734 2.736-1.705 3.301l-3.383 1.964c-.29-.163-.621-.265-.978-.265zm7.995 1.911l.005.089c0 4.411-3.589 8-8 8s-8-3.589-8-8 3.589-8 8-8c1.475 0 2.853.408 4.041 1.107.334-.586.428-1.544.146-2.18-1.275-.589-2.69-.927-4.187-.927-5.523 0-10 4.477-10 10s4.477 10 10 10c5.233 0 9.521-4.021 9.957-9.142-.301-.483-1.066-1.061-1.962-.947z"
                                     scaleX="0.5" scaleY="0.5" translateX="5.0"/>
@@ -88,9 +101,25 @@
         <Label styleClass="dialog-title-label" text="公告"/>
     </HBox>
     <JFXListView fx:id="annoListView" prefHeight="250.0" prefWidth="175.0" styleClass="list"
-                 AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0"/>
+                 AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0">
+        <placeholder>
+            <VBox id="Loading-empty-tip" alignment="CENTER" spacing="5.0">
+                <SVGPath
+                        content="M1.604 24c1.853-2.784 7.647-8.21 13.919-9.494l.525 3.276c-3.773.264-9.01 2.523-14.444 6.218zm-1.604-1c2.037-2.653 6.013-6.906 6.226-15.092l-3.271.561c.418 4.888-1.546 10.626-2.955 14.531zm20.827-11.423l.802 2.4 2.371.883-2.035 1.504-.107 2.528-2.06-1.471-2.437.68.763-2.413-1.4-2.109 2.531-.02 1.572-1.982zm-11.911 3.677h-.018c-.268 0-.49-.213-.499-.483-.098-2.877.511-4.87 3.798-5.24 1.953-.219 2.029-1.116 2.135-2.357.099-1.171.235-2.775 2.737-2.959 1.23-.09 1.908-.307 2.267-.725.407-.475.528-1.357.403-2.948-.022-.275.184-.516.459-.538.254-.019.516.184.537.46.151 1.906-.035 2.972-.64 3.678-.556.647-1.411.957-2.953 1.07-1.651.122-1.712.846-1.814 2.046-.106 1.247-.251 2.956-3.02 3.267-2.33.262-3.011 1.247-2.91 4.212.01.276-.207.507-.482.517zm12.084-9.254c1.104 0 2 .896 2 2s-.896 2-2 2-2-.896-2-2 .896-2 2-2zm-13.715-4.058l-2.531.017-1.601-1.959-.766 2.412-2.359.918 2.058 1.473.144 2.527 2.037-1.501 2.447.643-.798-2.401 1.369-2.129zm3.715.058c1.104 0 2 .896 2 2s-.896 2-2 2-2-.896-2-2 .896-2 2-2z"
+                        scaleX="1.2" scaleY="1.2" translateY="-10.0"/>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="喜报！没有找到任何公告"/>
+            </VBox>
+        </placeholder>
+    </JFXListView>
     <ScrollPane id="Anno-container" fx:id="annoScroll" layoutX="234.0" layoutY="61.0" prefHeight="250.0"
                 prefWidth="350.0" styleClass="scroll-v" AnchorPane.bottomAnchor="-5.0" AnchorPane.rightAnchor="-5.0">
-        <VBox fx:id="annoContainer"/>
+        <VBox fx:id="annoContainer" alignment="CENTER">
+            <VBox id="Loading-empty-tip" alignment="CENTER" minHeight="250.0" minWidth="350.0" spacing="5.0">
+                <SVGPath
+                        content="M22 24h-17c-1.657 0-3-1.343-3-3v-18c0-1.657 1.343-3 3-3h17v24zm-2-4h-14.505c-1.375 0-1.375 2 0 2h14.505v-2zm0-18h-3v9l-2-1.547-2 1.547v-9h-8v16h15v-16z"
+                        scaleX="1.5" scaleY="1.5" translateY="-20.0"/>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="在左侧选取公告以阅读"/>
+            </VBox>
+        </VBox>
     </ScrollPane>
 </AnchorPane>

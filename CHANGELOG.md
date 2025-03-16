@@ -1,5 +1,28 @@
 # 更新日志 / CHANGELOG
 
+## v3.7
+| **新增**                                 |                                                                   |
+|:---------------------------------------|:------------------------------------------------------------------|
+| [`#106`]<br>[`aebb7f7`]<br>[`8f138cc`] | 新增了**公告栏**功能，可以从服务器获取公告信息并显示。<br>新增了适用于 JavaFX 的 Markdown 文档渲染支持。 |
+| [`c797fb0`]<br>[`83979e6`]             | 新增了公告的已读状态记录功能。<br>新增了在重要公告未读时会强制弹出公告栏的特性。                        |
+
+| **修复**                 |                                                  |
+|:-----------------------|:-------------------------------------------------|
+| [`#76`]<br>[`08b1bdb`] | 彻底修复了部分桌宠的**缝合线问题**（必须同时更新模型库才能应用修复）。            |
+| [`3f43cac`]            | 修复了在系统屏幕缩放不为 1.0 时，滚动面板（ScrollPane）中的内容显示不清晰的问题。 |
+| [`51b04c7`]            | 修复了个别具有多形态的敌方角色无法切换形态的问题。                        |
+
+| **优化**      |                                     |
+|:------------|:------------------------------------|
+| [`1b3d05d`] | 优化了临时文件的占用开销，现在会在启动器退出时主动删除较旧的临时文件。 |
+| [`344713c`] | 优化了着色器的少许计算性能开销。                    |
+| [`60e330b`] | 优化了单选框和下拉框组件的鼠标指针表现。                |
+
+| **补丁**                  |                                                                 |
+|:------------------------|:----------------------------------------------------------------|
+| `v3.7.1`<br>[`3d4fd7d`] | 修复了公告 Markdown 渲染发生乱码的问题。<br>修复了不带显式对齐属性的 Markdown 表格列无法被解析的问题。 |
+| `v3.7.1`<br>[`00a6f0a`] | 修复了特殊情况下公告栏无法被正常关闭的问题。                                          |
+
 ## v3.6
 | **新增**                            |                                                       |
 |:----------------------------------|:------------------------------------------------------|
@@ -9,9 +32,9 @@
 | [`#99`]<br>[`90f0660`]            | 新增了依据**时装品牌名称**来搜索模型的功能。                              |
 | [`e06dc6d`]                       | 新增了可以渲染桌宠**阴影**的功能，并可以自定义阴影的强度。                       |
 
-| **修复**                 |                               |
-|:-----------------------|:------------------------------|
-| [`c95768a`]            | 修复了部分角色在进行坐下动作时，窗口上边界表现异常的问题。 |
+| **修复**      |                               |
+|:------------|:------------------------------|
+| [`c95768a`] | 修复了部分角色在进行坐下动作时，窗口上边界表现异常的问题。 |
 
 | **优化**                 |                                                     |
 |:-----------------------|:----------------------------------------------------|
@@ -466,6 +489,7 @@
 [`#92`]: https://github.com/isHarryh/Ark-Pets/pull/92
 [`#93`]: https://github.com/isHarryh/Ark-Pets/pull/93
 [`#99`]:https://github.com/isHarryh/Ark-Pets/pull/99
+[`#106`]: https://github.com/isHarryh/Ark-Pets/pull/106
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -539,3 +563,15 @@
 [`e06dc6d`]: https://github.com/isHarryh/Ark-Pets/commit/e06dc6db09c8d17a63fc85ebe47ba41b0cabf91b
 [`c95768a`]: https://github.com/isHarryh/Ark-Pets/commit/c95768aa6200b4bf480519d5b467757277d1b122
 [`c277dae`]: https://github.com/isHarryh/Ark-Pets/commit/c277dae858b1e27aeb38712d6e3d090420de3846
+[`1b3d05d`]: https://github.com/isHarryh/Ark-Pets/commit/1b3d05d1e64075d51f94374951c30855104df61f
+[`08b1bdb`]: https://github.com/isHarryh/Ark-Pets/commit/08b1bdbbe9853adb972c7b5523a1e9afaae9f597
+[`344713c`]: https://github.com/isHarryh/Ark-Pets/commit/344713c6b3fed733ba2932dab84f8897c80d268b
+[`43fed1b`]: https://github.com/isHarryh/Ark-Pets/commit/43fed1b5818006b4dda198d7bdaa3b6e5a4c4a52
+[`8f138cc`]: https://github.com/isHarryh/Ark-Pets/commit/8f138ccca41057a81ecf02bd4ad332fe1256287a
+[`3f43cac`]: https://github.com/isHarryh/Ark-Pets/commit/3f43caca4c90cd64f293b7816f432e826e539e71
+[`60e330b`]: https://github.com/isHarryh/Ark-Pets/commit/60e330b95f87028c25705b553bfc291a06a61ea2
+[`c797fb0`]: https://github.com/isHarryh/Ark-Pets/commit/c797fb084f5328520d40ccc8933e76e5916f1ef6
+[`83979e6`]: https://github.com/isHarryh/Ark-Pets/commit/83979e658ccf7bbae3ef339c22594fda4956457a
+[`51b04c7`]: https://github.com/isHarryh/Ark-Pets/commit/51b04c7547cb94434fd265861c8c2f19ad7c31ff
+[`3d4fd7d`]: https://github.com/isHarryh/Ark-Pets/commit/3d4fd7d0de215690d3484b1c3c696601b604e97e
+[`00a6f0a`]: https://github.com/isHarryh/Ark-Pets/commit/00a6f0aa7b07eb1e309e95889e387272b50146fd

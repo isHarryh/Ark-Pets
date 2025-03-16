@@ -15,12 +15,16 @@ import com.badlogic.gdx.Graphics;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.charsetDefault;
+import static cn.harryh.arkpets.Const.hexColorRegex;
 
 
 public class ArkConfig implements Serializable {
@@ -99,6 +103,8 @@ public class ArkConfig implements Serializable {
     public float        transition_duration;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "EASE_OUT_CUBIC")
     public String       transition_type;
+    /** @since ArkPets 3.7 */ @JSONField()
+    public JSONObject   user_announcement_read;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")

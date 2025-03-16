@@ -426,15 +426,20 @@ public class CoreFxmlNodeRenderer extends AbstractVisitor implements NodeRendere
 
     private Map<String, String> getCellAttrs(TableCell tableCell) {
         if (tableCell.getParent().getParent().getParent() instanceof TableBlock tableBlock) {
-            RowColumnValue rc = rowColumnCount.get(tableBlock);
             Map<String, String> attrs = new HashMap<>(8);
-            attrs.put("GridPane.rowIndex", String.valueOf(rc.row));
-            attrs.put("GridPane.columnIndex", String.valueOf(rc.column));
-            attrs.put("alignment", switch (tableCell.getAlignment()) {
-                case LEFT -> "CENTER_LEFT";
-                case CENTER -> "CENTER";
-                case RIGHT -> "CENTER_RIGHT";
-            });
+            RowColumnValue rc = rowColumnCount.get(tableBlock);
+            if (rc != null) {
+                attrs.put("GridPane.rowIndex", String.valueOf(rc.row));
+                attrs.put("GridPane.columnIndex", String.valueOf(rc.column));
+            }
+            TableCell.Alignment align = tableCell.getAlignment();
+            if (align != null) {
+                attrs.put("alignment", switch (tableCell.getAlignment()) {
+                    case LEFT -> "CENTER_LEFT";
+                    case CENTER -> "CENTER";
+                    case RIGHT -> "CENTER_RIGHT";
+                });
+            }
             attrs.putAll(FxmlPrefabs.TABLE_CELL.getAttrs());
             return attrs;
         } else {

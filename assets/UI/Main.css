@@ -493,6 +493,16 @@ JFXSlider {
     -fx-background-color: transparent;
 }
 
+.tool-bar-mask {
+    -fx-background-color: #00000011;
+    -fx-background-radius: 5px;
+}
+
+.tool-bar-mask Label {
+    -fx-fill: white;
+    -fx-text-fill: white;
+}
+
 /*******************************************************************************
  *                                                                             *
  * 6. Other components                                                         *

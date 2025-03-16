@@ -13,6 +13,7 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -48,7 +49,7 @@ public class FxmlConvertor {
             FXMLLoader loader = new FXMLLoader();
             loader.setClassLoader(FxmlConvertor.class.getClassLoader());
             loader.setController(controller);
-            loader.load(new ByteArrayInputStream(fxml.getBytes()));
+            loader.load(new ByteArrayInputStream(fxml.getBytes(StandardCharsets.UTF_8)));
             return controller;
         } catch (IOException e) {
             throw new RuntimeException(e);

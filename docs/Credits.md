@@ -28,6 +28,7 @@ ArkPets附加说明文档
 - **[@南陽劉子驥](https://github.com/KaiserWilheim)**
 - **[@NappingSodion](https://github.com/KJH-x)**
 - **[@MegaSteelX](https://github.com/MegaSteelX)**
+- **[@KJH-x](https://github.com/KJH-x)**
 
 -----
 
@@ -58,15 +59,16 @@ ArkPets附加说明文档
 ### 第三方库
 关于本项目依赖的第三方库的 *Group-Artifact-Version* 信息，请参见仓库根目录的 `build.gradle` 文件。概述如下：
 
-|                           名称                            | 用途                         |
-|:-------------------------------------------------------:|:---------------------------|
-| [EsotericSoftware Spine](https://esotericsoftware.com)  | Spine 动画运行时                |
-|    [BadlogicGames libGDX](https://badlogicgames.com)    | libGDX 游戏框架                |
-|              [OpenJFX](https://openjfx.io)              | JavaFX UI 框架               |
-|     [JFoenix](https://github.com/sshahine/JFoenix)      | JavaFX Material Design 组件库 |
-|    [JNA](https://github.com/java-native-access/jna)     | Java Native Access 接口      |
-| [Alibaba FastJSON](https://github.com/alibaba/fastjson) | JSON 工具                    |
-|    [Apache log4j](https://logging.apache.org/log4j)     | 日志工具                       |
-|   [TinyPinyin](https://github.com/promeG/TinyPinyin)    | 汉语拼音转换工具                   |
-|      [Opencc4j](https://github.com/houbb/opencc4j)      | 中文简繁体转换工具                  |
-|   [Dbus-java](https://github.com/hypfvieh/dbus-java)    | D-Bus 通信接口                 |
+|                                名称                                | 用途                         |
+|:----------------------------------------------------------------:|:---------------------------|
+|      [EsotericSoftware Spine](https://esotericsoftware.com)      | Spine 动画运行时                |
+|        [BadlogicGames libGDX](https://badlogicgames.com)         | libGDX 游戏框架                |
+|                  [OpenJFX](https://openjfx.io)                   | JavaFX UI 框架               |
+|          [JFoenix](https://github.com/sshahine/JFoenix)          | JavaFX Material Design 组件库 |
+|         [JNA](https://github.com/java-native-access/jna)         | Java Native Access 接口      |
+|     [Alibaba FastJSON](https://github.com/alibaba/fastjson)      | JSON 工具                    |
+|         [Apache log4j](https://logging.apache.org/log4j)         | 日志工具                       |
+|        [TinyPinyin](https://github.com/promeG/TinyPinyin)        | 汉语拼音转换工具                   |
+ |          [Opencc4j](https://github.com/houbb/opencc4j)           | 中文简繁体转换工具                  |
+| [Commonmark-Java](https://github.com/commonmark/commonmark-java) | Markdown 文档解析工具            | 
+|        [Dbus-java](https://github.com/hypfvieh/dbus-java)        | D-Bus 通信接口                 |

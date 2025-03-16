@@ -21,6 +21,7 @@ import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -91,10 +92,6 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        initAnnoEntrance();
-        initMenuButtons();
-        initLaunchButton();
-        initLaunchingStatusListener();
 
         app.stage.setOnShown(e -> {
             Logger.debug("Launcher", "Window on shown");
@@ -108,6 +105,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         isNewcomer = app.config.isNewcomer();
         app.config.save();
+
+        initAnnoEntrance();
+        initMenuButtons();
+        initLaunchButton();
+        initLaunchingStatusListener();
     }
 
     /** Pops up the splash screen in the GUI.
@@ -242,30 +244,47 @@ public final class RootModule implements Controller<ArkHomeFX> {
     }
 
     private void initAnnoEntrance() {
+        // Load the fxml of announce dialog
+        try {
+            FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
+            announceDialog = (AnnounceDialog) fxml.initializeWith(app);
+        } catch (IOException ex) {
+            Logger.error("Launcher", "Failed to open announcement dialog, details see below.", ex);
+            throw new RuntimeException(ex);
+        }
+        // Entrance button logic
         annoEntrance.setOnAction(e -> {
-            try {
-                boolean firstOpenAnno = announceDialog == null;
-                if (firstOpenAnno) {
-                    // Lazy load the FXML of announceDialog
-                    FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
-                    announceDialog = (AnnounceDialog) fxml.initializeWith(app);
-                }
-                List<Pane> panesBelow = List.of(sidebar, wrapper1,wrapper2,wrapper3);
-                panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
-                JFXDialog popup = new JFXDialog(body, announceDialog.dialog, JFXDialog.DialogTransition.TOP, false);
-                popup.show();
-                announceDialog.dialogReturn.setOnAction(ev -> {
-                    popup.close();
-                    panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
-                });
-                if (firstOpenAnno) {
-                    // Lazy load announcement content
-                    announceDialog.fetchAnnounce();
-                }
-            } catch (IOException ex) {
-                Logger.error("Launcher", "Failed to open announcement dialog, details see below.", ex);
-                throw new RuntimeException(ex);
-            }
+            if (annoEntrance.isDisable())
+                return;
+            annoEntrance.setDisable(true);
+            // Blur out background nodes
+            List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
+            panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
+            // Setup and show popup
+            JFXDialog popup = new JFXDialog(body, announceDialog.dialog, JFXDialog.DialogTransition.TOP, false);
+            popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
+                popup.setOnMouseClicked(null);
+                // Transfer overlay close
+                announceDialog.dialogReturn.getOnAction().handle(
+                        new ActionEvent(ev.getSource(), ev.getTarget())
+                );
+            }));
+            popup.show();
+            // Bind return actions
+            announceDialog.dialogReturn.setOnAction(ev -> {
+                announceDialog.dialogReturn.setOnAction(null);
+                // Close popup
+                popup.close();
+                panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
+                annoEntrance.setDisable(false);
+            });
+        });
+        // Fetch once on app initialized
+        announceDialog.fetchAnnounce(false, () -> {
+            Logger.info("Announce", "Need immediate show");
+            annoEntrance.getOnAction().handle(
+                    new ActionEvent(this, Event.NULL_SOURCE_TARGET)
+            );
         });
     }
 

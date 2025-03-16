@@ -83,6 +83,7 @@ public class AnimClip {
         private enum AnimCommonStage {
             NONE(""),
             C_NUMBER("^C\\d$"),
+            ZERO_NUMBER("^0\\d$"),
             ALPHABET("^[A-Z]$");
 
             public final Pattern pattern;
@@ -103,7 +104,8 @@ public class AnimClip {
         public AnimStage(String name) {
             this(0);
             try {
-                if (AnimCommonStage.C_NUMBER.matcher(name).matches()) {
+                if (AnimCommonStage.C_NUMBER.matcher(name).matches()
+                        || AnimCommonStage.ZERO_NUMBER.matcher(name).matches()) {
                     updateId(Integer.parseInt(name.substring(1)));
                 } else if (AnimCommonStage.ALPHABET.matcher(name).matches()) {
                     int valueOfA = Character.getNumericValue('A');
