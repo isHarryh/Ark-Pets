@@ -87,6 +87,18 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private HBox wrapperConfigRenderShadow;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
+    @FXML
+    private JFXButton toggleConfigRenderAdvanced;
+    @FXML
+    private HBox wrapperConfigRenderAdvanced;
+    @FXML
+    private JFXCheckBox configEnableAngle;
+    @FXML
+    private JFXButton configEnableAngleHelp;
+    @FXML
+    private JFXCheckBox configEnableMipMap;
+    @FXML
+    private JFXButton configEnableMipMapHelp;
 
     @FXML
     private JFXCheckBox configWindowTopmost;
@@ -266,6 +278,45 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_shadow_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
+
+        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderAdvanced, wrapperConfigRenderAdvanced, durationFast);
+        configEnableAngle.setSelected(app.config.enable_angle);
+        configEnableAngle.setOnAction(e -> {
+            app.config.enable_angle = configEnableAngle.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableAngleHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableAngle.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        String apiText = null;
+                        if (com.sun.jna.Platform.isWindows()) apiText = "DirectX 11";
+                        else if (com.sun.jna.Platform.isMac()) apiText = "Metal";
+                        return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
+                                "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
+                    }
+                };
+            }
+        };
+
+        configEnableMipMap.setSelected(app.config.enable_mipmap);
+        configEnableMipMap.setOnAction(e -> {
+            app.config.enable_mipmap = configEnableMipMap.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会柔和桌宠在小分辨率渲染时产生的锯齿，但会在一定程度上增加显存占用。禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
+                    }
+                };
+            }
+        };
     }
 
     private void initConfigAdvanced() {
