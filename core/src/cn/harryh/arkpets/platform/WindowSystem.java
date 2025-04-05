@@ -175,4 +175,17 @@ public enum WindowSystem {
     public static boolean needDecorated() {
         return PLATFORM == NULL;
     }
+
+    /** Return current WindowSystem information request rate.
+     */
+    public static float getRequestRate() {
+        switch (PLATFORM) {
+            case MUTTER,KWIN,X11,QUARTZ -> { // IPC
+                return 6;
+            }
+            default -> {
+                return 4;
+            }
+        }
+    }
 }

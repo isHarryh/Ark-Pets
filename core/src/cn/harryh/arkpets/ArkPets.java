@@ -87,7 +87,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         );
 
         // 4.Window position setup
-        getHWndLoopCtrl = new LoopCtrl(1f / config.display_fps * 4);
+        getHWndLoopCtrl = new LoopCtrl(1f / config.display_fps * WindowSystem.getRequestRate());
         windowPosition = new TransitionVector2(
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
