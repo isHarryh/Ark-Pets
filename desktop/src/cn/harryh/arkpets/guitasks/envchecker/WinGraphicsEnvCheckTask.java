@@ -75,14 +75,8 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setWinGraphicsCard(javaBin, false);
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
-                case WIN_PERF -> {
-                    setWinGraphicsCard(launcherPath, true);
-                    setWinGraphicsCard(javaBin, true);
-                }
-                case WIN_PERF_NV -> {
-                    setWinGraphicsCard(launcherPath, true);
-                    setWinGraphicsCard(javaBin, true);
-                    setNvidiaGLSettings(true, launcherPath, javaBin);
+                case ANGLE -> {
+                    // todo enable angle
                 }
             }
         } catch (Exception e) {
@@ -123,21 +117,12 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     return true;
                 } else if (cards.contains("AMD") && cards.contains("NVIDIA")) {
                     // A+N Hybrid
-                    boolean card = checkWinGraphicsCard(launcherPath, true) && checkWinGraphicsCard(javaBin, true);
-                    boolean nv = checkNvidiaGLSettings();
-                    if (card && nv) {
-                        return true;
-                    }
-                    if (!card && !nv) fix = FixMode.WIN_PERF_NV;
-                    else if (!card) fix = FixMode.WIN_PERF;
-                    else fix = FixMode.NV;
-                    return false;
+                    // todo check angle
+                    return true;
                 } else if (cards.contains("AMD")) {
-                    // A+A Hybrid or AMD single,Fail temporary
-                    fix = FixMode.FAIL;
-                    failureReason = "AMD 显卡警告";
-                    failureDetail = "检测到正在使用 AMD 显卡，ArkPets 暂不支持 AMD 显卡。\n你仍可以尝试强制运行，但桌宠背景可能会不透明。";
-                    return false;
+                    // A+A Hybrid or AMD single
+                    // todo check angle
+                    return true;
                 } else if (cards.contains("NVIDIA")) {
                     // NVIDIA only
                     boolean status = checkNvidiaGLSettings();
@@ -289,9 +274,8 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     private enum FixMode {
         WIN_SAV,     // Windows Power-saving
         WIN_SAV_NV,  // Windows and NVIDIA Power-saving
-        WIN_PERF,
+        ANGLE,       // Enable ANGLE
         NV,          // NVIDIA OpenGL GDI and Present method
-        WIN_PERF_NV, // Windows Performance, NVIDIA OpenGL GDI and Present method
         FAIL         // Can't Fix
     }
 }
