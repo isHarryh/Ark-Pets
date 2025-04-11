@@ -178,7 +178,7 @@ public enum WindowSystem {
 
     /** Return current WindowSystem information request rate.
      */
-    public static float getRequestRate() {
+    public static int getRequestRate() {
         switch (PLATFORM) {
             case MUTTER,KWIN,X11,QUARTZ -> { // IPC
                 return 6;

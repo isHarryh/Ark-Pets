@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.guitasks;
 
+import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
@@ -16,6 +17,7 @@ public class CheckEnvironmentTask extends GuiTask {
     private final List<EnvCheckTask> list;
     private final StackPane parent;
     private Runnable success;
+    private ArkConfig cfg;
 
     private enum CheckStatus {
         UNKNOWN,
@@ -31,9 +33,10 @@ public class CheckEnvironmentTask extends GuiTask {
         this.list = list;
     }
 
-    public CheckEnvironmentTask(StackPane parent, List<EnvCheckTask> list, Runnable success) {
+    public CheckEnvironmentTask(StackPane parent, List<EnvCheckTask> list, Runnable success, ArkConfig cfg) {
         this(parent, list);
         this.success = success;
+        this.cfg = cfg;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class CheckEnvironmentTask extends GuiTask {
                                 return true;
                             }
                             Logger.info("EnvCheck", "Running Fix " + task);
-                            boolean fixResult = task.tryFix();
+                            boolean fixResult = task.tryFix(cfg);
                             if (!fixResult) {
                                 failureReason = task.getFailureReason();
                                 failureContent = task.getFailureDetail();
@@ -122,7 +125,7 @@ public class CheckEnvironmentTask extends GuiTask {
     private void fixAndContinue() {
         EnvCheckTask fixtask = list.get(0);
         Logger.info("EnvCheck", "Running Fix " + fixtask);
-        boolean fixResult = fixtask.tryFix();
+        boolean fixResult = fixtask.tryFix(cfg);
         if (!fixResult) {
             GuiPrefabs.Dialogs.createCommonDialog(parent,
                     GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),

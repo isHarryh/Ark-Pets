@@ -1,5 +1,8 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
+import cn.harryh.arkpets.ArkConfig;
+
+
 public class ConfirmTestCheckTask extends EnvCheckTask {
     @Override
     public String getFailureReason() {
@@ -12,7 +15,7 @@ public class ConfirmTestCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix() {
+    public boolean tryFix(ArkConfig cfg) {
         return true;
     }
 

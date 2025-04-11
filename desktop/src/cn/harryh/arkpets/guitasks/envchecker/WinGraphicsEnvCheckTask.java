@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
+import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.naitves.NVAPIWrapper;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -62,7 +63,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix() {
+    public boolean tryFix(ArkConfig cfg) {
         try {
             switch (fix) {
                 case NV -> setNvidiaGLSettings(true, launcherPath, javaBin);
@@ -76,7 +77,8 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
                 case ANGLE -> {
-                    // todo enable angle
+                    cfg.enable_angle = true;
+                    cfg.save();
                 }
             }
         } catch (Exception e) {
@@ -116,13 +118,11 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     }
                     return true;
                 } else if (cards.contains("AMD") && cards.contains("NVIDIA")) {
-                    // A+N Hybrid
-                    // todo check angle
-                    return true;
+                    fix = FixMode.ANGLE;
+                    return false;
                 } else if (cards.contains("AMD")) {
-                    // A+A Hybrid or AMD single
-                    // todo check angle
-                    return true;
+                    fix = FixMode.ANGLE;
+                    return false;
                 } else if (cards.contains("NVIDIA")) {
                     // NVIDIA only
                     boolean status = checkNvidiaGLSettings();
