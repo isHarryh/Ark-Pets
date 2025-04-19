@@ -101,7 +101,7 @@ public class BootstrapLauncher {
             }
         };
         // Disable libdecor to avoid glfw and javafx problem on linux.
-        if(Platform.isLinux()) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
+        if(isLinux) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, ArgPending.argCache);
         Logger.info("System", "Exited from DesktopLauncher successfully");
@@ -169,7 +169,7 @@ public class BootstrapLauncher {
             config.setTransparentFramebuffer(true);
             config.setInitialBackgroundColor(Color.CLEAR);
             // Use async GLFW on macOS
-            if (Platform.isMac()) {
+            if (isMac) {
                 Logger.info("System", "Running on macOS, using async GLFW.");
                 System.setProperty("apple.awt.application.name", TITLE);
                 SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);

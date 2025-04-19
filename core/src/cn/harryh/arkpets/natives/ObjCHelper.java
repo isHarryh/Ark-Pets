@@ -1,8 +1,8 @@
 package cn.harryh.arkpets.natives;
 
+import cn.harryh.arkpets.Const;
 import com.sun.jna.*;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +15,7 @@ public class ObjCHelper {
 
     public static void init() {
         msgSend = Function.getFunction("objc.A", "objc_msgSend");
-        if (Platform.isIntel()) {
+        if (Const.isIntel) {
             msgSend_stret = Function.getFunction("objc.A", "objc_msgSend_stret");
         }
     }

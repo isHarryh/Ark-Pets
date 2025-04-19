@@ -1,6 +1,7 @@
 package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkHomeFX;
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
@@ -43,9 +44,9 @@ public class Titlebar implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        if (forceUiStyle.equals("mac") || com.sun.jna.Platform.isMac()) {
+        if (forceUiStyle.equals("mac") || Const.isMac) {
             initMacTitlebar();
-        } else if (forceUiStyle.equals("win") || com.sun.jna.Platform.isWindows()){
+        } else if (forceUiStyle.equals("win") || Const.isWindows){
 
         }
     }
