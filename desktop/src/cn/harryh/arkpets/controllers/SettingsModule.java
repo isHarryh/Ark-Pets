@@ -92,6 +92,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private HBox wrapperConfigRenderAdvanced;
     @FXML
+    private HBox configAngleBox;
+    @FXML
     private JFXCheckBox configEnableAngle;
     @FXML
     private JFXButton configEnableAngleHelp;
@@ -280,6 +282,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 });
 
         GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderAdvanced, wrapperConfigRenderAdvanced, durationFast);
+        if(isMac || isLinux) {
+            // Because some ANGLE Metal bug (background), temporary hide on macOS.
+            // Hide on Linux because the primary graphics API is OpenGL.
+            configAngleBox.setVisible(false);
+            configAngleBox.setManaged(false);
+        }
         configEnableAngle.setSelected(app.config.enable_angle);
         configEnableAngle.setOnAction(e -> {
             app.config.enable_angle = configEnableAngle.isSelected();

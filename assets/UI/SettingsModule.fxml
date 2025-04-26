@@ -154,7 +154,7 @@
                         <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="多级纹理"/>
                         <JFXButton fx:id="configEnableMipMapHelp"/>
                     </HBox>
-                    <HBox>
+                    <HBox fx:id="configAngleBox">
                         <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="原生渲染"/>
                         <JFXButton fx:id="configEnableAngleHelp"/>
                     </HBox>
