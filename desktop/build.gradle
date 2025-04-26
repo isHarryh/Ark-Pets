@@ -70,9 +70,6 @@ task distJar(dependsOn: classes, type: Jar, group: 'dist') {
         attributes 'Main-Class': project.mainClassName
     }
     dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
     with jar
     doLast() {
         copy {
@@ -81,6 +78,11 @@ task distJar(dependsOn: classes, type: Jar, group: 'dist') {
             rename "${jarLibName}.jar", "${distName}.jar"
         }
     }
+}
+
+task copyToLib(type: Copy) {
+    into "${distDir}/libs"
+    from configurations.runtimeClasspath
 }
 
 // Creates a customized Java Runtime Environment for the app.
