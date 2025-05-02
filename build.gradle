@@ -36,24 +36,38 @@ allprojects {
         lwjglVersion = "3.3.4"
         javaFXPlatform = ""
         lwjglPlatform = ""
-        // Platform
         def isArm = System.getProperty("os.arch").startsWith("aarch64")
         def isX64 = System.getProperty("os.arch").startsWith("64")
-        switch (OperatingSystem.current()) {
-            case OperatingSystem.LINUX:
-                javaFXPlatform = "linux"
-                lwjglPlatform = "natives-linux"
-                break
-            case OperatingSystem.WINDOWS:
-                javaFXPlatform = isX64 ? "win" : "win-x86"
-                lwjglPlatform = isX64 ? "natives-windows" : "natices-windows-x86"
-                break
-            case OperatingSystem.MAC_OS:
-                javaFXPlatform = isArm ? "mac-aarch64" : "mac"
-                lwjglPlatform = isArm ? "natives-macos-arm64" : "natives-macos"
-                break
+        if (forceJavaFXPlatform.empty) {
+            switch (OperatingSystem.current()) {
+                case OperatingSystem.LINUX:
+                    javaFXPlatform = "linux"
+                    break
+                case OperatingSystem.WINDOWS:
+                    javaFXPlatform = isX64 ? "win" : "win-x86"
+                    break
+                case OperatingSystem.MAC_OS:
+                    javaFXPlatform = isArm ? "mac-aarch64" : "mac"
+                    break
+            }
+        } else {
+            javaFXPlatform = forceJavaFXPlatform
         }
-
+        if (forceLWJGLPlatform.empty) {
+            switch (OperatingSystem.current()) {
+                case OperatingSystem.LINUX:
+                    lwjglPlatform = "natives-linux"
+                    break
+                case OperatingSystem.WINDOWS:
+                    lwjglPlatform = isX64 ? "natives-windows" : "natices-windows-x86"
+                    break
+                case OperatingSystem.MAC_OS:
+                    lwjglPlatform = isArm ? "natives-macos-arm64" : "natives-macos"
+                    break
+            }
+        } else {
+            lwjglPlatform = forceLWJGLPlatform
+        }
     }
 
     repositories {
