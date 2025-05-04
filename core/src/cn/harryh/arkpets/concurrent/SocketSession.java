@@ -118,6 +118,6 @@ abstract public class SocketSession implements Runnable {
 
     @Override
     public String toString() {
-        return "[" + getHostAddress() + ":" + getPort() +"]";
+        return "[" + getHostAddress() + ":" + getPort() + "]";
     }
 }

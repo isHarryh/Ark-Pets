@@ -592,6 +592,12 @@ ProgressBar:indeterminate>.bar {
     -fx-background-radius: 0 8px 0 0;
 }
 
+#Toast {
+    -fx-padding: 4px 8px;
+    -fx-background-color: white;
+    -fx-background-radius: 3px;
+}
+
 /*******************************************************************************
  *                                                                             *
  * 7. ScrollBar and ScrollPane                                                 *
@@ -677,4 +683,46 @@ ProgressBar:indeterminate>.bar {
 .flow-wrapper {
     -fx-hbar-policy: never;
     -fx-vbar-policy: as-needed;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 8. TabPane                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.jfx-tab-pane {
+	-fx-tab-min-width: 25px;
+	-fx-tab-min-height: 25px;
+	-fx-padding: 10px;
+}
+
+.jfx-tab-pane .tab-header-area .control-buttons-tab .jfx-rippler {
+    -jfx-rippler-fill: -theme-color-dim;
+}
+
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: #00000011;
+}
+
+.jfx-tab-pane .headers-region .tab-selected-line {
+    -fx-background-color: -theme-color;
+    -fx-pref-height: 1.5px;
+}
+
+.jfx-tab-pane .headers-region .tab .jfx-rippler {
+    -jfx-rippler-fill: -theme-color-light;
+}
+
+.jfx-tab-pane .headers-region .tab .tab-container .tab-label {
+    -fx-text-fill: gray;
+    -fx-font-size: 13px;
+}
+
+.jfx-tab-pane .headers-region .tab:closable {
+    -fx-border-color: -theme-color-dim;
+}
+
+.jfx-tab-pane .headers-region .tab:selected .tab-container .tab-label {
+    -fx-text-fill: -theme-color;
 }

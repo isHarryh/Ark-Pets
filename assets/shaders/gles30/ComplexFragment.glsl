@@ -1,13 +1,13 @@
 #version 300 es
-precision mediump float;
 /** Copyright (c) 2022-2024, Harry Huang
  * At GPL-3.0 License
  */
 
-// Gap Seaming and Ouline Effect Fragment Shader for TwoColorPolygonBatch.
+// Complex fragment shader for TwoColorPolygonBatch with outline and box shadow effect.
 
+precision mediump float;
 
-in vec2 v_texCoords;       // From VS
+in vec2 v_texCoords;            // From VS
 uniform sampler2D u_texture;    // From TCPB
 uniform vec4 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
@@ -24,7 +24,7 @@ const float c_seamCoef = 0.6;
 const float c_outlineOverstate = 10.0;
 const float c_shadowOffset = 2.0;
 
-const float gaussianNeighborKernel[25] = float[25] (
+const float gaussianNeighborKernel[25] = float[25](
 0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
 0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
 0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,

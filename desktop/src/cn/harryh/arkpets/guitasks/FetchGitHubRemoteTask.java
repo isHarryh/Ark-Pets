@@ -42,7 +42,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                 this.updateMessage("正在选择最佳线路");
                 Logger.info("Network", "Testing real delay");
                 GitHubSource.sortByOverallAvailability(NetUtils.ghSources);
-                selectedSource = (GitHubSource)NetUtils.ghSources.get(0);
+                selectedSource = (GitHubSource) NetUtils.ghSources.get(0);
 
                 Logger.info("Network", "Selected the most available " + selectedSource);
                 String remotePathPrefix = isArchive ? selectedSource.archivePreUrl : selectedSource.rawPreUrl;
@@ -58,7 +58,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                         isHttpsTrustAll);
                 final InputStream is = connection.getInputStream();
                 final OutputStream os = Files.newOutputStream(new File(destPath).toPath());
-                final BufferedInputStream  bis = new BufferedInputStream(is, httpBufferSizeDefault);
+                final BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
                 final BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
 
                 try (bis; bos; is; os) {

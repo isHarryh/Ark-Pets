@@ -13,6 +13,7 @@ import cn.harryh.arkpets.controllers.Titlebar;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
+import cn.harryh.arkpets.utils.GuiComponents;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -40,6 +41,7 @@ public class ArkHomeFX extends Application {
     public ArkConfig config;
     public ModelsDataset modelsDataset;
     public StackPane body;
+    public GuiComponents.Toast toast;
 
     public RootModule rootModule;
     public ModelsModule modelsModule;
@@ -60,7 +62,7 @@ public class ArkHomeFX extends Application {
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
         fxml0.initializeWith(this);
-        rootModule = (RootModule)fxml0.controller();
+        rootModule = (RootModule) fxml0.controller();
         body = rootModule.body;
         LoadFXMLResult<ArkHomeFX> fxmlTitlebar = FXMLHelper.loadFXML(getClass().getResource("/UI/Titlebar.fxml"));
         fxmlTitlebar.initializeWith(this);

@@ -41,7 +41,8 @@ public class HostTray {
                     UIManager.put("Menu.margin", new Insets(0, -16, 0, 0));
                 }
                 UIManager.setLookAndFeel(laf);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         });
         Const.FontsConfig.loadFontsToSwing();
     }

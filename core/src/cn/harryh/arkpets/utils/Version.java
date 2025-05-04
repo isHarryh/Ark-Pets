@@ -54,7 +54,7 @@ public class Version {
     }
 
     public int[] toArray() {
-        return new int[] {major, minor, patch};
+        return new int[]{major, minor, patch};
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Version {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Version that = (Version)o;
+        Version that = (Version) o;
         return major == that.major && minor == that.minor && patch == that.patch;
     }
 

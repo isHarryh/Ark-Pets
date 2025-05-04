@@ -19,7 +19,6 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
     protected final Insert minInsert = new Insert();
     protected FrameBuffer fbo;
 
-    protected static final int alphaThreshold = 255;
     protected static final int stepLength = 2;
     protected static final boolean cameraYDown = false;
 
@@ -52,13 +51,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         setInsert(curInsert);
     }
 
-    public void cropTo(Pixmap pixmap, boolean flippedX, boolean flippedY) {
-        Insert insert = getFittedInsert(pixmap, flippedX, flippedY);
-        insert.limitMax(curInsert);
-        setInsert(insert);
-    }
-
-    public Insert getFittedInsert(Pixmap pixmap, boolean flippedX, boolean flippedY) {
+    public Insert getFittedInsert(Pixmap pixmap, float alphaThreshold, boolean flippedX, boolean flippedY) {
         final Insert insert = curInsert.clone();
         final int edgeWidth = pixmap.getWidth() - 1;
         final int edgeHeight = pixmap.getHeight() - 1;
@@ -66,7 +59,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         final int extendedY = paddingLength;
         final int reservedX = paddingLength;
         final int reservedY = paddingLength;
-        //PixmapIO.writePNG(new FileHandle("temp.png"), pixmap);
+        final int alphaThresholdInt = Math.max(1, Math.min((int) Math.floor(alphaThreshold * 255f), 255));
 
         if (flippedX)
             insert.swapHorizontal();
@@ -76,7 +69,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         // TOP
         for (int y = 0; y <= edgeHeight; y += stepLength)
             for (int x = 0; x <= edgeWidth; x += stepLength)
-                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
+                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThresholdInt) {
                     if (y == 0)
                         insert.top += extendedY;
                     else
@@ -87,7 +80,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         // BOTTOM
         for (int y = edgeHeight; y >= 0; y -= stepLength)
             for (int x = 0; x <= edgeWidth; x += stepLength)
-                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
+                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThresholdInt) {
                     if (y == edgeHeight)
                         insert.bottom += extendedY;
                     else
@@ -98,7 +91,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         // LEFT
         for (int x = 0; x <= edgeWidth; x += stepLength)
             for (int y = 0; y <= edgeHeight; y += stepLength)
-                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
+                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThresholdInt) {
                     if (x == 0)
                         insert.left += extendedX;
                     else
@@ -109,7 +102,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         // RIGHT
         for (int x = edgeWidth; x >= 0; x -= stepLength)
             for (int y = 0; y <= edgeHeight; y += stepLength)
-                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThreshold) {
+                if ((pixmap.getPixel(x, y) & 0x000000FF) >= alphaThresholdInt) {
                     if (x == edgeWidth)
                         insert.right += extendedX;
                     else
@@ -251,7 +244,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Insert insert = (Insert)o;
+            Insert insert = (Insert) o;
             return top == insert.top && bottom == insert.bottom && left == insert.left && right == insert.right;
         }
 

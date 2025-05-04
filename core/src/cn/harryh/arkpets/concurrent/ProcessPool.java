@@ -50,7 +50,7 @@ public final class ProcessPool implements Executor {
     }
 
     public Future<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
-        FutureTask<ProcessResult> task = new FutureTask<> (() -> {
+        FutureTask<ProcessResult> task = new FutureTask<>(() -> {
             // Attributes preparation
             String javaHome = System.getProperty("java.home");
             String javaBin = javaHome + File.separator + "bin" + File.separator + "java";

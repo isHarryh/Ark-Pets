@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2025, Harry Huang
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
@@ -8,7 +11,6 @@ import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
-import com.sun.jna.Platform;
 import javafx.application.Application;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -116,7 +118,7 @@ public class BootstrapLauncher {
         new ArgPending("--load-lib", ArgPending.argCache) {
             @Override
             protected void process(String command, String addition) {
-                Logger.info("System", "Loading the specified library \"" + addition +"\"");
+                Logger.info("System", "Loading the specified library \"" + addition + "\"");
                 try {
                     System.load(addition);
                 } catch (UnsatisfiedLinkError e) {
@@ -148,7 +150,7 @@ public class BootstrapLauncher {
             WindowSystem.init(windowSystem);
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             // Configure ANGLE
-            if (appConfig.enable_angle) {
+            if (appConfig.render_enable_angle) {
                 Logger.info("System", "Using ANGLE renderer");
                 config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
                 Configuration.OPENGL_EXPLICIT_INIT.set(true);

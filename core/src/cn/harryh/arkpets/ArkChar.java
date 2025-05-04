@@ -74,8 +74,8 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader, config.enable_angle);
-        shader2 = getShader(pass2VShader, pass2FShader, config.enable_angle);
+        shader1 = getShader(pass1VShader, pass1FShader, config.render_enable_angle);
+        shader2 = getShader(pass2VShader, pass2FShader, config.render_enable_angle);
         Logger.debug("Shader", "Shader program compiled");
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
@@ -93,8 +93,8 @@ public class ArkChar {
             String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
             // Load atlas
             FileHandle packFile = Gdx.files.internal(path2atlas);
-            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile,packFile.parent(),false);
-            if(config.enable_mipmap) {
+            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false);
+            if (config.render_enable_mipmap) {
                 for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
                     page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
                     page.useMipMaps = true;
@@ -150,7 +150,7 @@ public class ArkChar {
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
-            adjustCanvas(animList.findAnimations(stage), config.canvas_fitting_samples);
+            adjustCanvas(stage, config.canvas_sampling_interval, config.canvas_coverage);
             if (!camera.isInsertMaxed()) {
                 // Succeeded
                 stageInsertMap.put(stage, camera.getInsert().clone());
@@ -233,7 +233,7 @@ public class ArkChar {
     /** Renders the character to the graphics.
      * The animation will be updated according to {@code Gdx.graphics.getDeltaTime()}.
      */
-    protected void renderToBatch() {
+    protected void render() {
         // Update skeleton position and geometry
         position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
         position.addProgress(Gdx.graphics.getDeltaTime());
@@ -250,6 +250,7 @@ public class ArkChar {
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
+        shader1.setUniformf("u_alpha", 1.0f);
         batch.setShader(shader1);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
@@ -280,9 +281,28 @@ public class ArkChar {
         batch.setShader(null);
     }
 
+    /** Renders the character to the graphics additively, ignoring delta time and complex shaders.
+     * @param alpha The additive rendering alpha.
+     */
+    protected void renderAdditive(float alpha) {
+        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
+        skeleton.setPosition(position.end().x, position.end().y + offsetY.end());
+        skeleton.setScaleX(position.end().z);
+        skeleton.updateWorldTransform();
+        animationState.apply(skeleton);
+        batch.getProjectionMatrix().set(camera.combined);
+        shader1.bind();
+        shader1.setUniformf("u_alpha", alpha);
+        batch.setShader(shader1);
+        batch.begin();
+        renderer.draw(batch, skeleton);
+        batch.end();
+        batch.setShader(null);
+    }
+
     private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
         String ver = gles30 ? "gles30" : "gl21";
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex,ver)), Gdx.files.internal(String.format(path2fragment,ver)));
+        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
         if (!shader.isCompiled()) {
             Logger.error("Shader", "Shader program failed to compile.");
             Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);
@@ -292,14 +312,28 @@ public class ArkChar {
         return shader;
     }
 
-    private void adjustCanvas(AnimClipGroup animClips, int fittingSamples) {
-        float timePerSample = fittingSamples / (float)fpsDefault;
+    private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {
+        // Pre stats total samples
+        float timePerSample = framePerSample / (float) fpsDefault;
+        int totalSamples = 0;
+        for (AnimClip animClip : animList.findAnimations(stage)) {
+            composer.reset();
+            composer.offer(new AnimData(animClip));
+            float totalTime = animationState.getCurrent(0).getAnimation().getDuration();
+            if (totalTime > 0) {
+                totalSamples += timePerSample <= 0 || totalTime <= timePerSample * 2
+                        ? 1 : (int) Math.floor(totalTime / timePerSample);
+            }
+        }
+        if (totalSamples <= 0)
+            return;
         // Prepare a Frame Buffer Object
         camera.setInsertMaxed();
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
-        for (AnimClip animClip : animClips) {
+        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, 1.0 - Math.pow(10.0, -4.0 / totalSamples));
+        for (AnimClip animClip : animList.findAnimations(stage)) {
             composer.reset();
             composer.offer(new AnimData(animClip));
             float totalTime = animationState.getCurrent(0).getAnimation().getDuration();
@@ -307,11 +341,11 @@ public class ArkChar {
                 if (timePerSample <= 0 || totalTime <= timePerSample * 2) {
                     // Render the middle frame as the only sample
                     animationState.update(totalTime / 2);
-                    renderAsSnapshot();
+                    renderAdditive(alphaPerSample);
                 } else {
                     // Render each interval frame as samples
                     for (float t = 0; t < totalTime; t += timePerSample) {
-                        renderAsSnapshot();
+                        renderAdditive(alphaPerSample);
                         animationState.update(timePerSample);
                     }
                 }
@@ -319,32 +353,32 @@ public class ArkChar {
         }
         // Take down the snapshot from the rendered FBO
         Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, camera.getWidth(), camera.getHeight());
-        // PixmapIO.writePNG(new FileHandle("temp/temp.png"), snapshot);
         camera.getFBO().end();
         // Crop the canvas in order to fit the snapshot
-        Insert insert = camera.getFittedInsert(snapshot, false, true);
+        float alphaThreshold = Math.max(0f, Math.min(coverage, 1f));
+        Insert insert;
+        do {
+            insert = camera.getFittedInsert(snapshot, alphaThreshold, false, true);
+            if (!insert.equals(camera.getInsert()) || alphaThreshold < 0.75f)
+                break;
+            alphaThreshold *= 0.9375f;
+        } while (true);
+        if (alphaThreshold != coverage)
+            Logger.warn("Character", stage + " has inappropriate canvas coverage setting, auto adjusted to " + alphaThreshold);
+        // For debugging
         if (enableSnapshot) {
             snapshot.setColor(Color.RED);
             snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
             snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);
             snapshot.drawLine(-insert.left, 0, -insert.left, camera.getHeight());
             snapshot.drawLine(camera.getWidth() + insert.right, 0, camera.getWidth() + insert.right, camera.getHeight());
-            PixmapIO.writePNG(new FileHandle("temp/adjustCanvasSnapshot.png"), snapshot);
+            FileHandle dir = new FileHandle("temp/");
+            dir.mkdirs();
+            FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
+            PixmapIO.writePNG(file, snapshot);
         }
+        // Complete
         camera.setInsert(insert);
         snapshot.dispose();
-    }
-
-    private void renderAsSnapshot() {
-        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
-        skeleton.setPosition(position.end().x, position.end().y + offsetY.end());
-        skeleton.setScaleX(position.end().z);
-        skeleton.updateWorldTransform();
-        animationState.apply(skeleton);
-        batch.getProjectionMatrix().set(camera.combined);
-
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
     }
 }

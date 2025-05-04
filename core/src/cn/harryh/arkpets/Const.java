@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  */
 public final class Const {
     // App version
-    public static final Version appVersion              = new Version(3, 7, 1);
+    public static final Version appVersion              = new Version(3, 8, 0);
     public static final Version datasetLowestVersion    = new Version(2, 2, 0);
 
     // App name
@@ -50,6 +50,7 @@ public final class Const {
     // Duration presets
     public static final Duration durationFast   = new Duration(150);
     public static final Duration durationNormal = new Duration(300);
+    public static final Duration durationLong   = new Duration(1500);
 
     // Encoding presets
     public static final String charsetDefault   = "UTF-8";
@@ -59,10 +60,10 @@ public final class Const {
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
     // %s will be replaced by GL version (gl21, gles30)
-    public static final String pass1VShader     = "shaders/%s/TCPBVertex.glsl";
-    public static final String pass1FShader     = "shaders/%s/TCPBFragment.glsl";
-    public static final String pass2VShader     = "shaders/%s/TCPBVertex.glsl";
-    public static final String pass2FShader     = "shaders/%s/OutlineFragment.glsl";
+    public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
+    public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
+    public static final String pass2VShader     = "shaders/%s/PlainVertex.glsl";
+    public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
 
     // Changeable constants
     public static boolean isHttpsTrustAll       = false;

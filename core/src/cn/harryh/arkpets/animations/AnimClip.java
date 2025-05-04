@@ -138,7 +138,7 @@ public class AnimClip {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            AnimStage animStage = (AnimStage)o;
+            AnimStage animStage = (AnimStage) o;
             return id == animStage.id;
         }
 
@@ -193,7 +193,7 @@ public class AnimClip {
         if (headTo > -1)
             fragment.add(String.valueOf(chars, 0, headTo + 1));
         int tailBegin = chars.length;
-        for (int i = chars.length - 1; i >= 0; i--){
+        for (int i = chars.length - 1; i >= 0; i--) {
             if (!Character.isDigit(chars[i])) {
                 tailBegin = i + 1;
                 break;

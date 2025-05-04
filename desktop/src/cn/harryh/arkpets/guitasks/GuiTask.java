@@ -5,13 +5,9 @@ package cn.harryh.arkpets.guitasks;
 
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
+import com.jfoenix.controls.*;
 import javafx.concurrent.Task;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -151,9 +147,9 @@ abstract public class GuiTask {
         // Handle changeable content
         final double[] cachedProgress = {-1};
         boundTask.progressProperty().addListener((observable, oldValue, newValue) -> {
-            if (Math.abs((double)newValue - cachedProgress[0]) >= 0.001) {
-                cachedProgress[0] = (double)newValue;
-                bar.setProgress((double)newValue);
+            if (Math.abs((double) newValue - cachedProgress[0]) >= 0.001) {
+                cachedProgress[0] = (double) newValue;
+                bar.setProgress((double) newValue);
             }
         });
         boundTask.messageProperty().addListener(((observable, oldValue, newValue) -> h3.setText(newValue)));

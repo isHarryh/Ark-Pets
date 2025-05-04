@@ -60,11 +60,11 @@ abstract public class Behavior {
     protected final int getRandomAction() {
         // Calculate the sum of all action's weight
         int weight_sum = 0;
-        for (AnimDataWeight i: action_list) {
+        for (AnimDataWeight i : action_list) {
             weight_sum += i.weight();
         }
         // Random select a weight
-        int weight_select = (int)Math.ceil(Math.random() * weight_sum);
+        int weight_select = (int) Math.ceil(Math.random() * weight_sum);
         // Figure out which action the weight referred
         weight_sum = 0;
         for (int j = 0; j < action_list.length; j++) {

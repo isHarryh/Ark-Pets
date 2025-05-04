@@ -9,8 +9,6 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.SVGPath?>
-<?import java.lang.*?>
 <Pane prefHeight="376.0" prefWidth="460.0" styleClass="wrapper" stylesheets="@Main.css"
       xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cn.harryh.arkpets.controllers.SettingsModule">
@@ -31,135 +29,81 @@
                     <JFXComboBox fx:id="configDisplayFps" prefWidth="120.0"/>
                     <JFXButton fx:id="configDisplayFpsHelp"/>
                 </HBox>
-                <HBox>
-                    <Label text="窗口边界"/>
-                    <JFXComboBox fx:id="configCanvasSize" prefWidth="120.0"/>
-                    <JFXButton fx:id="configCanvasSizeHelp"/>
-                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="渲染设置"/>
-                <HBox>
-                    <Label text="背景颜色"/>
-                    <JFXComboBox fx:id="configCanvasColor" prefWidth="120.0"/>
-                </HBox>
-                <HBox>
-                    <Label text="高亮描边"/>
-                    <JFXButton fx:id="toggleConfigRenderOutline" minHeight="-Infinity" minWidth="-Infinity"
-                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
-                        <graphic>
-                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
-                                <SVGPath
-                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
-                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
-                            </AnchorPane>
-                        </graphic>
-                        <styleClass>
-                            <String fx:value="btn-secondary"/>
-                            <String fx:value="btn-with-icon"/>
-                        </styleClass>
-                    </JFXButton>
-                </HBox>
-                <HBox fx:id="wrapperConfigRenderOutline" managed="false" visible="false">
-                    <VBox>
-                        <HBox>
-                            <Label text="开启条件"/>
-                            <JFXComboBox fx:id="configRenderOutline" prefWidth="120.0"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="描边颜色"/>
-                            <JFXComboBox fx:id="configRenderOutlineColor" prefWidth="120.0"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="描边宽度"/>
-                            <JFXComboBox fx:id="configRenderOutlineWidth" prefWidth="120.0"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
-                <HBox>
-                    <Label text="不透明度"/>
-                    <JFXButton fx:id="toggleConfigRenderOpacity" minHeight="-Infinity" minWidth="-Infinity"
-                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
-                        <graphic>
-                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
-                                <SVGPath
-                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
-                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
-                            </AnchorPane>
-                        </graphic>
-                        <styleClass>
-                            <String fx:value="btn-secondary"/>
-                            <String fx:value="btn-with-icon"/>
-                        </styleClass>
-                    </JFXButton>
-                </HBox>
-                <HBox fx:id="wrapperConfigRenderOpacity" managed="false" visible="false">
-                    <VBox>
-                        <HBox>
-                            <Label text="正常模式下"/>
-                            <JFXSlider fx:id="configRenderOpacityNormal"/>
-                            <Label fx:id="configRenderOpacityNormalValue" text="0"/>
-                        </HBox>
-                        <HBox>
-                            <Label text="透明模式下"/>
-                            <JFXSlider fx:id="configRenderOpacityDim"/>
-                            <Label fx:id="configRenderOpacityDimValue" text="0"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
-                <HBox>
-                    <Label text="光照效果"/>
-                    <JFXButton fx:id="toggleConfigRenderShadow" minHeight="-Infinity" minWidth="-Infinity"
-                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
-                        <graphic>
-                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
-                                <SVGPath
-                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
-                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
-                            </AnchorPane>
-                        </graphic>
-                        <styleClass>
-                            <String fx:value="btn-secondary"/>
-                            <String fx:value="btn-with-icon"/>
-                        </styleClass>
-                    </JFXButton>
-                </HBox>
-                <HBox fx:id="wrapperConfigRenderShadow" managed="false" visible="false">
-                    <VBox>
-                        <HBox>
-                            <Label text="阴影强度"/>
-                            <JFXComboBox fx:id="configRenderShadowColor" prefWidth="120.0"/>
-                        </HBox>
-                    </VBox>
-                </HBox>
-                <HBox>
-                    <Label text="杂项设置"/>
-                    <JFXButton fx:id="toggleConfigRenderAdvanced" minHeight="-Infinity" minWidth="-Infinity"
-                               mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0" text="配置">
-                        <graphic>
-                            <AnchorPane prefHeight="25.0" prefWidth="16.0" scaleX="0.0" styleClass="btn-icon">
-                                <SVGPath
-                                        content="m15 5h5v5h4v8h-4v5h-20v-22h15v4zm-5 12h-8v4h8v-4zm8 0h-7v4h7v-4zm-11-5h-5v4h5v-4zm9 0h-8v4h8v-4zm6 0h-5v4h5v-4zm-11-5v4h7v-4h-7zm-1 0h-8v4h8v-4zm-3-4h-5v3h5v-3zm6 0h-5v3h5v-3z"
-                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-9.0"/>
-                            </AnchorPane>
-                        </graphic>
-                        <styleClass>
-                            <String fx:value="btn-secondary"/>
-                            <String fx:value="btn-with-icon"/>
-                        </styleClass>
-                    </JFXButton>
-                </HBox>
-                <HBox fx:id="wrapperConfigRenderAdvanced" managed="false" visible="false">
-                    <VBox>
-                    <HBox>
-                        <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="多级纹理"/>
-                        <JFXButton fx:id="configEnableMipMapHelp"/>
-                    </HBox>
-                    <HBox fx:id="configAngleBox">
-                        <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="原生渲染"/>
-                        <JFXButton fx:id="configEnableAngleHelp"/>
-                    </HBox>
-                    </VBox>
-                </HBox>
+                <JFXTabPane fx:id="configRenderTabPane" maxWidth="430.0" tabClosingPolicy="UNAVAILABLE">
+                    <Tab text="背景">
+                        <VBox>
+                            <HBox>
+                                <Label text="背景颜色"/>
+                                <JFXComboBox fx:id="configCanvasColor" prefWidth="120.0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="窗口边界">
+                        <VBox>
+                            <HBox>
+                                <Label text="边界大小"/>
+                                <JFXComboBox fx:id="configCanvasCoverage" prefWidth="120.0"/>
+                                <JFXButton fx:id="configCanvasCoverageHelp"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="边界计算方式"/>
+                                <JFXComboBox fx:id="configCanvasSamplingInterval" prefWidth="120.0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="高亮描边">
+                        <VBox>
+                            <HBox>
+                                <Label text="开启条件"/>
+                                <JFXComboBox fx:id="configRenderOutline" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="描边颜色"/>
+                                <JFXComboBox fx:id="configRenderOutlineColor" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="描边宽度"/>
+                                <JFXComboBox fx:id="configRenderOutlineWidth" prefWidth="120.0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="不透明度">
+                        <VBox>
+                            <HBox>
+                                <Label text="正常模式下"/>
+                                <JFXSlider fx:id="configRenderOpacityNormal"/>
+                                <Label fx:id="configRenderOpacityNormalValue" text="0"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="透明模式下"/>
+                                <JFXSlider fx:id="configRenderOpacityDim"/>
+                                <Label fx:id="configRenderOpacityDimValue" text="0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="光照效果">
+                        <VBox>
+                            <HBox>
+                                <Label text="阴影强度"/>
+                                <JFXComboBox fx:id="configRenderShadowColor" prefWidth="120.0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="其他">
+                        <VBox>
+                            <HBox>
+                                <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="MipMap 抗锯齿"/>
+                                <JFXButton fx:id="configEnableMipMapHelp"/>
+                            </HBox>
+                            <HBox fx:id="configAngleBox">
+                                <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="Angle 原生渲染"/>
+                                <JFXButton fx:id="configEnableAngleHelp"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                </JFXTabPane>
                 <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>
@@ -186,6 +130,9 @@
                     <Label text="网络代理（仅本次有效）"/>
                     <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0"/>
                     <Label fx:id="configNetworkAgentStatus" alignment="TOP_CENTER" text="-"/>
+                </HBox>
+                <HBox spacing="22.5">
+                    <Label fx:id="exportLatestLog" styleClass="config-hyper-link" text="导出最近日志"/>
                 </HBox>
                 <HBox spacing="22.5">
                     <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>

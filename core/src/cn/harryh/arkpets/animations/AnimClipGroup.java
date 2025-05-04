@@ -3,7 +3,9 @@
  */
 package cn.harryh.arkpets.animations;
 
-import cn.harryh.arkpets.animations.AnimClip.*;
+import cn.harryh.arkpets.animations.AnimClip.AnimModifier;
+import cn.harryh.arkpets.animations.AnimClip.AnimStage;
+import cn.harryh.arkpets.animations.AnimClip.AnimType;
 import com.esotericsoftware.spine.Animation;
 
 import java.util.*;
@@ -123,7 +125,7 @@ public class AnimClipGroup implements Collection<AnimClip> {
      * @param type The specified animation type.
      * @return The animation data whose animation clip will be none if not found.
      */
-    public AnimData getLoopAnimData( AnimType type) {
+    public AnimData getLoopAnimData(AnimType type) {
         AnimClipGroup found = this.findAnimations(type);
         AnimClip loop = found.findAnimations(AnimModifier.LOOP).get(0);
         AnimClip none = found.findAnimations(AnimModifier.NONE).get(0);
