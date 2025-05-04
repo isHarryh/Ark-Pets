@@ -37,7 +37,7 @@ allprojects {
         javaFXPlatform = ""
         lwjglPlatform = ""
         def isArm = System.getProperty("os.arch").startsWith("aarch64")
-        def isX64 = System.getProperty("os.arch").startsWith("64")
+        def isX64 = System.getProperty("os.arch").contains("64")
         if (forceJavaFXPlatform.empty) {
             switch (OperatingSystem.current()) {
                 case OperatingSystem.LINUX:
@@ -59,7 +59,7 @@ allprojects {
                     lwjglPlatform = "natives-linux"
                     break
                 case OperatingSystem.WINDOWS:
-                    lwjglPlatform = isX64 ? "natives-windows" : "natices-windows-x86"
+                    lwjglPlatform = isX64 ? "natives-windows" : "natives-windows-x86"
                     break
                 case OperatingSystem.MAC_OS:
                     lwjglPlatform = isArm ? "natives-macos-arm64" : "natives-macos"
