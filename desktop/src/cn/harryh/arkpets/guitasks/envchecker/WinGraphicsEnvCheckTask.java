@@ -77,7 +77,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
                 case ANGLE -> {
-                    cfg.enable_angle = true;
+                    cfg.render_enable_angle = true;
                     cfg.save();
                 }
             }
