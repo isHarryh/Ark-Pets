@@ -1,0 +1,36 @@
+name: mirrorchyan_uploading
+
+on:
+  workflow_dispatch:
+  release:
+    types: [released]
+
+jobs:
+  mirrorchyan_exe:
+    runs-on: macos-latest
+    steps:
+      - uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "ArkPets-*-Setup.exe"
+          mirrorchyan_rid: ArkPetsApp
+
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: isHarryh
+          repo: Ark-Pets
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          os: win
+
+  mirrorchyan_jar:
+    runs-on: macos-latest
+    steps:
+      - uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "ArkPets-*.jar"
+          mirrorchyan_rid: ArkPetsApp
+
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: isHarryh
+          repo: Ark-Pets
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
