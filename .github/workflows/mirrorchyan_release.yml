@@ -1,4 +1,4 @@
-name: mirrorchyan_uploading
+name: MirrorChyan_Release
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     types: [released]
 
 jobs:
-  mirrorchyan_exe:
+  upload_exe:
     runs-on: macos-latest
     steps:
       - uses: MirrorChyan/uploading-action@v1
@@ -18,10 +18,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: isHarryh
           repo: Ark-Pets
-          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          upload_token: ${{ secrets.MIRROR_CHYAN_TOKEN }}
           os: win
 
-  mirrorchyan_jar:
+  upload_jar:
     runs-on: macos-latest
     steps:
       - uses: MirrorChyan/uploading-action@v1
@@ -33,4 +33,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: isHarryh
           repo: Ark-Pets
-          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          upload_token: ${{ secrets.MIRROR_CHYAN_TOKEN }}

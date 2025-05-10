@@ -1,4 +1,4 @@
-name: mirrorchyan_release_note
+name: MirrorChyan_Release_Note
 
 on:
   workflow_dispatch:
@@ -6,14 +6,12 @@ on:
     types: [edited, released]
 
 jobs:
-  mirrorchyan_release_note:
+  upload_release_note:
     runs-on: macos-latest
-
     steps:
-      - id: uploading
-        uses: MirrorChyan/release-note-action@v1
+      - uses: MirrorChyan/release-note-action@v1
         with:
           mirrorchyan_rid: ArkPetsApp
 
-          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          upload_token: ${{ secrets.MIRROR_CHYAN_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
