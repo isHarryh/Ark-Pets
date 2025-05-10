@@ -133,8 +133,6 @@
                 </HBox>
                 <HBox spacing="22.5">
                     <Label fx:id="exportLatestLog" styleClass="config-hyper-link" text="导出最近日志"/>
-                </HBox>
-                <HBox spacing="22.5">
                     <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>
                 </HBox>
                 <Separator/>
