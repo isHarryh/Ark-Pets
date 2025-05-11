@@ -511,6 +511,12 @@ public class ArkPets extends InputApplicationAdaptor {
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
             });
+            registerKeyTyped('A', () -> {
+                float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() /2);
+                float screenWidth = plane.borderRight() - plane.borderLeft();
+                float pan = -1f + 2 * (currentX/screenWidth);
+                Logger.debug("Audio","Current audio pan: " + pan);
+            });
         }
     }
 
