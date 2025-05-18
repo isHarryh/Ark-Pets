@@ -3,6 +3,7 @@ package cn.harryh.arkpets.audio;
 import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.assets.VoiceItemGroup;
 import cn.harryh.arkpets.assets.VoiceLang;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.utils.Timer;
@@ -16,7 +17,7 @@ public class AudioPlayer {
     private final Music music;
     private final HashMap<String,Float> startTime = new HashMap<>();
     private final HashMap<String,Float> durationTime = new HashMap<>();
-    private final Timer stopPlayTimer = new Timer();
+    private final Timer pauseTimer = new Timer();
 
     private AudioPlayer(VoiceItem group, File audio) {
         for (int i = 0; i < group.clips().size(); i++) {
@@ -42,15 +43,22 @@ public class AudioPlayer {
 
     public void playAudio(String name,float pan,float vol) {
         if (disposed) throw new IllegalStateException();
-        music.setPosition(startTime.get(name));
-        music.setPan(pan,vol);
+        float start,duration;
+        start = startTime.get(name);
+        duration = durationTime.get(name);
+        Logger.debug("Audio",
+                "Playing " + name + " Pan: " + pan + " Vol: " + vol
+                        + " Start: " + start + " Duration: " + duration
+        );
         music.play();
-        stopPlayTimer.scheduleTask(new Timer.Task() {
+        music.setPosition(start);
+        music.setPan(pan,vol);
+        pauseTimer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
-                music.stop();
+                music.pause();
             }
-        }, durationTime.get(name));
+        }, duration);
     }
 
     public void dispose() {
