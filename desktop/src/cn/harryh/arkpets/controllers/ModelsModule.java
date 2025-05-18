@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkHomeFX;
+import cn.harryh.arkpets.assets.DatasetKeyException;
 import cn.harryh.arkpets.assets.ModelItem;
 import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
@@ -216,7 +217,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                         "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。",
                         null).show();
             }
-        } catch (ModelsDataset.DatasetKeyException e) {
+        } catch (DatasetKeyException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
             if (doPopNotice)
                 GuiPrefabs.Dialogs.createCommonDialog(app.body,

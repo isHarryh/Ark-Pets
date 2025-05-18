@@ -65,13 +65,6 @@ public class ModelsDataset {
     }
 
 
-    public static class DatasetKeyException extends IllegalArgumentException {
-        public DatasetKeyException(String keyName) {
-            super("The key \"" + keyName + "\" not found or invalid.");
-        }
-    }
-
-
     protected static class ModelsDatasetBean implements Serializable {
         private HashMap<String, String> storageDirectory;
         private HashMap<String, String> sortTags;
