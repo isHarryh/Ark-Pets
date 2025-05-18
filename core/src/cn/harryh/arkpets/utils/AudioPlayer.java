@@ -1,9 +1,8 @@
-package cn.harryh.arkpets.audio;
+package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.assets.VoiceItemGroup;
 import cn.harryh.arkpets.assets.VoiceLang;
-import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.utils.Timer;
