@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 
 public class VoiceDataset {
-    public final HashMap<String, File> storageDirectory;
+    public final HashMap<VoiceLang, File> storageDirectory;
     public final HashMap<String, HashMap<String, String>> localizations;
     public final HashMap<String, VoiceItemGroup> data;
     public final HashMap<String, Pattern> audioTypes;
@@ -31,7 +31,7 @@ public class VoiceDataset {
         if (bean.storageDirectory == null || bean.storageDirectory.isEmpty())
             throw new DatasetKeyException("storageDirectory");
         for (String key : bean.storageDirectory.keySet())
-            storageDirectory.put(key, Path.of(bean.storageDirectory.get(key)).toFile());
+            storageDirectory.put(VoiceLang.valueOf(key), Path.of(bean.storageDirectory.get(key)).toFile());
         data = new HashMap<>();
         for (String key : bean.data.keySet()) {
             JSONObject variations = bean.data.get(key).getJSONObject("variations");
