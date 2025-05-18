@@ -2,6 +2,7 @@ package cn.harryh.arkpets.audio;
 
 import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.assets.VoiceItemGroup;
+import cn.harryh.arkpets.assets.VoiceLang;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.utils.Timer;
@@ -35,8 +36,8 @@ public class AudioPlayer {
         music.setLooping(false);
     }
 
-    public static AudioPlayer loadAudio(File oggPath, VoiceItemGroup group,String lang) {
-        return new AudioPlayer(group.getVariations().get(lang), oggPath);
+    public static AudioPlayer loadAudio(File oggPath, VoiceItemGroup group, VoiceLang lang) {
+        return new AudioPlayer(group.getVariation(lang), oggPath);
     }
 
     public void playAudio(String name,float pan,float vol) {

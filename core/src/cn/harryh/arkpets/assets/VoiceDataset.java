@@ -34,8 +34,8 @@ public class VoiceDataset {
             storageDirectory.put(key, Path.of(bean.storageDirectory.get(key)).toFile());
         data = new HashMap<>();
         for (String key : bean.data.keySet()) {
-            JSONObject variations = (JSONObject) bean.data.get(key).get("variations");
-            HashMap<String, VoiceItem> vMap = variations.toJavaObject(new TypeReference<>() {
+            JSONObject variations = bean.data.get(key).getJSONObject("variations");
+            HashMap<VoiceLang, VoiceItem> vMap = variations.toJavaObject(new TypeReference<>() {
             });
             data.put(key, new VoiceItemGroup(vMap));
         }
