@@ -200,6 +200,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
     @Override
     public void dispose() {
+        audioPlayer.dispose();
         Logger.info("App", "Dispose");
     }
 

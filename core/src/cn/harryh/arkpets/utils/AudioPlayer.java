@@ -16,6 +16,7 @@ public class AudioPlayer {
     private final HashMap<String, Float> startTime = new HashMap<>();
     private final HashMap<String, Float> durationTime = new HashMap<>();
     private final Timer pauseTimer = new Timer();
+    private boolean playing;
     private boolean disposed;
 
     private AudioPlayer(VoiceItem group, File audio) {
@@ -42,6 +43,7 @@ public class AudioPlayer {
 
     public void playAudio(String name, float pan, float vol) {
         if (disposed) throw new IllegalStateException();
+        if (playing) return;
         float start, duration;
         start = startTime.get(name);
         duration = durationTime.get(name);
@@ -52,10 +54,12 @@ public class AudioPlayer {
         music.play();
         music.setPosition(start);
         music.setPan(pan, vol);
+        playing = true;
         pauseTimer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
                 music.pause();
+                playing = false;
             }
         }, duration);
     }
