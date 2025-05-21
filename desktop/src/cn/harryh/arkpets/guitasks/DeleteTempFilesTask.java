@@ -9,10 +9,11 @@ import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 
 public abstract class DeleteTempFilesTask extends GuiTask {

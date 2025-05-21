@@ -323,7 +323,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             // Go to [Step 1/3]:
             new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override
-                protected void onSucceeded(boolean result){
+                protected void onSucceeded(boolean result) {
                     // Go to [Step 2/3]:
                     new UnzipModelsTask(parent, GuiTaskStyle.STRICT, PathConfig.tempModelsZipCachePath) {
                         @Override
@@ -485,7 +485,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     public void modelRandom() {
         if (!assertModelLoaded(true))
             return;
-        int idx = (int)(Math.random() * (modelListView.getItems().size() - 1));
+        int idx = (int) (Math.random() * (modelListView.getItems().size() - 1));
         modelListView.scrollTo(idx);
         modelListView.getSelectionModel().select(idx);
         modelListView.requestFocus();

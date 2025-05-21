@@ -43,9 +43,9 @@ abstract public class FetchRemoteTask extends GuiTask {
                         httpTimeoutDefault,
                         httpTimeoutDefault,
                         isHttpsTrustAll);
-                final InputStream  is = connection.getInputStream();
+                final InputStream is = connection.getInputStream();
                 final OutputStream os = Files.newOutputStream(new File(destPath).toPath());
-                final BufferedInputStream  bis = new BufferedInputStream(is, httpBufferSizeDefault);
+                final BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
                 final BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
 
                 try (bis; bos; is; os) {

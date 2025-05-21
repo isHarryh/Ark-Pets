@@ -5,9 +5,10 @@ package cn.harryh.arkpets.utils;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+
 import java.util.ArrayList;
 
-import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.Const.droppedThreshold;
 
 
 public class Plane {
@@ -206,9 +207,9 @@ public class Plane {
         for (Vector3 pc : pointCharges) {
             float dx = position.x + obj.x / 2f - pc.x;
             float dy = position.y + obj.y / 2f - pc.y;
-            float hypot = (float)Math.hypot(dx, dy);
+            float hypot = (float) Math.hypot(dx, dy);
             speed.x = applyElectrostaticEffect(speed.x, pc.z, hypot, dx / hypot, deltaTime);
-            speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot , deltaTime);
+            speed.y = applyElectrostaticEffect(speed.y, pc.z, hypot, dy / hypot, deltaTime);
         }
         // Ground friction
         if (position.y == bottom)
@@ -223,7 +224,7 @@ public class Plane {
             speed.y = Math.signum(speed.y) * speedLimit.y;
         // Bounce
         if (resilience != 0 && (position.x == borderLeft() || position.x == borderRight())) {
-            speed.x = (float)(Math.sqrt(speed.x * speed.x * resilience) * Math.signum(-speed.x));
+            speed.x = (float) (Math.sqrt(speed.x * speed.x * resilience) * Math.signum(-speed.x));
         }
     }
 
@@ -247,8 +248,8 @@ public class Plane {
      * @param deltaTime Delta time (s).
      * @return New velocity (px/s).
      */
-    private float applyElectrostaticEffect(float speed, float quantityProduct, float distance, float cosine, float deltaTime){
-        final float k = 2000 * (float)Math.hypot(obj.x, obj.y); // Electrostatic force constant
+    private float applyElectrostaticEffect(float speed, float quantityProduct, float distance, float cosine, float deltaTime) {
+        final float k = 2000 * (float) Math.hypot(obj.x, obj.y); // Electrostatic force constant
         final float dm = 20; // Min distance
         distance = Math.max(Math.abs(distance), dm); // Limit the distance
         cosine = Float.isNaN(cosine) ? 0 : Math.max(0, Math.min(1, cosine)); // Limit the cosine
@@ -334,8 +335,8 @@ public class Plane {
     @SuppressWarnings("unused")
     public record RectArea(float left, float right, float top, float bottom) {
         public float getWidth() {
-                return Math.abs(left - right);
-            }
+            return Math.abs(left - right);
+        }
 
         public float getHeight() {
             return Math.abs(top - bottom);
@@ -367,7 +368,7 @@ public class Plane {
 
         @Override
         public String toString() {
-                return "RectArea ^" + top + " >" + right + " v" + bottom + " <" + left;
-            }
+            return "RectArea ^" + top + " >" + right + " v" + bottom + " <" + left;
+        }
     }
 }

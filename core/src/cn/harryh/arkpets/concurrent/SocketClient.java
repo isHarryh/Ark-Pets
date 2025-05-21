@@ -24,7 +24,7 @@ public class SocketClient {
 
     public SocketClient() {
     }
-    
+
     public void connectWithRetry(Runnable onConnected, SocketSession session) {
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -78,7 +78,7 @@ public class SocketClient {
 
     public void sendRequest(SocketData socketData) {
         if (connected && session != null)
-             session.send(JSONObject.toJSONString(socketData));
+            session.send(JSONObject.toJSONString(socketData));
     }
 
 

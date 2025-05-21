@@ -33,7 +33,7 @@ public class ArkConfig implements Serializable {
     private static boolean isNewcomer = false;
 
     // Config items and default values:
-    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "8")
+    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "4")
     public int          behavior_ai_activation;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "true")
     public boolean      behavior_allow_interact;
@@ -49,8 +49,10 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_do_peer_repulsion;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#00000000")
     public String       canvas_color;
-    /** @since ArkPets 3.1 */ @JSONField(defaultValue = "16")
-    public int          canvas_fitting_samples;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "0.8")
+    public float        canvas_coverage;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "4")
+    public int          canvas_sampling_interval;
     /** @since ArkPets 2.0 */ @JSONField()
     public String       character_asset;
     /** @since ArkPets 3.5 */ @JSONField()
@@ -59,7 +61,7 @@ public class ArkConfig implements Serializable {
     public JSONObject   character_files;
     /** @since ArkPets 2.0 */ @JSONField()
     public String       character_label;
-    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "30")
+    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "60")
     public int          display_fps;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "0")
     public int          display_margin_bottom;
@@ -67,6 +69,10 @@ public class ArkConfig implements Serializable {
     public boolean      display_multi_monitors;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
     public float        render_animation_mixture;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
+    public boolean      render_enable_angle;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
+    public boolean      render_enable_mipmap;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
     public int          render_outline;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
@@ -269,12 +275,12 @@ public class ArkConfig implements Serializable {
             ArrayList<Monitor> list = new ArrayList<>();
             for (Object o : array)
                 if (o instanceof JSONObject)
-                    list.add(fromJSONObject((JSONObject)o));
+                    list.add(fromJSONObject((JSONObject) o));
             return list.toArray(new Monitor[0]);
         }
 
         public static JSONObject toJSONObject(Monitor monitor) {
-            return (JSONObject)JSON.toJSON(monitor);
+            return (JSONObject) JSON.toJSON(monitor);
         }
 
         public static JSONArray toJSONArray(Monitor[] monitors) {

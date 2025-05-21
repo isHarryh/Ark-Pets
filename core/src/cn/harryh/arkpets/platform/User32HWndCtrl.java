@@ -224,7 +224,7 @@ public class User32HWndCtrl extends HWndCtrl {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        User32HWndCtrl hWndCtrl = (User32HWndCtrl)o;
+        User32HWndCtrl hWndCtrl = (User32HWndCtrl) o;
         return hWnd.equals(hWndCtrl.hWnd);
     }
 

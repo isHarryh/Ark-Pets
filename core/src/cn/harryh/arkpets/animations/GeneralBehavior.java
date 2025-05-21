@@ -4,7 +4,9 @@
 package cn.harryh.arkpets.animations;
 
 import cn.harryh.arkpets.ArkConfig;
-import cn.harryh.arkpets.animations.AnimClip.*;
+import cn.harryh.arkpets.animations.AnimClip.AnimStage;
+import cn.harryh.arkpets.animations.AnimClip.AnimType;
+
 import java.util.*;
 
 import static cn.harryh.arkpets.Const.behaviorBaseWeight;
@@ -64,7 +66,7 @@ public class GeneralBehavior extends Behavior {
                 ),
                 new AnimDataWeight(
                         animList.getLoopAnimData(AnimType.SIT),
-                        config.behavior_allow_sit  ? 1 << 6 : 0
+                        config.behavior_allow_sit ? 1 << 6 : 0
                 ),
                 new AnimDataWeight(
                         animList.getLoopAnimData(AnimType.SLEEP),

@@ -5,6 +5,7 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
@@ -177,8 +178,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         DotPickerSetup setupDeployPosition = new DotPickerSetup(configDeployPosition);
         setupDeployPosition.setRelXY(app.config.initial_position_x, app.config.initial_position_y);
         setupDeployPosition.setOnDotPicked(e -> {
-            float x = (float)setupDeployPosition.getRelX();
-            float y = (float)setupDeployPosition.getRelY();
+            float x = (float) setupDeployPosition.getRelX();
+            float y = (float) setupDeployPosition.getRelY();
             Logger.debug("Config", "Specified deploy position to " + x + ", " + y);
             app.config.initial_position_x = x;
             app.config.initial_position_y = y;
@@ -314,6 +315,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         configPhysicRestore.setOnMouseClicked(e -> {
             configPhysicRestoreEvent.handle(e);
             app.rootModule.moduleWrapperComposer.activate(1);
+            app.toast.showText("已恢复默认物理设置", Const.durationLong);
         });
     }
 

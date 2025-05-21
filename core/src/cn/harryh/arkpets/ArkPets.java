@@ -6,10 +6,10 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
-import cn.harryh.arkpets.transitions.TransitionVector2;
-import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -92,14 +92,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
         );
-        windowPosition.reset(plane.getX(), - (cha.camera.getHeight() + plane.getY()) + offsetY);
+        windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.setToEnd();
         setWindowPos();
 
         // 5.Window style setup
         hWndMine = WindowSystem.findWindow(null, APP_TITLE);
         hWndMine.setLayered(true);
-        if(config.window_style_topmost)
+        if (config.window_style_topmost)
             hWndMine.setTopmost(true);
         promiseToolwindowStyle(1000);
 
@@ -113,7 +113,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     @Override
     public void render() {
         // 1.Render the next frame.
-        cha.renderToBatch();
+        cha.render();
 
         // 2.Select a new animation.
         AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
@@ -141,7 +141,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         changeAnimation(newAnim); // Apply the new anim.
 
         // 3.Window properties.
-        windowPosition.reset(plane.getX(), - (cha.camera.getHeight() + plane.getY()) + offsetY);
+        windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.addProgress(Gdx.graphics.getDeltaTime());
         setWindowPos();
         promiseToolwindowStyle(1);
@@ -187,13 +187,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     private void changeAnimation(AnimData animData) {
         if (cha.setAnimation(animData))
-            offsetY = (int)(animData.animClip().type.offsetY * config.display_scale);
+            offsetY = (int) (animData.animClip().type.offsetY * config.display_scale);
     }
 
     /* INPUT PROCESS */
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Logger.debug("Input", "Click+ Btn " + button +" @ " + screenX + ", " + screenY);
+        Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
             mouseStatus.mouseDown = true;
             mouseStatus.updatePosition(screenX, screenY, button);
@@ -214,7 +214,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                     tray.hideDialog();
                 } else if (button == Input.Buttons.RIGHT) {
                     // Right Click: Toggle the menu
-                    tray.toggleDialog((int)(plane.getX() + screenX), (int)(-plane.getY() - cha.camera.getHeight()));
+                    tray.toggleDialog((int) (plane.getX() + screenX), (int) (-plane.getY() - cha.camera.getHeight()));
                 }
             }
         }
@@ -229,8 +229,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 mouseStatus.dragging = true;
                 mouseStatus.updateIntentionX(screenX);
                 // Update window position
-                int x = (int)(windowPosition.now().x + screenX - mouseStatus.x);
-                int y = (int)(windowPosition.now().y + screenY - mouseStatus.y);
+                int x = (int) (windowPosition.now().x + screenX - mouseStatus.x);
+                int y = (int) (windowPosition.now().y + screenY - mouseStatus.y);
                 plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
                 windowPosition.setToEnd();
                 tray.hideDialog();
@@ -242,7 +242,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Logger.debug("Input", "Click- Btn " + button +" @ " + screenX + ", " + screenY);
+        Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
             mouseStatus.mouseDown = false;
             mouseStatus.updatePosition(screenX, screenY, button);
@@ -290,7 +290,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean keyTyped(char character) {
         if (ArkChar.enableSnapshot && character == 'B') {
-            String name = "temp/snapshot-"+System.currentTimeMillis()+".png";
+            String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
             Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
             PixmapIO.writePNG(new FileHandle(name), snapshot);
             snapshot.dispose();
@@ -335,15 +335,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             isFocused = hWndMine.isForeground();
         }
         hWndMine.setWindowPosition(hWndTopmost,
-                (int)windowPosition.now().x, (int)windowPosition.now().y,
+                (int) windowPosition.now().x, (int) windowPosition.now().y,
                 cha.camera.getWidth(), cha.camera.getHeight());
     }
 
     private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {
         if (hWndList == null)
             return null;
-        int absX = x + (int)(windowPosition.now().x);
-        int absY = y + (int)(windowPosition.now().y);
+        int absX = x + (int) (windowPosition.now().x);
+        int absY = y + (int) (windowPosition.now().y);
         for (HWndCtrl hWndCtrl : hWndList) {
             if (coreTitleManager.getNumber(hWndCtrl) < 0)
                 if (hWndCtrl.posLeft <= absX && hWndCtrl.posRight > absX)
@@ -360,7 +360,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         hWndList = WindowSystem.getWindowList(true);
         HWndCtrl minWindow = null;
         HashMap<Integer, HWndCtrl> line = new HashMap<>();
-        int myPos = (int)(windowPosition.now().x + cha.camera.getWidth() / 2f);
+        int myPos = (int) (windowPosition.now().x + cha.camera.getWidth() / 2f);
         int minNum = 2048;
         int myNum = coreTitleManager.getNumber(APP_TITLE);
         final float quantityProduct = 1;
@@ -403,7 +403,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         }
         if (plane != null) {
             // Set barriers according to the vertical line.
-            for (int h = (int)plane.borderTop(); h > plane.borderBottom(); h--) {
+            for (int h = (int) plane.borderTop(); h > plane.borderBottom(); h--) {
                 if (line.containsKey(h)) {
                     HWndCtrl temp = line.get(h);
                     if (temp != null)
@@ -458,7 +458,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
     private int randomRound(float val) {
-        int integer = (int)val;
+        int integer = (int) val;
         float decimal = val - integer;
         int offset = Math.abs(decimal) >= Math.random() ? (val >= 0 ? 1 : -1) : 0;
         return integer + offset;
@@ -511,7 +511,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         }
 
         public void updateIntentionX(int newX) {
-            int t = (int)Math.signum(newX - x);
+            int t = (int) Math.signum(newX - x);
             intentionX = t == 0 ? intentionX : t;
         }
 
@@ -529,7 +529,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
         public void sendMouseEvent(HWndCtrl.MouseEvent msg) {
-            if(msg == HWndCtrl.MouseEvent.EMPTY) return;
+            if (msg == HWndCtrl.MouseEvent.EMPTY) return;
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
         }

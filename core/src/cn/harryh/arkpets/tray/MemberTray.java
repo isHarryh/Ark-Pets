@@ -30,7 +30,8 @@ public abstract class MemberTray {
                 UIManager.put("Menu.margin", new Insets(0, -18, 0, 0));
             }
             UIManager.setLookAndFeel(laf);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         Const.FontsConfig.loadFontsToSwing();
     }
 
@@ -40,7 +41,7 @@ public abstract class MemberTray {
     public MemberTray(String name) {
         this.uuid = UUID.randomUUID();
         this.name = name;
-        
+
         optKeepAnimEn       .addActionListener(e -> onKeepAnimEn());
         optKeepAnimDis      .addActionListener(e -> onKeepAnimDis());
         optTransparentEn    .addActionListener(e -> onTransparentEn());

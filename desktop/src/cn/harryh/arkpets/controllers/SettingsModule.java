@@ -9,6 +9,7 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
+import cn.harryh.arkpets.guitasks.ZipTask;
 import cn.harryh.arkpets.startup.StartupConfig;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
@@ -23,16 +24,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
 
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static cn.harryh.arkpets.Const.*;
@@ -53,26 +59,22 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton configDisplayFpsHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasSize;
+    private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
-    private JFXButton configCanvasSizeHelp;
+    private JFXButton configCanvasCoverageHelp;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
 
     @FXML
+    private JFXTabPane configRenderTabPane;
+    @FXML
     private JFXComboBox<NamedItem<Integer>> configCanvasColor;
-    @FXML
-    private JFXButton toggleConfigRenderOutline;
-    @FXML
-    private HBox wrapperConfigRenderOutline;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
     @FXML
     private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
-    @FXML
-    private JFXButton toggleConfigRenderOpacity;
-    @FXML
-    private HBox wrapperConfigRenderOpacity;
     @FXML
     private JFXSlider configRenderOpacityNormal;
     @FXML
@@ -82,11 +84,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configRenderOpacityDimValue;
     @FXML
-    private JFXButton toggleConfigRenderShadow;
-    @FXML
-    private HBox wrapperConfigRenderShadow;
-    @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
+    @FXML
+    private JFXCheckBox configEnableAngle;
+    @FXML
+    private JFXButton configEnableAngleHelp;
+    @FXML
+    private JFXCheckBox configEnableMipMap;
+    @FXML
+    private JFXButton configEnableMipMapHelp;
 
     @FXML
     private JFXCheckBox configWindowTopmost;
@@ -106,6 +112,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXCheckBox configWindowToolwindow;
     @FXML
     private JFXButton configWindowToolwindowHelp;
+    @FXML
+    private Label exportLatestLog;
+
     @FXML
     private JFXComboBox<NamedItem<String>> configWindowSystem;
     @FXML
@@ -143,13 +152,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
     private void initConfigDisplay() {
         new ComboBoxSetup<>(configDisplayScale).setItems(new NamedItem<>("x0.5", 0.5f),
-                new NamedItem<>("x0.75", 0.75f),
-                new NamedItem<>("x1.0", 1f),
-                new NamedItem<>("x1.25", 1.25f),
-                new NamedItem<>("x1.5", 1.5f),
-                new NamedItem<>("x2.0", 2f),
-                new NamedItem<>("x2.5", 2.5f),
-                new NamedItem<>("x3.0", 3.0f))
+                        new NamedItem<>("x0.75", 0.75f),
+                        new NamedItem<>("x1.0", 1f),
+                        new NamedItem<>("x1.25", 1.25f),
+                        new NamedItem<>("x1.5", 1.5f),
+                        new NamedItem<>("x2.0", 2f),
+                        new NamedItem<>("x2.5", 2.5f),
+                        new NamedItem<>("x3.0", 3.0f))
                 .selectValue(app.config.display_scale, "x" + app.config.display_scale + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.display_scale = newValue.value();
@@ -157,30 +166,30 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     displayScaleHelpEntrance.refreshAndEnsureDisplayed();
                 });
         new ComboBoxSetup<>(configDisplayFps).setItems(new NamedItem<>("25", 25),
-                new NamedItem<>("30", 30),
-                new NamedItem<>("45", 45),
-                new NamedItem<>("60", 60),
-                new NamedItem<>("120", 120))
+                        new NamedItem<>("30", 30),
+                        new NamedItem<>("45", 45),
+                        new NamedItem<>("60", 60),
+                        new NamedItem<>("120", 120))
                 .selectValue(app.config.display_fps, app.config.display_fps + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.display_fps = newValue.value();
                     app.config.save();
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
-        new ComboBoxSetup<>(configCanvasSize).setItems(new NamedItem<>("最宽", 4),
-                new NamedItem<>("较宽", 8),
-                new NamedItem<>("标准", 16),
-                new NamedItem<>("较窄", 32),
-                new NamedItem<>("最窄", 0))
-                .selectValue(app.config.canvas_fitting_samples, "每" + app.config.canvas_fitting_samples + "帧采样（自定义）")
+        new ComboBoxSetup<>(configCanvasCoverage).setItems(new NamedItem<>("最宽", 0.45f),
+                        new NamedItem<>("较宽", 0.65f),
+                        new NamedItem<>("标准", 0.8f),
+                        new NamedItem<>("较窄", 0.9f),
+                        new NamedItem<>("最窄", 0.95f))
+                .selectValue(app.config.canvas_coverage, app.config.canvas_coverage * 100f + "% 覆盖率（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
-                    app.config.canvas_fitting_samples = newValue.value();
+                    app.config.canvas_coverage = newValue.value();
                     app.config.save();
                 });
-        new HelpHandbookEntrance(app.body, configCanvasSizeHelp) {
+        new HelpHandbookEntrance(app.body, configCanvasCoverageHelp) {
             @Override
             public Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled)configCanvasSize.getParent().getChildrenUnmodifiable().get(0)) {
+                return new ControlHelpHandbook((Labeled) configCanvasCoverage.getParent().getChildrenUnmodifiable().get(0)) {
                     @Override
                     public String getContent() {
                         return "设置桌宠窗口边界的相对大小。更宽的边界能够防止动画溢出；更窄的边界能够防止鼠标误触。";
@@ -188,6 +197,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+        new ComboBoxSetup<>(configCanvasSamplingInterval).setItems(new NamedItem<>("极精确", 1),
+                        new NamedItem<>("精确", 4),
+                        new NamedItem<>("粗略", 16),
+                        new NamedItem<>("极粗略", 64))
+                .selectValue(app.config.canvas_sampling_interval, "间隔" + app.config.canvas_sampling_interval + "帧（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.canvas_sampling_interval = newValue.value();
+                    app.config.save();
+                });
+
+        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
 
         new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
                         new NamedItem<>("绿色", 0x00FF00FF),
@@ -199,7 +219,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderOutline, wrapperConfigRenderOutline, durationFast);
         new ComboBoxSetup<>(configRenderOutline).setItems(new NamedItem<>("始终开启", ArkConfig.RenderOutline.ALWAYS.ordinal()),
                         new NamedItem<>("处于前台时", ArkConfig.RenderOutline.FOCUSED.ordinal()),
                         new NamedItem<>("点击时", ArkConfig.RenderOutline.PRESSING.ordinal()),
@@ -229,7 +248,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderOpacity, wrapperConfigRenderOpacity, durationFast);
         final int minOpacity = 10;
         GuiComponents.SliderSetup<Integer> setupRenderOpacityDim = new GuiComponents.SimpleIntegerSliderSetup(configRenderOpacityDim);
         setupRenderOpacityDim
@@ -256,7 +274,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         setupRenderOpacityDim.setRange(minOpacity, setupRenderOpacityNormal.getValidatedValue());
         setupRenderOpacityDim.setDisable(minOpacity >= setupRenderOpacityNormal.getValidatedValue());
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderShadow, wrapperConfigRenderShadow, durationFast);
         new ComboBoxSetup<>(configRenderShadowColor).setItems(new NamedItem<>("禁用", 0x00000000),
                         new NamedItem<>("轻微", 0x00000077),
                         new NamedItem<>("标准", 0x000000BB),
@@ -266,6 +283,46 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_shadow_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
+
+        configEnableAngle.setSelected(app.config.render_enable_angle);
+        configEnableAngle.setOnAction(e -> {
+            app.config.render_enable_angle = configEnableAngle.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableAngleHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableAngle.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        String apiText;
+                        if (com.sun.jna.Platform.isWindows()) apiText = "DirectX 11";
+                        else if (com.sun.jna.Platform.isMac()) apiText = "Metal";
+                        else apiText = "";
+                        return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
+                                "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
+                    }
+                };
+            }
+        };
+
+        configEnableMipMap.setSelected(app.config.render_enable_mipmap);
+        configEnableMipMap.setOnAction(e -> {
+            app.config.render_enable_mipmap = configEnableMipMap.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会使用 MipMap 技术来消除由于纹理缩放导致的锯齿，但是会略微增加显存占用。\n" +
+                                "禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
+                    }
+                };
+            }
+        };
     }
 
     private void initConfigAdvanced() {
@@ -384,6 +441,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+
+        exportLatestLog.setOnMouseClicked(e -> exportLatestLog());
 
         NamedItem<String>[] items = getWindowSystemItems().toArray(new NamedItem[0]);
         new ComboBoxSetup<>(configWindowSystem).setItems(items)
@@ -592,6 +651,37 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private void exportLatestLog() {
+        Logger.info("Config", "Ready to export logs");
+        List<String> logList = new ArrayList<>();
+        logList.add(Logger.getLogFilePath());
+        File logDir = new File("logs");
+        if (logDir.exists() && logDir.isDirectory()) {
+            File[] files = logDir.listFiles();
+            if (files != null) Arrays.stream(files)
+                    .filter(file -> file.getName().startsWith("core") && file.getName().endsWith(".log"))
+                    .max(Comparator.comparingLong(File::lastModified))
+                    .ifPresent(f -> logList.add(f.getPath()));
+        }
+        logList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
+        // Open file chooser
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archives", "*.zip"));
+        fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_Logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
+        Logger.info("Dialog", "Opening file chooser to export logs");
+        File zipFile = fileChooser.showSaveDialog(app.getWindow());
+        if (zipFile == null)
+            return;
+        // Export log files
+        new ZipTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), logList).start();
+        GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                "导出最近日志",
+                "导出最近日志成功",
+                "已导出最近日志到 " + zipFile.getAbsolutePath(),
+                null).show();
     }
 
     private void clearData() {

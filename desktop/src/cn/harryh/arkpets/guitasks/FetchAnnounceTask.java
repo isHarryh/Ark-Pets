@@ -29,7 +29,7 @@ public class FetchAnnounceTask extends FetchRemoteTask {
                 PathConfig.urlApi + "?type=queryAnnouncement",
                 PathConfig.tempQueryAnnounceCachePath,
                 Const.isHttpsTrustAll);
-        this.acceptor= acceptor;
+        this.acceptor = acceptor;
 
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
@@ -54,7 +54,7 @@ public class FetchAnnounceTask extends FetchRemoteTask {
                 // If the response status is "success":
                 ArrayList<AnnounceDialog.AnnounceItem> arrayList = new ArrayList<>();
                 queryAnnounceResult.getJSONObject("data").getJSONArray("contents")
-                        .forEach(o -> arrayList.add(((JSONObject)o).toJavaObject(AnnounceDialog.AnnounceItem.class)));
+                        .forEach(o -> arrayList.add(((JSONObject) o).toJavaObject(AnnounceDialog.AnnounceItem.class)));
                 acceptor.setAll(arrayList);
             } else {
                 // On API failed:

@@ -162,7 +162,7 @@ public class ModelItem implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ModelItem) {
-            return ((ModelItem)obj).assetDir.equals(assetDir);
+            return ((ModelItem) obj).assetDir.equals(assetDir);
         }
         return false;
     }

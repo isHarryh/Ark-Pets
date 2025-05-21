@@ -1,10 +1,9 @@
+#version 120
 /** Copyright (c) 2013-2023, Esoteric Software LLC
  * At Spine Runtimes License
  */
 
-// Common Vertex Shader for TwoColorPolygonBatch.
-
-#version 120
+// Plain vertex shader for TwoColorPolygonBatch.
 
 attribute vec4 a_position;
 attribute vec4 a_light;

@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2025, Harry Huang
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
@@ -116,7 +119,7 @@ public class BootstrapLauncher {
         new ArgPending("--load-lib", ArgPending.argCache) {
             @Override
             protected void process(String command, String addition) {
-                Logger.info("System", "Loading the specified library \"" + addition +"\"");
+                Logger.info("System", "Loading the specified library \"" + addition + "\"");
                 try {
                     System.load(addition);
                 } catch (UnsatisfiedLinkError e) {
@@ -147,6 +150,12 @@ public class BootstrapLauncher {
         try {
             WindowSystem.init(windowSystem);
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+            // Configure ANGLE
+            if (appConfig.render_enable_angle) {
+                Logger.info("System", "Using ANGLE renderer");
+                config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
+                Configuration.OPENGL_EXPLICIT_INIT.set(true);
+            }
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);

@@ -5,7 +5,10 @@ package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
 import com.jfoenix.controls.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.ScaleTransition;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.value.ChangeListener;
@@ -22,6 +25,9 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -270,6 +276,47 @@ public class GuiComponents {
     }
 
 
+    /** A useful tool to make a {@link TabPane} to be responsive to its content's height.
+     */
+    public static class TabPaneSetup {
+        private final TabPane tabPane;
+        private final Duration animDuration;
+        private final double tabHeaderHeight;
+
+        private final static double defaultTabHeaderHeight = 50.0;
+
+        public TabPaneSetup(TabPane tabPane, Duration animDuration) {
+            this(tabPane, animDuration, defaultTabHeaderHeight);
+        }
+
+        public TabPaneSetup(TabPane tabPane, Duration animDuration, double tabHeaderHeight) {
+            this.tabPane = tabPane;
+            this.animDuration = animDuration;
+            this.tabHeaderHeight = tabHeaderHeight;
+        }
+
+        public void makeResponsive() {
+            tabPane.getSelectionModel().clearSelection();
+            tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> responseTabHeight(newValue));
+        }
+
+        private void responseTabHeight(Tab tab) {
+            if (tab != null && tab.getContent() instanceof Region tabContent) {
+                tabContent.applyCss();
+                tabContent.layout();
+
+                double targetHeight = tabContent.prefHeight(-1) + tabHeaderHeight;
+
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.ZERO, new KeyValue(tabPane.prefHeightProperty(), tabPane.getHeight())),
+                        new KeyFrame(animDuration, new KeyValue(tabPane.prefHeightProperty(), targetHeight))
+                );
+                timeline.play();
+            }
+        }
+    }
+
+
     public static final class SimpleIntegerSliderSetup extends SliderSetup<Integer> {
         public SimpleIntegerSliderSetup(Slider slider) {
             super(slider);
@@ -370,7 +417,7 @@ public class GuiComponents {
         }
 
         protected double getWidth() {
-            Region region = (Region)container.getParent();
+            Region region = (Region) container.getParent();
             double regionWidth = region.getWidth() - region.getInsets().getLeft() - region.getInsets().getRight();
             return regionWidth * widthScale;
         }
@@ -601,6 +648,127 @@ public class GuiComponents {
         @Override
         protected SVGPath getIcon() {
             return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP, GuiPrefabs.COLOR_INFO);
+        }
+    }
+
+
+    public static final class Toast {
+        private final HBox pane;
+        private Timeline line;
+
+        public Toast(HBox toastPane) {
+            this.pane = toastPane;
+        }
+
+        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed) {
+            pane.getChildren().clear();
+            Text txt = new Text(text);
+            txt.setTextAlignment(TextAlignment.CENTER);
+            pane.getChildren().add(txt);
+            if (okPressed != null) {
+                JFXButton okButton = new JFXButton();
+                okButton.setRipplerFill(Color.GRAY);
+                if (okText != null) {
+                    okButton.setText(okText);
+                    okButton.setPrefWidth(60.0);
+                    okButton.getStyleClass().add("btn-primary");
+                } else {
+                    okButton.setGraphic(GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_THEME));
+                    okButton.setPrefWidth(20.0);
+                    okButton.getStyleClass().add("btn-plain-dark");
+                }
+                okButton.setOnAction(e -> {
+                    okPressed.run();
+                    GuiPrefabs.fadeOutNode(pane, Const.durationFast, null);
+                });
+                okButton.setPrefHeight(20.0);
+                pane.getChildren().add(okButton);
+            }
+            if (cancelPressed != null) {
+                JFXButton cancelButton = new JFXButton();
+                cancelButton.setRipplerFill(Color.GRAY);
+                if (cancelText != null) {
+                    cancelButton.setText(cancelText);
+                    cancelButton.setPrefWidth(60.0);
+                } else {
+                    cancelButton.setGraphic(GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CANCEL, GuiPrefabs.COLOR_THEME));
+                    cancelButton.setPrefWidth(20.0);
+                }
+                cancelButton.getStyleClass().add("btn-plain-dark");
+                cancelButton.setOnAction(e -> {
+                    cancelPressed.run();
+                    GuiPrefabs.fadeOutNode(pane, Const.durationFast, null);
+                });
+                cancelButton.setPrefHeight(20.0);
+                pane.getChildren().add(cancelButton);
+            }
+        }
+
+        public void playAnim(Duration time, Runnable onDismissed) {
+            if (line != null) line.stop();
+            if (time != null) {
+                Duration timeWait = new Duration(time.toMillis() + Const.durationFast.toMillis());
+                Duration timeHide = new Duration(timeWait.toMillis() + Const.durationFast.toMillis());
+                line = new Timeline(
+                        new KeyFrame(Duration.ZERO, new KeyValue(pane.opacityProperty(), 0)),
+                        new KeyFrame(Const.durationFast, new KeyValue(pane.opacityProperty(), 1)),
+                        new KeyFrame(timeWait, new KeyValue(pane.opacityProperty(), 1)),
+                        new KeyFrame(timeHide, new KeyValue(pane.opacityProperty(), 0))
+                );
+            } else {
+                GuiPrefabs.fadeInNode(pane, Const.durationFast, null);
+                return;
+            }
+            line.setOnFinished(e -> {
+                pane.setVisible(false);
+                pane.setManaged(false);
+                if (onDismissed != null) onDismissed.run();
+            });
+            line.setCycleCount(1);
+            pane.setVisible(true);
+            pane.setManaged(true);
+            line.play();
+        }
+
+        /** Show a simple toast.
+         */
+        public void showText(String text, Duration time) {
+            buildToast(text, null, null, null, null);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with undo button.
+         */
+        public void showUndo(String text, Runnable undoPressed, Runnable onDismissed, Duration time) {
+            buildToast(text, null, "撤销", null, () -> {
+                line.stop();
+                undoPressed.run();
+            });
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with undo button and custom text.
+         */
+        public void showUndo(String text, String undoText, Runnable undoPressed, Runnable onDismissed, Duration time) {
+            buildToast(text, null, undoText, null, () -> {
+                line.stop();
+                undoPressed.run();
+            });
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with ok and cancel button.
+         */
+        public void showOkCancel(String text, Runnable okPressed, Runnable cancelPressed, Duration time) {
+            buildToast(text, null, null, okPressed, cancelPressed);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with custom ok and cancel button.
+         */
+        public void showOkCancel(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, Duration time) {
+            buildToast(text, okText, cancelText, okPressed, cancelPressed);
+            playAnim(time, null);
         }
     }
 }
