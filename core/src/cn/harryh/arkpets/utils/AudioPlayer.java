@@ -4,37 +4,25 @@ import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.assets.VoiceItemGroup;
 import cn.harryh.arkpets.assets.VoiceLang;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.backends.lwjgl3.audio.OpenALLwjgl3Audio;
+import com.badlogic.gdx.backends.lwjgl3.audio.OpenALSound;
 import com.badlogic.gdx.utils.Timer;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 
 public class AudioPlayer {
-    private final Music music;
-    private final HashMap<String, Float> startTime = new HashMap<>();
-    private final HashMap<String, Float> durationTime = new HashMap<>();
-    private final Timer pauseTimer = new Timer();
+    private final HashMap<String, Sound> gdxSounds = new HashMap<>();
+    private final AudioSlicer slicer;
+    private final Timer resetTimer = new Timer();
     private boolean playing;
     private boolean disposed;
 
     private AudioPlayer(VoiceItem group, File audio) {
-        for (int i = 0; i < group.clips().size(); i++) {
-            VoiceItem.VoiceClip clip = group.clips().get(i);
-            VoiceItem.VoiceClip nextClip = null;
-            if (i < group.clips().size() - 1) {
-                nextClip = group.clips().get(i + 1);
-            }
-            startTime.put(clip.name(), clip.start());
-            if (nextClip != null) {
-                durationTime.put(clip.name(), nextClip.start() - clip.start());
-            } else {
-                durationTime.put(clip.name(), group.duration() - clip.start());
-            }
-        }
-        music = Gdx.audio.newMusic(Gdx.files.absolute(audio.getAbsolutePath()));
-        music.setLooping(false);
+        this.slicer = new AudioSlicer(audio, group);
     }
 
     public static AudioPlayer loadAudio(File oggPath, VoiceItemGroup group, VoiceLang lang) {
@@ -44,28 +32,33 @@ public class AudioPlayer {
     public void playAudio(String name, float pan, float vol) {
         if (disposed) throw new IllegalStateException();
         if (playing) return;
-        float start, duration;
-        start = startTime.get(name);
-        duration = durationTime.get(name);
-        Logger.debug("Audio",
-                "Playing " + name + " Pan: " + pan + " Vol: " + vol
-                        + " Start: " + start + " Duration: " + duration
-        );
-        music.play();
-        music.setPosition(start);
-        music.setPan(pan, vol);
-        playing = true;
-        pauseTimer.scheduleTask(new Timer.Task() {
-            @Override
-            public void run() {
-                music.pause();
-                playing = false;
-            }
-        }, duration);
+        Sound sound = fetchSound(name);
+        sound.play(vol, 1, pan);
+        //playing = true;
     }
 
     public void dispose() {
-        music.dispose();
+        for (Sound sound : gdxSounds.values()) {
+            sound.dispose();
+        }
         disposed = true;
+    }
+
+    private Sound fetchSound(String name) {
+        Sound sound = gdxSounds.get(name);
+        if (sound == null) {
+            Logger.debug("Audio", "Loading sound: " + name);
+            byte[] data = slicer.getSlice(name);
+            sound = new OpenALSound((OpenALLwjgl3Audio) Gdx.audio);
+            try {
+                Method setupMethod = OpenALSound.class.getDeclaredMethod("setup", byte[].class, int.class, int.class);
+                setupMethod.setAccessible(true);
+                setupMethod.invoke(sound, data, slicer.getChannels(), slicer.getSampleRate());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            gdxSounds.put(name, sound);
+        }
+        return sound;
     }
 }

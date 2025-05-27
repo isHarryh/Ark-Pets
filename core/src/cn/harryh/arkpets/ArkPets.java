@@ -500,7 +500,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        File ogg = new File(set.storageDirectory.get(lang),name+".ogg");
+        File ogg = new File(set.storageDirectory.get(lang), name + set.audioFormat);
         Logger.debug("Audio","Loading OGG: " + ogg.getAbsolutePath());
         audioPlayer = AudioPlayer.loadAudio(ogg,set.data.get(name), lang);
     }
