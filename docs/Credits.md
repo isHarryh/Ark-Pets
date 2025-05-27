@@ -70,6 +70,6 @@ ArkPets附加说明文档
 |     [Alibaba FastJSON](https://github.com/alibaba/fastjson)      | JSON 工具                    |
 |         [Apache log4j](https://logging.apache.org/log4j)         | 日志工具                       |
 |        [TinyPinyin](https://github.com/promeG/TinyPinyin)        | 汉语拼音转换工具                   |
- |          [Opencc4j](https://github.com/houbb/opencc4j)           | 中文简繁体转换工具                  |
+|          [Opencc4j](https://github.com/houbb/opencc4j)           | 中文简繁体转换工具                  |
 | [Commonmark-Java](https://github.com/commonmark/commonmark-java) | Markdown 文档解析工具            |
 |        [Dbus-java](https://github.com/hypfvieh/dbus-java)        | D-Bus 通信接口                 |
