@@ -42,11 +42,11 @@ import java.util.stream.Collectors;
 import static cn.harryh.arkpets.Const.durationFast;
 
 
-public final class AnnounceDialog implements Controller<ArkHomeFX> {
+public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
-    public AnchorPane dialog;
+    private AnchorPane dialog;
     @FXML
-    public JFXButton dialogReturn;
+    private JFXButton dialogReturn;
 
     @FXML
     private JFXListView<JFXListCell<AnnounceItem>> annoListView;
@@ -84,6 +84,16 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
+    }
+
+    @Override
+    public AnchorPane getDialogPane() {
+        return dialog;
+    }
+
+    @Override
+    public JFXButton getReturnButton() {
+        return dialogReturn;
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
