@@ -5,6 +5,7 @@ package cn.harryh.arkpets.controllers;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
@@ -25,17 +26,16 @@ public interface DialogController<T extends Application> extends Controller<T> {
      */
     Button getReturnButton();
 
-    /** Gets the action handler of the return trigger.
-     * @return The handler.
-     */
-    default EventHandler<ActionEvent> getReturnActionHandler() {
-        return getReturnButton().getOnAction();
-    }
-
-    /** Gets the action handler of the return trigger.
+    /** Sets the action handler of the return event.
      * @param handler The new handler.
      */
     default void setReturnActionHandler(EventHandler<ActionEvent> handler) {
         getReturnButton().setOnAction(handler);
+    }
+
+    /** Triggers the action handler of the return event.
+     */
+    default void triggerReturnActionHandler(Event event) {
+        getReturnButton().getOnAction().handle(new ActionEvent(event.getSource(), event.getTarget()));
     }
 }

@@ -26,7 +26,6 @@ import javafx.util.Duration;
 import org.apache.log4j.Level;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -94,7 +93,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXComboBox<String> configLoggingLevel;
     @FXML
-    private Label exploreLogDir;
+    private JFXButton exportLog;
     @FXML
     private JFXTextField configNetworkAgent;
     @FXML
@@ -341,15 +340,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             level = Const.LogConfig.debug;
         configLoggingLevel.getSelectionModel().select(level);
 
-        exploreLogDir.setOnMouseClicked(e -> {
-            // Only available in Windows OS
-            try {
-                Logger.debug("Config", "Request to explore the log dir");
-                Runtime.getRuntime().exec("explorer logs");
-            } catch (IOException ex) {
-                Logger.warn("Config", "Exploring log dir failed");
-            }
-        });
+        exportLog.setOnMouseClicked(e -> app.rootModule.popLogDialog(false));
 
         configNetworkAgent.setPromptText("示例：0.0.0.0:0");
         configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {

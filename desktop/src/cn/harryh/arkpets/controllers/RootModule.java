@@ -13,6 +13,8 @@ import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.utils.*;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
@@ -92,6 +94,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
     private HBox toast;
 
     private AnnounceDialog announceDialog;
+    private LogDialog logDialog;
 
     private ArkHomeFX app;
     private double xOffset;
@@ -116,9 +119,18 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.toast = new GuiComponents.Toast(toast);
 
         initAnnoEntrance();
+        initLogDialog();
         initMenuButtons();
         initLaunchButton();
         initLaunchingStatusListener();
+    }
+
+    /** Pops up the log dialog.
+     * @param autoExport Whether to auto trigger the export action.
+     */
+    public void popLogDialog(boolean autoExport) {
+        popDialog(logDialog, () -> logDialog.clearTable());
+        logDialog.refreshTable();
     }
 
     /** Pops up the splash screen in the GUI.
@@ -256,6 +268,33 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 this::exit).show();
     }
 
+    private void popDialog(DialogController<ArkHomeFX> dialogController, Runnable onClosed) {
+        // Blur out background nodes
+        List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
+        panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
+        // Setup and show popup
+        JFXDialog popup = new JFXDialog(body, dialogController.getDialogPane(), JFXDialog.DialogTransition.TOP, false);
+        popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
+            popup.setOnMouseClicked(null);
+            // Transfer overlay close
+            dialogController.triggerReturnActionHandler(eve);
+        }));
+        popup.show();
+        // Bind return actions
+        dialogController.setReturnActionHandler(ev -> {
+            dialogController.setReturnActionHandler(null);
+            // Register post-close procedure
+            BooleanProperty observer = new SimpleBooleanProperty();
+            observer.addListener((observable, oldValue, newValue) -> {
+                if (newValue && onClosed != null)
+                    onClosed.run();
+            });
+            // Close popup
+            popup.close();
+            panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, eve -> observer.set(true)));
+        });
+    }
+
     private void initLaunchButton() {
         // Set handler for internal start button.
         launchBtn.setOnAction(e -> {
@@ -285,36 +324,16 @@ public final class RootModule implements Controller<ArkHomeFX> {
         try {
             FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
             announceDialog = (AnnounceDialog) fxml.initializeWith(app);
-        } catch (IOException ex) {
-            Logger.error("Launcher", "Failed to open announcement dialog, details see below.", ex);
-            throw new RuntimeException(ex);
+        } catch (IOException e) {
+            Logger.error("Launcher", "Failed to load announcement dialog, details see below.", e);
+            throw new RuntimeException(e);
         }
         // Entrance button logic
         annoEntrance.setOnAction(e -> {
             if (annoEntrance.isDisable())
                 return;
             annoEntrance.setDisable(true);
-            // Blur out background nodes
-            List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
-            panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
-            // Setup and show popup
-            JFXDialog popup = new JFXDialog(body, announceDialog.getDialogPane(), JFXDialog.DialogTransition.TOP, false);
-            popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
-                popup.setOnMouseClicked(null);
-                // Transfer overlay close
-                announceDialog.getReturnActionHandler().handle(
-                        new ActionEvent(ev.getSource(), ev.getTarget())
-                );
-            }));
-            popup.show();
-            // Bind return actions
-            announceDialog.setReturnActionHandler(ev -> {
-                announceDialog.setReturnActionHandler(null);
-                // Close popup
-                popup.close();
-                panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
-                annoEntrance.setDisable(false);
-            });
+            popDialog(announceDialog, () -> annoEntrance.setDisable(false));
         });
         // Fetch once on app initialized
         announceDialog.fetchAnnounce(false, () -> {
@@ -323,6 +342,17 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     new ActionEvent(this, Event.NULL_SOURCE_TARGET)
             );
         });
+    }
+
+    private void initLogDialog() {
+        // Load the fxml of log dialog
+        try {
+            FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/LogDialog.fxml");
+            logDialog = (LogDialog) fxml.initializeWith(app);
+        } catch (IOException e) {
+            Logger.error("Launcher", "Failed to load log dialog, details see below.", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private void initMenuButtons() {
