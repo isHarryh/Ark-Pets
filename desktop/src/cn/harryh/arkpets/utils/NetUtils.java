@@ -4,22 +4,20 @@
 package cn.harryh.arkpets.utils;
 
 import javax.net.ssl.*;
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.IOException;
 import java.net.*;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
-import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class NetUtils {
-    private static final int k = 1024;
     private static final int delayTestPort = 443;
     private static final int delayUpThreshold = 1500;
-    private static final DecimalFormat df = new DecimalFormat("0.0");
 
     public static final ArrayList<Source> ghSources;
 
@@ -31,31 +29,6 @@ public class NetUtils {
         ghSources.add(new GitHubSource("GHProxy",
                 "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/",
                 "https://ghproxy.harryh.cn/https://github.com/"));
-    }
-
-    public static final Map<Long, String> sizeMap;
-
-    static {
-        sizeMap = new HashMap<>();
-        sizeMap.put(1L, "B");
-        sizeMap.put((long) k, "KB");
-        sizeMap.put((long) k * k, "MB");
-        sizeMap.put((long) k * k * k, "GB");
-        sizeMap.put((long) k * k * k * k, "TB");
-    }
-
-    /** Gets a formatted size string, e.g."{@code 114.5 MB}".
-     * @param byteSize The size value in Byte.
-     * @return The formatted string. Returns "{@code Unknown size}" if conversion failed.
-     */
-    public static String getFormattedSizeString(long byteSize) {
-        if (byteSize == 0)
-            return "0";
-        for (Long unitSize : sizeMap.keySet()) {
-            if (unitSize <= byteSize && byteSize < unitSize * k)
-                return df.format((double) byteSize / unitSize) + " " + sizeMap.get(unitSize);
-        }
-        return "Unknown size";
     }
 
     /** Opens the given URL in the user's browser.

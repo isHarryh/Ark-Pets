@@ -7,6 +7,7 @@ import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.NetUtils;
 import cn.harryh.arkpets.utils.NetUtils.GitHubSource;
+import cn.harryh.arkpets.utils.StringUtils;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
@@ -71,8 +72,8 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                         sum += len;
                         log.receive();
                         long speed = log.getSpeedPerSecond(500);
-                        this.updateMessage("当前已下载：" + NetUtils.getFormattedSizeString(sum) +
-                                (speed != 0 ? " (" + NetUtils.getFormattedSizeString(speed) + "/s)" : ""));
+                        this.updateMessage("当前已下载：" + StringUtils.getFormattedSizeString(sum) +
+                                (speed != 0 ? " (" + StringUtils.getFormattedSizeString(speed) + "/s)" : ""));
                         this.updateProgress(sum, max);
                         if (this.isCancelled()) {
                             this.updateMessage("下载进程已被取消");
