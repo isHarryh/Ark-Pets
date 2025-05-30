@@ -8,7 +8,6 @@ import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.guitasks.ZipTask;
 import cn.harryh.arkpets.platform.StartupConfig;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
@@ -21,18 +20,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static cn.harryh.arkpets.Const.*;
@@ -108,8 +100,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXButton configWindowToolwindowHelp;
     @FXML
     private JFXCheckBox configEcoMode;
-    @FXML
-    private Label exportLatestLog;
 
     @FXML
     private Label aboutQueryUpdate;
@@ -432,8 +422,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             app.config.eco_mode = configEcoMode.isSelected();
             app.config.save();
         });
-
-        exportLatestLog.setOnMouseClicked(e -> exportLatestLog());
     }
 
     private void initAbout() {
@@ -577,36 +565,5 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
-    }
-
-    private void exportLatestLog() {
-        Logger.info("Config", "Ready to export logs");
-        List<String> logList = new ArrayList<>();
-        logList.add(Logger.getLogFilePath());
-        File logDir = new File("logs");
-        if (logDir.exists() && logDir.isDirectory()) {
-            File[] files = logDir.listFiles();
-            if (files != null) Arrays.stream(files)
-                    .filter(file -> file.getName().startsWith("core") && file.getName().endsWith(".log"))
-                    .max(Comparator.comparingLong(File::lastModified))
-                    .ifPresent(f -> logList.add(f.getPath()));
-        }
-        logList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
-        // Open file chooser
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archives", "*.zip"));
-        fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_Logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
-        Logger.info("Dialog", "Opening file chooser to export logs");
-        File zipFile = fileChooser.showSaveDialog(app.getWindow());
-        if (zipFile == null)
-            return;
-        // Export log files
-        new ZipTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), logList).start();
-        GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
-                "导出最近日志",
-                "导出最近日志成功",
-                "已导出最近日志到 " + zipFile.getAbsolutePath(),
-                null).show();
     }
 }
