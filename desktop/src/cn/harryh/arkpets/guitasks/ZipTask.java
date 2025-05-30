@@ -65,4 +65,14 @@ public class ZipTask extends GuiTask {
         if (style != GuiTaskStyle.HIDDEN)
             GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();
     }
+
+    @Override
+    protected void onSucceeded(boolean result) {
+        GuiPrefabs.Dialogs.createCommonDialog(parent,
+                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                "导出",
+                "已成功导出为压缩包",
+                "压缩包文件已被保存到：\n" + new File(zipPath).getAbsolutePath(),
+                null).show();
+    }
 }
