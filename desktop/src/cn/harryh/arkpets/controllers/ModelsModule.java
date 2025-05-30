@@ -17,6 +17,7 @@ import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
+import com.jfoenix.controls.JFXPopup;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,9 +26,11 @@ import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -41,6 +44,7 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -86,6 +90,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     public SVGPath modelFavoriteIconFill;
     @FXML
     private Button topFavorite;
+    @FXML
+    private Button voiceSelect;
 
     @FXML
     private AnchorPane infoPane;
@@ -161,6 +167,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelSearch();
         initModelFilter();
         initModelManage();
+        initVoiceSelect();
         modelReload(false);
         Platform.runLater(() -> {
             GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
@@ -481,6 +488,44 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         });
 
         modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
+    }
+
+    private void initVoiceSelect() {
+        var imgURL = getClass().getResource("/icons/flags.png").toString();
+        ListView<Label> labelJFXListView = new ListView<>();
+        ImageView imgOFF = new ImageView(imgURL);
+        imgOFF.setViewport(new Rectangle2D(0,256,64,64));
+        imgOFF.setFitHeight(32);
+        imgOFF.setFitWidth(32);
+        ImageView imgCN = new ImageView(imgURL);
+        imgCN.setViewport(new Rectangle2D(0,0,64,64));
+        imgCN.setFitHeight(32);
+        imgCN.setFitWidth(32);
+        ImageView imgJP = new ImageView(imgURL);
+        imgJP.setViewport(new Rectangle2D(0,64,64,64));
+        imgJP.setFitHeight(32);
+        imgJP.setFitWidth(32);
+        ImageView imgEN = new ImageView(imgURL);
+        imgEN.setViewport(new Rectangle2D(0,192,64,64));
+        imgEN.setFitHeight(32);
+        imgEN.setFitWidth(32);
+        ImageView imgKR = new ImageView(imgURL);
+        imgKR.setViewport(new Rectangle2D(0,128,64,64));
+        imgKR.setFitHeight(32);
+        imgKR.setFitWidth(32);
+        labelJFXListView.getItems().add(new Label("关闭",imgOFF));
+        labelJFXListView.getItems().add(new Label("普通话",imgCN));
+        labelJFXListView.getItems().add(new Label("日语",imgJP));
+        labelJFXListView.getItems().add(new Label("英语",imgEN));
+        labelJFXListView.getItems().add(new Label("韩语",imgKR));
+        for (Label n:labelJFXListView.getItems()) {
+            n.setMaxSize(90,32);
+        }
+        labelJFXListView.setMaxSize(150,200);
+        JFXPopup popup = new JFXPopup(labelJFXListView);
+        voiceSelect.setOnAction(e -> {
+            popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT,0,30);
+        });
     }
 
     public void modelSearch(String keyWords) {
