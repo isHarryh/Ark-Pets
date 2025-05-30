@@ -79,6 +79,22 @@
                     <Canvas fx:id="configDeployPosition" height="150.0" width="150.0"/>
                 </HBox>
                 <Separator/>
+                <Label styleClass="config-group-title" text="语音"/>
+                <HBox>
+                    <JFXCheckBox fx:id="configVoiceStereo" mnemonicParsing="false" text="立体声语音"/>
+                    <JFXButton fx:id="configVoiceStereoHelp"/>
+                </HBox>
+                <HBox>
+                    <Label text="语音音量"/>
+                    <JFXSlider fx:id="configVoiceVolume"/>
+                    <Label fx:id="configVoiceVolumeValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="同时播放语音数"/>
+                    <JFXSlider fx:id="configMaxPlayingVoice"/>
+                    <Label fx:id="configMaxPlayingVoiceValue" text="0"/>
+                </HBox>
+                <Separator/>
                 <Label styleClass="config-group-title" text="过渡"/>
                 <HBox>
                     <Label fx:id="configTransitionAnimationLabel" text="动画交叉过渡"/>

@@ -66,6 +66,19 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private Canvas configDeployPosition;
 
     @FXML
+    private JFXCheckBox configVoiceStereo;
+    @FXML
+    private JFXButton configVoiceStereoHelp;
+    @FXML
+    private JFXSlider configVoiceVolume;
+    @FXML
+    private Label configVoiceVolumeValue;
+    @FXML
+    private JFXSlider configMaxPlayingVoice;
+    @FXML
+    private Label configMaxPlayingVoiceValue;
+
+    @FXML
     private Label configTransitionAnimationLabel;
     @FXML
     private ComboBox<NamedItem<Float>> configTransitionAnimation;
@@ -265,6 +278,30 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+
+        new HelpHandbookEntrance(app.body,configVoiceStereoHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configVoiceStereo) {
+                    @Override
+                    public String getContent() {
+                        return "启用后，桌宠将会根据在桌面的位置确定语音播放的位置。";
+                    }
+                };
+            }
+        };
+        SliderSetup<Integer> setupVoiceVolume = new SimpleIntegerSliderSetup(configVoiceVolume);
+        setupVoiceVolume
+                .setDisplay(configVoiceVolumeValue,"%d","音量")
+                .setRange(0,100)
+                .setTicks(10,1)
+                .setSliderValue(80);
+        SliderSetup<Integer> setupMaxPlayingVoiceValue = new SimpleIntegerSliderSetup(configMaxPlayingVoice);
+        setupMaxPlayingVoiceValue
+                .setDisplay(configMaxPlayingVoiceValue,"%d 个","音量")
+                .setRange(0,10)
+                .setTicks(2,1)
+                .setSliderValue(4);
 
         SliderSetup<Integer> setupPhysicGravity = new SimpleMultipleIntegerSliderSetup(configPhysicGravity, 10);
         setupPhysicGravity
