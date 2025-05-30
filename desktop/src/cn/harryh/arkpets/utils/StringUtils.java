@@ -5,6 +5,9 @@ package cn.harryh.arkpets.utils;
 
 import java.text.DecimalFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +24,7 @@ public class StringUtils {
             1L << 40, "TB"
     );
     private static final DecimalFormat sizeFormat = new DecimalFormat("0.0");
+    private static final DateTimeFormatter simpleDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
     /** Gets a formatted size string, e.g."{@code 114.5 MB}".
@@ -30,11 +34,14 @@ public class StringUtils {
     public static String getFormattedSizeString(long byteSize) {
         if (byteSize == 0)
             return "0";
+        long absByteSize = Math.abs(byteSize);
         for (Long unitSize : sizeMap.keySet()) {
-            if (unitSize <= byteSize && byteSize < unitSize << 10)
-                return sizeFormat.format((double) byteSize / unitSize) + " " + sizeMap.get(unitSize);
+            if (unitSize <= absByteSize && absByteSize < unitSize << 10) {
+                return (byteSize < 0 ? "-" : "") + sizeFormat.format((double) byteSize / unitSize)
+                        + ' ' + sizeMap.get(unitSize);
+            }
         }
-        return "未知";
+        return "N/A";
     }
 
     /** Gets a related time string.
@@ -43,7 +50,7 @@ public class StringUtils {
      */
     public static String getRelatedTimeString(Instant instant) {
         if (instant == null || instant.toEpochMilli() <= 0)
-            return "未知";
+            return "N/A";
 
         Instant now = Instant.now();
         boolean isFuture = instant.isAfter(now);
@@ -70,6 +77,17 @@ public class StringUtils {
             return "现在";
     }
 
+    /** Gets a human-readable time string, in {@link #simpleDateTimeFormat} format.
+     * @param instant The time instant.
+     * @return The formatted string.
+     */
+    public static String getSimpleTimeString(Instant instant) {
+        if (instant == null || instant.toEpochMilli() <= 0)
+            return "N/A";
+
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return simpleDateTimeFormat.format(localDateTime);
+    }
 
     /** Counts the number of matches of a given regular expression in the input string.
      * @param input The input string in which matches are to be counted.

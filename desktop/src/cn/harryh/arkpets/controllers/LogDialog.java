@@ -229,8 +229,8 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         }
         logName.setText("文件名：" + item.name);
         logSize.setText("大小：" + StringUtils.getFormattedSizeString(item.size));
-        logCreatedTime.setText("创建于：" + item.createdTime.toString());
-        logModifiedTime.setText("更新于：" + item.modifiedTime.toString());
+        logCreatedTime.setText("创建于：" + StringUtils.getSimpleTimeString(item.createdTime));
+        logModifiedTime.setText("更新于：" + StringUtils.getSimpleTimeString(item.modifiedTime));
 
         if (item.size > 4 << 20) // 4 MB
             logSummary.setText("此文件较大，已禁用分析");
