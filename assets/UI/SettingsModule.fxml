@@ -9,6 +9,8 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<?import java.lang.String?>
 <Pane prefHeight="376.0" prefWidth="460.0" styleClass="wrapper" stylesheets="@Main.css"
       xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="cn.harryh.arkpets.controllers.SettingsModule">
@@ -119,25 +121,36 @@
                     <JFXCheckBox fx:id="configEcoMode" mnemonicParsing="false" text="长时间未交互时降低帧率"/>
                 </HBox>
                 <Separator/>
-                <HBox>
+                <HBox spacing="20.0">
                     <Label text="日志级别"/>
                     <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
-                    <JFXButton fx:id="exportLog" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                               prefHeight="28.0" prefWidth="80.0" styleClass="btn-plain-dark" text="导出日志">
+                    <JFXButton fx:id="exportLog" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity"
+                               mnemonicParsing="false" prefWidth="82.5" text="导出日志">
+                        <graphic>
+                            <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
+                                <SVGPath
+                                        content="M23 0v20h-8v-2h6v-16h-18v16h6v2h-8v-20h22zm-12 13h-4l5-6 5 6h-4v11h-2v-11z"
+                                        scaleX="1.1" scaleY="1.1" AnchorPane.leftAnchor="-36.0"/>
+                            </AnchorPane>
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="btn-secondary"/>
+                            <String fx:value="btn-with-icon"/>
+                        </styleClass>
                     </JFXButton>
                 </HBox>
-                <HBox>
+                <HBox spacing="20.0">
                     <Label text="网络代理（仅本次有效）"/>
                     <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0"/>
-                    <Label fx:id="configNetworkAgentStatus" layoutX="10.0" text="-"/>
+                    <Label fx:id="configNetworkAgentStatus" text="-"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="关于软件"/>
-                <HBox spacing="22.5">
+                <HBox spacing="20.0">
                     <Label fx:id="aboutQueryUpdate" styleClass="config-hyper-link" text="检查软件更新"/>
                     <Label fx:id="aboutVisitWebsite" styleClass="config-hyper-link" text="ArkPets 官网"/>
                 </HBox>
-                <HBox spacing="22.5">
+                <HBox spacing="20.0">
                     <Label fx:id="aboutReadme" styleClass="config-hyper-link" text="使用指南"/>
                     <Label fx:id="aboutGitHub" styleClass="config-hyper-link" text="GitHub 项目仓库"/>
                 </HBox>

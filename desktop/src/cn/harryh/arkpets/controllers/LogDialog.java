@@ -11,6 +11,7 @@ import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import com.jfoenix.controls.*;
 import com.jfoenix.controls.datamodels.treetable.*;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -90,6 +91,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
     public void refreshTable() {
         Logger.info("LogDialog", "Refreshing table");
+        logView.getSelectionModel().clearSelection();
         loadLogFiles(
                 desktopLogList,
                 new File("logs"),
@@ -124,16 +126,17 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         );
         sizeCol.setReorderable(false);
 
-        TreeTableColumn<LogItem, HumanInstant> createdTimeCol = new JFXTreeTableColumn<>("创建时间");
-        createdTimeCol.setCellValueFactory(
-                new SimpleCellValueFactory<>(logItem -> new HumanInstant(logItem.createdTime, !logItem.isAvailable()))
+        TreeTableColumn<LogItem, HumanInstant> modifiedTimeCol = new JFXTreeTableColumn<>("更新时间");
+        modifiedTimeCol.setCellValueFactory(
+                new SimpleCellValueFactory<>(logItem -> new HumanInstant(logItem.modifiedTime, !logItem.isAvailable()))
         );
-        createdTimeCol.setReorderable(false);
+        modifiedTimeCol.setReorderable(false);
 
         LogItem coreLogRoot = new LogItem("桌宠日志");
         LogItem desktopLogRoot = new LogItem("启动器日志");
         coreLogRoot.setChildren(coreLogList);
         desktopLogRoot.setChildren(desktopLogList);
+
         RecursiveTreeItem<LogItem> root = new RecursiveTreeItem<>(
                 FXCollections.observableArrayList(coreLogRoot, desktopLogRoot),
                 RecursiveTreeObject::getChildren
@@ -144,7 +147,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         logView.setShowRoot(false);
         logView.getColumns().add(nameCol);
         logView.getColumns().add(sizeCol);
-        logView.getColumns().add(createdTimeCol);
+        logView.getColumns().add(modifiedTimeCol);
         logView.getSelectionModel().setCellSelectionEnabled(false);
         logView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
@@ -187,7 +190,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
             List<LogItem> logItems = Arrays.stream(logFiles)
                     .map(LogItem::new)
                     .filter(LogItem::isAvailable)
-                    .sorted(Comparator.comparingLong(logItem -> -logItem.createdTime.toEpochMilli()))
+                    .sorted(Comparator.comparingLong(logItem -> -logItem.modifiedTime.toEpochMilli()))
                     .toList();
             targetList.addAll(logItems);
             Logger.debug("LogDialog", "Found " + logItems.size() + " log files in \"" + directory + "\"");
@@ -197,25 +200,38 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     }
 
     private void prepareInfoPane() {
-        logView.getSelectionModel().getSelectedCells()
-                .addListener((ListChangeListener<? super TreeTablePosition<LogItem, ?>>) observable -> {
-                    observable.next();
-                    if (observable.wasAdded() && observable.getAddedSize() > 0) {
-                        selectLog(observable.getAddedSubList().get(0).getTreeItem().getValue());
-                    }
+        TreeTableView.TreeTableViewSelectionModel<LogItem> selections = logView.getSelectionModel();
 
-                    List<TreeTablePosition<LogItem, ?>> selected = logView.getSelectionModel().getSelectedCells()
-                            .filtered(position -> position.getTreeItem().getValue().isAvailable());
-                    if (!selected.isEmpty()) {
-                        logSelectedCount.setText("已选择 " + selected.size() + " 个文件");
-                    } else {
-                        selectLog(null);
-                        logSelectedCount.setText("未选择任何文件");
-                    }
-                });
+        selections.getSelectedItems().addListener((ListChangeListener<? super TreeItem<LogItem>>) observable -> {
+            observable.next();
+            if (observable.wasAdded() && observable.getAddedSize() > 0) {
+                List<? extends TreeItem<LogItem>> addedList = observable.getAddedSubList();
+                if (!addedList.isEmpty()) {
+                    // Inform selecting this tree item
+                    selectLog(addedList.get(0).getValue());
+                    // Recursively select its children items
+                    Platform.runLater(() -> addedList.forEach(
+                            treeItem -> treeItem.getChildren().forEach(
+                                    child -> logView.getSelectionModel().select(child)
+                            )
+                    ));
+                }
+            }
+
+            // Count and show selected item size
+            int selectedSize = selections.getSelectedItems().filtered(
+                    treeItem -> treeItem.getValue().isAvailable()
+            ).size();
+            if (selectedSize > 0) {
+                logSelectedCount.setText("已选择 " + selectedSize + " 个文件");
+            } else {
+                selectLog(null);
+                logSelectedCount.setText("未选择任何文件");
+            }
+        });
 
         exportSelected.setOnAction(e -> exportSelectedLog(
-                logView.getSelectionModel().getSelectedItems().stream().map(TreeItem::getValue).toList()
+                selections.getSelectedItems().stream().map(TreeItem::getValue).toList()
         ));
 
         selectLog(null);
@@ -234,13 +250,15 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         if (item.size > 4 << 20) // 4 MB
             logSummary.setText("此文件较大，已禁用分析");
-        try {
-            String content = FileUtil.readString(item.file, "UTF-8");
-            int errors = StringUtils.countMatches(content, "\\[ERROR\\]");
-            int warnings = StringUtils.countMatches(content, "\\[WARN\\]");
-            logSummary.setText("包含 " + warnings + " 个警告，" + errors + " 个错误");
-        } catch (IOException e) {
-            logSummary.setText("无法分析此文件");
+        else {
+            try {
+                String content = FileUtil.readString(item.file, "UTF-8");
+                int errors = StringUtils.countMatches(content, "\\[ERROR\\]");
+                int warnings = StringUtils.countMatches(content, "\\[WARN\\]");
+                logSummary.setText("包含 " + warnings + " 个警告，" + errors + " 个错误");
+            } catch (IOException e) {
+                logSummary.setText("无法分析此文件");
+            }
         }
     }
 
@@ -260,7 +278,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         Logger.info("LogDialog", "Opening file chooser to export logs, " + pathList.size() + " files included");
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archives", "*.zip"));
-        fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
+        fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_Logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
         File zipFile = fileChooser.showSaveDialog(app.getWindow());
         if (zipFile == null) {
             Logger.info("LogDialog", "Logs not exported, user cancelled");
