@@ -60,6 +60,10 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
     private Label logSelectedCount;
     @FXML
+    public JFXButton quickSelectAll;
+    @FXML
+    public JFXButton quickSelectRecent;
+    @FXML
     private JFXButton exportSelected;
 
     private ObservableList<LogItem> coreLogList;
@@ -210,11 +214,10 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
                     // Inform selecting this tree item
                     selectLog(addedList.get(0).getValue());
                     // Recursively select its children items
-                    Platform.runLater(() -> addedList.forEach(
-                            treeItem -> treeItem.getChildren().forEach(
-                                    child -> logView.getSelectionModel().select(child)
-                            )
-                    ));
+                    Platform.runLater(() -> addedList.forEach(treeItem -> {
+                        if (treeItem != null)
+                            treeItem.getChildren().forEach(selections::select);
+                    }));
                 }
             }
 
@@ -228,6 +231,32 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
                 selectLog(null);
                 logSelectedCount.setText("未选择任何文件");
             }
+        });
+
+        quickSelectAll.setOnAction(e -> {
+            logView.requestFocus();
+            logView.getRoot().getChildren().forEach(child -> child.setExpanded(true));
+            selections.selectAll();
+            logView.scrollTo(0);
+        });
+
+        quickSelectRecent.setOnAction(e -> {
+            logView.requestFocus();
+            logView.getRoot().getChildren().forEach(child -> child.setExpanded(true));
+            selections.selectAll();
+            Instant threshold = Instant.now().minusSeconds(3600); // 1h
+            List<? extends TreeItem<LogItem>> treeItemList = selections.getSelectedItems().stream()
+                    .filter(position -> position.getValue().isAvailable())
+                    .filter(position -> position.getValue().modifiedTime.isAfter(threshold))
+                    .toList();
+            selections.getSelectedCells().stream()
+                    .map(TablePositionBase::getRow)
+                    .max(Comparator.naturalOrder())
+                    .ifPresent(i -> logView.scrollTo(i));
+            Platform.runLater(() -> {
+                selections.clearSelection();
+                treeItemList.forEach(selections::select);
+            });
         });
 
         exportSelected.setOnAction(e -> exportSelectedLog(
