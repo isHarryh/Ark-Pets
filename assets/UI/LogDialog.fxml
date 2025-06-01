@@ -79,6 +79,9 @@
                    prefHeight="28.0" prefWidth="120.0" styleClass="btn-primary" text="导出所选的日志">
         </JFXButton>
         <Label fx:id="logSelectedCount" text="LogSelectedCount"/>
+        <JFXButton fx:id="logExplore" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="120.0" styleClass="btn-plain-dark" text="打开日志文件夹">
+        </JFXButton>
         <padding>
             <Insets left="10.0" right="10.0"/>
         </padding>

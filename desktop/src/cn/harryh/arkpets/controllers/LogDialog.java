@@ -46,6 +46,8 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     private TreeTableView<LogItem> logView;
     @FXML
     private JFXButton logRefetch;
+    @FXML
+    private JFXButton logExplore;
 
     @FXML
     private Label logName;
@@ -81,6 +83,16 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         prepareInfoPane();
 
         logRefetch.setOnAction(e -> refreshTable());
+        logExplore.setOnAction(e -> {
+            // Only available in Windows OS
+            try {
+                Logger.debug("LogDialog", "Request to explore the log dir");
+                Runtime.getRuntime().exec("explorer logs");
+            } catch (IOException ex) {
+                Logger.warn("LogDialog", "Exploring log dir failed");
+            }
+            logView.requestFocus();
+        });
     }
 
     @Override
@@ -214,10 +226,12 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
                     // Inform selecting this tree item
                     selectLog(addedList.get(0).getValue());
                     // Recursively select its children items
-                    Platform.runLater(() -> addedList.forEach(treeItem -> {
-                        if (treeItem != null)
-                            treeItem.getChildren().forEach(selections::select);
-                    }));
+                    if (addedList.stream().anyMatch(treeItem -> !treeItem.getChildren().isEmpty())) {
+                        Platform.runLater(() -> addedList.forEach(treeItem -> {
+                            if (treeItem != null)
+                                treeItem.getChildren().forEach(selections::select);
+                        }));
+                    }
                 }
             }
 
