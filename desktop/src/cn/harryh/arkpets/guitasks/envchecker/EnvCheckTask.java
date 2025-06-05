@@ -1,8 +1,6 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.Const;
-import com.sun.jna.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,7 @@ public abstract class EnvCheckTask {
 
     public abstract String getFailureDetail();
 
-    public abstract boolean tryFix(ArkConfig cfg);
+    public abstract boolean tryFix();
 
     public abstract boolean canFix();
 

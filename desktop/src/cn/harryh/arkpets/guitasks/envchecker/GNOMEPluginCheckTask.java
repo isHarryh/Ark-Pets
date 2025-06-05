@@ -1,6 +1,5 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.MutterPluginInterface;
 import cn.harryh.arkpets.utils.IOUtils;
@@ -46,7 +45,7 @@ public class GNOMEPluginCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix(ArkConfig cfg) {
+    public boolean tryFix() {
         Logger.info("EnvCheck", "Installing GNOME plugin");
         String pluginPath = System.getProperty("user.home") + "/.local/share/gnome-shell/extensions/" + Const.gnomePluginName;
         File pluginDir = new File(pluginPath);

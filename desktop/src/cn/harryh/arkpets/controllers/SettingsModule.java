@@ -477,7 +477,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     "环境检查通过。",
                     "当前系统环境可以顺利运行 ArkPets。",
                     null).show();
-        },app.config).start());
+        }).start());
     }
 
     private static ArrayList<NamedItem<String>> getWindowSystemItems() {

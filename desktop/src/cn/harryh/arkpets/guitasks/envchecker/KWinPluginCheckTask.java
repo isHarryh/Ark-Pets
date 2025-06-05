@@ -1,6 +1,5 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.KWinPluginInterface;
 import cn.harryh.arkpets.utils.IOUtils;
@@ -47,7 +46,7 @@ public class KWinPluginCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix(ArkConfig cfg) {
+    public boolean tryFix() {
         return false;
     }
 

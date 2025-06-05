@@ -226,7 +226,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 "首次运行环境检查",
                 "这似乎是你第一次运行 ArkPets，我们需要对您的系统进行一些基本检查以确保桌宠能够正常运行。\n你也可以跳过检查，但可能会导致使用体验下降。",
                 () -> {
-                    new CheckEnvironmentTask(app.body,EnvCheckTask.getAvailableTasks(),this::launchArkPets,app.config).start();
+                    new CheckEnvironmentTask(app.body,EnvCheckTask.getAvailableTasks(),this::launchArkPets).start();
                 });
         Node cancel = ((JFXDialogLayout)dialog.getContent()).getActions().get(0);
         ((JFXButton) cancel).setOnAction(e -> {

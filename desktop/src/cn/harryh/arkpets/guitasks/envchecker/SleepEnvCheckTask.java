@@ -1,7 +1,5 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
-
 
 public class SleepEnvCheckTask extends EnvCheckTask {
     private final int time;
@@ -31,7 +29,7 @@ public class SleepEnvCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix(ArkConfig cfg) {
+    public boolean tryFix() {
         return true;
     }
 

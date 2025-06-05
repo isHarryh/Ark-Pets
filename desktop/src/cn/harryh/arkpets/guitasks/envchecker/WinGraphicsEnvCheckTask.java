@@ -16,6 +16,7 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 import java.io.File;
+import java.util.Objects;
 
 import static com.sun.jna.platform.win32.WinNT.*;
 import static com.sun.jna.platform.win32.WinReg.HKEY_CURRENT_USER;
@@ -63,7 +64,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     }
 
     @Override
-    public boolean tryFix(ArkConfig cfg) {
+    public boolean tryFix() {
         try {
             switch (fix) {
                 case NV -> setNvidiaGLSettings(true, launcherPath, javaBin);
@@ -77,8 +78,9 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
                 case ANGLE -> {
-                    cfg.render_enable_angle = true;
-                    cfg.save();
+                    ArkConfig config = Objects.requireNonNull(ArkConfig.getConfig());
+                    config.render_enable_angle = true;
+                    config.save();
                 }
             }
         } catch (Exception e) {

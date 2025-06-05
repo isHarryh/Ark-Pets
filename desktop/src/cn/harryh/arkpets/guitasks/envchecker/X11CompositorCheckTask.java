@@ -1,6 +1,5 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.natives.X11Extension;
 import cn.harryh.arkpets.natives.X11Helper;
 import cn.harryh.arkpets.utils.Logger;
@@ -22,7 +21,7 @@ public class X11CompositorCheckTask extends EnvCheckTask{
     }
 
     @Override
-    public boolean tryFix(ArkConfig cfg) {
+    public boolean tryFix() {
         return false;
     }
 
