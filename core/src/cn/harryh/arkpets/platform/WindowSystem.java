@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.Logger;
 import com.sun.jna.Platform;
 
@@ -22,11 +23,11 @@ public enum WindowSystem {
     private static WindowSystem PLATFORM = null;
 
     public static WindowSystem detectWindowSystem() {
-        if (Platform.isWindows()) {
+        if (Const.isWindows) {
             return WindowSystem.USER32;
-        } else if (Platform.isMac()) {
+        } else if (Const.isMac) {
             return WindowSystem.QUARTZ;
-        } else if (Platform.isLinux()) {
+        } else if (Const.isLinux) {
             String desktop = System.getenv("XDG_CURRENT_DESKTOP");
             String type = System.getenv("XDG_SESSION_TYPE");
             if (desktop != null && type != null) {
@@ -174,5 +175,18 @@ public enum WindowSystem {
      */
     public static boolean needDecorated() {
         return PLATFORM == NULL;
+    }
+
+    /** Return current WindowSystem information request rate.
+     */
+    public static int getRequestRate() {
+        switch (PLATFORM) {
+            case MUTTER,KWIN,X11,QUARTZ -> { // IPC
+                return 6;
+            }
+            default -> {
+                return 4;
+            }
+        }
     }
 }

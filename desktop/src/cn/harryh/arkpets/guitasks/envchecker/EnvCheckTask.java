@@ -1,6 +1,6 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import com.sun.jna.Platform;
+import cn.harryh.arkpets.Const;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,10 +38,10 @@ public abstract class EnvCheckTask {
     public static List<EnvCheckTask> getAvailableTasks() {
         ArrayList<EnvCheckTask> list = new ArrayList<>();
         list.add(new SleepEnvCheckTask(1000));
-        if (Platform.isWindows()) {
+        if (Const.isWindows) {
             list.add(new WinGraphicsEnvCheckTask());
         }
-        if (Platform.isLinux()) {
+        if (Const.isLinux) {
             String desktop = System.getenv("XDG_CURRENT_DESKTOP");
             String type = System.getenv("XDG_SESSION_TYPE");
             if (desktop != null && type != null) {

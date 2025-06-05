@@ -97,7 +97,7 @@
                                 <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="MipMap 抗锯齿"/>
                                 <JFXButton fx:id="configEnableMipMapHelp"/>
                             </HBox>
-                            <HBox>
+                            <HBox fx:id="configAngleBox">
                                 <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="Angle 原生渲染"/>
                                 <JFXButton fx:id="configEnableAngleHelp"/>
                             </HBox>
@@ -132,6 +132,7 @@
                     <Label fx:id="configNetworkAgentStatus" alignment="TOP_CENTER" text="-"/>
                 </HBox>
                 <HBox spacing="22.5">
+                    <Label fx:id="exportLatestLog" styleClass="config-hyper-link" text="导出最近日志"/>
                     <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>
                 </HBox>
                 <HBox spacing="22.5">

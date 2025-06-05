@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.startup;
 
+import cn.harryh.arkpets.Const;
 import com.sun.jna.Platform;
 
 
@@ -11,11 +12,11 @@ public abstract class StartupConfig {
      * @return platform StartupConfig.
      */
     public static StartupConfig getInstance() {
-        if (Platform.isWindows()) {
+        if (Const.isWindows) {
             return new WindowsStartupConfig();
-        } else if (Platform.isLinux()) {
+        } else if (Const.isLinux) {
             return new XDGStartupConfig();
-        } else if (Platform.isMac()) {
+        } else if (Const.isMac) {
             return new LaunchdStartupConfig();
         }
         return new NullStartupConfig();

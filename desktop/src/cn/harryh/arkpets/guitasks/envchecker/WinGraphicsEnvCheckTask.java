@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
+import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.naitves.NVAPIWrapper;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -15,6 +16,7 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 import java.io.File;
+import java.util.Objects;
 
 import static com.sun.jna.platform.win32.WinNT.*;
 import static com.sun.jna.platform.win32.WinReg.HKEY_CURRENT_USER;
@@ -75,14 +77,10 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setWinGraphicsCard(javaBin, false);
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
-                case WIN_PERF -> {
-                    setWinGraphicsCard(launcherPath, true);
-                    setWinGraphicsCard(javaBin, true);
-                }
-                case WIN_PERF_NV -> {
-                    setWinGraphicsCard(launcherPath, true);
-                    setWinGraphicsCard(javaBin, true);
-                    setNvidiaGLSettings(true, launcherPath, javaBin);
+                case ANGLE -> {
+                    ArkConfig config = Objects.requireNonNull(ArkConfig.getConfig());
+                    config.render_enable_angle = true;
+                    config.save();
                 }
             }
         } catch (Exception e) {
@@ -122,21 +120,10 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     }
                     return true;
                 } else if (cards.contains("AMD") && cards.contains("NVIDIA")) {
-                    // A+N Hybrid
-                    boolean card = checkWinGraphicsCard(launcherPath, true) && checkWinGraphicsCard(javaBin, true);
-                    boolean nv = checkNvidiaGLSettings();
-                    if (card && nv) {
-                        return true;
-                    }
-                    if (!card && !nv) fix = FixMode.WIN_PERF_NV;
-                    else if (!card) fix = FixMode.WIN_PERF;
-                    else fix = FixMode.NV;
+                    fix = FixMode.ANGLE;
                     return false;
                 } else if (cards.contains("AMD")) {
-                    // A+A Hybrid or AMD single,Fail temporary
-                    fix = FixMode.FAIL;
-                    failureReason = "AMD 显卡警告";
-                    failureDetail = "检测到正在使用 AMD 显卡，ArkPets 暂不支持 AMD 显卡。\n你仍可以尝试强制运行，但桌宠背景可能会不透明。";
+                    fix = FixMode.ANGLE;
                     return false;
                 } else if (cards.contains("NVIDIA")) {
                     // NVIDIA only
@@ -289,9 +276,8 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     private enum FixMode {
         WIN_SAV,     // Windows Power-saving
         WIN_SAV_NV,  // Windows and NVIDIA Power-saving
-        WIN_PERF,
+        ANGLE,       // Enable ANGLE
         NV,          // NVIDIA OpenGL GDI and Present method
-        WIN_PERF_NV, // Windows Performance, NVIDIA OpenGL GDI and Present method
         FAIL         // Can't Fix
     }
 }

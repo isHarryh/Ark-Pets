@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
 import com.sun.jna.Platform;
@@ -20,7 +21,6 @@ import static cn.harryh.arkpets.natives.CoreGraphics.*;
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
 
-    private static final boolean isArm = Platform.isARM();
     private final IgnoreMouseCallback igcb = new IgnoreMouseCallback();
     private final FrameCallback fcb = new FrameCallback();
 
@@ -300,7 +300,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private CGRect getScreenSize() {
         getNSScreen();
-        if (isArm) {
+        if (Const.isARM) {
             return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
                     nsScreen,
                     ObjCHelper.sel("frame")

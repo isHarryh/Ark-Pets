@@ -1,4 +1,5 @@
 import org.codehaus.groovy.runtime.GStringImpl
+import org.gradle.internal.os.OperatingSystem
 
 buildscript {
     repositories {
@@ -33,6 +34,40 @@ allprojects {
         javaFXVersion = "17.0.8"
         dbusVersion = "5.1.0"
         lwjglVersion = "3.3.4"
+        javaFXPlatform = ""
+        lwjglPlatform = ""
+        def isArm = System.getProperty("os.arch").startsWith("aarch64")
+        def isX64 = System.getProperty("os.arch").contains("64")
+        if (forceJavaFXPlatform.empty) {
+            switch (OperatingSystem.current()) {
+                case OperatingSystem.LINUX:
+                    javaFXPlatform = "linux"
+                    break
+                case OperatingSystem.WINDOWS:
+                    javaFXPlatform = isX64 ? "win" : "win-x86"
+                    break
+                case OperatingSystem.MAC_OS:
+                    javaFXPlatform = isArm ? "mac-aarch64" : "mac"
+                    break
+            }
+        } else {
+            javaFXPlatform = forceJavaFXPlatform
+        }
+        if (forceLWJGLPlatform.empty) {
+            switch (OperatingSystem.current()) {
+                case OperatingSystem.LINUX:
+                    lwjglPlatform = "natives-linux"
+                    break
+                case OperatingSystem.WINDOWS:
+                    lwjglPlatform = isX64 ? "natives-windows" : "natives-windows-x86"
+                    break
+                case OperatingSystem.MAC_OS:
+                    lwjglPlatform = isArm ? "natives-macos-arm64" : "natives-macos"
+                    break
+            }
+        } else {
+            lwjglPlatform = forceLWJGLPlatform
+        }
     }
 
     repositories {
@@ -42,6 +77,7 @@ allprojects {
     }
 }
 
+println "Building ArkPets for LWJGL ${lwjglPlatform} JavaFX ${javaFXPlatform}."
 
 project(":desktop") {
     dependencies {
@@ -59,19 +95,20 @@ project(":core") {
         api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
         // libGDX
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"
+        api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
+            exclude group:"org.lwjgl"
+        }
+        api ("com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"){
+            exclude group:"org.lwjgl"
+        }
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
         // JavaFX
-        def javaFXPlatforms = ["win", "mac", "linux"]
-        javaFXPlatforms.each {
-            api "org.openjfx:javafx-base:$javaFXVersion:$it"
-            api "org.openjfx:javafx-controls:$javaFXVersion:$it"
-            api "org.openjfx:javafx-graphics:$javaFXVersion:$it"
-            api "org.openjfx:javafx-fxml:$javaFXVersion:$it"
-        }
+        api "org.openjfx:javafx-base:$javaFXVersion:$javaFXPlatform"
+        api "org.openjfx:javafx-controls:$javaFXVersion:$javaFXPlatform"
+        api "org.openjfx:javafx-graphics:$javaFXVersion:$javaFXPlatform"
+        api "org.openjfx:javafx-fxml:$javaFXVersion:$javaFXPlatform"
         // JFoenix
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
@@ -87,14 +124,12 @@ project(":core") {
         api "com.github.hypfvieh:dbus-java-core:$dbusVersion"
         api "com.github.hypfvieh:dbus-java-transport-native-unixsocket:$dbusVersion"
         // LWJGL
-        def lwjglList = ["lwjgl", "lwjgl-opengl", "lwjgl-stb", "lwjgl-openal", "lwjgl-jemalloc", "lwjgl-glfw"]
+        def lwjglList = ["lwjgl", "lwjgl-opengl","lwjgl-opengles", "lwjgl-stb", "lwjgl-openal", "lwjgl-jemalloc", "lwjgl-glfw"]
         lwjglList.each {
-            api("org.lwjgl:" + it) {
-                version {
-                    strictly lwjglVersion
-                }
-            }
+            api "org.lwjgl:${it}:${lwjglVersion}"
+            api "org.lwjgl:${it}:${lwjglVersion}:${lwjglPlatform}"
         }
+        api "org.lwjgl:lwjgl-egl:${lwjglVersion}"
         // TiniPinyin
         api 'com.github.promeg:tinypinyin:2.0.3'
         // OpenCC4j

@@ -6,6 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.platform.HWndCtrl.NumberedTitleManager;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
+import com.sun.jna.Platform;
 import javafx.util.Duration;
 
 import javax.swing.*;
@@ -73,6 +74,13 @@ public final class Const {
     public static final String serverHost           = "localhost";
     public static final int[] serverPorts           = {8686, 8866, 8989, 8899, 8800};
     public static final int reconnectDelayMillis    = 5 * 1000;
+
+    // Platform constants
+    public static boolean isWindows  = Platform.isWindows();
+    public static boolean isMac      = Platform.isMac();
+    public static boolean isLinux    = Platform.isLinux();
+    public static boolean isIntel    = Platform.isIntel();
+    public static boolean isARM      = Platform.isARM();
 
     // Misc constants
     public static final Pattern ipPortRegex     = Pattern.compile(

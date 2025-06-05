@@ -11,7 +11,6 @@ import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
-import com.sun.jna.Platform;
 import javafx.application.Application;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -104,7 +103,7 @@ public class BootstrapLauncher {
             }
         };
         // Disable libdecor to avoid glfw and javafx problem on linux.
-        if(Platform.isLinux()) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
+        if(isLinux) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, ArgPending.argCache);
         Logger.info("System", "Exited from DesktopLauncher successfully");
@@ -172,7 +171,7 @@ public class BootstrapLauncher {
             config.setTransparentFramebuffer(true);
             config.setInitialBackgroundColor(Color.CLEAR);
             // Use async GLFW on macOS
-            if (Platform.isMac()) {
+            if (isMac) {
                 Logger.info("System", "Running on macOS, using async GLFW.");
                 System.setProperty("apple.awt.application.name", TITLE);
                 SwingUtilities.invokeAndWait(Toolkit::getDefaultToolkit);

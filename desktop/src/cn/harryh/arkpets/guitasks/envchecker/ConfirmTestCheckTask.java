@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
+
 public class ConfirmTestCheckTask extends EnvCheckTask {
     @Override
     public String getFailureReason() {

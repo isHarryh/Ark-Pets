@@ -25,6 +25,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
@@ -86,6 +87,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
     @FXML
+    private HBox configAngleBox;
+    @FXML
     private JFXCheckBox configEnableAngle;
     @FXML
     private JFXButton configEnableAngleHelp;
@@ -114,7 +117,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXButton configWindowToolwindowHelp;
     @FXML
     private Label exportLatestLog;
-
     @FXML
     private JFXComboBox<NamedItem<String>> configWindowSystem;
     @FXML
@@ -283,7 +285,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_shadow_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
-
+        if(isMac || isLinux) {
+            // Because some ANGLE Metal bug (background), temporary hide on macOS.
+            // Hide on Linux because the primary graphics API is OpenGL.
+            configAngleBox.setVisible(false);
+            configAngleBox.setManaged(false);
+        }
         configEnableAngle.setSelected(app.config.render_enable_angle);
         configEnableAngle.setOnAction(e -> {
             app.config.render_enable_angle = configEnableAngle.isSelected();
@@ -296,8 +303,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     @Override
                     public String getContent() {
                         String apiText;
-                        if (com.sun.jna.Platform.isWindows()) apiText = "DirectX 11";
-                        else if (com.sun.jna.Platform.isMac()) apiText = "Metal";
+                        if (isWindows) apiText = "DirectX 11";
+                        else if (isMac) apiText = "Metal";
                         else apiText = "";
                         return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
                                 "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
@@ -476,15 +483,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private static ArrayList<NamedItem<String>> getWindowSystemItems() {
         ArrayList<NamedItem<String>> windowSystemItems = new ArrayList<>();
         windowSystemItems.add(new NamedItem<>("自动", WindowSystem.AUTO.name()));
-        if (Platform.isWindows()) {
+        if (isWindows) {
             windowSystemItems.add(new NamedItem<>("User32", WindowSystem.USER32.name()));
         }
-        if (Platform.isLinux()) {
+        if (isLinux) {
             windowSystemItems.add(new NamedItem<>("X11", WindowSystem.X11.name()));
             windowSystemItems.add(new NamedItem<>("Mutter", WindowSystem.MUTTER.name()));
             windowSystemItems.add(new NamedItem<>("KWin", WindowSystem.KWIN.name()));
         }
-        if (Platform.isMac()) {
+        if (isMac) {
             windowSystemItems.add(new NamedItem<>("Quartz", WindowSystem.QUARTZ.name()));
         }
         windowSystemItems.add(new NamedItem<>("NULL", WindowSystem.NULL.name()));
@@ -493,17 +500,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
     private static String getWindowSystemInfo() {
         String content = "不同平台对于窗口查询、操作有不同的 API，除非你遇到了桌宠窗口的问题，否则通常不需要更改。以下是对 API 的简单介绍：\n";
-        if (Platform.isWindows()) {
+        if (isWindows) {
             content += "User32 —— Windows 窗口系统。\n";
         }
-        if (Platform.isLinux()) {
+        if (isLinux) {
             content += """
                     Mutter —— GNOME 环境，需要安装集成扩展。
                     KWin —— KDE 环境，需要安装集成插件。
                     X11 —— 通用 X11 环境支持，适用于 Xfce,Mate,LXDE 等环境。
                     """;
         }
-        if (Platform.isMac()) {
+        if (isMac) {
             content += "Quartz —— MacOS Quartz 窗口系统。\n";
         }
         content += "NULL —— 空实现，桌宠不会有任何窗口交互。";
@@ -682,8 +689,5 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 "导出最近日志成功",
                 "已导出最近日志到 " + zipFile.getAbsolutePath(),
                 null).show();
-    }
-
-    private void clearData() {
     }
 }
