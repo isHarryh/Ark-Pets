@@ -67,22 +67,10 @@ public class ArkConfig implements Serializable {
     public int          display_margin_bottom;
     /** @since ArkPets 2.1 */ @JSONField(defaultValue = "true")
     public boolean      display_multi_monitors;
-    /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
-    public float        render_animation_mixture;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
-    public boolean      render_enable_angle;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
-    public boolean      render_enable_mipmap;
-    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
-    public int          render_outline;
-    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
-    public String       render_outline_color;
-    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
-    public float        render_outline_width;
-    /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")
-    public String       render_shadow_color;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "1.0")
     public float        display_scale;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "false")
+    public boolean      eco_mode;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
     public float        initial_position_x;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
@@ -105,6 +93,20 @@ public class ArkConfig implements Serializable {
     public float        physic_speed_limit_x;
     /** @since ArkPets 2.2 */ @JSONField(defaultValue = "1000.0")
     public float        physic_speed_limit_y;
+    /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
+    public float        render_animation_mixture;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
+    public boolean      render_enable_angle;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
+    public boolean      render_enable_mipmap;
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
+    public int          render_outline;
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
+    public String       render_outline_color;
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
+    public float        render_outline_width;
+    /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")
+    public String       render_shadow_color;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
     public float        transition_duration;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "EASE_OUT_CUBIC")

@@ -1,9 +1,9 @@
 /** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.guitasks;
+package cn.harryh.arkpets.guitasks.requests;
 
-import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.network.Source;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -18,15 +18,12 @@ import static cn.harryh.arkpets.Const.PathConfig;
 import static cn.harryh.arkpets.Const.charsetDefault;
 
 
-public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
+public class CheckModelUpdateTask extends FetchAsFileTask {
+    private Source.GitHubSource selectedSource;
+
     public CheckModelUpdateTask(StackPane parent, GuiTaskStyle style) {
-        super(
-                parent,
-                style,
-                PathConfig.urlModelsData,
-                PathConfig.tempDirPath + PathConfig.fileModelsDataPath,
-                Const.isHttpsTrustAll,
-                false);
+        super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath, 16 << 20); // 16 MB
+        selectedSource = null;
 
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
@@ -42,13 +39,31 @@ public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
     }
 
     @Override
-    protected void onSucceeded(boolean result) {
+    protected void onFailed(Throwable e) {
+        selectedSource.receiveError();
+        super.onFailed(e);
+    }
+
+    @Override
+    protected void onCancelled() {
+        selectedSource.receiveError();
+        super.onCancelled();
+    }
+
+    @Override
+    protected String getRemotePath() {
+        selectedSource = Source.GitHubSource.getMostAvailable();
+        return selectedSource.rawPreUrl + PathConfig.urlModelsData;
+    }
+
+    @Override
+    protected void onDownloadedFile(File file) {
         // When finished downloading the remote repo models info:
         try {
             String versionDescription;
             try {
                 // Try to parse the remote repo models info
-                JSONObject newModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(new File(PathConfig.tempDirPath + PathConfig.fileModelsDataPath), charsetDefault));
+                JSONObject newModelsDataset = JSONObject.parseObject(IOUtils.FileUtil.readString(file, charsetDefault));
                 versionDescription = newModelsDataset.getString("gameDataVersionDescription");
             } catch (Exception e) {
                 // When failed to parse the remote repo models info

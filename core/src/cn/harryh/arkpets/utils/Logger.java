@@ -25,7 +25,6 @@ public class Logger {
     protected static boolean isInitialized = false;
     protected static int maxFileCount = 256;
     protected static Level level = Level.INFO;
-    protected static String logFilePath = null;
 
     public static final int ERROR = 40000;
     public static final int WARN  = 30000;
@@ -42,7 +41,7 @@ public class Logger {
 
     /** Initializes the static logger for the app.
      * The default log level is {@code INFO}.
-     * @param logPrefix The prefix of the log's path-and-basename, eg.{@code "logs/myLog"}.
+     * @param logPrefix The prefix of the log's path-and-basename, e.g.{@code "logs/myLog"}.
      * @param maxFileCount The maximum count of the logs that shares the same prefix,
      *                     overmuch logs will be deleted.
      */
@@ -56,7 +55,7 @@ public class Logger {
 
         // Initialize log appender
         Logger.maxFileCount = Math.max(1, maxFileCount);
-        logFilePath = logPrefix + "." + pid + ".log";
+        String logFilePath = "%s.%d.log".formatted(logPrefix, pid);
         try {
             Cleaner.cleanByModifiedTime(logPrefix, Logger.maxFileCount - 1);
             FileAppender fileAppender = new FileAppender(
@@ -95,13 +94,6 @@ public class Logger {
                         Layout.LINE_SEP;
             }
         };
-    }
-
-    /** Get log file path
-     * @return log file path
-     */
-    public static String getLogFilePath() {
-        return logFilePath;
     }
 
     /** Sets a new log level.

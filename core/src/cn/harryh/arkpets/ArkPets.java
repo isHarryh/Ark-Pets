@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
@@ -10,12 +11,12 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
+import cn.harryh.arkpets.utils.Cached;
+import cn.harryh.arkpets.utils.InputApplicationAdaptor;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -24,11 +25,12 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
-public class ArkPets extends ApplicationAdapter implements InputProcessor {
+public class ArkPets extends InputApplicationAdaptor {
     /* RENDER PROCESS */
     public Plane plane;
     public ArkChar cha;
@@ -38,19 +40,41 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public TransitionVector2 windowPosition; // Window Position Easing
 
     private HWndCtrl hWndMine;
-    private HWndCtrl hWndTopmost;
-    private LoopCtrl getHWndLoopCtrl;
     private List<? extends HWndCtrl> hWndList;
+    private final Cached<HWndCtrl> hWndTopmostGetter;
 
     private final String APP_TITLE;
-    private final MouseStatus mouseStatus = new MouseStatus();
     private int offsetY = 0;
-    private boolean isFocused = false;
     private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
+    private final Cached<Boolean> isFocused;
 
     public ArkPets(String title) {
         APP_TITLE = title;
+
+        hWndTopmostGetter = new Cached<>() {
+            @Override
+            protected HWndCtrl produce() {
+                return refreshWindowIndex();
+            }
+
+            @Override
+            protected double cacheAge() {
+                return 4.0 / getReducedFPS();
+            }
+        };
+
+        isFocused = new Cached<>() {
+            @Override
+            protected Boolean produce() {
+                return hWndMine.isForeground();
+            }
+
+            @Override
+            protected double cacheAge() {
+                return 4.0 / getReducedFPS();
+            }
+        };
     }
 
     @Override
@@ -61,8 +85,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setForegroundFPS(config.display_fps);
-        Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
-        Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
+        registerDebugger();
 
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
@@ -87,21 +110,19 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         );
 
         // 4.Window position setup
-        getHWndLoopCtrl = new LoopCtrl(1f / config.display_fps * WindowSystem.getRequestRate());
         windowPosition = new TransitionVector2(
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
         );
         windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.setToEnd();
-        setWindowPos();
 
         // 5.Window style setup
         hWndMine = WindowSystem.findWindow(null, APP_TITLE);
         hWndMine.setLayered(true);
         if (config.window_style_topmost)
             hWndMine.setTopmost(true);
-        promiseToolwindowStyle(1000);
+        updateWindow();
 
         // 6.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
@@ -114,19 +135,23 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public void render() {
         // 1.Render the next frame.
         cha.render();
+        Gdx.graphics.setForegroundFPS((int) getReducedFPS());
 
         // 2.Select a new animation.
-        AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
-        if (!mouseStatus.dragging) { // If no dragging:
+        AnimData newAnim;
+        if (tray.keepAnim == null) newAnim = behavior.autoAnim(); // AI anim.
+        else newAnim = tray.keepAnim;
+        if (!isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
-                if (willReachBorder(cha.getPlaying().mobility())) {
+                if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
                     newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                walkWindow(0.85f * cha.getPlaying().mobility());
+                float fac = isCtrlPressed() ? 1.85f : 0.85f;
+                walkWindow(fac * cha.getPlaying().mobility());
             }
         } else { // If dragging:
             newAnim = behavior.dragging();
@@ -135,24 +160,26 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             newAnim = behavior.defaultAnim();
         } else if (plane.getDropped()) { // If dropped, play the dropped anim.
             newAnim = behavior.dropped();
-        } else if (tray.keepAnim != null) { // If keep-anim is enabled.
-            newAnim = tray.keepAnim;
+        } else if (tray.keepAnim != null) { // If action-mode is enabled.
+            if (isLeftPressed()) newAnim = behavior.walkAnim(-1);      // Left pressed
+            else if (isRightPressed()) newAnim = behavior.walkAnim(1); // Right pressed
         }
         changeAnimation(newAnim); // Apply the new anim.
 
         // 3.Window properties.
         windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.addProgress(Gdx.graphics.getDeltaTime());
-        setWindowPos();
-        promiseToolwindowStyle(1);
+        updateWindow();
 
         // 4.Outline.
-        ArkConfig.RenderOutline renderOutline = ArkConfig.getRenderOutlineFrom(config.render_outline);
-        cha.setOutlineAlpha(renderOutline == ArkConfig.RenderOutline.ALWAYS ||
-                mouseStatus.mouseDown && renderOutline == ArkConfig.RenderOutline.PRESSING ||
-                isFocused && renderOutline == ArkConfig.RenderOutline.FOCUSED ||
-                mouseStatus.dragging && renderOutline == ArkConfig.RenderOutline.DRAGGING
-                ? 1f : 0f);
+        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(config.render_outline)) {
+            case ALWAYS -> true;
+            case PRESSING -> isMouseDown();
+            case FOCUSED -> isFocused.getValue();
+            case DRAGGING -> isMouseDragging();
+            default -> false;
+        };
+        cha.setOutlineAlpha(renderOutline ? 1f : 0f);
     }
 
     @Override
@@ -192,149 +219,131 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     /* INPUT PROCESS */
     @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
-        if (pointer <= 0) {
-            mouseStatus.mouseDown = true;
-            mouseStatus.updatePosition(screenX, screenY, button);
-            if (!isMouseAtSolidPixel()) {
-                // Transfer mouse event
-                RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
-                if (rwp != null)
-                    rwp.sendMouseEvent(switch (button) {
-                        case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONDOWN;
-                        case Input.Buttons.RIGHT -> HWndCtrl.MouseEvent.RBUTTONDOWN;
-                        case Input.Buttons.MIDDLE -> HWndCtrl.MouseEvent.MBUTTONDOWN;
-                        default -> HWndCtrl.MouseEvent.EMPTY;
-                    });
-            } else {
-                if (button == Input.Buttons.LEFT) {
-                    // Left Click: Play the specified animation
-                    changeAnimation(behavior.clickStart());
-                    tray.hideDialog();
-                } else if (button == Input.Buttons.RIGHT) {
-                    // Right Click: Toggle the menu
-                    tray.toggleDialog((int) (plane.getX() + screenX), (int) (-plane.getY() - cha.camera.getHeight()));
-                }
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        //Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
-        if (pointer <= 0) {
-            if (mouseStatus.button != Input.Buttons.RIGHT && isMouseAtSolidPixel()) {
-                mouseStatus.dragging = true;
-                mouseStatus.updateIntentionX(screenX);
-                // Update window position
-                int x = (int) (windowPosition.now().x + screenX - mouseStatus.x);
-                int y = (int) (windowPosition.now().y + screenY - mouseStatus.y);
-                plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
-                windowPosition.setToEnd();
-                tray.hideDialog();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
-        if (pointer <= 0) {
-            mouseStatus.mouseDown = false;
-            mouseStatus.updatePosition(screenX, screenY, button);
-            if (mouseStatus.dragging) {
-                // Update the z-axis of the character
-                cha.position.reset(cha.position.end().x, cha.position.end().y, mouseStatus.intentionX);
-                if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
-                    AnimData anim = cha.getPlaying();
-                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX));
-                }
-                if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
-                    AnimData anim = tray.keepAnim;
-                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX);
-                }
-            } else if (!isMouseAtSolidPixel()) {
-                // Transfer mouse event
-                RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
-                if (rwp != null)
-                    rwp.sendMouseEvent(switch (button) {
-                        case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONUP;
-                        case Input.Buttons.RIGHT -> HWndCtrl.MouseEvent.RBUTTONUP;
-                        case Input.Buttons.MIDDLE -> HWndCtrl.MouseEvent.MBUTTONUP;
-                        default -> HWndCtrl.MouseEvent.EMPTY;
-                    });
-            } else if (button == Input.Buttons.LEFT) {
-                // Left Click: Play the specified animation
-                changeAnimation(behavior.clickEnd());
-                tray.hideDialog();
-            }
-        }
-        mouseStatus.dragging = false;
-        return true;
-    }
-
-    @Override
-    public boolean keyDown(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyUp(int keycode) {
-        return false;
-    }
-
-    @Override
-    public boolean keyTyped(char character) {
-        if (ArkChar.enableSnapshot && character == 'B') {
-            String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
-            Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
-            PixmapIO.writePNG(new FileHandle(name), snapshot);
-            snapshot.dispose();
-            Logger.debug("App", "Snapshot saved to `" + name + "`");
-        } else {
-            Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-            Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-        }
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        mouseStatus.updatePosition(screenX, screenY);
+    protected void onMouseDown() {
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
+            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            if (rwp != null)
+                rwp.sendMouseEvent(switch (getMouseButton()) {
+                    case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONDOWN;
+                    case Input.Buttons.RIGHT -> HWndCtrl.MouseEvent.RBUTTONDOWN;
+                    case Input.Buttons.MIDDLE -> HWndCtrl.MouseEvent.MBUTTONDOWN;
+                    default -> HWndCtrl.MouseEvent.EMPTY;
+                });
+        } else {
+            if (getMouseButton() == Input.Buttons.LEFT) {
+                // Left Click: Play the specified animation
+                changeAnimation(behavior.clickStart());
+                tray.hideDialog();
+            } else if (getMouseButton() == Input.Buttons.RIGHT) {
+                // Right Click: Toggle the menu
+                tray.toggleDialog((int) (plane.getX() + getMouseX()), (int) (-plane.getY() - cha.camera.getHeight()));
+            }
+        }
+    }
+
+    @Override
+    protected void onMouseDrag() {
+        if (getMouseButton() != Input.Buttons.RIGHT) {
+            // Update window position
+            int x = (int) (windowPosition.now().x + getMouseDeltaX());
+            int y = (int) (windowPosition.now().y + getMouseDeltaY());
+            plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
+            windowPosition.setToEnd();
+            tray.hideDialog();
+        }
+    }
+
+    @Override
+    protected void onMouseUp() {
+        if (isMouseDragging()) {
+            // Update the z-axis of the character
+            cha.position.reset(cha.position.end().x, cha.position.end().y, getMouseIntention());
+            if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
+                AnimData anim = cha.getPlaying();
+                cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * getMouseIntention()));
+            }
+            if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
+                AnimData anim = tray.keepAnim;
+                tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * getMouseIntention());
+            }
+        } else if (!isMouseAtSolidPixel()) {
+            // Transfer mouse event
+            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            if (rwp != null)
+                rwp.sendMouseEvent(switch (getMouseButton()) {
+                    case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONUP;
+                    case Input.Buttons.RIGHT -> HWndCtrl.MouseEvent.RBUTTONUP;
+                    case Input.Buttons.MIDDLE -> HWndCtrl.MouseEvent.MBUTTONUP;
+                    default -> HWndCtrl.MouseEvent.EMPTY;
+                });
+        } else if (getMouseButton() == Input.Buttons.LEFT) {
+            // Left Click: Play the specified animation
+            changeAnimation(behavior.clickEnd());
+            tray.hideDialog();
+        }
+    }
+
+    @Override
+    protected void onKeyDown(int keycode) {
+        if (tray.keepAnim != null) { // Switch animation in action mode
+            AnimData data;
+            if (isUpPressed()) {
+                do {
+                    data = behavior.prevAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
+                tray.keepAnim = data;
+                Logger.debug("Animation", "Switch to previous " + data);
+            } else if (isDownPressed()) {
+                do {
+                    data = behavior.nextAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE);
+                tray.keepAnim = data;
+                Logger.debug("Animation", "Switch to next " + data);
+            }
+        }
+    }
+
+    @Override
+    protected void onKeyUp(int keycode) {
+    }
+
+    @Override
+    protected void onMouseMoved() {
+        if (!isMouseAtSolidPixel()) {
+            // Transfer mouse event
+            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
             if (rwp != null)
                 rwp.sendMouseEvent(HWndCtrl.MouseEvent.MOUSEMOVE);
         }
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(float a, float b) {
-        return false;
     }
 
     private boolean isMouseAtSolidPixel() {
-        int pixel = cha.getPixel(mouseStatus.x, cha.camera.getHeight() - mouseStatus.y - 1);
+        int pixel = cha.getPixel(getMouseX(), cha.camera.getHeight() - getMouseY() - 1);
         return (pixel & 0x000000FF) > 0;
     }
 
     /* WINDOW OPERATIONS */
-    private void setWindowPos() {
-        if (hWndMine == null) return;
-        if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
-            refreshMonitorInfo();
-            HWndCtrl new_hwnd_topmost = refreshWindowIndex();
-            hWndTopmost = new_hwnd_topmost != hWndTopmost ? new_hwnd_topmost : hWndTopmost;
-            hWndMine.setTransparent(isAlwaysTransparent);
-            isFocused = hWndMine.isForeground();
+    private void updateWindow() {
+        if (hWndMine == null)
+            return;
+        // Tool window style
+        if (config.window_style_toolwindow && !isToolwindowStyle) {
+            // Make sure ArkPets has been set as foreground window once
+            for (int i = 0; i < 1; i++) {
+                if (hWndMine.isForeground()) {
+                    hWndMine.setTaskbar(false);
+                    Logger.info("Window", "SetForegroundWindow succeeded");
+                    isToolwindowStyle = true;
+                    break;
+                }
+                hWndMine.setForeground();
+            }
         }
-        hWndMine.setWindowPosition(hWndTopmost,
+        // Transparent style
+        hWndMine.setTransparent(isAlwaysTransparent);
+        // Window position
+        hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
                 (int) windowPosition.now().x, (int) windowPosition.now().y,
                 cha.camera.getWidth(), cha.camera.getHeight());
     }
@@ -357,6 +366,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
     private HWndCtrl refreshWindowIndex() {
+        refreshMonitorInfo();
         hWndList = WindowSystem.getWindowList(true);
         HWndCtrl minWindow = null;
         HashMap<Integer, HWndCtrl> line = new HashMap<>();
@@ -373,6 +383,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             int wndNum = coreTitleManager.getNumber(hWndCtrl);
             // Distinguish non-peer windows from peers.
             if (wndNum == -1) {
+                boolean isBlackListWindow = false;
+                for (Pattern pattern : Const.titleBlacklist) {
+                    isBlackListWindow = pattern.matcher(hWndCtrl.windowText).matches();
+                }
+                if (isBlackListWindow) continue;
                 if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
                     // This window and the app are share the same vertical line.
                     if (-hWndCtrl.posBottom < plane.borderTop() && -hWndCtrl.posTop > plane.borderBottom()) {
@@ -434,21 +449,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         return monitors[0];
     }
 
-    private void promiseToolwindowStyle(int maxRetries) {
-        if (config.window_style_toolwindow && !isToolwindowStyle) {
-            // Make sure ArkPets has been set as foreground window once
-            for (int i = 0; i < maxRetries; i++) {
-                if (hWndMine.isForeground()) {
-                    hWndMine.setTaskbar(false);
-                    Logger.info("Window", "SetForegroundWindow succeeded");
-                    isToolwindowStyle = true;
-                    break;
-                }
-                hWndMine.setForeground();
-            }
-        }
-    }
-
     /* WINDOW WALKING RELATED */
     private void walkWindow(float len) {
         float expectedLen = len * config.display_scale * (30f / config.display_fps);
@@ -472,60 +472,37 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
 
     /* UTILS */
-    private static class LoopCtrl {
-        private final float minIntervalTime;
-        private float accumTime;
-
-        /** Loop Controller instance.
-         * @param minIntervalTime The minimal interval time for each loop.
-         */
-        public LoopCtrl(float minIntervalTime) {
-            this.minIntervalTime = minIntervalTime;
-            this.accumTime = minIntervalTime;
-        }
-
-        /** Returns true if the loop is executable now.
-         * @param deltaTime The updated delta time.
-         */
-        public boolean isExecutable(float deltaTime) {
-            accumTime += deltaTime;
-            if (accumTime >= minIntervalTime) {
-                accumTime = 0;
-                return true;
-            } else {
-                return false;
-            }
-        }
+    private double getReducedFPS() {
+        if (!config.eco_mode)
+            return config.display_fps;
+        double t = getLastActiveDeltaTime() / 60.0;
+        double k = 1.0 + 0.5 * (Math.exp(-0.5 * t + 0.5) - 1.0);
+        return Math.max(0.0, Math.min(1.0, k)) * config.display_fps;
     }
 
-
-    private static class MouseStatus {
-        private int x = 0;
-        private int y = 0;
-        private int button = 0;
-        private int intentionX = 0;
-        private boolean dragging = false;
-        private boolean mouseDown = false;
-
-        public MouseStatus() {
-        }
-
-        public void updateIntentionX(int newX) {
-            int t = (int) Math.signum(newX - x);
-            intentionX = t == 0 ? intentionX : t;
-        }
-
-        public void updatePosition(int newX, int newY) {
-            x = newX;
-            y = newY;
-        }
-
-        public void updatePosition(int newX, int newY, int button) {
-            updatePosition(newX, newY);
-            this.button = button;
+    private void registerDebugger() {
+        Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
+        Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
+        if (Const.isDebugEnabled) {
+            registerKeyTyped('D', () -> {
+                int heap = (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f);
+                Logger.debug("Debugger", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + heap + "MB");
+            });
+            registerKeyTyped('P', () -> Logger.debug("Debugger", "Showing plane info\n" + plane.getDebugMsg()));
+            registerKeyTyped('S', () -> {
+                String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
+                Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
+                PixmapIO.writePNG(new FileHandle(name), snapshot);
+                snapshot.dispose();
+                Logger.debug("Debugger", "Snapshot saved to `" + name + "`");
+            });
+            registerKeyTyped('W', () -> {
+                StringBuilder builder = new StringBuilder("Showing window list\n");
+                WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
+                Logger.debug("Debugger", builder.toString());
+            });
         }
     }
-
 
     private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
         public void sendMouseEvent(HWndCtrl.MouseEvent msg) {

@@ -17,6 +17,7 @@
     "display_margin_bottom":0,
     "display_multi_monitors":true,
     "display_scale":1.0,
+    "eco_mode":false,
     "initial_position_x":0.2,
     "initial_position_y":0.2,
     "launcher_solid_exit":true,

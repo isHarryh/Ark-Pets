@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Copyright (c) 2022-2025, Harry Huang
+    At GPL-3.0 License
+-->
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<?import java.lang.String?>
+<AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0" styleClass="wrapper" stylesheets="@Main.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="cn.harryh.arkpets.controllers.LogDialog">
+    <HBox spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0"
+          AnchorPane.topAnchor="-15.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <Pane visible="false" HBox.hgrow="ALWAYS"/>
+        <JFXButton fx:id="logRefetch" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="28.0" text=" ">
+            <graphic>
+                <AnchorPane prefHeight="28.0" prefWidth="28.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="M20.944 12.979c-.489 4.509-4.306 8.021-8.944 8.021-2.698 0-5.112-1.194-6.763-3.075l1.245-1.633c1.283 1.645 3.276 2.708 5.518 2.708 3.526 0 6.444-2.624 6.923-6.021h-2.923l4-5.25 4 5.25h-3.056zm-15.864-1.979c.487-3.387 3.4-6 6.92-6 2.237 0 4.228 1.059 5.51 2.698l1.244-1.632c-1.65-1.876-4.061-3.066-6.754-3.066-4.632 0-8.443 3.501-8.941 8h-3.059l4 5.25 4-5.25h-2.92z"
+                            scaleX="1.05" scaleY="1.05" translateX="27.5"/>
+                </AnchorPane>
+            </graphic>
+            <styleClass>
+                <String fx:value="btn-plain-light"/>
+                <String fx:value="btn-iconified"/>
+            </styleClass>
+        </JFXButton>
+        <VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="50.0" prefWidth="355.0"
+              styleClass="tool-bar-mask"/>
+    </HBox>
+    <HBox prefHeight="50.0" prefWidth="125.0" spacing="10.0" styleClass="dialog-title-bar" AnchorPane.leftAnchor="-25.0"
+          AnchorPane.topAnchor="-25.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <JFXButton fx:id="dialogReturn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="32.0" prefWidth="32.0" text=" ">
+            <graphic>
+                <AnchorPane prefHeight="32.0" prefWidth="32.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="m10.978 14.999v3.251c0 .412-.335.75-.752.75-.188 0-.375-.071-.518-.206-1.775-1.685-4.945-4.692-6.396-6.069-.2-.189-.312-.452-.312-.725 0-.274.112-.536.312-.725 1.451-1.377 4.621-4.385 6.396-6.068.143-.136.33-.207.518-.207.417 0 .752.337.752.75v3.251h9.02c.531 0 1.002.47 1.002 1v3.998c0 .53-.471 1-1.002 1z"
+                            scaleX="1.75" scaleY="1.75" translateX="30.0" translateY="-2.5"/>
+                </AnchorPane>
+            </graphic>
+            <styleClass>
+                <String fx:value="btn-plain-light"/>
+                <String fx:value="btn-iconified"/>
+            </styleClass>
+        </JFXButton>
+        <Label styleClass="dialog-title-label" text="日志"/>
+    </HBox>
+    <TreeTableView fx:id="logView" prefHeight="240.0" prefWidth="285.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.topAnchor="55.0"/>
+    <VBox alignment="TOP_CENTER" prefHeight="240.0" prefWidth="225.0" spacing="5.0" AnchorPane.rightAnchor="0.0"
+          AnchorPane.topAnchor="55.0">
+        <Label fx:id="logName" maxWidth="1.7976931348623157E308" text="LogName"/>
+        <Label fx:id="logSize" maxWidth="1.7976931348623157E308" text="LogSize"/>
+        <Label fx:id="logCreatedTime" maxWidth="1.7976931348623157E308" text="LogCreatedTime"/>
+        <Label fx:id="logModifiedTime" maxWidth="1.7976931348623157E308" text="LogModifiedTime"/>
+        <Label fx:id="logSummary" maxWidth="1.7976931348623157E308" text="LogSummary"/>
+        <HBox alignment="TOP_CENTER" spacing="5.0">
+            <JFXButton fx:id="quickSelectAll" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       prefHeight="28.0" prefWidth="90.0" styleClass="btn-secondary" text="选择全部日志">
+            </JFXButton>
+            <JFXButton fx:id="quickSelectRecent" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       prefHeight="28.0" prefWidth="90.0" styleClass="btn-secondary" text="选择近期日志">
+            </JFXButton>
+        </HBox>
+        <JFXButton fx:id="exportSelected" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="120.0" styleClass="btn-primary" text="导出所选的日志">
+        </JFXButton>
+        <Label fx:id="logSelectedCount" text="LogSelectedCount"/>
+        <JFXButton fx:id="logExplore" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="28.0" prefWidth="120.0" styleClass="btn-plain-dark" text="打开日志文件夹">
+        </JFXButton>
+        <padding>
+            <Insets left="10.0" right="10.0"/>
+        </padding>
+    </VBox>
+</AnchorPane>

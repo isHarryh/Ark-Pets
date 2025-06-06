@@ -7,6 +7,7 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
+import cn.harryh.arkpets.network.Connections;
 import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -24,6 +25,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -42,8 +44,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.zip.ZipException;
-
-import static cn.harryh.arkpets.Const.durationNormal;
 
 
 @SuppressWarnings("unused")
@@ -320,23 +320,33 @@ public class GuiPrefabs {
             button.setTextFill(COLOR_WHITE);
             button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
             button.setOnAction(ev -> {
-                Logger.info("Dialog", "Ready to export logs");
+                Logger.debug("ErrorDialog", "Ready to export logs");
+
                 // Collect related log files
-                List<String> logList = new ArrayList<>();
-                logList.add(Logger.getLogFilePath());
+                List<String> pathList = new ArrayList<>();
+                pathList.add("%s.%d.log".formatted(Const.LogConfig.logDesktopPath, ProcessHandle.current().pid()));
                 if (e instanceof ProcessPool.UnexpectedExitCodeException exception)
-                    logList.add(String.format("%s.%d.log", Const.LogConfig.logCorePath, exception.getProcessId()));
-                logList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
+                    pathList.add("%s.%d.log".formatted(Const.LogConfig.logCorePath, exception.getProcessId()));
+                pathList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
+                if (pathList.isEmpty()) {
+                    Logger.info("ErrorDialog", "Logs not exported, no log file to export");
+                    return;
+                }
+
                 // Open file chooser
+                Logger.info("ErrorDialog", "Opening file chooser to export logs, " + pathList.size() + " files included");
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archives", "*.zip"));
                 fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_Logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
-                Logger.info("Dialog", "Opening file chooser to export logs");
                 File zipFile = fileChooser.showSaveDialog(parent.getScene().getWindow());
-                if (zipFile == null)
+                if (zipFile == null) {
+                    Logger.info("ErrorDialog", "Logs not exported, user cancelled");
                     return;
+                }
+
                 // Export log files
-                new ZipTask(parent, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), logList).start();
+                Logger.info("ErrorDialog", "Staring to export logs");
+                new ZipTask(parent, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), pathList).start();
                 disposeDialog(dialog);
             });
 
@@ -345,25 +355,29 @@ public class GuiPrefabs {
 
             if (e instanceof ProcessPool.UnexpectedExitCodeException) {
                 h2.setText("检测到桌宠异常退出");
-                h3.setText("桌宠运行时异常退出。如果该现象是在启动后立即发生的，可能是因为暂不支持该模型。您可以稍后重试或查看日志文件。");
+                h3.setText("桌宠运行时异常退出。您可以稍后重试或查看日志文件。");
             } else if (e instanceof FileNotFoundException) {
-                h3.setText("未找到某个文件或目录，请稍后重试。详细信息：");
-            } else if (e instanceof NetUtils.HttpResponseCodeException ex) {
+                h3.setText("未找到指定的文件或目录，请稍后重试。详细信息：");
+            } else if (e instanceof Connections.HttpStatusCodeException ex) {
                 h2.setText("神经递质接收异常");
-                switch (ex.getType()) {
-                    case REDIRECTION -> h3.setText("请求的网络地址被重定向转移。详细信息：");
-                    case CLIENT_ERROR -> {
+                switch (ex.getCode() / 100) {
+                    case 3 -> h3.setText("请求的网络地址被重定向转移。详细信息：");
+                    case 4 -> {
                         h3.setText("可能是客户端引发的网络错误，详细信息：");
                         switch (ex.getCode()) {
+                            case 400 -> h3.setText("(400)非法请求。详细信息：");
+                            case 401 -> h3.setText("(401)访问未授权。详细信息：");
                             case 403 -> h3.setText("(403)访问被拒绝。详细信息：");
                             case 404 -> h3.setText("(404)找不到要访问的目标。详细信息：");
+                            case 429 -> h3.setText("(429)请求过于频繁。详细信息：");
                         }
                     }
-                    case SERVER_ERROR -> {
+                    case 5 -> {
                         h3.setText("可能是服务器引发的网络错误，详细信息：");
                         switch (ex.getCode()) {
                             case 500 -> h3.setText("(500)服务器内部故障，请稍后重试。详细信息：");
                             case 502 -> h3.setText("(502)服务器网关故障，请稍后重试。详细信息：");
+                            case 503 -> h3.setText("(503)服务器暂不可用，请稍后重试。详细信息：");
                         }
                     }
                 }
@@ -384,7 +398,8 @@ public class GuiPrefabs {
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
                 JFXButton apply = Dialogs.getTrustButton(dialog);
                 apply.setOnAction(ev -> {
-                    Const.isHttpsTrustAll = true;
+                    Logger.warn("ErrorDialog", "Set SSL trust all to true");
+                    Connections.trustAllUnsafe = true;
                     Dialogs.disposeDialog(dialog);
                 });
                 Dialogs.attachAction(dialog, apply, 0);
@@ -466,6 +481,46 @@ public class GuiPrefabs {
     }
 
 
+    public static class Tables {
+        public static <T> void autoExpandRows(TreeTableView<T> treeTable) {
+            TreeItem<T> root = treeTable.getRoot();
+            if (root != null)
+                root.getChildren().forEach(child -> child.setExpanded(true));
+        }
+
+        public static <T> void autoResizeColumns(TreeTableView<T> treeTable, double paddingX) {
+            double totalMaxWidth = 0;
+            Map<TreeTableColumn<T, ?>, Double> columnMaxWidthMap = new HashMap<>();
+            Text tempText = new Text();
+
+            for (TreeTableColumn<T, ?> column : treeTable.getColumns()) {
+                tempText.setText(column.getText());
+                double max = tempText.getLayoutBounds().getWidth();
+                for (TreeItem<T> item : treeTable.getRoot().getChildren()) {
+                    Object cellData = column.getCellData(item);
+                    if (cellData != null) {
+                        tempText.setText(cellData.toString());
+                        double width = tempText.getLayoutBounds().getWidth();
+                        max = Math.max(width, max);
+                    }
+                }
+                columnMaxWidthMap.put(column, max);
+                totalMaxWidth += max;
+            }
+
+            double tableWidth = Math.max(treeTable.getPrefWidth(), treeTable.getWidth()) - paddingX;
+            if (totalMaxWidth == 0 || tableWidth == 0)
+                return;
+
+            for (TreeTableColumn<T, ?> column : treeTable.getColumns()) {
+                double colMax = columnMaxWidthMap.get(column);
+                double percent = colMax / totalMaxWidth;
+                column.setPrefWidth(tableWidth * percent);
+            }
+        }
+    }
+
+
     /** @since ArkPets 3.0
      */
     public static class PeerNodeComposer {
@@ -535,7 +590,7 @@ public class GuiPrefabs {
 
             private void activateNode(Node node) {
                 node.setManaged(true);
-                fadeInNode(node, durationNormal, null);
+                fadeInNode(node, Const.durationNormal, null);
             }
 
             private void suppressNode(Node node) {

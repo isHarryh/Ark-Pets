@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -8,8 +8,13 @@ import cn.harryh.arkpets.assets.ModelItem;
 import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
+import cn.harryh.arkpets.guitasks.requests.CheckModelUpdateTask;
+import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.IOUtils;
+import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -314,7 +319,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                NetUtils.browseWebpage(PathConfig.urlDownload);
+                app.popBrowser(urlDownload);
             }
         };
 
@@ -323,9 +328,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             // Go to [Step 1/3]:
             new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override
-                protected void onSucceeded(boolean result) {
+                protected void onDownloadedFile(File file) {
                     // Go to [Step 2/3]:
-                    new UnzipModelsTask(parent, GuiTaskStyle.STRICT, PathConfig.tempModelsZipCachePath) {
+                    new UnzipModelsTask(parent, GuiTaskStyle.STRICT, file.getPath()) {
                         @Override
                         protected void onSucceeded(boolean result) {
                             // Go to [Step 3/3]:
@@ -333,7 +338,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                                 @Override
                                 protected void onSucceeded(boolean result) {
                                     try {
-                                        IOUtils.FileUtil.delete(new File(PathConfig.tempModelsZipCachePath).toPath(), false);
+                                        IOUtils.FileUtil.delete(file.toPath(), false);
                                     } catch (IOException ex) {
                                         Logger.warn("Task", "The zip file cannot be deleted, because " + ex.getMessage());
                                     }
@@ -409,7 +414,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             }
         });
 
-        modelHelp.setOnMouseClicked(e -> NetUtils.browseWebpage(urlHelp));
+        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
     }
 
     private void initModelFavorite() {

@@ -12,8 +12,8 @@ import java.util.UUID;
 
 
 public abstract class MemberTray {
-    protected JMenuItem optKeepAnimEn       = new JMenuItem("保持动作");
-    protected JMenuItem optKeepAnimDis      = new JMenuItem("取消保持");
+    protected JMenuItem optKeepAnimEn       = new JMenuItem("行动模式");
+    protected JMenuItem optKeepAnimDis      = new JMenuItem("退出行动");
     protected JMenuItem optTransparentEn    = new JMenuItem("透明模式");
     protected JMenuItem optTransparentDis   = new JMenuItem("取消透明");
     protected JMenuItem optChangeStage      = new JMenuItem("切换形态");

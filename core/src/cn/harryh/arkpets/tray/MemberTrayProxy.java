@@ -73,14 +73,14 @@ public class MemberTrayProxy extends MemberTray {
 
     @Override
     public void onKeepAnimDis() {
-        Logger.info("ProxyTray", "Keep-Anim disabled");
+        Logger.info("ProxyTray", "Action-Mode disabled");
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);
     }
 
     @Override
     public void onKeepAnimEn() {
-        Logger.info("ProxyTray", "Keep-Anim enabled");
+        Logger.info("ProxyTray", "Action-Mode enabled");
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);
     }

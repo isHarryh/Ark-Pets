@@ -13,6 +13,7 @@ import static cn.harryh.arkpets.Const.behaviorBaseWeight;
 
 
 public class GeneralBehavior extends Behavior {
+    protected ArkConfig config;
     protected AnimStage stageCur;
     protected AnimClipGroup stageAnimList;
     protected Iterator<AnimStage> stageItr;
@@ -21,9 +22,10 @@ public class GeneralBehavior extends Behavior {
     protected final HashMap<AnimStage, AnimDataWeight[]> stageAnimWeightMap;
 
     public GeneralBehavior(ArkConfig config, AnimClipGroup animList) {
-        super(config, animList);
+        super(animList);
 
-        stageAnimMap = anim_list.clusterByStage();
+        this.config = config;
+        stageAnimMap = this.animList.clusterByStage();
         stageAnimWeightMap = new HashMap<>();
         for (AnimStage key : stageAnimMap.keySet()) {
             AnimDataWeight[] temp = getActionList(stageAnimMap.get(key));
@@ -37,7 +39,7 @@ public class GeneralBehavior extends Behavior {
             throw new NoSuchElementException("Animation stage map was empty because no animation's name was matched.");
         stageItr = stageList.iterator();
 
-        action_list = new AnimDataWeight[0];
+        actionList = new AnimDataWeight[0];
         nextStage();
     }
 
@@ -46,8 +48,8 @@ public class GeneralBehavior extends Behavior {
             stageItr = stageList.iterator();
         stageCur = stageItr.next();
         stageAnimList = stageAnimMap.get(stageCur);
-        action_list = stageAnimWeightMap.get(stageCur);
-        autoCtrlReset();
+        actionList = stageAnimWeightMap.get(stageCur);
+        actionAutoGetter.reset();
     }
 
     public Set<AnimStage> getStages() {
@@ -92,6 +94,11 @@ public class GeneralBehavior extends Behavior {
     @Override
     public AnimData defaultAnim() {
         return stageAnimList.getLoopAnimData(AnimType.IDLE);
+    }
+
+    @Override
+    public AnimData walkAnim(int mobility) {
+        return stageAnimList.getLoopAnimData(AnimType.MOVE).derive(mobility);
     }
 
     @Override

@@ -13,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -66,9 +68,9 @@ public final class Const {
     public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
 
     // Changeable constants
-    public static boolean isHttpsTrustAll       = false;
     public static boolean isUpdateAvailable     = false;
     public static boolean isNewcomer            = false;
+    public static boolean isDebugEnabled        = false;
 
     // Socket C/S constants
     public static final String serverHost           = "localhost";
@@ -87,6 +89,11 @@ public final class Const {
             "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$");
     public static final Pattern hexColorRegex   = Pattern.compile(
             "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$");
+    public static final List<Pattern> titleBlacklist = Arrays.stream(new String[]{
+            "KeyShowView",       // Carnac
+            "keyviz",            // Keyviz
+            "KeyCastOW"          // KeyCastOW
+    }).map(Pattern::compile).toList();
 
     // Plugin require version
     public static final int gnomePluginVersion    = 2;
@@ -121,8 +128,9 @@ public final class Const {
         public static final int logCoreMaxKeep      = 32;
         public static final int logDesktopMaxKeep   = 8;
 
-        public static final String logCorePath      = "logs/core";
-        public static final String logDesktopPath   = "logs/desktop";
+        public static final String logDir           = "logs/";
+        public static final String logCorePath      = logDir + "core";
+        public static final String logDesktopPath   = logDir + "desktop";
 
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";

@@ -5,15 +5,14 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.guitasks.FetchAnnounceTask;
 import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
+import cn.harryh.arkpets.guitasks.requests.FetchAnnounceTask;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NetUtils;
+import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.jfoenix.controls.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -27,26 +26,21 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
-import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static cn.harryh.arkpets.Const.durationFast;
+import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
-public final class AnnounceDialog implements Controller<ArkHomeFX> {
+public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
-    public AnchorPane dialog;
+    private AnchorPane dialog;
     @FXML
-    public JFXButton dialogReturn;
+    private JFXButton dialogReturn;
 
     @FXML
     private JFXListView<JFXListCell<AnnounceItem>> annoListView;
@@ -84,6 +78,16 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
+    }
+
+    @Override
+    public AnchorPane getDialogPane() {
+        return dialog;
+    }
+
+    @Override
+    public JFXButton getReturnButton() {
+        return dialogReturn;
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
@@ -160,9 +164,10 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
             case WARN -> "重要公告";
             case DANGER -> "紧急公告";
         });
-        GuiPrefabs.replaceTextAutoVisibility(annoDate, anno.getFormattedDate(DateTimeFormatter.ISO_DATE));
+        GuiPrefabs.replaceTextAutoVisibility(annoDate,
+                anno.date != null && !anno.date.isEmpty() ? StringUtils.getSimpleTimeString(anno.getParsedDate()) : "");
         GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
-        annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
+        annoGotoOrigin.setOnMouseClicked(e -> app.popBrowser(anno.source));
         // Display announcement
         GuiPrefabs.fadeOutNode(annoContainer, durationFast, e -> {
             GuiPrefabs.disableScrollPaneCache(annoScroll);
@@ -170,11 +175,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
             annoContainer.getChildren().clear();
             FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
             document.getBodyNode().setMaxWidth(annoScroll.getWidth());
-            document.setHyperlinkConsumer(string -> {
-                if (string.startsWith("https://") || string.startsWith("http://")) {
-                    NetUtils.browseWebpage(string);
-                }
-            });
+            document.setHyperlinkConsumer(string -> app.popBrowser(string));
             annoContainer.getChildren().add(document.getBodyNode());
             GuiPrefabs.fadeInNode(annoContainer, durationFast, null);
         });
@@ -237,65 +238,6 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
                 Logger.info("Announce", "Removed " + delta + " legacy local announcement records");
                 config.save();
             }
-        }
-    }
-
-
-    public static class AnnounceItem implements Serializable {
-        /** @since ArkPets 3.7 */ @JSONField
-        public String title;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String date;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String group;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String markdown;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String source;
-
-        @JSONField(deserialize = false)
-        public String getAnnoId() {
-            return String.format("%08x", hashCode());
-        }
-
-        @JSONField(deserialize = false)
-        public String getFormattedDate(DateTimeFormatter format) {
-            Instant parsedDate = getParsedDate();
-            return parsedDate != null ? LocalDate.ofInstant(parsedDate, ZoneId.systemDefault()).format(format) : null;
-        }
-
-        @JSONField(deserialize = false)
-        public Instant getParsedDate() {
-            try {
-                return date != null ? Instant.parse(date) : null;
-            } catch (DateTimeParseException e) {
-                Logger.warn("Announce", "Unrecognized date string \"" + date + "\"");
-                return null;
-            }
-        }
-
-        @JSONField(deserialize = false)
-        public AnnounceGroup getParsedGroup() {
-            try {
-                return group != null ? AnnounceGroup.valueOf(group) : null;
-            } catch (IllegalArgumentException e) {
-                Logger.warn("Announce", "Unrecognized group string \"" + group + "\"");
-                return AnnounceGroup.DEFAULT;
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            AnnounceItem that = (AnnounceItem) o;
-            return Objects.equals(title, that.title) && Objects.equals(date, that.date)
-                    && Objects.equals(markdown, that.markdown) && Objects.equals(source, that.source);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(title, date, group, markdown, source);
         }
     }
 }

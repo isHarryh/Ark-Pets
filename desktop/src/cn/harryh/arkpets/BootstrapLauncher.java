@@ -19,7 +19,6 @@ import org.lwjgl.system.MemoryUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -68,6 +67,8 @@ public class BootstrapLauncher {
         new ArgPending(LogConfig.debugArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.DEBUG);
+                Logger.info("System", "Enable the debug feature");
+                isDebugEnabled = true;
             }
         };
         Logger.info("System", "ArkPets version is " + appVersion);
@@ -132,17 +133,6 @@ public class BootstrapLauncher {
                 Logger.info("System", "Using the specified GLFW library \"" + addition +"\"");
                 Configuration.GLFW_LIBRARY_NAME.set(addition);
                 useCustomGLFW = true;
-            }
-        };
-        new ArgPending("--enable-snapshot", ArgPending.argCache) {
-            @Override
-            protected void process(String command, String addition) {
-                Logger.info("System", "Enable the snapshot feature");
-                ArkChar.enableSnapshot = true;
-                File temp = new File(PathConfig.tempDirPath);
-                if (!(temp.exists() || temp.mkdir())) {
-                    Logger.error("System", "Failed to create the temporary directory.");
-                }
             }
         };
         WindowSystem windowSystem = ArkConfig.getWindowSystemFrom(appConfig.window_system);

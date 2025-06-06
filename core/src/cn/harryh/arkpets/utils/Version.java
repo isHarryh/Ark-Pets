@@ -27,6 +27,8 @@ public class Version {
     }
 
     public Version(String string) throws IllegalArgumentException {
+        if (string.startsWith("v") || string.startsWith("V"))
+            string = string.substring(1);
         String[] array = string.split("\\.");
         major = array.length > 0 ? Integer.parseInt(array[0]) : defaultNumber;
         minor = array.length > 1 ? Integer.parseInt(array[1]) : defaultNumber;

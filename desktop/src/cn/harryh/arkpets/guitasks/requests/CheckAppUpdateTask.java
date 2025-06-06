@@ -1,38 +1,28 @@
 /** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.guitasks;
+package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.network.api.AppQueryVersion;
 import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.layout.StackPane;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.PathConfig;
 import static cn.harryh.arkpets.Const.appVersion;
 
 
-public class CheckAppUpdateTask extends FetchRemoteTask {
-    public CheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String sourceStr) {
-        super(parent,
-                style,
-                PathConfig.urlApi + "?type=queryVersion&cliVer=" + appVersion + "&source=" + sourceStr,
-                PathConfig.tempQueryVersionCachePath,
-                Const.isHttpsTrustAll);
+public class CheckAppUpdateTask extends FetchAsDataTask {
+    private final String sourceStr;
 
-        try {
-            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
-        } catch (Exception e) {
-            Logger.warn("Task", "Failed to create temp dir.");
-            throw new RuntimeException(e);
-        }
+    public CheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String sourceStr) {
+        super(parent, style, 16 << 20); // 16 MB
+        this.sourceStr = sourceStr;
     }
 
     @Override
@@ -41,16 +31,18 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
     }
 
     @Override
-    protected void onSucceeded(boolean result) {
+    protected String getRemotePath() {
+        return PathConfig.urlApi + "?type=queryVersion&cliVer=" + appVersion + "&source=" + sourceStr;
+    }
+
+    @Override
+    protected void onReceivedData(JSONObject json) {
         // When finished downloading the latest app ver-info:
         try {
-            // Try to parse the latest app ver-info
-            JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath))));
+            AppQueryVersion value = json.toJavaObject(AppQueryVersion.class);
             // TODO show in-test version
-            if (queryVersionResult.getString("msg").equals("success")) {
-                // If the response status is "success":
-                int[] stableVersionResult = queryVersionResult.getJSONObject("data").getObject("stableVersion", int[].class);
-                Version stableVersion = new Version(stableVersionResult);
+            if (value.code == 0) {
+                Version stableVersion = Objects.requireNonNull(value.getStableVersion());
                 if (appVersion.lessThan(stableVersion)) {
                     // On update is available:
                     Const.isUpdateAvailable = true;

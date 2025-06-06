@@ -7,12 +7,17 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.BootstrapLauncher;
 import cn.harryh.arkpets.concurrent.ProcessPool;
-import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
+import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.DialogComposer;
+import cn.harryh.arkpets.utils.GuiComponents.Handbook;
+import cn.harryh.arkpets.utils.GuiComponents.Toast;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
@@ -31,7 +36,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +44,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
-import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
 
 
 public final class RootModule implements Controller<ArkHomeFX> {
@@ -85,8 +88,6 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private HBox toast;
 
-    private AnnounceDialog announceDialog;
-
     private ArkHomeFX app;
     private boolean checkEnd;
 
@@ -106,7 +107,13 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         isNewcomer = app.config.isNewcomer();
         app.config.save();
-        app.toast = new GuiComponents.Toast(toast);
+
+        // Load misc.
+        app.toast = new Toast(toast);
+        app.dialogs = new DialogComposer<>(app);
+        List<Node> backgroundNodes = List.of(sidebar, wrapper1, wrapper2, wrapper3);
+        app.dialogs.registerDialog("announceDialog", body, backgroundNodes, "/UI/AnnounceDialog.fxml");
+        app.dialogs.registerDialog("logDialog", body, backgroundNodes, "/UI/LogDialog.fxml");
 
         initAnnoEntrance();
         initMenuButtons();
@@ -246,43 +253,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
     }
 
     private void initAnnoEntrance() {
-        // Load the fxml of announce dialog
-        try {
-            FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
-            announceDialog = (AnnounceDialog) fxml.initializeWith(app);
-        } catch (IOException ex) {
-            Logger.error("Launcher", "Failed to open announcement dialog, details see below.", ex);
-            throw new RuntimeException(ex);
-        }
-        // Entrance button logic
-        annoEntrance.setOnAction(e -> {
-            if (annoEntrance.isDisable())
-                return;
-            annoEntrance.setDisable(true);
-            // Blur out background nodes
-            List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
-            panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
-            // Setup and show popup
-            JFXDialog popup = new JFXDialog(body, announceDialog.dialog, JFXDialog.DialogTransition.TOP, false);
-            popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
-                popup.setOnMouseClicked(null);
-                // Transfer overlay close
-                announceDialog.dialogReturn.getOnAction().handle(
-                        new ActionEvent(ev.getSource(), ev.getTarget())
-                );
-            }));
-            popup.show();
-            // Bind return actions
-            announceDialog.dialogReturn.setOnAction(ev -> {
-                announceDialog.dialogReturn.setOnAction(null);
-                // Close popup
-                popup.close();
-                panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
-                annoEntrance.setDisable(false);
-            });
-        });
-        // Fetch once on app initialized
-        announceDialog.fetchAnnounce(false, () -> {
+        annoEntrance.setOnAction(e -> app.dialogs.popDialog("announceDialog"));
+        ((AnnounceDialog) app.dialogs.getDialogController("announceDialog")).fetchAnnounce(false, () -> {
             Logger.info("Announce", "Need immediate show");
             annoEntrance.getOnAction().handle(
                     new ActionEvent(this, Event.NULL_SOURCE_TARGET)

@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -6,40 +6,33 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.guitasks.ZipTask;
-import cn.harryh.arkpets.startup.StartupConfig;
-import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
+import cn.harryh.arkpets.network.NetworkUtils;
+import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.startup.StartupConfig;
+import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.GuiComponents;
 import cn.harryh.arkpets.utils.GuiComponents.*;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
-import com.sun.jna.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
+import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
 
-import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static cn.harryh.arkpets.Const.*;
@@ -59,17 +52,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXComboBox<NamedItem<Integer>> configDisplayFps;
     @FXML
     private JFXButton configDisplayFpsHelp;
+
+    @FXML
+    private JFXTabPane configRenderTabPane;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
     private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
     private JFXButton configCanvasCoverageHelp;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
-
-    @FXML
-    private JFXTabPane configRenderTabPane;
-    @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
@@ -102,7 +95,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXComboBox<String> configLoggingLevel;
     @FXML
-    private Label exploreLogDir;
+    private JFXButton exportLog;
     @FXML
     private JFXTextField configNetworkAgent;
     @FXML
@@ -116,7 +109,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton configWindowToolwindowHelp;
     @FXML
-    private Label exportLatestLog;
+    private JFXCheckBox configEcoMode;
     @FXML
     private JFXComboBox<NamedItem<String>> configWindowSystem;
     @FXML
@@ -145,6 +138,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initNoticeBox();
         initHandbookEntrance();
         initConfigDisplay();
+        initConfigRendering();
         initConfigAdvanced();
         initAbout();
         initScheduledListener();
@@ -178,6 +172,21 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
+    }
+
+    private void initConfigRendering() {
+        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
+
+        new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
+                        new NamedItem<>("绿色", 0x00FF00FF),
+                        new NamedItem<>("蓝色", 0x0000FFFF),
+                        new NamedItem<>("品红色", 0xFF00FFFF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.canvas_color)), app.config.canvas_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.canvas_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
+
         new ComboBoxSetup<>(configCanvasCoverage).setItems(new NamedItem<>("最宽", 0.45f),
                         new NamedItem<>("较宽", 0.65f),
                         new NamedItem<>("标准", 0.8f),
@@ -206,18 +215,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 .selectValue(app.config.canvas_sampling_interval, "间隔" + app.config.canvas_sampling_interval + "帧（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.canvas_sampling_interval = newValue.value();
-                    app.config.save();
-                });
-
-        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
-
-        new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
-                        new NamedItem<>("绿色", 0x00FF00FF),
-                        new NamedItem<>("蓝色", 0x0000FFFF),
-                        new NamedItem<>("品红色", 0xFF00FFFF))
-                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.canvas_color)), app.config.canvas_color + "（自定义）")
-                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
-                    app.config.canvas_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
 
@@ -285,6 +282,25 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_shadow_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
+
+        configEnableMipMap.setSelected(app.config.render_enable_mipmap);
+        configEnableMipMap.setOnAction(e -> {
+            app.config.render_enable_mipmap = configEnableMipMap.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会使用 MipMap 技术来消除由于纹理缩放导致的锯齿，但是会略微增加显存占用。\n" +
+                                "禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
+                    }
+                };
+            }
+        };
+
         if(isMac || isLinux) {
             // Because some ANGLE Metal bug (background), temporary hide on macOS.
             // Hide on Linux because the primary graphics API is OpenGL.
@@ -312,24 +328,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
-
-        configEnableMipMap.setSelected(app.config.render_enable_mipmap);
-        configEnableMipMap.setOnAction(e -> {
-            app.config.render_enable_mipmap = configEnableMipMap.isSelected();
-            app.config.save();
-        });
-        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
-            @Override
-            protected Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
-                    @Override
-                    public String getContent() {
-                        return "启用时，将会使用 MipMap 技术来消除由于纹理缩放导致的锯齿，但是会略微增加显存占用。\n" +
-                                "禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
-                    }
-                };
-            }
-        };
     }
 
     private void initConfigAdvanced() {
@@ -353,16 +351,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             level = Const.LogConfig.debug;
         configLoggingLevel.getSelectionModel().select(level);
 
-        exploreLogDir.setOnMouseClicked(e -> {
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    Logger.debug("Config", "Request to explore the log dir");
-                    java.awt.Desktop.getDesktop().open(new File("logs"));
-                } catch (IOException ex) {
-                    Logger.warn("Config", "Exploring log dir failed");
-                }
-            });
-        });
+        exportLog.setOnMouseClicked(e -> app.dialogs.popDialog("logDialog"));
 
         configNetworkAgent.setPromptText("示例：0.0.0.0:0");
         configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -370,11 +359,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 configNetworkAgentStatus.setText("未使用代理");
                 configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
                 Logger.info("Network", "Set proxy to none");
-                NetUtils.setProxy("", "");
+                NetworkUtils.setProxy("", "");
             } else {
                 if (ipPortRegex.matcher(newValue).matches()) {
                     String[] ipPort = newValue.split(":");
-                    NetUtils.setProxy(ipPort[0], ipPort[1]);
+                    NetworkUtils.setProxy(ipPort[0], ipPort[1]);
                     configNetworkAgentStatus.setText("代理生效中");
                     configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
                     Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
@@ -449,7 +438,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
         };
 
-        exportLatestLog.setOnMouseClicked(e -> exportLatestLog());
+        configEcoMode.setSelected(app.config.eco_mode);
+        configEcoMode.setOnAction(e -> {
+            app.config.eco_mode = configEcoMode.isSelected();
+            app.config.save();
+        });
 
         NamedItem<String>[] items = getWindowSystemItems().toArray(new NamedItem[0]);
         new ComboBoxSetup<>(configWindowSystem).setItems(items)
@@ -522,9 +515,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             /* Foreground check app update */
             new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual").start();
         });
-        aboutVisitWebsite.setOnMouseClicked (e -> NetUtils.browseWebpage(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked       (e -> NetUtils.browseWebpage(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked       (e -> NetUtils.browseWebpage(Const.PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked (e -> app.popBrowser(Const.PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlReadme));
+        aboutGitHub.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlLicense));
     }
 
     private void initNoticeBox() {
@@ -551,7 +544,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                NetUtils.browseWebpage(Const.PathConfig.urlDownload);
+                app.popBrowser(Const.PathConfig.urlDownload);
             }
         };
         diskFreeSpaceNotice = new NoticeBar(noticeBox) {
@@ -658,36 +651,5 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
-    }
-
-    private void exportLatestLog() {
-        Logger.info("Config", "Ready to export logs");
-        List<String> logList = new ArrayList<>();
-        logList.add(Logger.getLogFilePath());
-        File logDir = new File("logs");
-        if (logDir.exists() && logDir.isDirectory()) {
-            File[] files = logDir.listFiles();
-            if (files != null) Arrays.stream(files)
-                    .filter(file -> file.getName().startsWith("core") && file.getName().endsWith(".log"))
-                    .max(Comparator.comparingLong(File::lastModified))
-                    .ifPresent(f -> logList.add(f.getPath()));
-        }
-        logList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
-        // Open file chooser
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Archives", "*.zip"));
-        fileChooser.setInitialFileName(LocalDateTime.now().format(DateTimeFormatter.ofPattern("'ArkPets_Logs_'yyyy-MM-dd-HH-mm-ss'.zip'")));
-        Logger.info("Dialog", "Opening file chooser to export logs");
-        File zipFile = fileChooser.showSaveDialog(app.getWindow());
-        if (zipFile == null)
-            return;
-        // Export log files
-        new ZipTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.toString(), logList).start();
-        GuiPrefabs.Dialogs.createCommonDialog(app.body,
-                GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
-                "导出最近日志",
-                "导出最近日志成功",
-                "已导出最近日志到 " + zipFile.getAbsolutePath(),
-                null).show();
     }
 }

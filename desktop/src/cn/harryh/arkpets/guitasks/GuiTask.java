@@ -14,6 +14,8 @@ import javafx.scene.layout.VBox;
 import java.util.List;
 
 
+/** The base class that provides a framework for executing tasks in the JavaFX GUI.
+ */
 abstract public class GuiTask {
     public final StackPane parent;
     public final GuiTaskStyle style;
@@ -39,41 +41,41 @@ abstract public class GuiTask {
         this.parent = parent;
         this.style = style;
 
-        // Generate related instances
         task = getTask();
         dialog = style != GuiTaskStyle.HIDDEN ? getDialog(parent, task, style != GuiTaskStyle.STRICT) : null;
 
-        // Handle all task events
+        // Handle all the state events
         task.setOnCancelled(e -> {
-            Logger.info("Task", this + " was cancelled.");
-            this.onCancelled();
+            Logger.warn("Task", this + " was cancelled");
             GuiPrefabs.Dialogs.disposeDialog(dialog);
+            this.onCancelled();
         });
         task.setOnFailed(e -> {
             Logger.error("Task", this + " failed, details see below.", task.getException());
-            this.onFailed(task.getException());
             GuiPrefabs.Dialogs.disposeDialog(dialog);
+            this.onFailed(task.getException());
         });
         task.setOnSucceeded(e -> {
-            Logger.info("Task", this + " completed.");
-            this.onSucceeded(task.getValue());
+            Logger.info("Task", this + " completed");
             GuiPrefabs.Dialogs.disposeDialog(dialog);
+            this.onSucceeded(task.getValue());
         });
-        task.setOnRunning(e -> Logger.debug("Task", this + " running."));
-        task.setOnScheduled(e -> Logger.debug("Task", this + " scheduled."));
+        task.setOnRunning(null);
+        task.setOnScheduled(null);
     }
 
     /** Starts the task defined in this wrapper.
      */
     public final void start() {
         if (task == null)
-            throw new NullPointerException("The task to be started was null.");
+            throw new NullPointerException("The task to be started was null");
         if (task.isDone())
-            throw new IllegalStateException("The task was already done.");
+            throw new IllegalStateException("The task has already done");
         if (task.isRunning())
-            throw new IllegalStateException("The task was already running.");
+            throw new IllegalStateException("The task is already running");
         if (dialog != null && style != GuiTaskStyle.HIDDEN)
             dialog.show();
+        Logger.info("Task", this + " starting");
         new Thread(task, "GuiTask-" + threadNumber++).start();
     }
 

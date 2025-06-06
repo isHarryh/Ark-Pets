@@ -11,9 +11,10 @@ import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.controllers.Titlebar;
 import cn.harryh.arkpets.tray.HostTray;
+import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
-import cn.harryh.arkpets.utils.GuiComponents;
+import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,6 +29,12 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -41,7 +48,8 @@ public class ArkHomeFX extends Application {
     public ArkConfig config;
     public ModelsDataset modelsDataset;
     public StackPane body;
-    public GuiComponents.Toast toast;
+    public Toast toast;
+    public DialogComposer<ArkHomeFX> dialogs;
 
     public RootModule rootModule;
     public ModelsModule modelsModule;
@@ -147,6 +155,38 @@ public class ArkHomeFX extends Application {
 
     public void popLoading(EventHandler<ActionEvent> handler) {
         rootModule.popLoading(handler);
+    }
+
+    public void popBrowser(URI uri) {
+        Logger.info("Launcher", "Request to open URI: " + uri);
+        try {
+            if ("file".equalsIgnoreCase(uri.getScheme())) {
+                // File URI
+                File localFile = new File(uri);
+                if (!localFile.isDirectory())
+                    throw new IOException("Given file URI should be a directory");
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        Desktop.getDesktop().open(localFile);
+                    } catch (IOException e) {
+                        Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
+                    }
+                });
+            } else {
+                // Other types of URI (like HTTP/HTTPS)
+                Desktop.getDesktop().browse(uri);
+            }
+        } catch (IOException e) {
+            Logger.error("Launcher", "Failed to open the URI, details see below.", e);
+        }
+    }
+
+    public void popBrowser(String uri) {
+        try {
+            popBrowser(new URI(uri));
+        } catch (URISyntaxException e) {
+            Logger.error("Launcher", "Failed to open URI due to bad URI syntax: " + uri);
+        }
     }
 
     public Window getWindow() {
