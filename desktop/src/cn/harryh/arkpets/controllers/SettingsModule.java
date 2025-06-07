@@ -352,6 +352,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         configLoggingLevel.valueProperty().addListener(observable -> {
             if (configLoggingLevel.getValue() != null) {
                 Logger.setLevel(Level.toLevel(configLoggingLevel.getValue(), Level.INFO));
+                if(Logger.getLevel().equals(Level.DEBUG))
+                    GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
+                            "调试模式",
+                            "调试模式已启用。",
+                            "已启用桌宠的调试模式，这可能会在一定程度上影响性能。\n除非因故障排除明确要求你这么做，否则请选择其他日志等级。",null).show();
                 app.config.logging_level = Logger.getLevel().toString();
                 app.config.save();
             }
