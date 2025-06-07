@@ -303,7 +303,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
         searchModelRandom.setOnAction(e -> modelRandom());
 
-        searchModelReload.setOnAction(e -> modelReload(true));
+        searchModelReload.setOnAction(e -> {
+            modelReload(true);
+            app.toast.showText("已重新加载", durationLong);
+        });
     }
 
     private void initModelFilter() {
@@ -458,6 +461,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                             @Override
                             protected void onSucceeded(boolean result) {
                                 app.modelsModule.modelReload(true);
+                                app.toast.showText("压缩包导入完成", durationLong);
                             }
                         }.start();
                     }
