@@ -1,40 +1,20 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.assets.VoiceItem;
-import com.badlogic.gdx.backends.lwjgl3.audio.OggInputStream;
 
 
-import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 
 public class AudioSlicer {
-    private ByteBuffer pcmBuffer;
-    private int sampleRate;
-    private int channels;
-    private int bits = 16;
-    private int bytesPerSample = 0;
+    private final int bits = 16;
+    private final int bytesPerSample;
     private final HashMap<String, Float> startTime = new HashMap<>();
     private final HashMap<String, Float> durationTime = new HashMap<>();
 
-    public AudioSlicer(File oggFile, VoiceItem group) {
-        try {
-            OggInputStream oggInput = new OggInputStream(new FileInputStream(oggFile));
-            this.sampleRate = oggInput.getSampleRate();
-            this.channels = oggInput.getChannels();
-            ByteArrayOutputStream pcmOutput = new ByteArrayOutputStream();
-            byte[] buffer = new byte[2048];
-            while (!oggInput.atEnd()) {
-                int length = oggInput.read(buffer);
-                if (length == -1) break;
-                pcmOutput.write(buffer, 0, length);
-            }
-            this.pcmBuffer = ByteBuffer.wrap(pcmOutput.toByteArray());
-            this.bytesPerSample = sampleRate * channels * bits / 8;
-        } catch (IOException e) {
-            Logger.error("Audio", "Failed to read ogg file.", e);
-        }
+    public AudioSlicer(VoiceItem group,int sampleRate,int channels) {
+        this.bytesPerSample = sampleRate * channels * bits / 8;
         for (int i = 0; i < group.clips().size(); i++) {
             float duration,start;
             VoiceItem.VoiceClip clip = group.clips().get(i);
@@ -56,7 +36,7 @@ public class AudioSlicer {
     }
 
 
-    public byte[] getSlice(String name) {
+    public byte[] getSlice(ByteBuffer pcmBuffer,String name) {
         float start, duration;
         if(!(startTime.containsKey(name) && durationTime.containsKey(name))) {
             Logger.warn("Audio", "Slice " + name + " not found.");
@@ -73,13 +53,5 @@ public class AudioSlicer {
         byte[] dst = new byte[pcmLength+1];
         pcmBuffer.get(startByte, dst, 0, pcmLength);
         return dst;
-    }
-
-    public int getSampleRate() {
-        return sampleRate;
-    }
-
-    public int getChannels() {
-        return channels;
     }
 }
