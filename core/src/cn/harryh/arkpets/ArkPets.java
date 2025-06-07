@@ -292,6 +292,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
+                audioPlayer.playAudio("CN_036", calcPan(), 0.8f);
             tray.hideDialog();
         }
     }
@@ -503,6 +504,12 @@ public class ArkPets extends InputApplicationAdaptor {
         File ogg = new File(set.storageDirectory.get(lang), name + set.audioFormat);
         Logger.debug("Audio","Loading OGG: " + ogg.getAbsolutePath());
         audioPlayer = AudioPlayer.loadAudio(ogg,set.data.get(name), lang);
+    }
+
+    private float calcPan() {
+        float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() /2);
+        float screenWidth = plane.borderRight() - plane.borderLeft();
+        return -1f + 2 * (currentX/screenWidth);
     }
 
 

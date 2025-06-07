@@ -23,7 +23,7 @@ public class AudioPlayer {
     private final HashMap<String, Sound> gdxSounds = new HashMap<>();
     private AudioSlicer slicer;
     private ByteBuffer pcmBuffer;
-    private final Timer resetTimer = new Timer();
+    private final Timer finishTimer = new Timer();
     private Status status = Status.UNAVAILABLE;
     private int sample;
     private int channel;
@@ -56,8 +56,17 @@ public class AudioPlayer {
         if (status == Status.UNAVAILABLE) throw new IllegalStateException();
         if (status == Status.PLAYING) return;
         Sound sound = fetchSound(name);
+        float duration = slicer.getDuration(name);
+        Logger.debug("Audio",String.format("Playing Audio %s Vol %f Pan %f",name,vol,pan));
         sound.play(vol, 1, pan);
-        //playing = true;
+        status = Status.PLAYING;
+        finishTimer.scheduleTask(new Timer.Task() {
+            @Override
+            public void run() {
+                Logger.debug("Audio","End Audio "+ name);
+                status = Status.READY;
+            }
+        },duration);
     }
 
     public void dispose() {

@@ -54,4 +54,14 @@ public class AudioSlicer {
         pcmBuffer.get(startByte, dst, 0, pcmLength);
         return dst;
     }
+
+    public float getDuration(String name) {
+        if(!durationTime.containsKey(name)) return 0;
+        return durationTime.get(name);
+    }
+
+    public float getStartTime(String name) {
+        if(!startTime.containsKey(name)) return 0;
+        return startTime.get(name);
+    }
 }
