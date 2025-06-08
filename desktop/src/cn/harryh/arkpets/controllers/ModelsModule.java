@@ -10,6 +10,9 @@ import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelDatasetTask;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
+import cn.harryh.arkpets.guitasks.requests.McCheckModelsUpdateTask;
+import cn.harryh.arkpets.network.SourceStrategy;
+import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
@@ -326,7 +329,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         EventHandler<ActionEvent> modelFetchEventHandler = e -> {
             /* Foreground fetch models */
             // Go to [Step 1/3]:
-            new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+            DownloadModelsTask task = new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override
                 protected void onDownloadedFile(File file) {
                     // Go to [Step 2/3]:
@@ -348,7 +351,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                         }
                     }.start();
                 }
-            }.start();
+            };
+
+            assertDownloadSource(true, task::start);
         };
 
         modelUpdate.setOnAction(e -> {
@@ -693,6 +698,40 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         } else {
             // Loaded:
             return true;
+        }
+    }
+
+    private void assertDownloadSource(boolean doDoubleCheck, Runnable onDone) {
+        SourceStrategy.getStrategy("ModelDownload").unsetPrimarySource();
+        String cdk;
+        if ((cdk = app.config.getMcCdk()) != null) {
+            Logger.debug("ModelManager", "Attempting using CDK to fetch resource");
+            new McCheckModelsUpdateTask(app.body, GuiTask.GuiTaskStyle.STRICT, cdk) {
+                @Override
+                protected void onReceivedData(JSONObject json) {
+                    McQueryVersion value = json.toJavaObject(McQueryVersion.class);
+                    try {
+                        value.raiseForCode();
+                        SourceStrategy.getStrategy("ModelDownload").setPrimarySource("MirrorChyan", value.data.url);
+
+                        Logger.info("ModelManager", "CDK assertion passed");
+                        if (onDone != null)
+                            onDone.run();
+                    } catch (McQueryVersion.McException e) {
+                        Logger.warn("ModelManager", "CDK assertion not passed, " + e.getMessage());
+                        if (doDoubleCheck)
+                            app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+                        else if (onDone != null)
+                            onDone.run();
+                    }
+                }
+            }.start();
+        } else {
+            Logger.info("ModelManager", "CDK assertion not passed due to not set");
+            if (doDoubleCheck)
+                app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+            else if (onDone != null)
+                onDone.run();
         }
     }
 }

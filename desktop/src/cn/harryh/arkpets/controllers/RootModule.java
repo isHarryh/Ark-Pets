@@ -122,6 +122,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.dialogs = new DialogComposer<>(app);
         List<Node> backgroundNodes = List.of(sidebar, wrapper1, wrapper2, wrapper3);
         app.dialogs.registerDialog("announceDialog", body, backgroundNodes, "/UI/AnnounceDialog.fxml");
+        app.dialogs.registerDialog("downloadDialog", body, backgroundNodes, "/UI/DownloadDialog.fxml");
         app.dialogs.registerDialog("logDialog", body, backgroundNodes, "/UI/LogDialog.fxml");
 
         initAnnoEntrance();

@@ -84,8 +84,8 @@ public class Connections {
             int len;
             byte[] bytes = new byte[httpBufferSizeDefault];
             while ((len = bis.read(bytes)) != -1) {
-                bos.write(bytes, 0, len);
                 recorder.receive(len);
+                bos.write(bytes, 0, len);
             }
             bos.flush();
         }

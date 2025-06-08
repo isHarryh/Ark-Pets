@@ -42,6 +42,8 @@ public class DialogComposer<T extends Application> {
      * @param onClosed A runnable callback that is executed after the dialog is closed.
      */
     public void popDialog(String dialogId, Object data, Runnable onClosed) {
+        if (!dialogs.containsKey(dialogId))
+            throw new IllegalStateException("No such dialog ID");
         DialogRecord<T> dialogRecord = dialogs.get(dialogId);
         // Avoid duplicated popup
         if (activatedDialogs.contains(dialogRecord))

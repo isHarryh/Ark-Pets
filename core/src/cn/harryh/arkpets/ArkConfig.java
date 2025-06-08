@@ -6,6 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SecretUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -68,6 +70,8 @@ public class ArkConfig implements Serializable {
     public boolean      display_multi_monitors;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "1.0")
     public float        display_scale;
+    /** @since ArkPets 3.9 */ @JSONField()
+    public String       download_mc_cdk;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "false")
     public boolean      eco_mode;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
@@ -139,6 +143,40 @@ public class ArkConfig implements Serializable {
         return isNewcomer;
     }
 
+    /** Gets the MirrorChyan CDK.
+     * @return The decrypted CDK, or {@code null} if the CDK is not set or decryption failed.
+     */
+    @JSONField(serialize = false)
+    public String getMcCdk() {
+        if (download_mc_cdk != null && !download_mc_cdk.isEmpty()) {
+            try {
+                String result = new SecretUtils.WeakEncryptionV0().decrypt(download_mc_cdk);
+                Logger.debug("Config", "Decrypt MirrorChyan CDK okay");
+                return result;
+            } catch (GeneralSecurityException e) {
+                Logger.error("Config", "Failed to decrypt MirrorChyan CDK, details see below.", e);
+            }
+        }
+        return null;
+    }
+
+    /** Sets the MirrorChyan CDK.
+     * @param string The CDK to set. If the string is {@code null} or empty, the CDK will be cleared.
+     */
+    public void setMcCdk(String string) throws GeneralSecurityException {
+        if (string != null && !string.isEmpty()) {
+            try {
+                download_mc_cdk = new SecretUtils.WeakEncryptionV0().encrypt(string);
+                Logger.debug("Config", "Encrypt MirrorChyan CDK okay");
+                return;
+            } catch (GeneralSecurityException e) {
+                Logger.error("Config", "Failed to encrypt MirrorChyan CDK, details see below.", e);
+                throw e;
+            }
+        }
+        download_mc_cdk = "";
+    }
+
     /** Gets the custom ArkConfig object by reading the external config file.
      * If the external config file does not exist, a default config file will be generated.
      * @return An ArkConfig object. {@code null} if failed.
@@ -191,7 +229,7 @@ public class ArkConfig implements Serializable {
         }
     }
 
-    /** @see com.badlogic.gdx.graphics.Color
+    /** @see Color
      */
     public static Color getGdxColorFrom(String string) {
         Color color;
