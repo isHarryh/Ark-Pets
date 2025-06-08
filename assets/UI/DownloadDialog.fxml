@@ -50,7 +50,7 @@
                 <String fx:value="btn-iconified"/>
             </styleClass>
         </JFXButton>
-        <Label styleClass="dialog-title-label" text="下载选项"/>
+        <Label styleClass="dialog-title-label" text="下载策略"/>
     </HBox>
     <Separator layoutX="272.0" layoutY="130.0" orientation="VERTICAL" prefHeight="225.0"
                AnchorPane.bottomAnchor="15.0"/>

@@ -17,9 +17,11 @@ import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -90,10 +92,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton exportLog;
     @FXML
-    private JFXTextField configNetworkAgent;
-    @FXML
-    private Label configNetworkAgentStatus;
-    @FXML
     private JFXCheckBox configAutoStartup;
     @FXML
     private JFXCheckBox configSolidExit;
@@ -103,6 +101,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXButton configWindowToolwindowHelp;
     @FXML
     private JFXCheckBox configEcoMode;
+
+    @FXML
+    private JFXTextField configNetworkSource;
+    @FXML
+    private JFXTextField configNetworkProxy;
+    @FXML
+    private Label configNetworkProxyStatus;
 
     @FXML
     private Label aboutQueryUpdate;
@@ -128,6 +133,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initConfigDisplay();
         initConfigRendering();
         initConfigAdvanced();
+        initNetwork();
         initAbout();
         initScheduledListener();
 
@@ -335,29 +341,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
         exportLog.setOnMouseClicked(e -> app.dialogs.popDialog("logDialog"));
 
-        configNetworkAgent.setPromptText("示例：0.0.0.0:0");
-        configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) {
-                configNetworkAgentStatus.setText("未使用代理");
-                configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
-                Logger.info("Network", "Set proxy to none");
-                setProxy("", "");
-            } else {
-                if (ipPortRegex.matcher(newValue).matches()) {
-                    String[] ipPort = newValue.split(":");
-                    setProxy(ipPort[0], ipPort[1]);
-                    configNetworkAgentStatus.setText("代理生效中");
-                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
-                    Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
-                } else {
-                    configNetworkAgentStatus.setText("输入不合法");
-                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_DANGER);
-                }
-            }
-        });
-        configNetworkAgentStatus.setText("未使用代理");
-        configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
-
         StartupConfig startup = StartupConfig.getInstance();
         configAutoStartup.setSelected(startup.isSetStartup());
         configAutoStartup.setOnAction(e -> {
@@ -425,6 +408,39 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             app.config.eco_mode = configEcoMode.isSelected();
             app.config.save();
         });
+    }
+
+    private void initNetwork() {
+        BooleanProperty isMc = ((DownloadDialog) app.dialogs.getDialogController("downloadDialog")).getIsMcProperty();
+        isMc.addListener(observable -> configNetworkSource.setText(isMc.get() ? "Mirror 酱" : "公共源"));
+        configNetworkSource.setText(isMc.get() ? "Mirror 酱" : "公共源");
+        configNetworkSource.setEditable(false);
+        configNetworkSource.setCursor(Cursor.HAND);
+        configNetworkSource.setOnMouseClicked(e -> app.dialogs.popDialog("downloadDialog"));
+        configNetworkSource.setOnKeyPressed(e -> app.dialogs.popDialog("downloadDialog"));
+
+        configNetworkProxy.setPromptText("示例：0.0.0.0:0");
+        configNetworkProxy.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                configNetworkProxyStatus.setText("未使用代理");
+                configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
+                Logger.info("Network", "Set proxy to none");
+                setProxy("", "");
+            } else {
+                if (ipPortRegex.matcher(newValue).matches()) {
+                    String[] ipPort = newValue.split(":");
+                    setProxy(ipPort[0], ipPort[1]);
+                    configNetworkProxyStatus.setText("代理生效中");
+                    configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
+                    Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
+                } else {
+                    configNetworkProxyStatus.setText("输入不合法");
+                    configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_DANGER);
+                }
+            }
+        });
+        configNetworkProxyStatus.setText("未使用代理");
+        configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
     }
 
     private void initAbout() {

@@ -13,6 +13,8 @@ import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -32,7 +34,7 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     @FXML
     private Label mcIndicator;
     @FXML
-    public Label mcPurchase;
+    private Label mcPurchase;
     @FXML
     private JFXTextField mcCdkInput;
     @FXML
@@ -45,12 +47,16 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     private ArkHomeFX app;
 
     private Runnable afterConfirm;
+    private BooleanProperty isMc;
 
     private static final Pattern cdkPattern = Pattern.compile("[\\w\\-]{4,256}");
 
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+
+        afterConfirm = null;
+        isMc = new SimpleBooleanProperty(app.config.getMcCdk() != null);
 
         initPs();
         initMc();
@@ -78,12 +84,14 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
             }
         }
         if (app.config.getMcCdk() != null) {
+            isMc.setValue(true);
             mcIndicator.setManaged(true);
             mcIndicator.setVisible(true);
             psIndicator.setManaged(false);
             psIndicator.setVisible(false);
             mcCdkInput.setPromptText("点击下方按钮以验证当前 CDK");
         } else {
+            isMc.setValue(false);
             mcIndicator.setManaged(false);
             mcIndicator.setVisible(false);
             psIndicator.setManaged(true);
@@ -92,11 +100,16 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
         }
     }
 
+    public BooleanProperty getIsMcProperty() {
+        return isMc;
+    }
+
     private void initPs() {
         psConfirm.setOnAction(e -> {
             try {
                 app.config.setMcCdk("");
                 app.config.save();
+                isMc.setValue(false);
             } catch (GeneralSecurityException ignored) {
             }
             Logger.info("DownloadDialog", "Chose the public source");
@@ -141,6 +154,7 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
                     value.raiseForCode();
                     app.config.setMcCdk(cdk);
                     app.config.save();
+                    isMc.setValue(true);
 
                     String exp = StringUtils.getSimpleTimeString(value.getCDKExpiredTime());
                     Logger.info("DownloadDialog", "Accepted CDK, expires at: " + exp);

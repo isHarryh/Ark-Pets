@@ -120,10 +120,9 @@
                 <HBox>
                     <JFXCheckBox fx:id="configEcoMode" mnemonicParsing="false" text="长时间未交互时降低帧率"/>
                 </HBox>
-                <Separator/>
                 <HBox spacing="20.0">
                     <Label text="日志级别"/>
-                    <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
+                    <JFXComboBox fx:id="configLoggingLevel" prefWidth="120.0"/>
                     <JFXButton fx:id="exportLog" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity"
                                mnemonicParsing="false" prefWidth="82.5" text="导出日志">
                         <graphic>
@@ -139,10 +138,16 @@
                         </styleClass>
                     </JFXButton>
                 </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="网络设置"/>
+                <HBox spacing="20.0">
+                    <Label text="下载策略"/>
+                    <JFXTextField fx:id="configNetworkSource" prefWidth="120.0" text="-"/>
+                </HBox>
                 <HBox spacing="20.0">
                     <Label text="网络代理（仅本次有效）"/>
-                    <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0"/>
-                    <Label fx:id="configNetworkAgentStatus" text="-"/>
+                    <JFXTextField fx:id="configNetworkProxy" prefHeight="23.0" prefWidth="120.0"/>
+                    <Label fx:id="configNetworkProxyStatus" text="-"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="关于软件"/>
