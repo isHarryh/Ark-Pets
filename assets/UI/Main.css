@@ -54,6 +54,7 @@ JFXButton,
 JFXCheckBox,
 JFXComboBox,
 JFXSlider,
+JFXRadioButton,
 JFXToggleButton {
     -fx-cursor: hand;
 }
@@ -193,6 +194,10 @@ JFXButton>AnchorPane>SVGPath {
 JFXCheckBox {
     -jfx-checked-color: -theme-color;
     -jfx-unchecked-color: dimgray;
+}
+
+JFXRadioButton {
+    -jfx-selected-color: -theme-color;
 }
 
 JFXSlider {
