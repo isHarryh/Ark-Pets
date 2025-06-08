@@ -68,7 +68,7 @@ ArkPets附加说明文档
 |          [JFoenix](https://github.com/sshahine/JFoenix)          | JavaFX Material Design 组件库 |
 |         [JNA](https://github.com/java-native-access/jna)         | Java Native Access 接口      |
 |     [Alibaba FastJSON](https://github.com/alibaba/fastjson)      | JSON 工具                    |
-|         [Apache log4j](https://logging.apache.org/log4j)         | 日志工具                       |
+|           [QOS.ch reload4j](https://reload4j.qos.ch/)            | 日志工具                       |
 |        [TinyPinyin](https://github.com/promeG/TinyPinyin)        | 汉语拼音转换工具                   |
  |          [Opencc4j](https://github.com/houbb/opencc4j)           | 中文简繁体转换工具                  |
 | [Commonmark-Java](https://github.com/commonmark/commonmark-java) | Markdown 文档解析工具            |
