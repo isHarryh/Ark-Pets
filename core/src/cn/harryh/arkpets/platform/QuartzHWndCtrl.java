@@ -3,7 +3,8 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
-import com.sun.jna.Platform;
+import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.mac.CoreFoundation;
 import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
@@ -26,7 +27,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private final long windowID;
     private Pointer nsWin;
-    private Pointer nsScreen;
+    private CGRect currentScreenRect;
     private final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private byte nsWinUnavailable;
@@ -41,8 +42,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public boolean isForeground() {
-        //todo
-        return true;
+        getNSWindow(windowID);
+        return ObjCHelper.msgSend.invokeInt(new Object[]{
+                nsWin,
+                ObjCHelper.sel("isKeyWindow")
+        }) == 1;
     }
 
     @Override
@@ -58,19 +62,22 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public HWndCtrl updated() {
-        //todo
-        /*QuartzHWndCtrl hwnd = null;
-        CFIndex index = new CFIndex(1);
-        LongByReference wid = new LongByReference(windowID);
-        CFArrayRef arr = CFExt.INSTANCE.CFArrayCreate(null,new Pointer[] {wid.getPointer()},index,null);
+        QuartzHWndCtrl hwnd;
+        CoreFoundation.CFIndex index = new CoreFoundation.CFIndex(1);
+        Memory carr = new Memory(Native.getNativeSize(Integer.class));
+        carr.write(0,new int[] {(int) windowID},0,1);
+        CFArrayRef arr = CoreFoundation.INSTANCE.CFArrayCreate(null,carr,index,null);
         if (arr != null) {
             CFArrayRef win = CoreGraphics.INSTANCE.CGWindowListCreateDescriptionFromArray(arr);
             arr.release();
             CFDictionaryRef dict = new CFDictionaryRef(win.getValueAtIndex(0));
             hwnd=new QuartzHWndCtrl(dict);
             win.release();
-        }*/
-        return new NullHWndCtrl();
+            carr.close();
+            return hwnd;
+        } else {
+            return new NullHWndCtrl();
+        }
     }
 
     @Override
@@ -85,9 +92,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
         getNSWindow(windowID);
-        CGRect rect = getScreenSize();
         newRect.origin.x = x;
-        newRect.origin.y = rect.size.height - y - h;
+        newRect.origin.y = currentScreenRect.size.height - y - h;
         newRect.size.width = w;
         newRect.size.height = h;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
@@ -237,6 +243,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
             this.nsWin = nswin;
             nsWinUnavailable = 1;
             registerMethods(nsWin);
+            currentScreenRect = getScreenSize();
         }
     }
 
@@ -253,14 +260,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
                 ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
                 null,
                 1
-        });
-    }
-
-    private void getNSScreen() {
-        if (this.nsWinUnavailable != 1 || this.nsScreen != null) return;
-        this.nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nsWin,
-                ObjCHelper.sel("screen")
         });
     }
 
@@ -294,7 +293,10 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     private CGRect getScreenSize() {
-        getNSScreen();
+        Pointer nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
+                nsWin,
+                ObjCHelper.sel("screen")
+        });
         if (Const.isARM) {
             return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
                     nsScreen,
