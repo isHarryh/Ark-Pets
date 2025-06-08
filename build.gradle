@@ -76,8 +76,8 @@ project(":core") {
         api "org.commonmark:commonmark-ext-autolink:0.24.0"
         api "org.commonmark:commonmark-ext-gfm-strikethrough:0.24.0"
         api "org.commonmark:commonmark-ext-gfm-tables:0.24.0"
-        // Log4j
-        api "apache-log4j:log4j:1.2.15"
+        // reload4j
+        api "ch.qos.reload4j:reload4j:1.2.26"
         // TiniPinyin
         api 'com.github.promeg:tinypinyin:2.0.3'
         // OpenCC4j
