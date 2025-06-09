@@ -59,6 +59,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"
+        api "com.badlogicgames.gdx:gdx-ai:1.8.2"
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
