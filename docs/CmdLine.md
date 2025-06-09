@@ -9,7 +9,7 @@ ArkPets 的命令行启动方法。
 ### 用法
 `ArkPets.exe`：
 ```
-ArkPets [--direct-start [--config <path>] [--load-lib <path>]]
+ArkPets [--direct-start [--config <path>] [--glfw-lib <path>] [--load-lib <path>]]
         [--quiet|--warn|--info|--debug]
 ```
 
