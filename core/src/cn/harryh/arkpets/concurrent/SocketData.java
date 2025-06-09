@@ -25,7 +25,11 @@ public class SocketData implements Serializable {
         CHANGE_STAGE,
         HANDSHAKE_REQUEST,
         HANDSHAKE_RESPONSE,
-        ACTIVATE_LAUNCHER
+        ACTIVATE_LAUNCHER,
+        // Voice
+        REQUEST_VOICE,
+        CAN_VOICE,
+        NO_VOICE
     }
 
     /** The UUID for identification.

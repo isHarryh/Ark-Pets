@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static cn.harryh.arkpets.Const.serverPorts;
 
@@ -26,6 +27,7 @@ public final class SocketServer {
     private final Set<SocketSession> sessionList = new CopyOnWriteArraySet<>();
     private Thread listener;
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicInteger playingAudios = new AtomicInteger(0);
     private static volatile SocketServer instance = null;
 
     public static SocketServer getInstance() {
