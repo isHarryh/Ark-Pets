@@ -292,7 +292,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
-                audioPlayer.playAudio("CN_036", calcPan(), 0.8f);
+                audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_036", calcPan(), 0.8f));
             tray.hideDialog();
         }
     }

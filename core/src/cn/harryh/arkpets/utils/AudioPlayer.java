@@ -52,18 +52,21 @@ public class AudioPlayer {
         return new AudioPlayer(group.getVariation(lang), oggPath);
     }
 
-    public void playAudio(String name, float pan, float vol) {
+    public void playAudio(PlayRequest req) {
         if (status == Status.UNAVAILABLE) throw new IllegalStateException();
-        if (status == Status.PLAYING) return;
-        Sound sound = fetchSound(name);
-        float duration = slicer.getDuration(name);
-        Logger.debug("Audio",String.format("Playing Audio %s Vol %f Pan %f",name,vol,pan));
-        sound.play(vol, 1, pan);
+        if (status == Status.PLAYING) {
+            Logger.warn("Audio","Audio is still playing.");
+            return;
+        }
+        Sound sound = fetchSound(req.name);
+        float duration = slicer.getDuration(req.name);
+        Logger.debug("Audio",String.format("Playing Audio %s Vol %f Pan %f",req.name,req.vol,req.pan));
+        sound.play(req.vol, 1, req.pan);
         status = Status.PLAYING;
         finishTimer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
-                Logger.debug("Audio","End Audio "+ name);
+                Logger.debug("Audio","End Audio "+ req.name);
                 status = Status.READY;
             }
         },duration);
@@ -99,4 +102,6 @@ public class AudioPlayer {
         READY,
         PLAYING,
     }
+
+    public record PlayRequest(String name,float pan,float vol) {}
 }
