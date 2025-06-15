@@ -3,7 +3,9 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.KWinInterface;
 import cn.harryh.arkpets.natives.KWinPluginInterface;
+import cn.harryh.arkpets.natives.WaylandHelper;
 import cn.harryh.arkpets.utils.Logger;
+import com.sun.jna.Pointer;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -15,11 +17,14 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class KWinHWndCtrl extends HWndCtrl {
+public class KWinHWndCtrl extends HWndCtrl implements WaylandHWnd {
     protected final String hWnd;
     protected KWinInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
     private static KWinInterface dBusInterface;
+
+    private boolean isTransparent;
+    private Pointer surface;
 
     protected KWinHWndCtrl(KWinInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
@@ -59,7 +64,10 @@ public class KWinHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTransparent(boolean enable) {
-
+        if (isTransparent != enable) {
+            WaylandHelper.setTransparent(surface, enable);
+            isTransparent = enable;
+        }
     }
 
     @Override
@@ -75,6 +83,10 @@ public class KWinHWndCtrl extends HWndCtrl {
     @Override
     public void sendMouseEvent(MouseEvent msg, int x, int y) {
 
+    }
+
+    public void setSurface(Pointer surface) {
+        this.surface = surface;
     }
 
     protected static void init() {
