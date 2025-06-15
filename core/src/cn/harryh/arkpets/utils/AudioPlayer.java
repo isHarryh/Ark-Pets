@@ -58,6 +58,10 @@ public class AudioPlayer {
             Logger.warn("Audio","Audio is still playing.");
             return;
         }
+        if(!slicer.hasSlice(req.name)) {
+            Logger.warn("Audio", "Slice " + req.name + " not found.");
+            return;
+        }
         Sound sound = fetchSound(req.name);
         float duration = slicer.getDuration(req.name);
         Logger.debug("Audio",String.format("Playing Audio %s Vol %f Pan %f",req.name,req.vol,req.pan));

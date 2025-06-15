@@ -64,4 +64,8 @@ public class AudioSlicer {
         if(!startTime.containsKey(name)) return 0;
         return startTime.get(name);
     }
+
+    public boolean hasSlice(String name) {
+        return startTime.containsKey(name) && durationTime.containsKey(name);
+    }
 }
