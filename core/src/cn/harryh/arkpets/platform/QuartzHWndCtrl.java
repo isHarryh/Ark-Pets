@@ -293,7 +293,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     private CGRect getScreenSize() {
-        Pointer nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
+        /*Pointer nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
                 nsWin,
                 ObjCHelper.sel("screen")
         });
@@ -310,7 +310,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
                     ObjCHelper.sel("frame")
             });
             return rect;
-        }
+        }*/
+        return CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID());
     }
 
     private class IgnoreMouseCallback implements ObjCHelper.ThreadCallback {

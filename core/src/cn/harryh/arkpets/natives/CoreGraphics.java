@@ -31,6 +31,10 @@ public interface CoreGraphics extends Library {
 
     CFDictionaryRef CGSessionCopyCurrentDictionary();
 
+    int CGMainDisplayID();
+
+    CGRect.ByValue CGDisplayBounds(int display);
+
 
     @Structure.FieldOrder({"origin", "size"})
     class CGRect extends Structure {
