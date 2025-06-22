@@ -3,9 +3,7 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.MutterInterface;
 import cn.harryh.arkpets.natives.MutterPluginInterface;
-import cn.harryh.arkpets.natives.WaylandHelper;
 import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Pointer;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
 import org.freedesktop.dbus.exceptions.DBusException;
@@ -19,14 +17,11 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MutterHWndCtrl extends HWndCtrl implements WaylandHWnd{
+public class MutterHWndCtrl extends WaylandHWndCtrl {
     protected final UInt32 hWnd;
     protected MutterInterface.DetailsStruct details;
     private static DBusConnection dBusConnection;
     private static MutterInterface dBusInterface;
-
-    private boolean isTransparent;
-    private Pointer surface;
 
     protected MutterHWndCtrl(MutterInterface.DetailsStruct details) {
         super(details.title, new WindowRect(details.y, details.y + details.h.intValue(), details.x, details.x + details.w.intValue()));
@@ -65,14 +60,6 @@ public class MutterHWndCtrl extends HWndCtrl implements WaylandHWnd{
     }
 
     @Override
-    public void setTransparent(boolean enable) {
-        if (isTransparent != enable) {
-            WaylandHelper.setTransparent(surface, enable);
-            isTransparent = enable;
-        }
-    }
-
-    @Override
     public void setTaskbar(boolean enable) {
         dBusInterface.Stick(hWnd, !enable);
     }
@@ -85,10 +72,6 @@ public class MutterHWndCtrl extends HWndCtrl implements WaylandHWnd{
     @Override
     public void sendMouseEvent(MouseEvent msg, int x, int y) {
 
-    }
-
-    public void setSurface(Pointer surface) {
-        this.surface = surface;
     }
 
     protected static void init() {
