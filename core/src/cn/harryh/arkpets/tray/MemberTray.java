@@ -12,8 +12,8 @@ import java.util.UUID;
 
 
 public abstract class MemberTray {
-    protected JMenuItem optKeepAnimEn       = new JMenuItem("行动模式");
-    protected JMenuItem optKeepAnimDis      = new JMenuItem("退出行动");
+    protected JMenuItem optKeepAnimEn       = new JMenuItem("手动模式");
+    protected JMenuItem optKeepAnimDis      = new JMenuItem("退出手动");
     protected JMenuItem optTransparentEn    = new JMenuItem("透明模式");
     protected JMenuItem optTransparentDis   = new JMenuItem("取消透明");
     protected JMenuItem optChangeStage      = new JMenuItem("切换形态");
@@ -22,7 +22,6 @@ public abstract class MemberTray {
     protected final String name;
 
     static {
-        // Avoid AWT Thread problem.
         try {
             String laf = UIManager.getSystemLookAndFeelClassName();
             if (laf.contains("WindowsLookAndFeel")) {

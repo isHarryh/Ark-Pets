@@ -143,7 +143,7 @@ public class MemberTrayImpl extends MemberTray {
 
     @Override
     public void onKeepAnimDis() {
-        Logger.info("MemberTray", "Keep-Anim disabled");
+        Logger.info("MemberTray", "Action-Mode disabled");
         keepAnim = null;
         popMenu.remove(optKeepAnimDis);
         popMenu.add(optKeepAnimEn, 1);

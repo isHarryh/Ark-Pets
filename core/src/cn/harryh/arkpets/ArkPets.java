@@ -11,10 +11,7 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
-import cn.harryh.arkpets.utils.Cached;
-import cn.harryh.arkpets.utils.InputApplicationAdaptor;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Plane;
+import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
@@ -52,29 +49,13 @@ public class ArkPets extends InputApplicationAdaptor {
     public ArkPets(String title) {
         APP_TITLE = title;
 
-        hWndTopmostGetter = new Cached<>() {
-            @Override
-            protected HWndCtrl produce() {
-                return refreshWindowIndex();
-            }
+        hWndTopmostGetter = new Cached<>();
+        hWndTopmostGetter.setValueProducer(this::refreshWindowIndex);
+        hWndTopmostGetter.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
 
-            @Override
-            protected double cacheAge() {
-                return 4.0 / getReducedFPS();
-            }
-        };
-
-        isFocused = new Cached<>() {
-            @Override
-            protected Boolean produce() {
-                return hWndMine.isForeground();
-            }
-
-            @Override
-            protected double cacheAge() {
-                return 4.0 / getReducedFPS();
-            }
-        };
+        isFocused = new Cached<>();
+        isFocused.setValueProducer(() -> hWndMine.isForeground());
+        isFocused.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
     }
 
     @Override
@@ -103,10 +84,10 @@ public class ArkPets extends InputApplicationAdaptor {
         plane.setFrict(config.physic_air_friction_acc, config.physic_static_friction_acc);
         plane.setObjSize(cha.camera.getWidth(), cha.camera.getHeight());
         plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
-        ArkConfig.Monitor primaryMonitor = refreshMonitorInfo();
+        Monitor primaryMonitor = refreshMonitorInfo();
         plane.changePosition(0,
-                primaryMonitor.size[0] * config.initial_position_x - cha.camera.getWidth() / 2f,
-                -(primaryMonitor.size[1] * config.initial_position_y + cha.camera.getHeight())
+                primaryMonitor.getWidth() * config.initial_position_x - cha.camera.getWidth() / 2f,
+                -(primaryMonitor.getHeight() * config.initial_position_y + cha.camera.getHeight())
         );
 
         // 4.Window position setup
@@ -139,19 +120,28 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 2.Select a new animation.
         AnimData newAnim;
-        if (tray.keepAnim == null) newAnim = behavior.autoAnim(); // AI anim.
-        else newAnim = tray.keepAnim;
+        if (tray.keepAnim == null) {
+            if (behavior.isAutoAnimExpired()) {
+                newAnim = behavior.autoAnim(); // AI anim.
+            } else {
+                newAnim = null;
+            }
+        } else {
+            newAnim = tray.keepAnim;
+        }
+
         if (!isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
-                if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
+                int mobility = cha.getPlaying().mobility();
+                if (tray.keepAnim == null && willReachBorder(mobility)) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
-                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
+                    mobility = -mobility;
+                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), mobility);
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                float fac = isCtrlPressed() ? 1.85f : 0.85f;
-                walkWindow(fac * cha.getPlaying().mobility());
+                walkWindow(config.behavior_walk_speed * (isCtrlPressed() ? 2 : 1) * mobility);
             }
         } else { // If dragging:
             newAnim = behavior.dragging();
@@ -172,7 +162,9 @@ public class ArkPets extends InputApplicationAdaptor {
         updateWindow();
 
         // 4.Outline.
-        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(config.render_outline)) {
+        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(
+                tray.keepAnim != null ? config.render_outline_emphasis : config.render_outline
+        )) {
             case ALWAYS -> true;
             case PRESSING -> isMouseDown();
             case FOCUSED -> isFocused.getValue();
@@ -180,6 +172,9 @@ public class ArkPets extends InputApplicationAdaptor {
             default -> false;
         };
         cha.setOutlineAlpha(renderOutline ? 1f : 0f);
+        cha.setOutlineColor(ArkConfig.getGdxColorFrom(
+                tray.keepAnim != null ? config.render_outline_emphasis_color : config.render_outline_color
+        ));
     }
 
     @Override
@@ -429,45 +424,42 @@ public class ArkPets extends InputApplicationAdaptor {
         return config.window_style_topmost ? minWindow : null; // Return the last peer window.
     }
 
-    private ArkConfig.Monitor refreshMonitorInfo() {
-        ArkConfig.Monitor[] monitors = ArkConfig.Monitor.getMonitors();
-        if (monitors.length == 0) {
+    private Monitor refreshMonitorInfo() {
+        List<Monitor> monitors = Monitor.getMonitors();
+        if (monitors.isEmpty()) {
             Logger.error("App", "Failed to get monitors information since no monitor has been found");
             throw new RuntimeException("Failed to refresh monitors config.");
         }
         plane.world.clear();
         boolean flag = true;
-        for (ArkConfig.Monitor i : monitors) {
+        for (Monitor m : monitors) {
             if (!flag) break;
             flag = config.display_multi_monitors;
-            float left = i.virtual[0];
-            float right = left + i.size[0];
-            float top = -i.virtual[1];
-            float bottom = top - i.size[1] + config.display_margin_bottom;
+            float left = m.getVirtualX();
+            float right = left + m.getWidth();
+            float top = -m.getVirtualY();
+            float bottom = top - m.getHeight() + config.display_margin_bottom;
             plane.world.add(new Plane.RectArea(left, right, top, bottom));
         }
-        return monitors[0];
+        return monitors.get(0); // Return the primary monitor.
     }
 
     /* WINDOW WALKING RELATED */
-    private void walkWindow(float len) {
-        float expectedLen = len * config.display_scale * (30f / config.display_fps);
-        int realLen = randomRound(expectedLen);
-        float newPlaneX = plane.getX() + realLen;
-        plane.changePosition(Gdx.graphics.getDeltaTime(), newPlaneX, plane.getY());
+    private void walkWindow(float speed) {
+        float distance = speed * config.display_scale * Gdx.graphics.getDeltaTime();
+        int bias = Math.abs(distance - (int) distance) >= Math.random() ? (int) Math.signum(distance) : 0;
+        int intDistance = (int) distance + bias;
+        plane.changePosition(Gdx.graphics.getDeltaTime(), plane.getX() + intDistance, plane.getY());
     }
 
-    private int randomRound(float val) {
-        int integer = (int) val;
-        float decimal = val - integer;
-        int offset = Math.abs(decimal) >= Math.random() ? (val >= 0 ? 1 : -1) : 0;
-        return integer + offset;
-    }
-
-    private boolean willReachBorder(float len) {
-        if (plane == null) return false;
-        return (plane.getX() >= plane.borderRight() - cha.camera.getWidth() && len > 0) ||
-                (plane.getX() <= plane.borderLeft() && len < 0);
+    private boolean willReachBorder(float speed) {
+        if (plane == null)
+            return false;
+        if (speed > 0)
+            return plane.getX() >= plane.borderRight() - cha.camera.getWidth();
+        if (speed < 0)
+            return plane.getX() <= plane.borderLeft();
+        return false;
     }
 
 

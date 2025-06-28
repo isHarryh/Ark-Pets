@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  */
 public final class Const {
     // App version
-    public static final Version appVersion              = new Version(3, 8, 0);
+    public static final Version appVersion              = new Version(3, 9, 2);
     public static final Version datasetLowestVersion    = new Version(2, 2, 0);
 
     // App name
@@ -110,15 +110,11 @@ public final class Const {
         public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
         public static final String urlReadme        = "https://github.com/isHarryh/Ark-Pets#readme";
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
-        public static final String urlModelsZip     = "isHarryh/Ark-Models/archive/refs/heads/main.zip";
-        public static final String urlModelsData    = "isHarryh/Ark-Models/main/models_data.json";
+        public static final String urlMirrorChyan   = "https://mirrorchyan.com/?source=" + appName + "Gui";
         public static final String tempDirPath      = "temp/";
         public static final String fileModelsZipName            = "ArkModels";
         public static final String fileModelsDataPath           = "models_data.json";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
-        public static final String tempModelsZipCachePath       = tempDirPath + fileModelsZipName + ".zip";
-        public static final String tempQueryVersionCachePath    = tempDirPath + "ApiQueryVersionCache";
-        public static final String tempQueryAnnounceCachePath   = tempDirPath + "ApiQueryAnnounceCache";
     }
 
 

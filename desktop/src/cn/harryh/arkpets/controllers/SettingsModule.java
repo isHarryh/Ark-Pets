@@ -6,23 +6,30 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.concurrent.SocketData;
+import cn.harryh.arkpets.guitasks.AppInstallTask;
 import cn.harryh.arkpets.guitasks.CheckEnvironmentTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.envchecker.EnvCheckTask;
 import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
-import cn.harryh.arkpets.network.NetworkUtils;
+import cn.harryh.arkpets.guitasks.requests.DownloadAppTask;
+import cn.harryh.arkpets.guitasks.requests.McCheckAppUpdateTask;
+import cn.harryh.arkpets.network.SourceStrategy;
+import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.startup.StartupConfig;
-import cn.harryh.arkpets.utils.ArgPending;
-import cn.harryh.arkpets.utils.GuiComponents;
+import cn.harryh.arkpets.tray.HostTray;
+import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.Logger;
+import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -66,7 +73,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
+    @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
     @FXML
     private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
     @FXML
@@ -97,10 +108,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton exportLog;
     @FXML
-    private JFXTextField configNetworkAgent;
-    @FXML
-    private Label configNetworkAgentStatus;
-    @FXML
     private JFXCheckBox configAutoStartup;
     @FXML
     private JFXCheckBox configSolidExit;
@@ -116,6 +123,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXButton configWindowSystemHelp;
     @FXML
     private Label runEnvCheck;
+    @FXML
+    private JFXTextField configNetworkSource;
+    @FXML
+    private JFXTextField configNetworkProxy;
+    @FXML
+    private Label configNetworkProxyStatus;
+
     @FXML
     private Label aboutQueryUpdate;
     @FXML
@@ -140,6 +154,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initConfigDisplay();
         initConfigRendering();
         initConfigAdvanced();
+        initNetwork();
         initAbout();
         initScheduledListener();
 
@@ -228,12 +243,32 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_outline = newValue.value();
                     app.config.save();
                 });
+        new ComboBoxSetup<>(configRenderOutlineEmphasis).setItems(new NamedItem<>("始终开启", ArkConfig.RenderOutline.ALWAYS.ordinal()),
+                        new NamedItem<>("处于前台时", ArkConfig.RenderOutline.FOCUSED.ordinal()),
+                        new NamedItem<>("点击时", ArkConfig.RenderOutline.PRESSING.ordinal()),
+                        new NamedItem<>("拖拽时", ArkConfig.RenderOutline.DRAGGING.ordinal()),
+                        new NamedItem<>("关闭", ArkConfig.RenderOutline.NEVER.ordinal()))
+                .selectValue(app.config.render_outline_emphasis, "未知")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_outline_emphasis = newValue.value();
+                    app.config.save();
+                });
         new ComboBoxSetup<>(configRenderOutlineColor).setItems(new NamedItem<>("黄色", 0xFFFF00FF),
+                        new NamedItem<>("橙色", 0xFFBB00FF),
                         new NamedItem<>("白色", 0xFFFFFFFF),
                         new NamedItem<>("青色", 0x00FFFFFF))
                 .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_outline_color)), app.config.render_outline_color + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.render_outline_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
+        new ComboBoxSetup<>(configRenderOutlineColorEmphasis).setItems(new NamedItem<>("黄色", 0xFFFF00FF),
+                        new NamedItem<>("橙色", 0xFFBB00FF),
+                        new NamedItem<>("白色", 0xFFFFFFFF),
+                        new NamedItem<>("青色", 0x00FFFFFF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_outline_emphasis_color)), app.config.render_outline_emphasis_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_outline_emphasis_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
         new ComboBoxSetup<>(configRenderOutlineWidth).setItems(new NamedItem<>("极细", 1f),
@@ -352,29 +387,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         configLoggingLevel.getSelectionModel().select(level);
 
         exportLog.setOnMouseClicked(e -> app.dialogs.popDialog("logDialog"));
-
-        configNetworkAgent.setPromptText("示例：0.0.0.0:0");
-        configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) {
-                configNetworkAgentStatus.setText("未使用代理");
-                configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
-                Logger.info("Network", "Set proxy to none");
-                NetworkUtils.setProxy("", "");
-            } else {
-                if (ipPortRegex.matcher(newValue).matches()) {
-                    String[] ipPort = newValue.split(":");
-                    NetworkUtils.setProxy(ipPort[0], ipPort[1]);
-                    configNetworkAgentStatus.setText("代理生效中");
-                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
-                    Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
-                } else {
-                    configNetworkAgentStatus.setText("输入不合法");
-                    configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_DANGER);
-                }
-            }
-        });
-        configNetworkAgentStatus.setText("未使用代理");
-        configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
 
         StartupConfig startup = StartupConfig.getInstance();
         configAutoStartup.setSelected(startup.isSetStartup());
@@ -510,14 +522,94 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         return content;
     }
 
-    private void initAbout() {
-        aboutQueryUpdate.setOnMouseClicked  (e -> {
-            /* Foreground check app update */
-            new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual").start();
+    private void initNetwork() {
+        BooleanProperty isMc = ((DownloadDialog) app.dialogs.getDialogController("downloadDialog")).getIsMcProperty();
+        isMc.addListener(observable -> configNetworkSource.setText(isMc.get() ? "Mirror 酱" : "公共源"));
+        configNetworkSource.setText(isMc.get() ? "Mirror 酱" : "公共源");
+        configNetworkSource.setEditable(false);
+        configNetworkSource.setCursor(Cursor.HAND);
+        configNetworkSource.setOnMouseClicked(e -> app.dialogs.popDialog("downloadDialog"));
+        configNetworkSource.setOnKeyPressed(e -> app.dialogs.popDialog("downloadDialog"));
+
+        configNetworkProxy.setPromptText("示例：0.0.0.0:0");
+        configNetworkProxy.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                configNetworkProxyStatus.setText("未使用代理");
+                configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
+                Logger.info("Network", "Set proxy to none");
+                setProxy("", "");
+            } else {
+                if (ipPortRegex.matcher(newValue).matches()) {
+                    String[] ipPort = newValue.split(":");
+                    setProxy(ipPort[0], ipPort[1]);
+                    configNetworkProxyStatus.setText("代理生效中");
+                    configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
+                    Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
+                } else {
+                    configNetworkProxyStatus.setText("输入不合法");
+                    configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_DANGER);
+                }
+            }
         });
-        aboutVisitWebsite.setOnMouseClicked (e -> app.popBrowser(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlLicense));
+        configNetworkProxyStatus.setText("未使用代理");
+        configNetworkProxyStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
+    }
+
+    private void initAbout() {
+        aboutQueryUpdate.setOnMouseClicked(e -> {
+            /* Foreground check app update */
+            new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual") {
+                @Override
+                protected void onHasNewStableVersion(Version stableVersion) {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    JFXDialog dialog = GuiPrefabs.Dialogs.createConfirmDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
+                            "检查软件更新",
+                            "检测到软件有新的版本！",
+                            "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n是否要现在进行更新？",
+                            () -> executeAppUpdate());
+                    JFXButton gotoButton = new JFXButton("访问官网");
+                    gotoButton.setOnAction(e -> app.popBrowser(PathConfig.urlDownload));
+                    GuiPrefabs.Dialogs.attachAction(dialog, gotoButton, 0);
+                    dialog.show();
+                }
+
+                @Override
+                protected void onUpToDated(Version stableVersion) {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    JFXDialog dialog = GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                            "检查软件更新",
+                            "尚未发现新的正式版本。",
+                            "当前版本 " + appVersion + " 已是最新",
+                            null);
+                    JFXButton forceBtn = new JFXButton("强制重装");
+                    forceBtn.setOnAction(e -> {
+                        executeAppUpdate();
+                        GuiPrefabs.Dialogs.disposeDialog(dialog);
+                    });
+                    GuiPrefabs.Dialogs.attachAction(dialog, forceBtn, 0);
+                    dialog.show();
+                }
+
+                @Override
+                protected void onAPIFailed() {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    GuiPrefabs.Dialogs.createCommonDialog(parent,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER),
+                            "检查软件更新",
+                            "服务器返回了无效的消息。",
+                            "可能是兼容性问题或服务器不可用。\n您可以访问ArkPets官网或GitHub仓库以查看是否有新版本。",
+                            null).show();
+                }
+            }.start();
+        });
+        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlReadme));
+        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlLicense));
     }
 
     private void initNoticeBox() {
@@ -539,12 +631,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected String getText() {
-                return "ArkPets 有新版本可用！点击此处前往下载~";
+                return "ArkPets 有新版本可用！点击此处进行更新~";
             }
 
             @Override
             protected void onClick(MouseEvent event) {
-                app.popBrowser(Const.PathConfig.urlDownload);
+                executeAppUpdate();
             }
         };
         diskFreeSpaceNotice = new NoticeBar(noticeBox) {
@@ -606,10 +698,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
                     @Override
                     protected String getContent() {
-                        int maxHz = -1;
-                        for (ArkConfig.Monitor i : ArkConfig.Monitor.getMonitors())
-                            if (i.hz > maxHz)
-                                maxHz = i.hz;
+                        int maxHz = Monitor.getMaxRefreshRate();
                         return "您设置的最大帧率超过了您的显示器的最大刷新率（" + maxHz + " Hz），因此实际帧率并不会得到提高。";
                     }
                 };
@@ -619,10 +708,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             protected boolean getEntranceVisibleCondition() {
                 int configHz = configDisplayFps.getValue() == null ?
                         app.config.display_fps : configDisplayFps.getValue().value();
-                int maxHz = -1;
-                for (ArkConfig.Monitor i : ArkConfig.Monitor.getMonitors())
-                    if (i.hz > maxHz)
-                        maxHz = i.hz;
+                int maxHz = Monitor.getMaxRefreshRate();
                 return configHz > maxHz;
             }
         };
@@ -651,5 +737,76 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private void assertDownloadSource(boolean doDoubleCheck, Runnable onDone) {
+        SourceStrategy.getStrategy("AppDownload").clearPrimarySource();
+        String cdk;
+        if ((cdk = app.config.getMcCdk()) != null) {
+            Logger.debug("Updater", "Attempting using CDK to fetch resource");
+            new McCheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.STRICT, cdk) {
+                @Override
+                protected void onReceivedData(JSONObject json) {
+                    McQueryVersion value = json.toJavaObject(McQueryVersion.class);
+                    try {
+                        value.raiseForCode();
+                        SourceStrategy.getStrategy("AppDownload").setPrimarySource("MirrorChyan", value.data.url);
+
+                        Logger.info("Updater", "CDK assertion passed");
+                        if (onDone != null)
+                            onDone.run();
+                    } catch (McQueryVersion.McException e) {
+                        Logger.warn("Updater", "CDK assertion not passed, " + e.getMessage());
+                        if (doDoubleCheck)
+                            app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+                        else if (onDone != null)
+                            onDone.run();
+                    }
+                }
+            }.start();
+        } else {
+            Logger.info("Updater", "CDK assertion not passed due to not set");
+            if (doDoubleCheck)
+                app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+            else if (onDone != null)
+                onDone.run();
+        }
+    }
+
+    private void executeAppUpdate() {
+        if (!StartupConfig.getInstance().isAutoUpdateAvailable()) {
+            // Maybe the user is not an installer user
+            Logger.warn("Updater", "Maybe auto update is not available");
+            GuiPrefabs.Dialogs.createConfirmDialog(app.body,
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
+                    "自动更新不可用",
+                    "请您手动下载新版程序文件并进行安装",
+                    "您使用的似乎不是安装包版本的 ArkPets，或者您的系统环境存在限制，所以无法自动更新哦~ 是否前往 ArkPets 官网下载？",
+                    () -> app.popBrowser(PathConfig.urlDownload)).show();
+        } else {
+            assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+                @Override
+                protected void onDownloadedFile(File file) {
+                    Logger.info("Updater", "Closing all core instances");
+                    HostTray.getInstance().forEachMemberTray(memberTray -> memberTray.sendOperation(SocketData.Operation.LOGOUT));
+
+                    Logger.info("Updater", "Starting update task");
+                    new AppInstallTask(app.body, GuiTaskStyle.COMMON, file) {
+                        @Override
+                        protected void onSucceeded(boolean result) {
+                            Logger.info("Launcher", "Updater close request");
+                            GuiPrefabs.fadeOutWindow(app.stage, durationNormal, e -> Platform.exit());
+                        }
+                    }.start();
+                }
+            }.start());
+        }
+    }
+
+    private static void setProxy(String host, String port) {
+        System.setProperty("http.proxyHost", host);
+        System.setProperty("http.proxyPort", port);
+        System.setProperty("https.proxyHost", host);
+        System.setProperty("https.proxyPort", port);
     }
 }

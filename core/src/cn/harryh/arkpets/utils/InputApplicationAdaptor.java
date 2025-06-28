@@ -17,7 +17,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     private int mouseDeltaX = 0;
     private int mouseDeltaY = 0;
     private int mouseButton = 0;
-    private int mouseIntention = 0;
+    private int mouseIntention = 1;
     private boolean isMouseDragging = false;
     private boolean isMouseDown = false;
 

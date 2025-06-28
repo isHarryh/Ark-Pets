@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Copyright (c) 2022-2025, Harry Huang
+    At GPL-3.0 License
+-->
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.text.Font?>
+<?import java.lang.String?>
+<AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0" styleClass="wrapper" stylesheets="@Main.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="cn.harryh.arkpets.controllers.DownloadDialog">
+    <HBox spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0"
+          AnchorPane.topAnchor="-15.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <Pane visible="false" HBox.hgrow="ALWAYS"/>
+        <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="50.0" prefWidth="355.0"
+              styleClass="tool-bar-mask">
+            <Label text="请选择下载源：">
+                <font>
+                    <Font name="System Bold" size="18.0"/>
+                </font>
+            </Label>
+            <Label text="您希望从哪个渠道下载资源？"/>
+        </VBox>
+    </HBox>
+    <HBox prefHeight="50.0" prefWidth="125.0" styleClass="dialog-title-bar" AnchorPane.leftAnchor="-25.0"
+          AnchorPane.topAnchor="-25.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <JFXButton fx:id="dialogReturn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="32.0" prefWidth="32.0" text=" ">
+            <graphic>
+                <AnchorPane prefHeight="32.0" prefWidth="32.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="m10.978 14.999v3.251c0 .412-.335.75-.752.75-.188 0-.375-.071-.518-.206-1.775-1.685-4.945-4.692-6.396-6.069-.2-.189-.312-.452-.312-.725 0-.274.112-.536.312-.725 1.451-1.377 4.621-4.385 6.396-6.068.143-.136.33-.207.518-.207.417 0 .752.337.752.75v3.251h9.02c.531 0 1.002.47 1.002 1v3.998c0 .53-.471 1-1.002 1z"
+                            scaleX="1.75" scaleY="1.75" translateX="30.0" translateY="-2.5"/>
+                </AnchorPane>
+            </graphic>
+            <styleClass>
+                <String fx:value="btn-plain-light"/>
+                <String fx:value="btn-iconified"/>
+            </styleClass>
+        </JFXButton>
+        <Label styleClass="dialog-title-label" text="下载策略"/>
+    </HBox>
+    <Separator layoutX="272.0" layoutY="130.0" orientation="VERTICAL" prefHeight="225.0"
+               AnchorPane.bottomAnchor="15.0"/>
+    <VBox alignment="TOP_CENTER" layoutX="309.0" layoutY="79.0" prefHeight="235.0" prefWidth="235.0" spacing="5.0"
+          AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0">
+        <padding>
+            <Insets left="5.0" right="5.0"/>
+        </padding>
+        <HBox alignment="TOP_CENTER" spacing="5.0">
+            <Label text="从 Mirror 酱下载" textAlignment="CENTER">
+                <font>
+                    <Font name="System Bold" size="16.0"/>
+                </font>
+            </Label>
+            <Label fx:id="mcIndicator" managed="false" styleClass="info-type-badge" text="当前采用" visible="false">
+            </Label>
+        </HBox>
+        <Label minHeight="75.0"
+               text="Mirror 酱是一个第三方应用分发平台，提供高效的资源下载服务，由用户付费使用，其收益与我们开发者共享。"
+               textAlignment="CENTER" wrapText="true"/>
+        <Label fx:id="mcPurchase" styleClass="config-hyper-link" text="还未拥有 CDK 密钥？点我前往购买！"
+               textAlignment="CENTER" wrapText="true"/>
+        <Pane prefHeight="200.0" prefWidth="200.0"/>
+        <Label minHeight="20.0" text="请输入 Mirror 酱 CDK 密钥："/>
+        <JFXTextField fx:id="mcCdkInput"/>
+        <Pane prefHeight="200.0" prefWidth="200.0"/>
+        <JFXButton fx:id="mcConfirm" mnemonicParsing="false" styleClass="btn-primary" text="肯定是这边厉害"/>
+    </VBox>
+    <VBox alignment="TOP_CENTER" layoutX="41.0" layoutY="130.0" prefHeight="235.0" prefWidth="235.0" spacing="7.5"
+          AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0">
+        <padding>
+            <Insets left="5.0" right="5.0"/>
+        </padding>
+        <HBox alignment="TOP_CENTER" spacing="5.0">
+            <Label text="从公共源下载" textAlignment="CENTER">
+                <font>
+                    <Font name="System Bold" size="16.0"/>
+                </font>
+            </Label>
+            <Label fx:id="psIndicator" managed="false" styleClass="info-type-badge" text="当前采用" visible="false">
+            </Label>
+        </HBox>
+        <Label minHeight="75.0"
+               text="从公共互联网中下载资源是完全免费的，但是连接可能不稳定。下载速度太慢时，您可能需要取消下载并重新尝试。"
+               textAlignment="CENTER" wrapText="true"/>
+        <Pane prefHeight="200.0" prefWidth="200.0"/>
+        <JFXButton fx:id="psConfirm" mnemonicParsing="false" styleClass="btn-primary" text="我寻思这边能行"/>
+    </VBox>
+</AnchorPane>

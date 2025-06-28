@@ -8,6 +8,7 @@ import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
 import cn.harryh.arkpets.network.Connections;
+import cn.harryh.arkpets.network.api.McQueryVersion;
 import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -381,6 +382,9 @@ public class GuiPrefabs {
                         }
                     }
                 }
+            } else if (e instanceof McQueryVersion.McException) {
+                h2.setText("Mirror 酱拒绝了你");
+                h3.setText(e.getLocalizedMessage());
             } else if (e instanceof UnknownHostException) {
                 h2.setText("无法建立神经连接");
                 h3.setText("找不到服务器地址。可能是因为网络未连接或DNS解析失败，请尝试更换网络环境、检查防火墙和代理设置。");

@@ -72,6 +72,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
     private ObservableList<LogItem> coreLogList;
     private ObservableList<LogItem> desktopLogList;
+    private ObservableList<LogItem> jvmCrashLogList;
 
     private ArkHomeFX app;
 
@@ -81,6 +82,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         coreLogList = FXCollections.observableArrayList();
         desktopLogList = FXCollections.observableArrayList();
+        jvmCrashLogList = FXCollections.observableArrayList();
         prepareTable();
         prepareInfoPane();
 
@@ -121,6 +123,11 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
                 new File(logDir),
                 (dir, name) -> name.startsWith("core") && name.endsWith(".log")
         );
+        loadLogFiles(
+                jvmCrashLogList,
+                new File("."),
+                (dir, name) -> name.startsWith("hs_err_pid") && name.endsWith(".log")
+        );
         GuiPrefabs.Tables.autoResizeColumns(logView, 20.0);
         GuiPrefabs.Tables.autoExpandRows(logView);
         logView.refresh();
@@ -153,11 +160,14 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         LogItem coreLogRoot = new LogItem("桌宠日志");
         LogItem desktopLogRoot = new LogItem("启动器日志");
+        LogItem jvmCrashLogRoot = new LogItem("JVM 崩溃日志");
         coreLogRoot.setChildren(coreLogList);
         desktopLogRoot.setChildren(desktopLogList);
+        jvmCrashLogRoot.setChildren(jvmCrashLogList);
+
 
         RecursiveTreeItem<LogItem> root = new RecursiveTreeItem<>(
-                FXCollections.observableArrayList(coreLogRoot, desktopLogRoot),
+                FXCollections.observableArrayList(coreLogRoot, desktopLogRoot, jvmCrashLogRoot),
                 RecursiveTreeObject::getChildren
         );
         root.setExpanded(true);

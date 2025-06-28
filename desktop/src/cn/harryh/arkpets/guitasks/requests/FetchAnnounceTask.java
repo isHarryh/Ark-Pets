@@ -6,10 +6,12 @@ package cn.harryh.arkpets.guitasks.requests;
 import cn.harryh.arkpets.network.api.AppQueryAnnouncement;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.StackPane;
 
+import java.net.URL;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.PathConfig;
@@ -20,7 +22,7 @@ public class FetchAnnounceTask extends FetchAsDataTask {
     private final ObservableList<AnnounceItem> acceptor;
 
     public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceItem> acceptor) {
-        super(parent, style, 16 << 20); // 16 MB
+        super(parent, style);
         this.acceptor = acceptor;
     }
 
@@ -30,8 +32,10 @@ public class FetchAnnounceTask extends FetchAsDataTask {
     }
 
     @Override
-    protected String getRemotePath() {
-        return PathConfig.urlApi + "?type=queryAnnouncement";
+    protected URL getTargetURL() {
+        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
+                .addQuery("type", "queryAnnouncement")
+                .toURL();
     }
 
     @Override

@@ -10,6 +10,8 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.httpBufferSizeDefault;
 import static cn.harryh.arkpets.Const.httpTimeoutDefault;
@@ -84,8 +86,8 @@ public class Connections {
             int len;
             byte[] bytes = new byte[httpBufferSizeDefault];
             while ((len = bis.read(bytes)) != -1) {
-                bos.write(bytes, 0, len);
                 recorder.receive(len);
+                bos.write(bytes, 0, len);
             }
             bos.flush();
         }
@@ -118,6 +120,29 @@ public class Connections {
        throw new HttpStatusCodeException(connection);
     }
 
+    /** Extracts the suggested download file name from the response header.
+     * @param connection The connection instance to extract file name.
+     * @return The suggested file name, or {@code null} if not found.
+     */
+    public static String extractDownloadFilename(HttpURLConnection connection) {
+        String disposition = connection.getHeaderField("Content-Disposition");
+        if (disposition != null) {
+            Matcher m = Pattern.compile("filename=\"?([^\"]+)\"?").matcher(disposition);
+            return m.find() ? m.group(1) : null;
+        }
+        return null;
+    }
+
+    /** Extracts the suggested download file name from the response header, or returns a default value if not found.
+     * @param connection The connection instance to extract file name.
+     * @param defaultValue The default value to return if no file name is found.
+     * @return The suggested file name, or the given default value if not found.
+     */
+    public static String extractDownloadFilename(HttpURLConnection connection, String defaultValue) {
+        String fileName = extractDownloadFilename(connection);
+        return fileName != null && !fileName.isBlank() ? fileName : defaultValue;
+    }
+
     private static InputStream getInputStreamOrErrorStream(HttpURLConnection connection) {
         try {
             return connection.getInputStream();
@@ -141,30 +166,15 @@ public class Connections {
             if (bufferSize <= 0 || maxRecords <= 0)
                 throw new IllegalArgumentException("bufferSize and maxRecords should be positive.");
 
-            this.bufferNanoTimes = new long[maxRecords];
             this.bufferSize = bufferSize;
-            this.cachedBps = new Cached<>() {
-                @Override
-                protected String produce() {
-                    return StringUtils.getFormattedSizeString(getBytesPerSecond());
-                }
+            bufferNanoTimes = new long[maxRecords];
 
-                @Override
-                protected double cacheAge() {
-                    return bpsCacheAge;
-                }
-            };
-            this.cachedTb = new Cached<>() {
-                @Override
-                protected String produce() {
-                    return StringUtils.getFormattedSizeString(getTotalBytes());
-                }
-
-                @Override
-                protected double cacheAge() {
-                    return tbCacheAge;
-                }
-            };
+            cachedBps = new Cached<>();
+            cachedBps.setValueProducer(() -> StringUtils.getFormattedSizeString(getBytesPerSecond()));
+            cachedBps.setCacheAge(bpsCacheAge);
+            cachedTb = new Cached<>();
+            cachedTb.setValueProducer(() -> StringUtils.getFormattedSizeString(getTotalBytes()));
+            cachedTb.setCacheAge(tbCacheAge);
         }
 
         public Recorder() {

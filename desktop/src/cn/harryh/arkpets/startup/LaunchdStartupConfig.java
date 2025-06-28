@@ -67,4 +67,9 @@ public class LaunchdStartupConfig extends StartupConfig{
     public boolean isStartupAvailable() {
         return this.available;
     }
+
+    @Override
+    public boolean isAutoUpdateAvailable() {
+        return false; // WIP
+    }
 }

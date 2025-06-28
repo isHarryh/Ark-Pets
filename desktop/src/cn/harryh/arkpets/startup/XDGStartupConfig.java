@@ -71,4 +71,9 @@ public class XDGStartupConfig extends StartupConfig {
     public boolean isStartupAvailable() {
         return this.available;
     }
+
+    @Override
+    public boolean isAutoUpdateAvailable() {
+        return false; // WIP
+    }
 }

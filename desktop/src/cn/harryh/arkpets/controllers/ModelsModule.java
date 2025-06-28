@@ -8,8 +8,11 @@ import cn.harryh.arkpets.assets.ModelItem;
 import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
-import cn.harryh.arkpets.guitasks.requests.CheckModelUpdateTask;
+import cn.harryh.arkpets.guitasks.requests.DownloadModelDatasetTask;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
+import cn.harryh.arkpets.guitasks.requests.McCheckModelsUpdateTask;
+import cn.harryh.arkpets.network.SourceStrategy;
+import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
@@ -326,7 +329,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         EventHandler<ActionEvent> modelFetchEventHandler = e -> {
             /* Foreground fetch models */
             // Go to [Step 1/3]:
-            new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+            DownloadModelsTask task = new DownloadModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override
                 protected void onDownloadedFile(File file) {
                     // Go to [Step 2/3]:
@@ -348,14 +351,28 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                         }
                     }.start();
                 }
-            }.start();
+            };
+
+            assertDownloadSource(true, task::start);
         };
 
         modelUpdate.setOnAction(e -> {
             /* Foreground check models update */
             if (!app.modelsModule.initModelsDataset(true))
                 return;
-            new CheckModelUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON).start();
+            Logger.info("ModelManager", "Attempting checking model repo update by MirrorChyan");
+            checkModelUpdateByMc(() -> {
+                Logger.info("ModelManager", "Attempting checking model repo update by dataset file");
+                checkModelUpdateByDataset(() -> {
+                    Logger.error("ModelManager", "All approaches to check model repo update failed");
+                    GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER),
+                            "检查模型更新",
+                            "尝试了两种渠道都未能检查更新",
+                            "这可能是网络原因导致的，详情参见日志。",
+                            null).show();
+                });
+            });
         });
 
         modelFetch.setOnAction(modelFetchEventHandler);
@@ -693,6 +710,110 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         } else {
             // Loaded:
             return true;
+        }
+    }
+
+    private void assertDownloadSource(boolean doDoubleCheck, Runnable onDone) {
+        SourceStrategy.getStrategy("ModelDownload").clearPrimarySource();
+        String cdk;
+        if ((cdk = app.config.getMcCdk()) != null) {
+            Logger.debug("ModelManager", "Attempting using CDK to fetch resource");
+            new McCheckModelsUpdateTask(app.body, GuiTask.GuiTaskStyle.STRICT, cdk) {
+                @Override
+                protected void onReceivedData(JSONObject json) {
+                    McQueryVersion value = json.toJavaObject(McQueryVersion.class);
+                    try {
+                        value.raiseForCode();
+                        SourceStrategy.getStrategy("ModelDownload").setPrimarySource("MirrorChyan", value.data.url);
+
+                        Logger.info("ModelManager", "CDK assertion passed");
+                        if (onDone != null)
+                            onDone.run();
+                    } catch (McQueryVersion.McException e) {
+                        Logger.warn("ModelManager", "CDK assertion not passed, " + e.getMessage());
+                        if (doDoubleCheck)
+                            app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+                        else if (onDone != null)
+                            onDone.run();
+                    }
+                }
+            }.start();
+        } else {
+            Logger.info("ModelManager", "CDK assertion not passed due to not set");
+            if (doDoubleCheck)
+                app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+            else if (onDone != null)
+                onDone.run();
+        }
+    }
+
+    private void checkModelUpdateByMc(Runnable onFail) {
+        new McCheckModelsUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "") {
+            @Override
+            protected void onReceivedData(JSONObject json) {
+                McQueryVersion value = json.toJavaObject(McQueryVersion.class);
+                try {
+                    value.raiseForCode();
+                    checkModelUpdateByMD5(value.data.version_name);
+                } catch (McQueryVersion.McException | IOException e) {
+                    this.onFailed(e);
+                }
+            }
+
+            @Override
+            protected void onFailed(Throwable e) {
+                Logger.error("ModelManager", "Model repo version check (mc) failed, details see below.", e);
+                if (onFail != null)
+                    onFail.run();
+            }
+        }.start();
+    }
+
+    private void checkModelUpdateByDataset(Runnable onFail) {
+        new DownloadModelDatasetTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+            @Override
+            protected void onDownloadedFile(File file) {
+                try {
+                    String remoteMD5 = IOUtils.FileUtil.getMD5(file);
+                    checkModelUpdateByMD5(remoteMD5);
+                } catch (IOException e) {
+                    this.onFailed(e);
+                }
+            }
+
+            @Override
+            protected void onFailed(Throwable e) {
+                Logger.error("ModelManager", "Model repo version check (dataset) failed, details see below.", e);
+                if (onFail != null)
+                    onFail.run();
+            }
+        }.start();
+    }
+
+    private void checkModelUpdateByMD5(String remoteMD5) throws IOException {
+        if (!app.modelsModule.initModelsDataset(true))
+            return;
+        // Compare the remote models dataset and the local models dataset by their MD5
+        String localMD5 = IOUtils.FileUtil.getMD5(new File(PathConfig.fileModelsDataPath));
+        String detail = "本地摘要值：" + localMD5 + "\n远程摘要值：" + remoteMD5;
+        if (localMD5.equals(remoteMD5)) {
+            // Same result: no update
+            Logger.info("ModelManager", "Model repo version check finished (up-to-dated)");
+            GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                    "检查模型更新",
+                    "无需进行模型库更新",
+                    "本地模型库的版本与远程模型库的一致。",
+                    "提示：远程模型库的版本不一定和游戏官方同步更新。\n\n" + detail).show();
+        } else {
+            // Different result: has update
+            GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
+                    "检查模型更新",
+                    "模型库似乎有更新！",
+                    "您可以 [重新下载] 模型，以更新模型库版本。",
+                    detail).show();
+            Logger.info("ModelManager", "Model repo version check finished (not up-to-dated)");
         }
     }
 }

@@ -4,14 +4,18 @@
 package cn.harryh.arkpets.utils;
 
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import static java.time.Duration.between;
 
@@ -122,5 +126,107 @@ public class StringUtils {
         while (matcher.find() && matcher.start() != matcher.end())
             count++;
         return count;
+    }
+
+
+    public static class URLStringBuilder implements CharSequence {
+        private static final int MAX_LENGTH = 4096;
+        private static final int MAX_QUERY_COUNT = 2048;
+
+        private final String url;
+        private final LinkedHashMap<String, String> params;
+        private String buildCache;
+
+        /** Initializes a builder for URL string building.
+         * @param baseUrl The base URL string.
+         */
+        public URLStringBuilder(String baseUrl) {
+            if (baseUrl == null || baseUrl.isEmpty())
+                throw new IllegalArgumentException("Base URL cannot be null or empty");
+            url = baseUrl;
+            params = new LinkedHashMap<>(8);
+            buildCache = null;
+        }
+
+        /** Adds a query parameter to the URL string being built.
+         * @param key The query parameter key, cannot be {@code null} or empty.
+         * @param value The query parameter value, can be {@code null} or empty.
+         * @return The current {@link URLStringBuilder} instance for method chaining.
+         */
+        public URLStringBuilder addQuery(String key, String value) {
+            if (key == null || key.isEmpty())
+                throw new IllegalArgumentException("Query key cannot be null or empty");
+            params.put(key, value == null ? "" : value);
+            buildCache = null;
+            if (params.size() > MAX_QUERY_COUNT)
+                throw new RuntimeException("Too many query parameters appended");
+            return this;
+        }
+
+        /** Returns the constructed URL with query parameters appended if present.
+         * @return The complete URL.
+         */
+        public URL toURL() {
+            try {
+                return new URL(toString());
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid URL format: " + this, e);
+            }
+        }
+
+        /** Returns the constructed URL string with query parameters appended if present.
+         * @return The complete URL string.
+         */
+        @Override
+        public String toString() {
+            if (buildCache == null) {
+                if (params.isEmpty()) {
+                    buildCache = url;
+                } else {
+                    StringBuilder sb = new StringBuilder(url);
+                    int i = 0;
+                    for (Map.Entry<String, String> entry : params.entrySet()) {
+                        sb.append(i++ == 0 ? '?' : '&');
+                        sb.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+                        sb.append('=');
+                        sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+                    }
+                    buildCache = sb.toString();
+                }
+            }
+            if (buildCache.length() > MAX_LENGTH)
+                throw new RuntimeException("Constructed URL exceeds max length limit");
+            return buildCache;
+        }
+
+        @Override
+        public int length() {
+            return toString().length();
+        }
+
+        @Override
+        public char charAt(int index) {
+            return toString().charAt(index);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return toString().isEmpty();
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return toString().subSequence(start, end);
+        }
+
+        @Override
+        public IntStream chars() {
+            return toString().codePoints();
+        }
+
+        @Override
+        public IntStream codePoints() {
+            return toString().codePoints();
+        }
     }
 }

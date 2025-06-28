@@ -12,17 +12,17 @@ import java.net.URL;
 import static cn.harryh.arkpets.Const.PathConfig;
 
 
-public class DownloadModelsTask extends FetchAsFileTask {
+public class DownloadAppTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
-    public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
+    public DownloadAppTask(StackPane parent, GuiTaskStyle style) {
         super(parent, style, PathConfig.tempDirPath);
         selectedSource = null;
     }
 
     @Override
     protected String getHeader() {
-        return "正在下载模型资源文件...";
+        return "正在下载安装包...";
     }
 
     @Override
@@ -39,7 +39,7 @@ public class DownloadModelsTask extends FetchAsFileTask {
 
     @Override
     protected URL getTargetURL() {
-        selectedSource = SourceStrategy.getStrategy("ModelDownload").getBestSource();
+        selectedSource = SourceStrategy.getStrategy("AppDownload").getBestSource();
         return selectedSource.toURL();
     }
 

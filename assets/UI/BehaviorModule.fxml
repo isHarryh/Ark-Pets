@@ -34,6 +34,11 @@
                     <JFXSlider fx:id="configBehaviorAiActivation"/>
                     <Label fx:id="configBehaviorAiActivationValue" text="0"/>
                 </HBox>
+                <HBox>
+                    <Label text="行走速度"/>
+                    <JFXSlider fx:id="configBehaviorWalkSpeed"/>
+                    <Label fx:id="configBehaviorSpeedWalkValue" text="0"/>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="交互"/>
                 <HBox>

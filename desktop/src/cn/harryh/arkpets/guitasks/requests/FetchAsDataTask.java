@@ -4,9 +4,7 @@
 package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.network.Connections;
-import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONException;
@@ -25,26 +23,23 @@ import java.util.Objects;
 /** The task fetches the given remote content and parses it as JSON API response data.
  * @implNote Implement the {@link #onReceivedData(JSONObject)} to retrieve the downloaded data.
  */
-abstract public class FetchAsDataTask extends GuiTask {
+abstract public class FetchAsDataTask extends FetchTask {
     private final ByteArrayOutputStream response;
-    private final long contentLengthLimit;
     private final int[] forgiveCodes;
 
     public FetchAsDataTask(StackPane parent, GuiTaskStyle style, long contentLengthLimit, int[] forgiveCodes) {
-        super(parent, style);
+        super(parent, style, contentLengthLimit);
         this.response = new ByteArrayOutputStream();
-        this.contentLengthLimit = contentLengthLimit;
         this.forgiveCodes = forgiveCodes;
     }
 
-    public FetchAsDataTask(StackPane parent, GuiTaskStyle style, long contentLengthLimit) {
-        this(parent, style, contentLengthLimit, new int[0]);
+    public FetchAsDataTask(StackPane parent, GuiTaskStyle style, int[] forgiveCodes) {
+        this(parent, style, 64L << 20, forgiveCodes); // 64 MB for default
     }
 
-    /** Returns the remote path from which the data will be fetched.
-     * @return The remote path to be fetched.
-     */
-    abstract protected String getRemotePath();
+    public FetchAsDataTask(StackPane parent, GuiTaskStyle style) {
+        this(parent, style, new int[0]);
+    }
 
     /** Called when the data has been successfully fetched and parsed.
      * @param json The fetched data object, already parsed to JSON.
@@ -56,13 +51,14 @@ abstract public class FetchAsDataTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                URL remoteURL = new URL(getRemotePath());
+                URL remoteURL = getTargetURL();
                 Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL));
 
                 this.updateMessage("正在尝试建立连接");
                 HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL);
                 Connections.raiseForStatus(connection, forgiveCodes);
-                long max = connection.getContentLengthLong();
+
+                long fullSize = connection.getContentLengthLong();
                 response.reset();
 
                 Connections.Recorder recorder = new Connections.Recorder() {
@@ -80,9 +76,11 @@ abstract public class FetchAsDataTask extends GuiTask {
                             Logger.error("Network", "Exceeded content length limit, size: " + total);
                             throw new IOException("Exceeded content length limit");
                         }
-                        updateMessage("当前已下载：" + getTotalBytesString() + (getBytesPerSecondString().equals("0") ?
-                                "" : " (" + getBytesPerSecondString() + "/s)"));
-                        updateProgress(getTotalBytes(), max);
+                        String bps = getBytesPerSecondString();
+                        updateMessage("当前已下载：" +
+                                getTotalBytesString() +
+                                ("0".equals(bps) ? "" : " (" + bps + "/s)"));
+                        updateProgress(getTotalBytes(), fullSize);
                     }
                 };
 
@@ -97,12 +95,6 @@ abstract public class FetchAsDataTask extends GuiTask {
                 return this.isDone() && !this.isCancelled();
             }
         };
-    }
-
-    @Override
-    protected void onFailed(Throwable e) {
-        if (style != GuiTaskStyle.HIDDEN)
-            GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();
     }
 
     @Override

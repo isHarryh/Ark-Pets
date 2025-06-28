@@ -3,9 +3,7 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
-import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.network.Connections;
-import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import javafx.concurrent.Task;
@@ -18,25 +16,24 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 
-/** The task fetches the given remote content and saves it to a specified local path.
+/** The task fetches the given remote content and saves it to a specified local directory.
  * @implNote Implement the {@link #onDownloadedFile(File)} for future operations to the downloaded file.
  */
-abstract public class FetchAsFileTask extends GuiTask {
-    protected final String localPath;
-    private final long contentLengthLimit;
+abstract public class FetchAsFileTask extends FetchTask {
+    private final File localDir;
+    private File localFile;
 
-    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath, long contentLengthLimit) {
-        super(parent, style);
-        this.localPath = localPath;
-        this.contentLengthLimit = contentLengthLimit;
+    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localDirPath, long contentLengthLimit) {
+        super(parent, style, contentLengthLimit);
+        localDir = new File(localDirPath);
     }
 
-    /** Returns the remote path from which the file will be fetched.
-     * @return The remote path to be fetched.
-     */
-    abstract protected String getRemotePath();
+    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localDirPath) {
+        this(parent, style, localDirPath, 4L << 30); // 4 GB for default
+    }
 
     /** Called when the file has been successfully downloaded.
      * @param file The downloaded file object representing the local file.
@@ -48,15 +45,24 @@ abstract public class FetchAsFileTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                URL remoteURL = new URL(getRemotePath());
-                File localFile = new File(localPath);
-                Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL) + " to " + localFile);
+                try {
+                    Files.createDirectories(localDir.toPath());
+                } catch (IOException e) {
+                    Logger.warn("Network", "Cannot create the directory for file download");
+                    throw e;
+                }
+                URL remoteURL = getTargetURL();
+                Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL));
 
                 this.updateMessage("正在尝试建立连接");
                 HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL);
                 Connections.raiseForStatus(connection);
-                long max = connection.getContentLengthLong();
+
+                long fullSize = connection.getContentLengthLong();
+                String filename = Connections.extractDownloadFilename(connection, UUID.randomUUID().toString());
+                localFile = new File(localDir, filename);
                 OutputStream os = Files.newOutputStream(localFile.toPath());
+                Logger.debug("Network",  "Downloading " + StringUtils.getMaskedURL(remoteURL) + " -> " + localFile);
 
                 Connections.Recorder recorder = new Connections.Recorder() {
                     @Override
@@ -73,9 +79,12 @@ abstract public class FetchAsFileTask extends GuiTask {
                             Logger.error("Network", "Exceeded content length limit, size: " + total);
                             throw new IOException("Exceeded content length limit");
                         }
-                        updateMessage("当前已下载：" + getTotalBytesString() + (getBytesPerSecondString().equals("0") ?
-                                "" : " (" + getBytesPerSecondString() + "/s)"));
-                        updateProgress(getTotalBytes(), max);
+                        String bps = getBytesPerSecondString();
+                        updateMessage("当前已下载：" +
+                                getTotalBytesString() +
+                                (fullSize <= 0 ? "" : " / " + StringUtils.getFormattedSizeString(fullSize)) +
+                                ("0".equals(bps) ? "" : " (" + bps + "/s)"));
+                        updateProgress(getTotalBytes(), fullSize);
                     }
                 };
 
@@ -93,13 +102,9 @@ abstract public class FetchAsFileTask extends GuiTask {
     }
 
     @Override
-    protected void onFailed(Throwable e) {
-        if (style != GuiTaskStyle.HIDDEN)
-            GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();
-    }
-
-    @Override
     protected void onSucceeded(boolean result) {
-        onDownloadedFile(new File(localPath));
+        if (localFile == null || !localFile.isFile())
+            throw new IllegalStateException("Condition not met because localFile is null or not a file");
+        onDownloadedFile(localFile);
     }
 }

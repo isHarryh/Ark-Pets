@@ -1,5 +1,32 @@
 # 更新日志 / CHANGELOG
 
+## v3.9
+| **新增**                              |                                                                                     |
+|:------------------------------------|:------------------------------------------------------------------------------------|
+| [`#109`]<br>[`#113`]<br>[`4d35feb`] | 新增了**手动模式**，可在托盘菜单中开启，允许用户使用键盘来手动控制桌宠的移动和动作。<br>移除了原先的保持动作功能（已被取代）。                 |
+| [`fd45fe6`]<br>[`8e729ad`]          | 新增了在长时间未操作时自动降低桌宠帧率的可选功能。                                                           |
+| [`#123`]<br>[`677cd4f`]             | 新增了专门的**日志对话框**，用于快捷地选取日志进行导出。                                                      |
+| [`#124`]<br>[`0ab4a0a`]             | 新增了可以选择**下载策略**的功能，用户可以从公共源和 Mirror 酱之间进行下载源切换。<br>新增了可以利用 Mirror 酱进行模型库下载和检查更新的功能。 |
+| [`#126`]<br>[`b874313`]             | 新增了可以调整桌宠的行走速度的功能。                                                                  |
+| [`#67`]<br>[`ec1f6dd`]              | 新增了可以在启动器内**直接更新软件**的功能。                                                            |
+
+| **修复**                  |                              |
+|:------------------------|:-----------------------------|
+| [`#126`]<br>[`51b7806`] | 修复了在特定情况下，桌宠在被鼠标拖拽后会原地消失的问题。 |
+
+| **优化**                                 |                                  |
+|:---------------------------------------|:---------------------------------|
+| [`#125`]<br>[`e0f2dce`]                | 优化了日志模块的安全性，现在采用的是 reload4j 日志库。 |
+| [`#113`]<br>[`4d35feb`]<br>[`f6a9c64`] | 优化了桌宠输入控制模块的代码逻辑。                |
+| [`f5b0d9e`]<br>[`601f522`]             | 优化了网络模块的代码逻辑。                    |
+
+| **补丁**                                 |                            |
+|:---------------------------------------|:---------------------------|
+| `v3.9.1`<br>[`76464f9`]                | 修复了桌宠在行走到屏幕边缘时会频繁翻转的问题。    |
+| `v3.9.1`<br>[`e7e0ac3`]<br>[`c4e0f40`] | 修复了桌宠所处的显示器断开连接时，桌宠会消失的问题。 |
+| `v3.9.2`<br>[`cd34faa`]                | 修复了软件内更新可以被 zip 版本用户触发的问题。 |
+| `v3.9.2`<br>[`5294d91`]                | 修复了软件内更新完成后，程序未重启的问题。      |
+
 ## v3.8
 | **新增**                  |                                                        |
 |:------------------------|:-------------------------------------------------------|
@@ -485,6 +512,7 @@
 [`#60`]: https://github.com/isHarryh/Ark-Pets/issues/60
 [`#62`]: https://github.com/isHarryh/Ark-Pets/issues/62
 [`#63`]: https://github.com/isHarryh/Ark-Pets/issues/63
+[`#67`]: https://github.com/isHarryh/Ark-Pets/issues/67
 [`#68`]: https://github.com/isHarryh/Ark-Pets/issues/68
 [`#70`]: https://github.com/isHarryh/Ark-Pets/issues/70
 [`#71`]: https://github.com/isHarryh/Ark-Pets/issues/71
@@ -504,9 +532,15 @@
 [`#93`]: https://github.com/isHarryh/Ark-Pets/pull/93
 [`#99`]:https://github.com/isHarryh/Ark-Pets/pull/99
 [`#106`]: https://github.com/isHarryh/Ark-Pets/pull/106
+[`#109`]: https://github.com/isHarryh/Ark-Pets/issues/109
 [`#110`]: https://github.com/isHarryh/Ark-Pets/pull/110
 [`#112`]: https://github.com/isHarryh/Ark-Pets/pull/112
+[`#113`]: https://github.com/isHarryh/Ark-Pets/pull/113
 [`#116`]: https://github.com/isHarryh/Ark-Pets/pull/116
+[`#123`]: https://github.com/isHarryh/Ark-Pets/pull/123
+[`#124`]: https://github.com/isHarryh/Ark-Pets/pull/124
+[`#125`]: https://github.com/isHarryh/Ark-Pets/pull/125
+[`#126`]: https://github.com/isHarryh/Ark-Pets/pull/126
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -599,3 +633,23 @@
 [`a41e489`]: https://github.com/isHarryh/Ark-Pets/commit/a41e489c84661c30303c6cfcc3d10c4ad86293c5
 [`49d13b6`]: https://github.com/isHarryh/Ark-Pets/commit/49d13b6627a73cd4cfe628db15062c7240cca334
 [`0b2d11e`]: https://github.com/isHarryh/Ark-Pets/commit/0b2d11e519ccc4395e801379b9b1085cfb1779e2
+[`4d35feb`]: https://github.com/isHarryh/Ark-Pets/commit/4d35febd0954e961b47150ff805e9b15a517cfee
+[`f6a9c64`]: https://github.com/isHarryh/Ark-Pets/commit/f6a9c640ade62dc6e1dea72db62dc72a173760ce
+[`fd45fe6`]: https://github.com/isHarryh/Ark-Pets/commit/fd45fe6d45759ed7261b4d8cb2eff497390171b7
+[`8e729ad`]: https://github.com/isHarryh/Ark-Pets/commit/8e729adf2a03da4e46ac6244379cd2b01409a5f9
+[`677cd4f`]: https://github.com/isHarryh/Ark-Pets/commit/677cd4f900251c5247bb08537c249c5899d0e832
+[`f5b0d9e`]: https://github.com/isHarryh/Ark-Pets/commit/f5b0d9e06ba44724ce2b525e9c981a103cf0d559
+[`601f522`]: https://github.com/isHarryh/Ark-Pets/commit/601f522526fc864a725d4bafe8b23055dda3dd3b
+[`0ab4a0a`]: https://github.com/isHarryh/Ark-Pets/commit/0ab4a0a650f13ab428b11b0158117b2c7fcd6a9c
+[`e0f2dce`]: https://github.com/isHarryh/Ark-Pets/commit/e0f2dce2a994f176acc82d2942b4abd336550ff8
+[`51b7806`]: https://github.com/isHarryh/Ark-Pets/commit/51b7806ba9715344ecaeeef675b1735d7e4a39d2
+[`b874313`]: https://github.com/isHarryh/Ark-Pets/commit/b874313bd5e58d8ef9110f93b81b202dbddb6292
+[`ec1f6dd`]: https://github.com/isHarryh/Ark-Pets/commit/ec1f6ddba6712a5c96d0f72d51008024dbe5bc84
+[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
+[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
+[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
+[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
+[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
+[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
+[`cd34faa`]: https://github.com/isHarryh/Ark-Pets/commit/cd34faaee325ebb31d29ccfe4dfa3c766cdd634d
+[`5294d91`]: https://github.com/isHarryh/Ark-Pets/commit/5294d918451c4d3421cb9fc10110fa01f77d21bc

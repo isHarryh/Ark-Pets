@@ -62,8 +62,16 @@
                                 <JFXComboBox fx:id="configRenderOutline" prefWidth="120.0"/>
                             </HBox>
                             <HBox>
+                                <Label text="开启条件（操控中）"/>
+                                <JFXComboBox fx:id="configRenderOutlineEmphasis" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
                                 <Label text="描边颜色"/>
                                 <JFXComboBox fx:id="configRenderOutlineColor" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="描边颜色（操控中）"/>
+                                <JFXComboBox fx:id="configRenderOutlineColorEmphasis" prefWidth="120.0"/>
                             </HBox>
                             <HBox>
                                 <Label text="描边宽度"/>
@@ -128,7 +136,7 @@
                 <Separator/>
                 <HBox spacing="20.0">
                     <Label text="日志级别"/>
-                    <JFXComboBox fx:id="configLoggingLevel" prefWidth="100.0"/>
+                    <JFXComboBox fx:id="configLoggingLevel" prefWidth="120.0"/>
                     <JFXButton fx:id="exportLog" alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity"
                                mnemonicParsing="false" prefWidth="82.5" text="导出日志">
                         <graphic>
@@ -145,12 +153,18 @@
                     </JFXButton>
                 </HBox>
                 <HBox spacing="20.0">
-                    <Label text="网络代理（仅本次有效）"/>
-                    <JFXTextField fx:id="configNetworkAgent" prefHeight="23.0" prefWidth="100.0"/>
-                    <Label fx:id="configNetworkAgentStatus" text="-"/>
+                    <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>
+                </HBox>
+                <Separator/>
+                <Label styleClass="config-group-title" text="网络设置"/>
+                <HBox spacing="20.0">
+                    <Label text="下载策略"/>
+                    <JFXTextField fx:id="configNetworkSource" prefWidth="120.0" text="-"/>
                 </HBox>
                 <HBox spacing="20.0">
-                    <Label fx:id="runEnvCheck" styleClass="config-hyper-link" text="重新运行环境检查"/>
+                    <Label text="网络代理（仅本次有效）"/>
+                    <JFXTextField fx:id="configNetworkProxy" prefHeight="23.0" prefWidth="120.0"/>
+                    <Label fx:id="configNetworkProxyStatus" text="-"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="关于软件"/>

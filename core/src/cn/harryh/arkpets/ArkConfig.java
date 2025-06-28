@@ -7,12 +7,10 @@ import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SecretUtils;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.badlogic.gdx.Graphics;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 
 import java.io.File;
@@ -20,7 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.ArrayList;
+import java.security.GeneralSecurityException;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.charsetDefault;
@@ -47,6 +45,8 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_allow_walk;
     /** @since ArkPets 1.6 */ @JSONField(defaultValue = "true")
     public boolean      behavior_do_peer_repulsion;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "30.0")
+    public float        behavior_walk_speed;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#00000000")
     public String       canvas_color;
     /** @since ArkPets 3.8 */ @JSONField(defaultValue = "0.8")
@@ -69,6 +69,8 @@ public class ArkConfig implements Serializable {
     public boolean      display_multi_monitors;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "1.0")
     public float        display_scale;
+    /** @since ArkPets 3.9 */ @JSONField()
+    public String       download_mc_cdk;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "false")
     public boolean      eco_mode;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
@@ -103,6 +105,10 @@ public class ArkConfig implements Serializable {
     public int          render_outline;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
     public String       render_outline_color;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "3")
+    public int       render_outline_emphasis;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "#FFBB00FF")
+    public String          render_outline_emphasis_color;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
     public float        render_outline_width;
     /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")
@@ -140,6 +146,41 @@ public class ArkConfig implements Serializable {
     @JSONField(serialize = false)
     public boolean isNewcomer() {
         return isNewcomer;
+    }
+
+    /** Gets the MirrorChyan CDK.
+     * @return The decrypted CDK, or {@code null} if the CDK is not set or decryption failed.
+     */
+    @JSONField(serialize = false)
+    public String getMcCdk() {
+        if (download_mc_cdk != null && !download_mc_cdk.isEmpty()) {
+            try {
+                String result = new SecretUtils.WeakEncryptionV0().decrypt(download_mc_cdk);
+                Logger.debug("Config", "Decrypt MirrorChyan CDK okay");
+                return result;
+            } catch (GeneralSecurityException e) {
+                Logger.error("Config", "Failed to decrypt MirrorChyan CDK, details see below.", e);
+            }
+        }
+        return null;
+    }
+
+    /** Sets the MirrorChyan CDK.
+     * @param string The CDK to set. If the string is {@code null} or empty, the CDK will be cleared.
+     */
+    @JSONField(deserialize = false)
+    public void setMcCdk(String string) throws GeneralSecurityException {
+        if (string != null && !string.isEmpty()) {
+            try {
+                download_mc_cdk = new SecretUtils.WeakEncryptionV0().encrypt(string);
+                Logger.debug("Config", "Encrypt MirrorChyan CDK okay");
+                return;
+            } catch (GeneralSecurityException e) {
+                Logger.error("Config", "Failed to encrypt MirrorChyan CDK, details see below.", e);
+                throw e;
+            }
+        }
+        download_mc_cdk = "";
     }
 
     /** Gets the custom ArkConfig object by reading the external config file.
@@ -205,7 +246,7 @@ public class ArkConfig implements Serializable {
         }
     }
 
-    /** @see com.badlogic.gdx.graphics.Color
+    /** @see Color
      */
     public static Color getGdxColorFrom(String string) {
         Color color;
@@ -236,60 +277,5 @@ public class ArkConfig implements Serializable {
         FOCUSED,
         _RESERVED,
         ALWAYS
-    }
-
-
-    @SuppressWarnings("unused")
-    public static class Monitor {
-        public String name;
-        public int[]  size;
-        public int[]  virtual;
-        public int    hz;
-        public int    bbp;
-
-        private Monitor() {
-        }
-
-        /** Gets the information of all the existing monitors.
-         * @return A list of Monitor objects.
-         */
-        public static Monitor[] getMonitors() {
-            ArrayList<Monitor> list = new ArrayList<>();
-            Graphics.Monitor[] monitors = Lwjgl3ApplicationConfiguration.getMonitors();
-            for (Graphics.Monitor m : monitors) {
-                Monitor monitor = new Monitor();
-                monitor.name = m.name;
-                Graphics.DisplayMode dm = Lwjgl3ApplicationConfiguration.getDisplayMode(m);
-                monitor.size = new int[]{dm.width, dm.height};
-                monitor.virtual = new int[]{m.virtualX, m.virtualY};
-                monitor.hz = dm.refreshRate;
-                monitor.bbp = dm.bitsPerPixel;
-                list.add(monitor);
-            }
-            return list.toArray(new Monitor[0]);
-        }
-
-        public static Monitor fromJSONObject(JSONObject object) {
-            return object.toJavaObject(Monitor.class);
-        }
-
-        public static Monitor[] fromJSONArray(JSONArray array) {
-            ArrayList<Monitor> list = new ArrayList<>();
-            for (Object o : array)
-                if (o instanceof JSONObject)
-                    list.add(fromJSONObject((JSONObject) o));
-            return list.toArray(new Monitor[0]);
-        }
-
-        public static JSONObject toJSONObject(Monitor monitor) {
-            return (JSONObject) JSON.toJSON(monitor);
-        }
-
-        public static JSONArray toJSONArray(Monitor[] monitors) {
-            JSONArray array = new JSONArray();
-            for (Monitor m : monitors)
-                array.add(toJSONObject(m));
-            return array;
-        }
     }
 }

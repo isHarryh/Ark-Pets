@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = "3.8.0"
+    version = "3.9.2"
     ext {
         // App Metadata
         appName = "ArkPets"
@@ -118,8 +118,6 @@ project(":core") {
         api "org.commonmark:commonmark-ext-autolink:0.24.0"
         api "org.commonmark:commonmark-ext-gfm-strikethrough:0.24.0"
         api "org.commonmark:commonmark-ext-gfm-tables:0.24.0"
-        // Log4j
-        api "apache-log4j:log4j:1.2.15"
         // dbus-java
         api "com.github.hypfvieh:dbus-java-core:$dbusVersion"
         api "com.github.hypfvieh:dbus-java-transport-native-unixsocket:$dbusVersion"
@@ -130,6 +128,8 @@ project(":core") {
             api "org.lwjgl:${it}:${lwjglVersion}:${lwjglPlatform}"
         }
         api "org.lwjgl:lwjgl-egl:${lwjglVersion}"
+        // reload4j
+        api "ch.qos.reload4j:reload4j:1.2.26"
         // TiniPinyin
         api 'com.github.promeg:tinypinyin:2.0.3'
         // OpenCC4j

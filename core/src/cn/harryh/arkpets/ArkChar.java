@@ -143,7 +143,7 @@ public class ArkChar {
         // 6.Canvas setup
         setCanvas(ArkConfig.getGdxColorFrom(config.canvas_color));
         outlineWidth = config.render_outline_width;
-        outlineColor = ArkConfig.getGdxColorFrom(config.render_outline_color);
+        outlineColor = new Color(Color.CLEAR);
         shadowColor = ArkConfig.getGdxColorFrom(config.render_shadow_color);
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
@@ -187,6 +187,13 @@ public class ArkChar {
      */
     public void setOutlineAlpha(float newAlpha) {
         outlineAlpha.reset(Math.max(0f, Math.min(1f, newAlpha)));
+    }
+
+    /** Requests to set the outline's color of the character.
+     * @param color The color to be applied as the outline.
+     */
+    public void setOutlineColor(Color color) {
+        outlineColor.set(color);
     }
 
     /** Requests to set the alpha value of the ultimate rendering process.

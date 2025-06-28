@@ -22,4 +22,9 @@ public class NullStartupConfig extends StartupConfig {
     public boolean isStartupAvailable() {
         return false;
     }
+
+    @Override
+    public boolean isAutoUpdateAvailable() {
+        return false;
+    }
 }

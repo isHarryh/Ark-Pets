@@ -110,6 +110,17 @@ public class Plane {
             speed.y = 0;
         }
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
+        if (isPositionInvalid()) {
+            // If the position is out of bounds, reset it to a fallback position.
+            Vector2 p = getFallbackPosition();
+            if (p != null) {
+                position.set(p);
+                speed.set(0, 0);
+            } else {
+                position.set(0, 0);
+                speed.set(0, 0);
+            }
+        }
     }
 
     /** Sets a line barrier that can support the object.
@@ -271,6 +282,40 @@ public class Plane {
      */
     private float limitY(float y) {
         return Math.max(borderBottom(), Math.min(y, borderTop() - obj.y));
+    }
+
+    private boolean isPositionInvalid() {
+        return position.x == Float.MAX_VALUE ||
+                position.x == Float.MIN_VALUE ||
+                position.y == Float.MAX_VALUE ||
+                position.y == Float.MIN_VALUE;
+    }
+
+    private Vector2 getFallbackPosition() {
+        Vector2 nearest = null;
+        double minDist = Long.MAX_VALUE;
+        for (RectArea area : world) {
+            float[][] points = {
+                    {area.left, area.top - obj.y}, // ↖
+                    {area.left, area.bottom}, // ↙
+                    {area.right - obj.x, area.top - obj.y}, // ↗
+                    {area.right - obj.x, area.bottom} // ↘
+            };
+            long px = (long) (position.x == Float.MAX_VALUE ? Integer.MAX_VALUE :
+                    position.x == Float.MIN_VALUE ? Integer.MIN_VALUE : position.x);
+            long py = (long) (position.y == Float.MAX_VALUE ? Integer.MAX_VALUE :
+                    position.y == Float.MIN_VALUE ? Integer.MIN_VALUE : position.y);
+            for (float[] p : points) {
+                double d = Math.hypot(px - (long) p[0], py - (long) p[1]);
+                if (d < minDist || nearest == null) {
+                    minDist = d;
+                    if (nearest == null)
+                        nearest = new Vector2();
+                    nearest.set(p[0], p[1]);
+                }
+            }
+        }
+        return nearest;
     }
 
     /** Gets the position of the top border.
