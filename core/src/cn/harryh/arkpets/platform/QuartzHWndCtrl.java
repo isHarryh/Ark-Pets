@@ -1,8 +1,9 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
+import cn.harryh.arkpets.utils.Cached;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.natives.CoreGraphics.*;
+import static org.lwjgl.glfw.GLFWNativeCocoa.glfwGetCocoaWindow;
 
 
 public class QuartzHWndCtrl extends HWndCtrl {
@@ -27,10 +29,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private final long windowID;
     private Pointer nsWin;
-    private CGRect currentScreenRect;
+    private static Cached<CGRect.ByValue> currentScreenRect;
     private final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
-    private byte nsWinUnavailable;
     private boolean trans;
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
@@ -42,7 +43,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public boolean isForeground() {
-        getNSWindow(windowID);
+        if (nsWin == null) return false;
         return ObjCHelper.msgSend.invokeInt(new Object[]{
                 nsWin,
                 ObjCHelper.sel("isKeyWindow")
@@ -82,7 +83,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public void setForeground() {
-        getNSWindow(windowID);
+        if (nsWin == null) return;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
                 ObjCHelper.sel("orderFrontRegardless:")
@@ -91,9 +92,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
-        getNSWindow(windowID);
+        if (nsWin == null) return;
         newRect.origin.x = x;
-        newRect.origin.y = currentScreenRect.size.height - y - h;
+        newRect.origin.y = currentScreenRect.getValue().size.height - y - h;
         newRect.size.width = w;
         newRect.size.height = h;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
@@ -117,7 +118,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTopmost(boolean enable) {
-        getNSWindow(windowID);
+        if(nsWin == null) return;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
                 ObjCHelper.sel("setLevel:"),
@@ -127,8 +128,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public void setTransparent(boolean enable) {
+        if (nsWin == null) return;
         if (trans == enable) return;
-        getNSWindow(windowID);
         trans = enable;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
@@ -144,6 +145,12 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     }
 
+    public void attachNSWindow(Lwjgl3Graphics graphics) {
+        long glfwHandle = graphics.getWindow().getWindowHandle();
+        nsWin = new Pointer(glfwGetCocoaWindow(glfwHandle));
+        registerMethods(nsWin);
+    }
+
     protected static void init() {
         CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
         if (server == null) {
@@ -152,6 +159,9 @@ public class QuartzHWndCtrl extends HWndCtrl {
             CoreFoundation.INSTANCE.CFRelease(server);
         }
         ObjCHelper.init();
+        currentScreenRect = new Cached<>();
+        currentScreenRect.setCacheAge(1.0);
+        currentScreenRect.setValueProducer(() -> CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID()));
     }
 
     protected static void free() {
@@ -226,24 +236,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
                     ObjCHelper.cls("NSApplication"),
                     ObjCHelper.sel("sharedApplication")
             });
-        }
-    }
-
-    private void getNSWindow(long CGWindowId) {
-        checkNSApp();
-        if (nsWinUnavailable == 0) {
-            Pointer nswin = ObjCHelper.msgSend.invokePointer(new Object[]{
-                    nsApp,
-                    ObjCHelper.sel("windowWithWindowNumber:"),
-                    CGWindowId
-            });
-            if (nswin == null) {
-                nsWinUnavailable = -1;
-            }
-            this.nsWin = nswin;
-            nsWinUnavailable = 1;
-            registerMethods(nsWin);
-            currentScreenRect = getScreenSize();
         }
     }
 
