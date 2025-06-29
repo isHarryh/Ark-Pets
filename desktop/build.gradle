@@ -72,6 +72,7 @@ ext {
     issFileRel = "docs/scripts/ExePacking.iss"
     distDir = layout.buildDirectory.dir("dist").get().toString()
     distName = project.appName + "-v" + project.version
+    copyrightText = "Copyright (C) 2022-2026 Harry Huang"
 }
 
 // Generates a distributable JAR file for the app.
@@ -152,7 +153,8 @@ tasks.register("jpackage", Exec) {
             '--main-class', mainClassName,
             '--main-jar', jar.archiveFile.get().asFile.getName(),
             '--runtime-image', "${jlinkDir}/runtime",
-            '--java-options', '-Dfile.encoding=UTF-8'
+            '--java-options', '-Dfile.encoding=UTF-8',
+            '--copyright', project.copyrightText
     ]
     if (osName.contains('windows')) {
         commands << '--icon'
@@ -161,8 +163,10 @@ tasks.register("jpackage", Exec) {
         commands << '--icon'
         commands << "${assetsDir}/icons/icon.png"
     } else if (osName.contains('mac')) {
-        commands << '--java-options'
-        commands << "-XstartOnFirstThread"
+        commands << '--icon'
+        commands << "${project.assetsDir}/icons/icon.icns"
+        commands << '--mac-app-category'
+        commands << 'entertainment'
     }
     commandLine = commands as List<String>
 }
