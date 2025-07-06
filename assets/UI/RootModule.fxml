@@ -159,7 +159,7 @@
 
         <!-- ********** 3. Title Bar ********** -->
         <Pane fx:id="wrapper4" maxHeight="-Infinity" minHeight="-Infinity" maxWidth="-Infinity" minWidth="-Infinity"
-              prefHeight="24.0" prefWidth="600.0" StackPane.alignment="TOP_CENTER"/>
+              cache="true" cacheHint="SPEED" prefHeight="24.0" prefWidth="600.0" StackPane.alignment="TOP_CENTER"/>
 
         <!-- ********** 4. Toast ********** -->
         <HBox fx:id="toast" id="Toast" maxHeight="30.0" maxWidth="-Infinity" minWidth="-Infinity" minHeight="-Infinity"

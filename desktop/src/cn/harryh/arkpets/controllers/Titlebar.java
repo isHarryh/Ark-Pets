@@ -11,8 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
-import static cn.harryh.arkpets.Const.appName;
-import static cn.harryh.arkpets.Const.durationFast;
+import static cn.harryh.arkpets.Const.*;
 
 
 public class Titlebar implements Controller<ArkHomeFX> {
@@ -44,7 +43,7 @@ public class Titlebar implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        if (forceUiStyle.equals("mac") || Const.isMac) {
+        if (forceUiStyle.equals("mac") || isMac) {
             initMacTitlebar();
         } else if (forceUiStyle.equals("win") || Const.isWindows){
 
@@ -65,10 +64,12 @@ public class Titlebar implements Controller<ArkHomeFX> {
 
     @FXML
     public void windowMinimize(MouseEvent event) {
-        GuiPrefabs.fadeOutWindow(app.stage, durationFast, e -> {
-            app.stage.hide();
-            app.stage.setIconified(true);
-        });
+        if (!isMac) {
+            GuiPrefabs.fadeOutWindow(app.stage, durationFast, e -> {
+                app.stage.hide();
+            });
+        }
+        app.stage.setIconified(true);
     }
 
     @FXML
