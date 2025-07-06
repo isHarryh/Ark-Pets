@@ -9,4 +9,4 @@ create-dmg --volname ArkPets \
 --icon "LICENSE" 500 50 \
 --window-size 700 60 \
 --icon-size 100 \
-"./desktop/build/dist/ArkPets-$1-mac-$(uname -m).dmg" ./desktop/build/jpackage/
+"./desktop/build/dist/ArkPets-v$1-mac-$(uname -m).dmg" ./desktop/build/jpackage/

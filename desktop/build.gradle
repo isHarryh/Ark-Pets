@@ -66,13 +66,14 @@ ext {
     jarLibDir = layout.buildDirectory.dir("libs").get().toString()
     jarLibName = project.name + "-" + project.version
     jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
-    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
+    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.security.auth,jdk.unsupported"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
     issFileRel = "docs/scripts/ExePacking.iss"
     distDir = layout.buildDirectory.dir("dist").get().toString()
     distName = project.appName + "-v" + project.version
     macPackage = "docs/scripts/macPackage.sh"
+    appImagePackage = "docs/scripts/appImagePackage.sh"
     copyrightText = "Copyright (C) 2022-2026 Harry Huang"
 }
 
@@ -200,9 +201,17 @@ tasks.register("distExe", Exec) {
 
 // Generates a distributable DMG file for the app, using create-dmg.
 // Note that you must install create-dmg in your environment and add it to PATH before running this task.
-task distDmg(dependsOn: jpackage,type: Exec,group: 'dist') {
+task distDmg(dependsOn: jpackage, type: Exec, group: 'dist') {
     workingDir project.rootDir
-    def commands = [macPackage,project.version]
+    def commands = [macPackage, project.version]
+    commandLine = commands
+}
+
+// Generates a distributable AppImage file for the app, using linuxdeploy and appimagetool.
+// Note that you must install linuxdeploy and appimagetool in your environment and add it to PATH before running this task.
+task distAppImage(dependsOn: jpackage, type: Exec, group: 'dist') {
+    workingDir project.rootDir
+    def commands = [appImagePackage, project.version]
     commandLine = commands
 }
 
