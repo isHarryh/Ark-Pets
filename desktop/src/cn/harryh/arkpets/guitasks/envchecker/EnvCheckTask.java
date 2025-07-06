@@ -54,6 +54,9 @@ public abstract class EnvCheckTask {
                 }
             }
         }
+        if (Const.isMac) {
+            list.add(new AccessibilityCheckTask());
+        }
         return list;
     }
 }
