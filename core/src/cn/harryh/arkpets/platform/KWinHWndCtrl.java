@@ -1,8 +1,8 @@
 package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.natives.KWinInterface;
-import cn.harryh.arkpets.natives.KWinPluginInterface;
+import cn.harryh.arkpets.rpc.KWinInterface;
+import cn.harryh.arkpets.rpc.KWinPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;

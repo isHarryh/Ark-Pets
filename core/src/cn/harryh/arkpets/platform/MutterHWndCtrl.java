@@ -1,8 +1,8 @@
 package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.natives.MutterInterface;
-import cn.harryh.arkpets.natives.MutterPluginInterface;
+import cn.harryh.arkpets.rpc.MutterInterface;
+import cn.harryh.arkpets.rpc.MutterPluginInterface;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;

@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.natives;
+package cn.harryh.arkpets.rpc;
 
 import org.freedesktop.dbus.annotations.DBusBoundProperty;
 import org.freedesktop.dbus.annotations.DBusInterfaceName;
