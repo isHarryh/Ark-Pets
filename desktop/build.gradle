@@ -72,6 +72,7 @@ ext {
     issFileRel = "docs/scripts/ExePacking.iss"
     distDir = layout.buildDirectory.dir("dist").get().toString()
     distName = project.appName + "-v" + project.version
+    macPackage = "docs/scripts/macPackage.sh"
     copyrightText = "Copyright (C) 2022-2026 Harry Huang"
 }
 
@@ -194,6 +195,14 @@ tasks.register("distExe", Exec) {
             "/Q",
             issFileRel
     ]
+    commandLine = commands
+}
+
+// Generates a distributable DMG file for the app, using create-dmg.
+// Note that you must install create-dmg in your environment and add it to PATH before running this task.
+task distDmg(dependsOn: jpackage,type: Exec,group: 'dist') {
+    workingDir project.rootDir
+    def commands = [macPackage,project.version]
     commandLine = commands
 }
 
