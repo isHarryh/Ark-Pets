@@ -24,7 +24,6 @@ import static org.lwjgl.glfw.GLFWNativeCocoa.glfwGetCocoaWindow;
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
 
-    private final IgnoreMouseCallback igcb = new IgnoreMouseCallback();
     private final FrameCallback fcb = new FrameCallback();
 
     private final long windowID;
@@ -32,7 +31,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private static Cached<CGRect.ByValue> currentScreenRect;
     private final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
-    private boolean trans;
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
     public QuartzHWndCtrl(CFDictionaryRef dict) {
@@ -127,26 +125,13 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setTransparent(boolean enable) {
-        if (nsWin == null) return;
-        if (trans == enable) return;
-        trans = enable;
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
-                null,
-                1
-        });
-    }
-
-    @Override
     public void sendMouseEvent(MouseEvent msg, int x, int y) {
 
     }
 
-    public void attachNSWindow(Lwjgl3Graphics graphics) {
-        long glfwHandle = graphics.getWindow().getWindowHandle();
+    @Override
+    public void attachGLFWWindow(Lwjgl3Graphics graphics) {
+        super.attachGLFWWindow(graphics);
         nsWin = new Pointer(glfwGetCocoaWindow(glfwHandle));
         registerMethods(nsWin);
     }
@@ -245,14 +230,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
                 ObjCHelper.sel("class")
         });
         ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
-        ObjCHelper.addRunOnAppKitMethod(cls, igcb, "IgnoreMouse");
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitIgnoreMouse"),
-                null,
-                1
-        });
     }
 
     private static String getWindowName(Pointer value) {
@@ -304,17 +281,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
             return rect;
         }*/
         return CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID());
-    }
-
-    private class IgnoreMouseCallback implements ObjCHelper.ThreadCallback {
-        @Override
-        public void callback(Pointer id, Pointer _cmd) {
-            ObjCHelper.msgSend.invokeVoid(new Object[]{
-                    id,
-                    ObjCHelper.sel("setIgnoresMouseEvents:"),
-                    trans ? 1 : 0
-            });
-        }
     }
 
     private class FrameCallback implements ObjCHelper.ThreadCallback {

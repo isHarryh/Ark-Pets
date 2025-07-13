@@ -8,8 +8,6 @@ import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
-import cn.harryh.arkpets.platform.QuartzHWndCtrl;
-import cn.harryh.arkpets.platform.WaylandHWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.render.PixmapWrapper;
 import cn.harryh.arkpets.transitions.TransitionVector2;
@@ -113,8 +111,6 @@ public class ArkPets extends InputApplicationAdaptor {
         if (config.window_style_toolwindow)
             hWndMine.setTaskbar(false);
         updateWindow();
-        if (hWndMine instanceof QuartzHWndCtrl qHWnd) qHWnd.attachNSWindow((Lwjgl3Graphics) Gdx.graphics);
-        if (hWndMine instanceof WaylandHWndCtrl wlHWnd) wlHWnd.attachSurface((Lwjgl3Graphics) Gdx.graphics);
 
         // 6.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
