@@ -1,5 +1,5 @@
 [Desktop Entry]
 Name=ArkPetsStartup
-Exec={{ARKPETS_EXECUTABLE}}
+Exec=env LIBDECOR_FORCE_CSD=1 {{ARKPETS_EXECUTABLE}}
 Type=Application
 Path={{ARKPETS_WORKING_DIR}}
