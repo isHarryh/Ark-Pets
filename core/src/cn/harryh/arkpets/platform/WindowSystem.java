@@ -154,6 +154,18 @@ public enum WindowSystem {
             case USER32 -> {
                 return User32HWndCtrl.getMousePos();
             }
+            case QUARTZ -> {
+                return QuartzHWndCtrl.getMousePos();
+            }
+            case MUTTER -> {
+                return MutterHWndCtrl.getMousePos();
+            }
+            case KWIN -> {
+                return KWinHWndCtrl.getMousePos();
+            }
+            case X11 -> {
+                return X11HWndCtrl.getMousePos();
+            }
             default -> {
                 return new HWndCtrl.MousePoint(0, 0);
             }

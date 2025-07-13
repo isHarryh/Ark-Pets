@@ -69,6 +69,15 @@ public class X11HWndCtrl extends HWndCtrl {
         return list.isEmpty() ? null : list.get(0);
     }
 
+    public static MousePoint getMousePos() {
+        IntByReference rootX = new IntByReference();
+        IntByReference rootY = new IntByReference();
+        IntByReference junk = new IntByReference();
+        X11.WindowByReference junkW = new X11.WindowByReference();
+        x11.XQueryPointer(display,x11.XDefaultRootWindow(display),junkW,junkW,rootX,rootY,junk,junk,junk);
+        return new MousePoint(rootX.getValue(),rootY.getValue());
+    }
+
     public static void free() {
         x11.XCloseDisplay(display);
         Logger.info("System", "Disconnected from X display");

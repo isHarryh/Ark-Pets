@@ -201,6 +201,14 @@ public class QuartzHWndCtrl extends HWndCtrl {
         return win;
     }
 
+    protected static MousePoint getMousePos() {
+        CGPoint.ByValue point = (CGPoint.ByValue) ObjCHelper.msgSend.invoke(CGPoint.ByValue.class,new Object[]{
+                ObjCHelper.cls("NSEvent"),
+                ObjCHelper.sel("mouseLocation")
+        });
+        return new MousePoint((int) Math.floor(point.x), (int) Math.floor(currentScreenRect.getValue().size.height - point.y));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
