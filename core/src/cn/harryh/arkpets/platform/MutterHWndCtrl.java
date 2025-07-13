@@ -132,6 +132,11 @@ public class MutterHWndCtrl extends WaylandHWndCtrl {
         return new MutterHWndCtrl(list.get(list.size() - 1));
     }
 
+    protected static MousePoint getMousePos() {
+        MutterInterface.PointStruct pos = dBusInterface.Mouse();
+        return new MousePoint(pos.x, pos.y);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

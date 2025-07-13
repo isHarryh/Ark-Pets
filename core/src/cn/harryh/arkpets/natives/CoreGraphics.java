@@ -52,6 +52,9 @@ public interface CoreGraphics extends Library {
     class CGPoint extends Structure {
         public double x;
         public double y;
+
+        public static class ByValue extends CGPoint implements Structure.ByValue {
+        }
     }
 
     @Structure.FieldOrder({"width", "height"})

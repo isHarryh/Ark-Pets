@@ -27,6 +27,8 @@ public interface MutterInterface extends DBusInterface {
 
     String Version();
 
+    PointStruct Mouse();
+
     class DetailsStruct extends Struct {
         @Position(0)
         public final int x;
@@ -54,6 +56,18 @@ public interface MutterInterface extends DBusInterface {
             this.wclass = wClass;
             this.visible = visible;
             this.id = id;
+        }
+    }
+
+    class PointStruct extends Struct {
+        @Position(0)
+        public final int x;
+        @Position(1)
+        public final int y;
+
+        public PointStruct(int x, int y) {
+            this.x = x;
+            this.y = y;
         }
     }
 }
