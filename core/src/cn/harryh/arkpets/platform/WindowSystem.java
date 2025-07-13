@@ -5,7 +5,6 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Platform;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,18 +188,5 @@ public enum WindowSystem {
      */
     public static boolean needDecorated() {
         return PLATFORM == NULL;
-    }
-
-    /** Return current WindowSystem information request rate.
-     */
-    public static int getRequestRate() {
-        switch (PLATFORM) {
-            case MUTTER,KWIN,X11,QUARTZ -> { // IPC
-                return 6;
-            }
-            default -> {
-                return 4;
-            }
-        }
     }
 }

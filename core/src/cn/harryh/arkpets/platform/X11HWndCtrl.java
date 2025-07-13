@@ -2,9 +2,7 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.X11Extension;
 import cn.harryh.arkpets.natives.X11Helper;
-import cn.harryh.arkpets.natives.XextExtension;
 import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Pointer;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.ptr.IntByReference;
 
@@ -16,11 +14,7 @@ import java.util.List;
 public class X11HWndCtrl extends HWndCtrl {
     private static X11.Display display;
     private static final X11Extension x11 = X11Extension.INSTANCE;
-    private static final XextExtension xext = XextExtension.INSTANCE;
     protected final X11.Window hWnd;
-
-    private static boolean shapeAvailable;
-    private boolean transparentEnable;
 
     public static final int STATE_REMOVE = 0;
     public static final int STATE_ADD = 1;
@@ -37,15 +31,6 @@ public class X11HWndCtrl extends HWndCtrl {
             throw new RuntimeException("Cannot open X display");
         } else {
             Logger.info("System", "Connected to X display");
-        }
-        IntByReference evt = new IntByReference();
-        IntByReference err = new IntByReference();
-        boolean xshape = xext.XShapeQueryExtension(display, evt, err);
-        if (!xshape) {
-            Logger.warn("System", "No XShape extension");
-            shapeAvailable = false;
-        } else {
-            shapeAvailable = true;
         }
     }
 
@@ -158,21 +143,6 @@ public class X11HWndCtrl extends HWndCtrl {
         //clientMsg(hWnd,"_NET_MOVERESIZE_WINDOW",3840,x,y,w,h);
         x11.XSync(display, false);
         x11.XMoveResizeWindow(display, hWnd, x, y, w, h);
-    }
-
-    @Override
-    public void setTransparent(boolean transparent) {
-        if (!shapeAvailable) return;
-        if (transparentEnable != transparent) {
-            if (transparent) {
-                Pointer reg = x11.XCreateRegion();
-                xext.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
-                x11.XDestroyRegion(reg);
-            } else {
-                xext.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
-            }
-            transparentEnable = transparent;
-        }
     }
 
     @Override
