@@ -6,6 +6,7 @@ package cn.harryh.arkpets.utils;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 
 import java.util.HashMap;
 
@@ -144,6 +145,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        screenX = HdpiUtils.toBackBufferX(screenX);
+        screenY = HdpiUtils.toBackBufferY(screenY);
         lastActiveNanoTime = System.nanoTime();
         if (pointer <= 0) {
             Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
@@ -165,6 +168,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        screenX = HdpiUtils.toBackBufferX(screenX);
+        screenY = HdpiUtils.toBackBufferY(screenY);
         lastActiveNanoTime = System.nanoTime();
         if (pointer <= 0) {
             Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
@@ -184,6 +189,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         lastActiveNanoTime = System.nanoTime();
+        screenX = HdpiUtils.toBackBufferX(screenX);
+        screenY = HdpiUtils.toBackBufferY(screenY);
         if (pointer <= 0) {
             mouseDeltaX = screenX - mouseX;
             mouseDeltaY = screenY - mouseY;
@@ -198,6 +205,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        screenX = HdpiUtils.toBackBufferX(screenX);
+        screenY = HdpiUtils.toBackBufferY(screenY);
         int dx = screenX - mouseX;
         int dy = screenY - mouseY;
         mouseX = screenX;
