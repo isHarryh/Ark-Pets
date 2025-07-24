@@ -3,6 +3,7 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.utils.Cached;
+import cn.harryh.arkpets.utils.HdpiUtils;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -93,8 +94,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
         if (nsWin == null) return;
         newRect.origin.x = x;
         newRect.origin.y = currentScreenRect.getValue().size.height - y - h;
-        newRect.size.width = w;
-        newRect.size.height = h;
+        newRect.size.width = HdpiUtils.toLogicalX(w);
+        newRect.size.height = HdpiUtils.toLogicalY(h);
         ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
                 ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
