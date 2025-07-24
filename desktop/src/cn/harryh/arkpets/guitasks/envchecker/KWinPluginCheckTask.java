@@ -61,7 +61,7 @@ public class KWinPluginCheckTask extends EnvCheckTask {
             return false;
         }
         try {
-            String result = IOUtils.CommandUtil.runCommand("plasmashell --version", null, null);
+            String result = IOUtils.CommandUtil.runCommand(new String[] {"plasmashell", "--version"}, null, null);
             Pattern pattern = Pattern.compile("plasmashell (\\d+)");
             if (result == null) return false;
             Matcher matcher = pattern.matcher(result);
