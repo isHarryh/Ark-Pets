@@ -79,7 +79,7 @@ public class X11HWndCtrl extends HWndCtrl {
     }
 
     public static void free() {
-        x11.XCloseDisplay(display);
+        if(display != null) x11.XCloseDisplay(display);
         Logger.info("System", "Disconnected from X display");
     }
 
