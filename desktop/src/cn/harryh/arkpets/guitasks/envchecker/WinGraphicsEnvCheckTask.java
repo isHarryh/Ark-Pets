@@ -38,7 +38,7 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
 
     private static String wmicCheck() {
         try {
-            String result = IOUtils.CommandUtil.runCommand("wmic path win32_VideoController get Name", null, null);
+            String result = IOUtils.CommandUtil.runCommand(new String[]{"wmic", "path", "win32_VideoController", "get", "Name"}, null, null);
             if (result != null) {
                 return result;
             } else {
