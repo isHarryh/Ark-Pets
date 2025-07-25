@@ -66,15 +66,15 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private Canvas configDeployPosition;
 
     @FXML
-    private JFXCheckBox configVoiceStereo;
+    private CheckBox configVoiceStereo;
     @FXML
-    private JFXButton configVoiceStereoHelp;
+    private Button configVoiceStereoHelp;
     @FXML
-    private JFXSlider configVoiceVolume;
+    private Slider configVoiceVolume;
     @FXML
     private Label configVoiceVolumeValue;
     @FXML
-    private JFXSlider configMaxPlayingVoice;
+    private Slider configMaxPlayingVoice;
     @FXML
     private Label configMaxPlayingVoiceValue;
 
