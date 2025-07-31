@@ -1,20 +1,10 @@
 package cn.harryh.arkpets.platform;
 
-import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.rpc.KWinInterface;
-import cn.harryh.arkpets.rpc.KWinPluginInterface;
 import cn.harryh.arkpets.utils.HdpiUtils;
-import cn.harryh.arkpets.utils.Logger;
-import org.freedesktop.dbus.connections.impl.DBusConnection;
-import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
-import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.UInt32;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import static cn.harryh.arkpets.platform.KWinHWndCtrlFactory.dBusInterface;
 import static cn.harryh.arkpets.utils.HdpiUtils.toBackBufferX;
 import static cn.harryh.arkpets.utils.HdpiUtils.toBackBufferY;
 
@@ -22,8 +12,6 @@ import static cn.harryh.arkpets.utils.HdpiUtils.toBackBufferY;
 public class KWinHWndCtrl extends WaylandHWndCtrl {
     protected final String hWnd;
     protected KWinInterface.DetailsStruct details;
-    private static DBusConnection dBusConnection;
-    private static KWinInterface dBusInterface;
 
     protected KWinHWndCtrl(KWinInterface.DetailsStruct details) {
         super(details.title, new WindowRect(
@@ -79,69 +67,6 @@ public class KWinHWndCtrl extends WaylandHWndCtrl {
     @Override
     public void sendMouseEvent(MouseEvent msg, int x, int y) {
 
-    }
-
-    protected static void init() {
-        try {
-            dBusConnection = DBusConnectionBuilder.forSessionBus().build();
-            Logger.info("System", "Connected to DBus");
-            checkAndEnablePlugin();
-            dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinInterface.class);
-            Logger.info("System", "KDE Integration plugin version " + dBusInterface.Version());
-        } catch (DBusException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void checkAndEnablePlugin() throws DBusException {
-        KWinPluginInterface pi = dBusConnection.getRemoteObject("org.kde.KWin", "/Plugins", KWinPluginInterface.class);
-        String pluginName = Const.kdePluginName + Const.kdePluginVersion;
-        List<String> available = pi.getAvailablePlugins();
-        List<String> enabled = pi.getLoadedPlugins();
-        if (!available.contains(pluginName)) throw new RuntimeException("KDE Integration plugin not found.");
-        if (!enabled.contains(pluginName)) {
-            boolean result = pi.LoadPlugin(pluginName);
-            if (!result) throw new RuntimeException("Failed to enable KDE integration plugin.");
-            try {
-                Thread.sleep(500); // wait for loaded
-            } catch (InterruptedException ignored) {
-            }
-        }
-    }
-
-    protected static void free() {
-        try {
-            dBusConnection.close();
-            Logger.info("System", "Disconnected from DBus");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected static KWinHWndCtrl find(String className, String windowName) {
-        return dBusInterface.List().stream().map(KWinHWndCtrl::new).filter((i) -> {
-            if (className == null) {
-                return i.windowText != null && i.windowText.equals(windowName);
-            } else {
-                return i.details.wclass.equals(className) && i.windowText.equals(windowName);
-            }
-        }).findAny().orElse(null);
-    }
-
-    protected static List<KWinHWndCtrl> getWindowList(boolean onlyVisible) {
-        List<KWinHWndCtrl> list = new ArrayList<>(dBusInterface.List().stream().map(KWinHWndCtrl::new).filter(w -> !onlyVisible || w.isVisible()).toList());
-        Collections.reverse(list);
-        return list;
-    }
-
-    protected static KWinHWndCtrl getTopmostWindow() {
-        List<KWinInterface.DetailsStruct> list = dBusInterface.List();
-        return new KWinHWndCtrl(list.get(list.size() - 1));
-    }
-
-    protected static MousePoint getMousePos() {
-        KWinInterface.PointStruct pos = dBusInterface.Mouse();
-        return new MousePoint(pos.x, pos.y);
     }
 
     @Override

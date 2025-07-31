@@ -2,7 +2,6 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.ObjCHelper;
-import cn.harryh.arkpets.utils.Cached;
 import cn.harryh.arkpets.utils.HdpiUtils;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
@@ -14,11 +13,10 @@ import com.sun.jna.platform.mac.CoreFoundation.CFDictionaryRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFNumberRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.natives.CoreGraphics.*;
+import static cn.harryh.arkpets.platform.QuartzHWndCtrlFactory.currentScreenRect;
 import static org.lwjgl.glfw.GLFWNativeCocoa.glfwGetCocoaWindow;
 
 
@@ -29,8 +27,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private final long windowID;
     private Pointer nsWin;
-    private static Cached<CGRect.ByValue> currentScreenRect;
-    private final long layer;
+    final long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
@@ -137,79 +134,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
         registerMethods(nsWin);
     }
 
-    protected static void init() {
-        CFDictionaryRef server = CoreGraphics.INSTANCE.CGSessionCopyCurrentDictionary();
-        if (server == null) {
-            throw new RuntimeException("No window server connection.");
-        } else {
-            CoreFoundation.INSTANCE.CFRelease(server);
-        }
-        ObjCHelper.init();
-        currentScreenRect = new Cached<>();
-        currentScreenRect.setCacheAge(1.0);
-        currentScreenRect.setValueProducer(() -> CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID()));
-    }
-
-    protected static void free() {
-
-    }
-
-    protected static List<QuartzHWndCtrl> getWindowList(boolean onlyVisible) {
-        ArrayList<QuartzHWndCtrl> list = new ArrayList<>();
-        //todo
-        int opt;
-        if (onlyVisible) {
-            opt = kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements;
-        } else {
-            opt = kCGWindowListExcludeDesktopElements;
-        }
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(opt, 0);
-        int numWindows = windows.getCount();
-        for (int i = 0; i < numWindows; i++) {
-            Pointer result = windows.getValueAtIndex(i);
-            CFDictionaryRef windowRef = new CFDictionaryRef(result);
-            QuartzHWndCtrl win = new QuartzHWndCtrl(windowRef);
-            if (!onlyVisible || (win.layer >= 0 && win.layer != 20)) {
-                list.add(win);
-            }
-        }
-        windows.release();
-        return list;
-    }
-
-    protected static QuartzHWndCtrl find(String className, String windowText) {
-        CFArrayRef windows = CoreGraphics.INSTANCE.CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, 0);
-        int numWindows = windows.getCount();
-        QuartzHWndCtrl win = null;
-        for (int i = 0; i < numWindows; i++) {
-            Pointer result = windows.getValueAtIndex(i);
-            CFDictionaryRef windowRef = new CFDictionaryRef(result);
-            String cname = getWindowName(windowRef.getValue(kCGWindowOwnerName));
-            String wname = getWindowName(windowRef.getValue(kCGWindowName));
-            if (className == null) {
-                if (wname.equals(windowText) || cname.equals(windowText)) {
-                    win = new QuartzHWndCtrl(windowRef);
-                    break;
-                }
-            } else {
-                if (cname.equals(className) && wname.equals(windowText)) {
-                    win = new QuartzHWndCtrl(windowRef);
-                    break;
-                }
-            }
-        }
-        windows.release();
-        return win;
-    }
-
-    protected static MousePoint getMousePos() {
-        CGPoint.ByValue point = (CGPoint.ByValue) ObjCHelper.msgSend.invoke(CGPoint.ByValue.class,new Object[]{
-                ObjCHelper.cls("NSEvent"),
-                ObjCHelper.sel("mouseLocation")
-        });
-        return new MousePoint((int) Math.floor(point.x), (int) Math.floor(currentScreenRect.getValue().size.height - point.y));
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -241,11 +165,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
         ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
     }
 
-    private static String getWindowName(Pointer value) {
+    static String getWindowName(Pointer value) {
         return value == null ? "" : new CFStringRef(value).stringValue();
     }
 
-    private static String getWindowName(Pointer own, Pointer title) {
+    static String getWindowName(Pointer own, Pointer title) {
         String ownName;
         String titleName;
         ownName = own == null ? "" : new CFStringRef(own).stringValue();

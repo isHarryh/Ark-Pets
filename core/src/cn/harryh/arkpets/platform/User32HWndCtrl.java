@@ -12,8 +12,6 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinNT.HRESULT;
 import com.sun.jna.ptr.PointerByReference;
 
-import java.util.ArrayList;
-
 
 public class User32HWndCtrl extends HWndCtrl {
     protected final HWND hWnd;
@@ -45,18 +43,6 @@ public class User32HWndCtrl extends HWndCtrl {
     protected User32HWndCtrl(HWND hWnd) {
         super(getWindowText(hWnd), getWindowRect(hWnd));
         this.hWnd = hWnd;
-    }
-
-    /** Finds a window.
-     * @param className The class name of the window.
-     * @param windowName The title of the window.
-     */
-    public static HWndCtrl find(String className, String windowName) {
-        HWND hwnd = User32.INSTANCE.FindWindow(className, windowName);
-        if (hwnd != null) {
-            return new User32HWndCtrl(hwnd);
-        }
-        return null;
     }
 
     @Override
@@ -135,43 +121,6 @@ public class User32HWndCtrl extends HWndCtrl {
         User32.INSTANCE.SendMessage(hWnd, wmsg, new WinDef.WPARAM(wParam), new WinDef.LPARAM(lParam));
     }
 
-    /** Gets the current list of windows.
-     * @param only_visible Whether exclude the invisible window.
-     * @return An ArrayList consists of HWndCtrls.
-     */
-    public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible) {
-        ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd)))
-                windowList.add(new User32HWndCtrl(hWnd));
-            return true;
-        }, null);
-        return windowList;
-    }
-
-    /** Gets the current list of windows. (Advanced)
-     * @param only_visible Whether exclude the invisible window.
-     * @param exclude_ws_ex Exclude the specific window-style-extra.
-     * @return An ArrayList consists of HWndCtrls.
-     */
-    public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible, long exclude_ws_ex) {
-        ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd))
-                    && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & exclude_ws_ex) != exclude_ws_ex)
-                windowList.add(new User32HWndCtrl(hWnd));
-            return true;
-        }, null);
-        return windowList;
-    }
-
-    public static MousePoint getMousePos() {
-        WinDef.POINT point = new WinDef.POINT();
-        boolean result = User32.INSTANCE.GetCursorPos(point);
-        if (!result) return new MousePoint(0, 0);
-        return new MousePoint(point.x, point.y);
-    }
-
     /** Gets the value of the window's extended styles.
      * @return EX_STYLE value.
      * @see WinUser
@@ -189,13 +138,6 @@ public class User32HWndCtrl extends HWndCtrl {
         User32.INSTANCE.SetWindowPos(hWnd, null, 0, 0, 0, 0, WinUser.SWP_NOSIZE | WinUser.SWP_NOMOVE | WinUser.SWP_NOZORDER | WinUser.SWP_FRAMECHANGED);
     }
 
-    /** Gets the topmost window.
-     * @return The topmost window's HWndCtrl.
-     */
-    protected static User32HWndCtrl getTopmostWindow() {
-        return new User32HWndCtrl(new HWND(Pointer.createConstant(-1)));
-    }
-
     protected static String getWindowText(HWND hWnd) {
         char[] text = new char[1024];
         User32.INSTANCE.GetWindowText(hWnd, text, 1024);
@@ -208,7 +150,7 @@ public class User32HWndCtrl extends HWndCtrl {
         return new WindowRect(rect.top, rect.bottom, rect.left, rect.right);
     }
 
-    protected static boolean isVisible(HWND hWnd) {
+    static boolean isVisible(HWND hWnd) {
         try {
             if (!User32.INSTANCE.IsWindowVisible(hWnd) || !User32.INSTANCE.IsWindowEnabled(hWnd))
                 return false;
