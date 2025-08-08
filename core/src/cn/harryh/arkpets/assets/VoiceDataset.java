@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 
@@ -35,9 +36,9 @@ public class VoiceDataset {
         data = new HashMap<>();
         for (String key : bean.data.keySet()) {
             JSONObject variations = bean.data.get(key).getJSONObject("variations");
-            HashMap<VoiceLang, VoiceItem> vMap = variations.toJavaObject(new TypeReference<>() {
+            TreeMap<VoiceLang, VoiceItem> vMap = variations.toJavaObject(new TypeReference<>() {
             });
-            data.put(key, new VoiceItemGroup(vMap));
+            data.put(key, new VoiceItemGroup(key,vMap));
         }
         audioTypes = new HashMap<>();
         for (String key : bean.audioTypes.keySet())
@@ -51,6 +52,35 @@ public class VoiceDataset {
 
     public String getLocalizedName(String lang,String id) {
         return localizations.get(lang).get(id);
+    }
+
+    public String getVoiceFile(VoiceItemGroup ig) {
+        return ig.getKey()+audioFormat;
+    }
+
+    public String getVoiceFolder(VoiceLang lang) {
+        return storageDirectory.get(lang).toString();
+    }
+
+    public VoiceItemGroup searchByFile(String file) {
+        if (file == null || file.isEmpty())
+            return null;
+        file = file.substring(0, file.length()-4);
+        for(var a:data.entrySet()) {
+            if (getVoiceFile(a.getValue()).equalsIgnoreCase(file))
+                return a.getValue();
+        }
+        return null;
+    }
+
+    public VoiceLang getLangByFolder(String folder) {
+        if (folder == null || folder.isEmpty())
+            return null;
+        for(var s:storageDirectory.entrySet()) {
+            if(s.getValue().toString().equals(folder))
+                return s.getKey();
+        }
+        return null;
     }
 
     protected static class VoiceDatasetBean implements Serializable {

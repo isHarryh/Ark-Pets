@@ -60,6 +60,7 @@ public final class Const {
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
+    public static final String langIconFilePng  = "/icons/flags.png";
     // %s will be replaced by GL version (gl21, gles30)
     public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
     public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";

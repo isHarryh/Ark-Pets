@@ -14,6 +14,7 @@ import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
+import com.jfoenix.controls.JFXListView;
 import com.jfoenix.controls.JFXPopup;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -44,6 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -88,6 +90,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private Button topFavorite;
     @FXML
     private Button voiceSelect;
+    private ListView<VoiceLang> voiceList;
 
     @FXML
     private AnchorPane infoPane;
@@ -130,8 +133,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private ModelItemGroup assetItemList;
     private VoiceItemGroup voiceItemList;
     private ModelItemWrapper selectedModel;
+    private VoiceLang selectedLang;
     private final ObservableList<ModelItem> targetList = FXCollections.observableArrayList();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
+    private final ObservableList<VoiceLang> availableVoices = FXCollections.observableArrayList();
     private boolean filterFavorite;
 
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
@@ -255,9 +260,25 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                                 IOUtils.FileUtil.readString(new File(fileVoiceDataPath), charsetDefault)
                         )
                 );
-
                 //app.voiceDataset.data.removeIf(Predicate.not(ModelItem::isValid));
-                //todo version
+                try {
+                    // Check the dataset compatibility
+                    Version compatibleVersion = app.voiceDataset.arkPetsCompatibility;
+                    if (appVersion.lessThan(compatibleVersion)) {
+                        datasetTooHighVerNotice.activate();
+                        Logger.warn("VoiceManager", "The voice dataset version may be too high which requiring program version " + compatibleVersion);
+                    } else {
+                        datasetTooHighVerNotice.suppress();
+                    }
+                    if (datasetLowestVersion.greaterThan(compatibleVersion)) {
+                        datasetTooLowVerNotice.activate();
+                        Logger.warn("VoiceManager", "The voice dataset version may be too low");
+                    } else {
+                        datasetTooLowVerNotice.suppress();
+                    }
+                } catch (Exception ex) {
+                    Logger.warn("VoiceManager", "Failed to get the compatibility of the voice database.");
+                }
                 if (mngBtnComposer.getActivatedId() != 1)
                     mngBtnComposer.activate(1);
                 Logger.debug("VoiceManager", "Initialized voice dataset successfully.");
@@ -546,44 +567,32 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initVoiceSelect() {
-        var imgURL = getClass().getResource("/icons/flags.png").toString();
-        ListView<Label> labelJFXListView = new ListView<>();
-        ImageView imgOFF = new ImageView(imgURL);
-        imgOFF.setViewport(new Rectangle2D(0,256,64,64));
-        imgOFF.setFitHeight(32);
-        imgOFF.setFitWidth(32);
-        ImageView imgCN = new ImageView(imgURL);
-        imgCN.setViewport(new Rectangle2D(0,0,64,64));
-        imgCN.setFitHeight(32);
-        imgCN.setFitWidth(32);
-        ImageView imgJP = new ImageView(imgURL);
-        imgJP.setViewport(new Rectangle2D(0,64,64,64));
-        imgJP.setFitHeight(32);
-        imgJP.setFitWidth(32);
-        ImageView imgEN = new ImageView(imgURL);
-        imgEN.setViewport(new Rectangle2D(0,192,64,64));
-        imgEN.setFitHeight(32);
-        imgEN.setFitWidth(32);
-        ImageView imgKR = new ImageView(imgURL);
-        imgKR.setViewport(new Rectangle2D(0,128,64,64));
-        imgKR.setFitHeight(32);
-        imgKR.setFitWidth(32);
-        labelJFXListView.getItems().add(new Label("关闭",imgOFF));
-        labelJFXListView.getItems().add(new Label("普通话",imgCN));
-        labelJFXListView.getItems().add(new Label("日语",imgJP));
-        labelJFXListView.getItems().add(new Label("英语",imgEN));
-        labelJFXListView.getItems().add(new Label("韩语",imgKR));
-        for (Label n:labelJFXListView.getItems()) {
+        voiceList = new JFXListView<>();
+        JFXPopup popup = new JFXPopup(voiceList);
+        var imgURL = Objects.requireNonNull(getClass().getResource("/icons/flags.png")).toExternalForm();
+        voiceList.setItems(availableVoices);
+        /*for (Label n:voiceList.getItems()) {
             n.setMaxSize(90,32);
-        }
-        labelJFXListView.setMaxSize(150,200);
-        labelJFXListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-            System.out.println(newValue);
+        }*/
+        //voiceList.setMinSize(150,200);
+        voiceList.setMinWidth(150);
+        voiceList.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            if(newValue == null) return;
+            Logger.debug("VoiceManager","Select voice "+newValue);
+            selectedLang = newValue;
+            if(selectedLang == VoiceLang.OFF) {
+                app.config.voice_file=null;
+                app.config.voice_folder=null;
+                app.config.voice_data=null;
+                return;
+            }
+            var voice = app.voiceDataset.data.get(selectedModel.modelItem.getVoiceName());
+            app.config.voice_file = app.voiceDataset.getVoiceFile(voice);
+            app.config.voice_folder = app.voiceDataset.getVoiceFolder(selectedLang);
+            app.config.voice_data = (JSONObject) JSONObject.toJSON(voice.getVariation(selectedLang));
         }));
-        JFXPopup popup = new JFXPopup(labelJFXListView);
-        voiceSelect.setOnAction(e -> {
-            popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT,0,30);
-        });
+        voiceList.setCellFactory((view) -> new VoiceListCell(imgURL,150));
+        voiceSelect.setOnAction(e -> popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT,0,30));
     }
 
     public void modelSearch(String keyWords) {
@@ -723,8 +732,17 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
     public void voiceReload(boolean doPopNotice) {
         app.popLoading(e -> {
+            Logger.info("VoiceManager", "Reloading");
             if (initVoiceDataset(doPopNotice)) {
-                //todo
+                System.out.println("test");
+                modelListView.getSelectionModel().getSelectedItems().addListener(
+                        (ListChangeListener<ModelItem>) (observable -> observable.getList().forEach(
+                                (Consumer<ModelItem>) this::fetchVoiceData)
+                        )
+                );
+                selectedLang = app.voiceDataset.getLangByFolder(app.config.voice_folder);
+                fetchVoiceData(selectedModel.modelItem);
+                voiceList.getSelectionModel().select(selectedLang);
             }
         });
     }
@@ -879,6 +897,24 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
     }
 
+    private void fetchVoiceData(ModelItem model) {
+        var name = model.getVoiceName();
+        var itemg = app.voiceDataset.data.get(name);
+        if (itemg == null) {
+            voiceSelect.setVisible(false);
+            return;
+        } else {
+            voiceSelect.setVisible(true);
+        }
+        availableVoices.clear();
+        availableVoices.add(VoiceLang.OFF);
+        availableVoices.addAll(itemg.getVariations().keySet());
+        if(availableVoices.contains(selectedLang))
+            voiceList.getSelectionModel().select(selectedLang);
+        else
+            voiceList.getSelectionModel().select(VoiceLang.OFF);
+    }
+
 
     private class ModelListCell extends GuiPrefabs.RipperListCell<ModelItem> {
         private final double width;
@@ -925,6 +961,33 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 alias.setLayoutX(model.skinGroupName == null ? 0 : width * divide);
                 icon.setOpacity(app.config.character_favorites.containsKey(model.key) ? 1 : 0);
                 setId(model.getLocation());
+                setContentVisible(true);
+            }
+        }
+    }
+
+    private class VoiceListCell extends GuiPrefabs.RipperListCell<VoiceLang> {
+        private ImageView img;
+        private Label name;
+
+        public VoiceListCell(String imgURL, double width) {
+            super();
+            this.img = new ImageView(imgURL);
+            img.setFitHeight(32);
+            img.setFitWidth(32);
+            this.name = new Label();
+            name.setLayoutX(width * 0.3);
+            getContent().setAll(img,name);
+        }
+
+        @Override
+        protected void updateItem(VoiceLang voiceLang, boolean empty) {
+            super.updateItem(voiceLang, empty);
+            if (empty || voiceLang == null) {
+                setContentVisible(false);
+            } else {
+                name.setText(voiceLang.getLangName());
+                img.setViewport(new Rectangle2D(0,voiceLang.getIconY(),64,64));
                 setContentVisible(true);
             }
         }

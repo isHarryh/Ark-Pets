@@ -15,6 +15,7 @@ import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.util.ParameterizedTypeImpl;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
@@ -24,6 +25,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -122,7 +124,7 @@ public class ArkPets extends InputApplicationAdaptor {
         // Setup complete
         Logger.info("App", "Render");
 
-        if(config.voice_file != null && config.voice_data != null) initVoice(config.voice_file,config.voice_data);
+        if(config.voice_folder != null && config.voice_file != null && config.voice_data != null) initVoice(config.voice_folder,config.voice_file,config.voice_data);
     }
 
     @Override
@@ -197,7 +199,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
     @Override
     public void dispose() {
-        audioPlayer.dispose();
+        if(audioPlayer != null) audioPlayer.dispose();
         Logger.info("App", "Dispose");
     }
 
@@ -289,7 +291,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
-            audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_036", calcPan(), 0.8f)); // todo
+            if(audioPlayer!=null) audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_034", calcPan(), 0.8f)); // todo
             tray.hideDialog();
         }
     }
@@ -490,12 +492,14 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
 
-    private void initVoice(String file, JSONObject data) {
+    private void initVoice(String folder,String file, JSONObject data) {
         Logger.debug("Audio","Loading VoiceItem");
-        var item = data.toJavaObject(VoiceItem.class);
-        File ogg = new File(file);
+        ParameterizedTypeImpl inner = new ParameterizedTypeImpl(new Type[]{VoiceItem.VoiceClip.class},null,List.class);
+        ParameterizedTypeImpl out = new ParameterizedTypeImpl(new Type[]{inner},null,VoiceItem.class);
+        var item = data.toJavaObject(out);
+        File ogg = new File(folder,file);
         Logger.debug("Audio","Loading OGG: " + ogg.getAbsolutePath());
-        audioPlayer = AudioPlayer.loadAudio(ogg,item);
+        audioPlayer = AudioPlayer.loadAudio(ogg, (VoiceItem) item);
     }
 
     private float calcPan() {

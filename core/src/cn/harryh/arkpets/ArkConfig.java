@@ -121,6 +121,8 @@ public class ArkConfig implements Serializable {
     /** @since ArkPets 3.11 */ @JSONField()
     public JSONObject   voice_data;
     /** @since ArkPets 3.11 */ @JSONField()
+    public String       voice_folder;
+    /** @since ArkPets 3.11 */ @JSONField()
     public String       voice_file;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_toolwindow;
