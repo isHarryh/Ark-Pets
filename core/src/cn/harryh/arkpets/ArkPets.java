@@ -7,7 +7,7 @@ import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.assets.VoiceItem;
-import cn.harryh.arkpets.utils.AudioPlayer;
+import cn.harryh.arkpets.audio.AudioPlayer;
 import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
