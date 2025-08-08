@@ -6,8 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
-import cn.harryh.arkpets.assets.VoiceDataset;
-import cn.harryh.arkpets.assets.VoiceLang;
+import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.utils.AudioPlayer;
 import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
@@ -15,7 +14,7 @@ import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
@@ -25,13 +24,11 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.PixmapIO;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import static cn.harryh.arkpets.Const.charsetDefault;
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
@@ -125,7 +122,7 @@ public class ArkPets extends InputApplicationAdaptor {
         // Setup complete
         Logger.info("App", "Render");
 
-        initVoice("char_377_gdglow",VoiceLang.CN);
+        if(config.voice_file != null && config.voice_data != null) initVoice(config.voice_file,config.voice_data);
     }
 
     @Override
@@ -292,7 +289,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
-                audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_036", calcPan(), 0.8f));
+            audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_036", calcPan(), 0.8f)); // todo
             tray.hideDialog();
         }
     }
@@ -493,17 +490,12 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
 
-    private void initVoice(String name,VoiceLang lang) {
-        VoiceDataset set;
-        Logger.debug("Audio","Loading VoiceDataset");
-        try {
-            set = new VoiceDataset(JSON.parseObject(IOUtils.FileUtil.readString(new File("voice_data.json"),charsetDefault)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        File ogg = new File(set.storageDirectory.get(lang), name + set.audioFormat);
+    private void initVoice(String file, JSONObject data) {
+        Logger.debug("Audio","Loading VoiceItem");
+        var item = data.toJavaObject(VoiceItem.class);
+        File ogg = new File(file);
         Logger.debug("Audio","Loading OGG: " + ogg.getAbsolutePath());
-        audioPlayer = AudioPlayer.loadAudio(ogg,set.data.get(name), lang);
+        audioPlayer = AudioPlayer.loadAudio(ogg,item);
     }
 
     private float calcPan() {

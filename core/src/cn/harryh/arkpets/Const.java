@@ -101,7 +101,9 @@ public final class Const {
         public static final String tempDirPath      = "temp/";
         public static final String fileModelsZipName            = "ArkModels";
         public static final String fileModelsDataPath           = "models_data.json";
+        public static final String fileVoiceDataPath           = "voice_data.json";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
+        public static final String tempVoiceUnzipDirPath       = tempDirPath + "voice_unzipped/";
     }
 
 

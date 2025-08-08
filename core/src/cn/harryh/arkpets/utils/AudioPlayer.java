@@ -1,8 +1,6 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.assets.VoiceItem;
-import cn.harryh.arkpets.assets.VoiceItemGroup;
-import cn.harryh.arkpets.assets.VoiceLang;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.backends.lwjgl3.audio.OggInputStream;
@@ -48,8 +46,8 @@ public class AudioPlayer {
         }
     }
 
-    public static AudioPlayer loadAudio(File oggPath, VoiceItemGroup group, VoiceLang lang) {
-        return new AudioPlayer(group.getVariation(lang), oggPath);
+    public static AudioPlayer loadAudio(File oggPath, VoiceItem item) {
+        return new AudioPlayer(item, oggPath);
     }
 
     public void playAudio(PlayRequest req) {

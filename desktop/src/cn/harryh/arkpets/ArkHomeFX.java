@@ -4,6 +4,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.assets.ModelsDataset;
+import cn.harryh.arkpets.assets.VoiceDataset;
 import cn.harryh.arkpets.concurrent.*;
 import cn.harryh.arkpets.controllers.BehaviorModule;
 import cn.harryh.arkpets.controllers.ModelsModule;
@@ -46,6 +47,7 @@ public class ArkHomeFX extends Application {
     public Stage stage;
     public ArkConfig config;
     public ModelsDataset modelsDataset;
+    public VoiceDataset voiceDataset;
     public StackPane body;
     public Toast toast;
     public DialogComposer<ArkHomeFX> dialogs;

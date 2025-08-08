@@ -4,10 +4,7 @@
 package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.assets.DatasetKeyException;
-import cn.harryh.arkpets.assets.ModelItem;
-import cn.harryh.arkpets.assets.ModelItemGroup;
-import cn.harryh.arkpets.assets.ModelsDataset;
+import cn.harryh.arkpets.assets.*;
 import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelDatasetTask;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
@@ -44,7 +41,6 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -132,6 +128,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private Label modelHelp;
 
     private ModelItemGroup assetItemList;
+    private VoiceItemGroup voiceItemList;
     private ModelItemWrapper selectedModel;
     private final ObservableList<ModelItem> targetList = FXCollections.observableArrayList();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
@@ -169,6 +166,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelManage();
         initVoiceSelect();
         modelReload(false);
+        voiceReload(false);
         Platform.runLater(() -> {
             GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
             GuiPrefabs.disableScrollPaneCache(filterPaneTagScroll);
@@ -240,6 +238,63 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                         GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：发生意外错误。",
+                        "失败原因概要：" + e.getLocalizedMessage(),
+                        null).show();
+        }
+        if (mngBtnComposer.getActivatedId() != 0)
+            mngBtnComposer.activate(0);
+        return false;
+    }
+
+    public boolean initVoiceDataset(boolean doPopNotice) {
+        try {
+            try {
+                // Read and initialize the dataset
+                app.voiceDataset = new VoiceDataset(
+                        JSONObject.parseObject(
+                                IOUtils.FileUtil.readString(new File(fileVoiceDataPath), charsetDefault)
+                        )
+                );
+
+                //app.voiceDataset.data.removeIf(Predicate.not(ModelItem::isValid));
+                //todo version
+                if (mngBtnComposer.getActivatedId() != 1)
+                    mngBtnComposer.activate(1);
+                Logger.debug("VoiceManager", "Initialized voice dataset successfully.");
+                return true;
+            } catch (Exception e) {
+                // Explicitly set models dataset to empty.
+                app.voiceDataset = null;
+                throw e;
+            }
+
+            // If any exception occurred during the progress above:
+        } catch (FileNotFoundException e) {
+            Logger.warn("VoiceManager", "Failed to initialize voice dataset due to file not found. (" + e.getMessage() + ")");
+            if (doPopNotice) {
+                GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
+                        "语音库载入失败",
+                        "语音库未成功载入：未找到数据集。",
+                        "语音库数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行语音库下载。",
+                        null).show();
+            }
+        } catch (DatasetKeyException e) {
+            Logger.warn("VoiceManager", "Failed to initialize voice dataset due to dataset parsing error. (" + e.getMessage() + ")");
+            if (doPopNotice)
+                GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
+                        "语音库载入失败",
+                        "语音库未成功载入：数据集解析失败。",
+                        "语音库可能不完整，或无法被启动器正确识别。请尝试更新语音库或更新软件。",
+                        null).show();
+        } catch (IOException e) {
+            Logger.error("VoiceManager", "Failed to initialize voice dataset due to unknown reasons, details see below.", e);
+            if (doPopNotice)
+                GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
+                        "语音库载入失败",
+                        "语音库未成功载入：发生意外错误。",
                         "失败原因概要：" + e.getLocalizedMessage(),
                         null).show();
         }
@@ -522,6 +577,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             n.setMaxSize(90,32);
         }
         labelJFXListView.setMaxSize(150,200);
+        labelJFXListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            System.out.println(newValue);
+        }));
         JFXPopup popup = new JFXPopup(labelJFXListView);
         voiceSelect.setOnAction(e -> {
             popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT,0,30);
@@ -660,6 +718,14 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             if (willGc)
                 System.gc();
             Logger.info("ModelManager", "Reloaded");
+        });
+    }
+
+    public void voiceReload(boolean doPopNotice) {
+        app.popLoading(e -> {
+            if (initVoiceDataset(doPopNotice)) {
+                //todo
+            }
         });
     }
 

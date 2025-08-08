@@ -118,6 +118,10 @@ public class ArkConfig implements Serializable {
     public String       transition_type;
     /** @since ArkPets 3.7 */ @JSONField()
     public JSONObject   user_announcement_read;
+    /** @since ArkPets 3.11 */ @JSONField()
+    public JSONObject   voice_data;
+    /** @since ArkPets 3.11 */ @JSONField()
+    public String       voice_file;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
