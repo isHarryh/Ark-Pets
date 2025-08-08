@@ -38,14 +38,14 @@
                     <Label fx:id="configBehaviorAiActivationValue" text="0"/>
                 </HBox>
                 <HBox>
-                    <Label text="动作策略"/>
-                    <JFXRadioButton text="信赖养成" selected="true" toggleGroup="$group"/>
-                    <JFXRadioButton text="随机动作" toggleGroup="$group"/>
-                </HBox>
-                <HBox>
                     <Label text="行走速度"/>
                     <JFXSlider fx:id="configBehaviorWalkSpeed"/>
                     <Label fx:id="configBehaviorSpeedWalkValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="动作策略"/>
+                    <JFXRadioButton text="信赖养成" selected="true" toggleGroup="$group"/>
+                    <JFXRadioButton text="随机动作" toggleGroup="$group"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="交互"/>
@@ -85,22 +85,6 @@
                 <HBox fx:id="wrapperConfigDeployPosition" managed="false" visible="false">
                     <Label styleClass="config-help-text" text="在矩形区域内单击以选定桌宠生成时在屏幕中的初始位置"/>
                     <Canvas fx:id="configDeployPosition" height="150.0" width="150.0"/>
-                </HBox>
-                <Separator/>
-                <Label styleClass="config-group-title" text="语音"/>
-                <HBox>
-                    <JFXCheckBox fx:id="configVoiceStereo" mnemonicParsing="false" text="立体声语音"/>
-                    <JFXButton fx:id="configVoiceStereoHelp"/>
-                </HBox>
-                <HBox>
-                    <Label text="语音音量"/>
-                    <JFXSlider fx:id="configVoiceVolume"/>
-                    <Label fx:id="configVoiceVolumeValue" text="0"/>
-                </HBox>
-                <HBox>
-                    <Label text="同时播放语音数"/>
-                    <JFXSlider fx:id="configMaxPlayingVoice"/>
-                    <Label fx:id="configMaxPlayingVoiceValue" text="0"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="过渡"/>

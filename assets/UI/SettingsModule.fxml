@@ -115,6 +115,22 @@
                     </Tab>
                 </JFXTabPane>
                 <Separator/>
+                <Label styleClass="config-group-title" text="语音设置"/>
+                <HBox>
+                    <JFXCheckBox fx:id="configVoiceStereo" mnemonicParsing="false" text="立体声语音"/>
+                    <JFXButton fx:id="configVoiceStereoHelp"/>
+                </HBox>
+                <HBox>
+                    <Label text="语音音量"/>
+                    <JFXSlider fx:id="configVoiceVolume"/>
+                    <Label fx:id="configVoiceVolumeValue" text="0"/>
+                </HBox>
+                <HBox>
+                    <Label text="同时播放语音数"/>
+                    <JFXSlider fx:id="configMaxPlayingVoice"/>
+                    <Label fx:id="configMaxPlayingVoiceValue" text="0"/>
+                </HBox>
+                <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>
                     <JFXCheckBox fx:id="configAutoStartup" mnemonicParsing="false" text="开机自动生成桌宠"/>

@@ -95,6 +95,19 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private Button configEnableMipMapHelp;
 
     @FXML
+    private CheckBox configVoiceStereo;
+    @FXML
+    private Button configVoiceStereoHelp;
+    @FXML
+    private Slider configVoiceVolume;
+    @FXML
+    private Label configVoiceVolumeValue;
+    @FXML
+    private Slider configMaxPlayingVoice;
+    @FXML
+    private Label configMaxPlayingVoiceValue;
+
+    @FXML
     private CheckBox configWindowTopmost;
     @FXML
     private ComboBox<String> configLoggingLevel;
@@ -141,6 +154,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initHandbookEntrance();
         initConfigDisplay();
         initConfigRendering();
+        initConfigVoice();
         initConfigAdvanced();
         initNetwork();
         initAbout();
@@ -345,6 +359,32 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+    }
+
+    private void initConfigVoice() {
+        new HelpHandbookEntrance(app.body,configVoiceStereoHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configVoiceStereo) {
+                    @Override
+                    public String getContent() {
+                        return "启用后，桌宠将会根据在桌面的位置确定语音播放的位置。";
+                    }
+                };
+            }
+        };
+        SliderSetup<Integer> setupVoiceVolume = new SimpleIntegerSliderSetup(configVoiceVolume);
+        setupVoiceVolume
+                .setDisplay(configVoiceVolumeValue,"%d","音量")
+                .setRange(0,100)
+                .setTicks(10,1)
+                .setSliderValue(80);
+        SliderSetup<Integer> setupMaxPlayingVoiceValue = new SimpleIntegerSliderSetup(configMaxPlayingVoice);
+        setupMaxPlayingVoiceValue
+                .setDisplay(configMaxPlayingVoiceValue,"%d 个","音量")
+                .setRange(0,10)
+                .setTicks(2,1)
+                .setSliderValue(4);
     }
 
     private void initConfigAdvanced() {
