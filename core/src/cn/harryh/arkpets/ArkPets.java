@@ -291,7 +291,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
-            if(audioPlayer!=null) audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_034", calcPan(), 0.8f)); // todo
+            if(audioPlayer!=null) audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_034", calcPan(), config.voice_volume)); // todo
             tray.hideDialog();
         }
     }
@@ -503,6 +503,7 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     private float calcPan() {
+        if(!config.voice_stereo) return 0.5f;
         float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() /2);
         float screenWidth = plane.borderRight() - plane.borderLeft();
         return -1f + 2 * (currentX/screenWidth);

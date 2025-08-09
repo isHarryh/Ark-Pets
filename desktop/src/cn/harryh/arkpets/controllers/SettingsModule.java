@@ -373,18 +373,33 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+        configVoiceStereo.setSelected(app.config.voice_stereo);
+        configVoiceStereo.setOnAction(e -> {
+            app.config.voice_stereo = configVoiceStereo.isSelected();
+            app.config.save();
+        });
+
         SliderSetup<Integer> setupVoiceVolume = new SimpleIntegerSliderSetup(configVoiceVolume);
         setupVoiceVolume
                 .setDisplay(configVoiceVolumeValue,"%d","音量")
                 .setRange(0,100)
                 .setTicks(10,1)
-                .setSliderValue(80);
+                .setSliderValue(app.config.voice_volume * 100)
+                .setOnChanged(((observable, oldValue, newValue) -> {
+                    app.config.voice_volume = setupVoiceVolume.getValidatedValue() / 100f;
+                    app.config.save();
+                }));
         SliderSetup<Integer> setupMaxPlayingVoiceValue = new SimpleIntegerSliderSetup(configMaxPlayingVoice);
         setupMaxPlayingVoiceValue
                 .setDisplay(configMaxPlayingVoiceValue,"%d 个","音量")
                 .setRange(0,10)
                 .setTicks(2,1)
-                .setSliderValue(4);
+                .setSliderValue(app.config.voice_max_play)
+                .setOnChanged(((observable, oldValue, newValue) -> {
+                    app.config.voice_max_play = setupMaxPlayingVoiceValue.getValidatedValue();
+                    app.config.save();
+                }));
+
     }
 
     private void initConfigAdvanced() {
