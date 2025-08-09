@@ -45,13 +45,19 @@ public class AudioSlicer {
         }
         start = startTime.get(name);
         duration = durationTime.get(name);
-        int startByte = (int) Math.ceil(start * bytesPerSample);
-        int endByte = (int) Math.ceil(startByte + duration * bytesPerSample);
+
+        int startByte = (int) Math.floor(start * bytesPerSample);
+        startByte = startByte - (startByte % 2);
+
+        int endByte = (int) Math.floor(startByte + duration * bytesPerSample);
+        endByte = endByte - (endByte % 2);
+
         if (endByte > pcmBuffer.limit()) {
             endByte = pcmBuffer.limit();
         }
+
         int pcmLength = endByte - startByte;
-        byte[] dst = new byte[pcmLength+1];
+        byte[] dst = new byte[pcmLength];
         pcmBuffer.get(startByte, dst, 0, pcmLength);
         return dst;
     }
