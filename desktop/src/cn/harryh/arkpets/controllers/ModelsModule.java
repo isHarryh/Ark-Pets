@@ -569,30 +569,26 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private void initVoiceSelect() {
         voiceList = new JFXListView<>();
         JFXPopup popup = new JFXPopup(voiceList);
-        var imgURL = Objects.requireNonNull(getClass().getResource("/icons/flags.png")).toExternalForm();
+        String imgURL = Objects.requireNonNull(getClass().getResource("/icons/flags.png")).toExternalForm();
         voiceList.setItems(availableVoices);
-        /*for (Label n:voiceList.getItems()) {
-            n.setMaxSize(90,32);
-        }*/
-        //voiceList.setMinSize(150,200);
         voiceList.setMinWidth(150);
         voiceList.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-            if(newValue == null) return;
-            Logger.debug("VoiceManager","Select voice "+newValue);
+            if (newValue == null) return;
+            Logger.debug("VoiceManager", "Select voice " + newValue);
             selectedLang = newValue;
-            if(selectedLang == VoiceLang.OFF) {
-                app.config.voice_file=null;
-                app.config.voice_folder=null;
-                app.config.voice_data=null;
+            if (selectedLang == VoiceLang.OFF) {
+                app.config.voice_file = null;
+                app.config.voice_folder = null;
+                app.config.voice_data = null;
                 return;
             }
-            var voice = app.voiceDataset.data.get(selectedModel.modelItem.getVoiceName());
+            VoiceItemGroup voice = app.voiceDataset.data.get(selectedModel.modelItem.getVoiceName());
             app.config.voice_file = app.voiceDataset.getVoiceFile(voice);
             app.config.voice_folder = app.voiceDataset.getVoiceFolder(selectedLang);
             app.config.voice_data = (JSONObject) JSONObject.toJSON(voice.getVariation(selectedLang));
         }));
-        voiceList.setCellFactory((view) -> new VoiceListCell(imgURL,150));
-        voiceSelect.setOnAction(e -> popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT,0,30));
+        voiceList.setCellFactory((view) -> new VoiceListCell(imgURL, 150));
+        voiceSelect.setOnAction(e -> popup.show(voiceSelect, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 0, 30));
     }
 
     public void modelSearch(String keyWords) {
@@ -776,6 +772,20 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         app.config.character_label = model.name;
     }
 
+    private void fetchVoiceData(ModelItem model) {
+        String name = model.getVoiceName();
+        VoiceItemGroup itemGroup = app.voiceDataset.data.get(name);
+        voiceSelect.setVisible(itemGroup != null);
+        if (itemGroup == null) return;
+        availableVoices.clear();
+        availableVoices.add(VoiceLang.OFF);
+        availableVoices.addAll(itemGroup.getVariations().keySet());
+        if (availableVoices.contains(selectedLang))
+            voiceList.getSelectionModel().select(selectedLang);
+        else
+            voiceList.getSelectionModel().select(VoiceLang.OFF);
+    }
+
     private boolean assertModelLoaded(boolean doPopNotice) {
         if (app.modelsDataset == null) {
             // Not loaded:
@@ -897,24 +907,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
     }
 
-    private void fetchVoiceData(ModelItem model) {
-        var name = model.getVoiceName();
-        var itemg = app.voiceDataset.data.get(name);
-        if (itemg == null) {
-            voiceSelect.setVisible(false);
-            return;
-        } else {
-            voiceSelect.setVisible(true);
-        }
-        availableVoices.clear();
-        availableVoices.add(VoiceLang.OFF);
-        availableVoices.addAll(itemg.getVariations().keySet());
-        if(availableVoices.contains(selectedLang))
-            voiceList.getSelectionModel().select(selectedLang);
-        else
-            voiceList.getSelectionModel().select(VoiceLang.OFF);
-    }
-
 
     private class ModelListCell extends GuiPrefabs.RipperListCell<ModelItem> {
         private final double width;
@@ -966,9 +958,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
     }
 
-    private class VoiceListCell extends GuiPrefabs.RipperListCell<VoiceLang> {
-        private ImageView img;
-        private Label name;
+    private static class VoiceListCell extends GuiPrefabs.RipperListCell<VoiceLang> {
+        private final ImageView img;
+        private final Label name;
 
         public VoiceListCell(String imgURL, double width) {
             super();
@@ -977,7 +969,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             img.setFitWidth(32);
             this.name = new Label();
             name.setLayoutX(width * 0.3);
-            getContent().setAll(img,name);
+            getContent().setAll(img, name);
         }
 
         @Override
@@ -987,7 +979,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 setContentVisible(false);
             } else {
                 name.setText(voiceLang.getLangName());
-                img.setViewport(new Rectangle2D(0,voiceLang.getIconY(),64,64));
+                img.setViewport(new Rectangle2D(0, voiceLang.getIconY(), 64, 64));
                 setContentVisible(true);
             }
         }

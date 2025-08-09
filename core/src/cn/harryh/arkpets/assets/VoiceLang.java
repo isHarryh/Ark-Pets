@@ -10,15 +10,15 @@ public enum VoiceLang {
 
     private final String langName;
 
+    VoiceLang(String langName) {
+        this.langName = langName;
+    }
+
     public String getLangName() {
         return langName;
     }
 
     public int getIconY() {
         return 64 * this.ordinal();
-    }
-
-    VoiceLang(String langName) {
-        this.langName = langName;
     }
 }

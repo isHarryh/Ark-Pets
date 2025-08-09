@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 
-
 public class VoiceDataset {
     public final HashMap<VoiceLang, File> storageDirectory;
     public final HashMap<String, HashMap<String, String>> localizations;
@@ -38,7 +37,7 @@ public class VoiceDataset {
             JSONObject variations = bean.data.get(key).getJSONObject("variations");
             TreeMap<VoiceLang, VoiceItem> vMap = variations.toJavaObject(new TypeReference<>() {
             });
-            data.put(key, new VoiceItemGroup(key,vMap));
+            data.put(key, new VoiceItemGroup(key, vMap));
         }
         audioTypes = new HashMap<>();
         for (String key : bean.audioTypes.keySet())
@@ -50,12 +49,12 @@ public class VoiceDataset {
         arkPetsCompatibility = new Version(bean.arkPetsCompatibility);
     }
 
-    public String getLocalizedName(String lang,String id) {
+    public String getLocalizedName(String lang, String id) {
         return localizations.get(lang).get(id);
     }
 
     public String getVoiceFile(VoiceItemGroup ig) {
-        return ig.getKey()+audioFormat;
+        return ig.getKey() + audioFormat;
     }
 
     public String getVoiceFolder(VoiceLang lang) {
@@ -65,8 +64,8 @@ public class VoiceDataset {
     public VoiceItemGroup searchByFile(String file) {
         if (file == null || file.isEmpty())
             return null;
-        file = file.substring(0, file.length()-4);
-        for(var a:data.entrySet()) {
+        file = file.substring(0, file.length() - 4);
+        for (var a : data.entrySet()) {
             if (getVoiceFile(a.getValue()).equalsIgnoreCase(file))
                 return a.getValue();
         }
@@ -76,8 +75,8 @@ public class VoiceDataset {
     public VoiceLang getLangByFolder(String folder) {
         if (folder == null || folder.isEmpty())
             return null;
-        for(var s:storageDirectory.entrySet()) {
-            if(s.getValue().toString().equals(folder))
+        for (var s : storageDirectory.entrySet()) {
+            if (s.getValue().toString().equals(folder))
                 return s.getKey();
         }
         return null;

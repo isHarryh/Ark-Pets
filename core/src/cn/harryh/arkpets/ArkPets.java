@@ -492,21 +492,21 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
 
-    private void initVoice(String folder,String file, JSONObject data) {
-        Logger.debug("Audio","Loading VoiceItem");
-        ParameterizedTypeImpl inner = new ParameterizedTypeImpl(new Type[]{VoiceItem.VoiceClip.class},null,List.class);
-        ParameterizedTypeImpl out = new ParameterizedTypeImpl(new Type[]{inner},null,VoiceItem.class);
+    private void initVoice(String folder, String file, JSONObject data) {
+        Logger.debug("Audio", "Loading VoiceItem");
+        ParameterizedTypeImpl inner = new ParameterizedTypeImpl(new Type[]{VoiceItem.VoiceClip.class}, null, List.class);
+        ParameterizedTypeImpl out = new ParameterizedTypeImpl(new Type[]{inner}, null, VoiceItem.class);
         var item = data.toJavaObject(out);
-        File ogg = new File(folder,file);
-        Logger.debug("Audio","Loading OGG: " + ogg.getAbsolutePath());
+        File ogg = new File(folder, file);
+        Logger.debug("Audio", "Loading OGG: " + ogg.getAbsolutePath());
         audioPlayer = AudioPlayer.loadAudio(ogg, (VoiceItem) item);
     }
 
     private float calcPan() {
-        if(!config.voice_stereo) return 0.5f;
-        float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() /2);
+        if (!config.voice_stereo) return 0;
+        float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() / 2);
         float screenWidth = plane.borderRight() - plane.borderLeft();
-        return -1f + 2 * (currentX/screenWidth);
+        return -1f + 2 * (currentX / screenWidth);
     }
 
 
@@ -541,10 +541,7 @@ public class ArkPets extends InputApplicationAdaptor {
                 Logger.debug("Debugger", builder.toString());
             });
             registerKeyTyped('A', () -> {
-                float currentX = windowPosition.now().x + ((float) cha.camera.getWidth() /2);
-                float screenWidth = plane.borderRight() - plane.borderLeft();
-                float pan = -1f + 2 * (currentX/screenWidth);
-                Logger.debug("Audio","Current audio pan: " + pan);
+                Logger.debug("Debugger","Current audio pan: " + calcPan());
             });
         }
     }

@@ -7,13 +7,13 @@ public class VoiceItemGroup {
     private final String key;
     private final TreeMap<VoiceLang, VoiceItem> variations;
 
-    public VoiceItemGroup(String key,TreeMap<VoiceLang, VoiceItem> map) {
+    public VoiceItemGroup(String key, TreeMap<VoiceLang, VoiceItem> map) {
         this.key = key;
         variations = map;
     }
 
     public VoiceItemGroup() {
-        this("",new TreeMap<>());
+        this("", new TreeMap<>());
     }
 
     public TreeMap<VoiceLang, VoiceItem> getVariations() {
