@@ -582,7 +582,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 app.config.voice_data = null;
                 return;
             }
-            VoiceItemGroup voice = app.voiceDataset.data.get(selectedModel.modelItem.getVoiceName());
+            VoiceItemGroup voice = app.voiceDataset.getVoiceItemGroup(selectedModel.modelItem.key);
             app.config.voice_file = app.voiceDataset.getVoiceFile(voice);
             app.config.voice_folder = app.voiceDataset.getVoiceFolder(selectedLang);
             app.config.voice_data = (JSONObject) JSONObject.toJSON(voice.getVariation(selectedLang));
@@ -773,8 +773,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void fetchVoiceData(ModelItem model) {
-        String name = model.getVoiceName();
-        VoiceItemGroup itemGroup = app.voiceDataset.data.get(name);
+        VoiceItemGroup itemGroup = app.voiceDataset.getVoiceItemGroup(model.key);
         voiceSelect.setVisible(itemGroup != null);
         if (itemGroup == null) return;
         availableVoices.clear();

@@ -53,6 +53,15 @@ public class VoiceDataset {
         return localizations.get(lang).get(id);
     }
 
+    public VoiceItemGroup getVoiceItemGroup(String key) {
+        key = "char_"+key;
+        if(data.containsKey(key)) {
+            return this.data.get(key);
+        } else {
+            return this.data.get(key.substring(0,key.indexOf('#')));
+        }
+    }
+
     public String getVoiceFile(VoiceItemGroup ig) {
         return ig.getKey() + audioFormat;
     }

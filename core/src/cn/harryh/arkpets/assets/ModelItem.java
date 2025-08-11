@@ -101,12 +101,6 @@ public class ModelItem implements Serializable {
         return pinyinSuoxie;
     }
 
-    @JSONField(serialize = false)
-    public String getVoiceName() {
-        String[] data = key.split("_");
-        return "char_" + data[0] + "_" + data[1];
-    }
-
     /** Verifies the integrity of the necessary fields of this {@code ModelItem}.
      * @return {@code true} if all the following conditions are satisfied, otherwise {@code false}:
      *          1. Both {@code assetDir} and {@code type} are not {@code null}.
