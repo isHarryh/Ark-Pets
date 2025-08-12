@@ -54,11 +54,12 @@ public class VoiceDataset {
     }
 
     public VoiceItemGroup getVoiceItemGroup(String key) {
-        key = "char_"+key;
-        if(data.containsKey(key)) {
-            return this.data.get(key);
+        String newkey = "char_" + key;
+        if (data.containsKey(newkey)) {
+            return this.data.get(newkey);
         } else {
-            return this.data.get(key.substring(0,key.indexOf('#')));
+            String[] d = key.split("_");
+            return this.data.get("char_%s_%s".formatted(d[0], d[1]));
         }
     }
 
