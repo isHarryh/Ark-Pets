@@ -44,6 +44,11 @@ public class MemberTrayProxy extends MemberTray {
         popMenu.add(optChangeStage, 3);
     }
 
+    public void onCanMute() {
+        Logger.info("ProxyTray", "Can mute");
+        popMenu.add(optMuteEn, 3);
+    }
+
     @Override
     public void onExit() {
         Logger.info("ProxyTray", "Request to exit");
@@ -83,6 +88,20 @@ public class MemberTrayProxy extends MemberTray {
         Logger.info("ProxyTray", "Action-Mode enabled");
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);
+    }
+
+    @Override
+    public void onMuteEn() {
+        Logger.info("ProxyTray", "Muted");
+        popMenu.remove(optMuteEn);
+        popMenu.add(optMuteDis, 3);
+    }
+
+    @Override
+    public void onMuteDis() {
+        Logger.info("ProxyTray", "Unmuted");
+        popMenu.remove(optMuteDis);
+        popMenu.add(optMuteEn, 3);
     }
 
     @Override

@@ -146,6 +146,9 @@ public final class SocketServer {
                     case NO_KEEP_ACTION         -> tray.onKeepAnimDis();
                     case TRANSPARENT_MODE       -> tray.onTransparentEn();
                     case NO_TRANSPARENT_MODE    -> tray.onTransparentDis();
+                    case MUTE                   -> tray.onMuteEn();
+                    case UNMUTE                 -> tray.onMuteDis();
+                    case CAN_MUTE               -> tray.onCanMute();
                     case CAN_CHANGE_STAGE       -> tray.onCanChangeStage();
                     case CHANGE_STAGE           -> tray.onChangeStage();
                 }

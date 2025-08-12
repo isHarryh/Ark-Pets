@@ -59,6 +59,8 @@ public class MemberTrayImpl extends MemberTray {
         popMenu.add(optTransparentEn);
         if (arkPets.canChangeStage())
             popMenu.add(optChangeStage);
+        if (arkPets.audioPlayerAvailable())
+            popMenu.add(optMuteEn);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
@@ -147,6 +149,22 @@ public class MemberTrayImpl extends MemberTray {
     }
 
     @Override
+    public void onMuteEn() {
+        Logger.info("MemberTray", "Muted");
+        arkPets.setMute(true);
+        popMenu.remove(optMuteEn);
+        popMenu.add(optMuteDis, 3);
+    }
+
+    @Override
+    public void onMuteDis() {
+        Logger.info("MemberTray", "Unmuted");
+        arkPets.setMute(false);
+        popMenu.remove(optMuteDis);
+        popMenu.add(optMuteEn, 3);
+    }
+
+    @Override
     public void sendOperation(SocketData.Operation operation) {
         client.sendRequest(SocketData.ofOperation(uuid, operation));
     }
@@ -165,6 +183,8 @@ public class MemberTrayImpl extends MemberTray {
         client.sendRequest(SocketData.ofLogin(uuid, name));
         if (arkPets.canChangeStage())
             sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
+        if (arkPets.audioPlayerAvailable())
+            sendOperation(SocketData.Operation.CAN_MUTE);
         for (MenuElement element : popMenu.getSubElements()) {
             if (element.equals(optKeepAnimDis))
                 sendOperation(SocketData.Operation.KEEP_ACTION);

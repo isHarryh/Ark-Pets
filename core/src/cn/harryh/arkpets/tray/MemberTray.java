@@ -14,6 +14,8 @@ import java.util.UUID;
 public abstract class MemberTray {
     protected JMenuItem optKeepAnimEn       = new JMenuItem("手动模式");
     protected JMenuItem optKeepAnimDis      = new JMenuItem("退出手动");
+    protected JMenuItem optMuteEn           = new JMenuItem("开启静音");
+    protected JMenuItem optMuteDis          = new JMenuItem("关闭静音");
     protected JMenuItem optTransparentEn    = new JMenuItem("透明模式");
     protected JMenuItem optTransparentDis   = new JMenuItem("取消透明");
     protected JMenuItem optChangeStage      = new JMenuItem("切换形态");
@@ -43,6 +45,8 @@ public abstract class MemberTray {
 
         optKeepAnimEn       .addActionListener(e -> onKeepAnimEn());
         optKeepAnimDis      .addActionListener(e -> onKeepAnimDis());
+        optMuteEn           .addActionListener(e -> onMuteEn());
+        optMuteDis          .addActionListener(e -> onMuteDis());
         optTransparentEn    .addActionListener(e -> onTransparentEn());
         optTransparentDis   .addActionListener(e -> onTransparentDis());
         optChangeStage      .addActionListener(e -> onChangeStage());
@@ -50,6 +54,8 @@ public abstract class MemberTray {
 
         optKeepAnimEn       .addActionListener(e -> sendOperation(SocketData.Operation.KEEP_ACTION));
         optKeepAnimDis      .addActionListener(e -> sendOperation(SocketData.Operation.NO_KEEP_ACTION));
+        optMuteEn           .addActionListener(e -> sendOperation(SocketData.Operation.MUTE));
+        optMuteDis          .addActionListener(e -> sendOperation(SocketData.Operation.UNMUTE));
         optTransparentEn    .addActionListener(e -> sendOperation(SocketData.Operation.TRANSPARENT_MODE));
         optTransparentDis   .addActionListener(e -> sendOperation(SocketData.Operation.NO_TRANSPARENT_MODE));
         optChangeStage      .addActionListener(e -> sendOperation(SocketData.Operation.CHANGE_STAGE));
@@ -57,6 +63,8 @@ public abstract class MemberTray {
 
         optKeepAnimEn       .setIcon(null);
         optKeepAnimDis      .setIcon(null);
+        optMuteEn           .setIcon(null);
+        optMuteDis          .setIcon(null);
         optTransparentEn    .setIcon(null);
         optTransparentDis   .setIcon(null);
         optChangeStage      .setIcon(null);
@@ -70,6 +78,10 @@ public abstract class MemberTray {
     abstract public void onTransparentDis();
 
     abstract public void onTransparentEn();
+
+    abstract public void onMuteEn();
+
+    abstract public void onMuteDis();
 
     abstract public void onKeepAnimDis();
 

@@ -26,6 +26,7 @@ public class AudioPlayer {
     private Status status = Status.UNAVAILABLE;
     private int sample;
     private int channel;
+    private boolean mute;
 
     private AudioPlayer(VoiceItem group, File audio) {
         try {
@@ -53,6 +54,7 @@ public class AudioPlayer {
 
     public void playAudio(PlayRequest req) {
         if (status == Status.UNAVAILABLE) throw new IllegalStateException();
+        if (mute) return;
         if (status == Status.PLAYING) {
             Logger.warn("Audio","Audio is still playing.");
             return;
@@ -80,6 +82,14 @@ public class AudioPlayer {
             sound.dispose();
         }
         status = Status.UNAVAILABLE;
+    }
+
+    public boolean isMute() {
+        return mute;
+    }
+
+    public void setMute(boolean mute) {
+        this.mute = mute;
     }
 
     private Sound fetchSound(String name) {

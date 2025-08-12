@@ -29,7 +29,10 @@ public class SocketData implements Serializable {
         // Voice
         REQUEST_VOICE,
         CAN_VOICE,
-        NO_VOICE
+        NO_VOICE,
+        MUTE,
+        UNMUTE,
+        CAN_MUTE
     }
 
     /** The UUID for identification.

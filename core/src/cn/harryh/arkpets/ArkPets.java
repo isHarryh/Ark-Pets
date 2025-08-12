@@ -118,13 +118,15 @@ public class ArkPets extends InputApplicationAdaptor {
             hWndMine.setTopmost(true);
         updateWindow();
 
-        // 6.Tray icon setup
+        // 6.Voice setup
+        if (config.voice_folder != null && config.voice_file != null && config.voice_data != null)
+            initVoice(config.voice_folder, config.voice_file, config.voice_data);
+
+        // 7.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
 
         // Setup complete
         Logger.info("App", "Render");
-
-        if(config.voice_folder != null && config.voice_file != null && config.voice_data != null) initVoice(config.voice_folder,config.voice_file,config.voice_data);
     }
 
     @Override
@@ -226,6 +228,14 @@ public class ArkPets extends InputApplicationAdaptor {
     private void changeAnimation(AnimData animData) {
         if (cha.setAnimation(animData))
             offsetY = (int) (animData.animClip().type.offsetY * config.display_scale);
+    }
+
+    public boolean audioPlayerAvailable() {
+        return audioPlayer != null;
+    }
+
+    public void setMute(boolean mute) {
+        audioPlayer.setMute(mute);
     }
 
     /* INPUT PROCESS */

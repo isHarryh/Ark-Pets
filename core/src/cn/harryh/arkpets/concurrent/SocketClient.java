@@ -109,6 +109,8 @@ public class SocketClient {
                         case NO_KEEP_ACTION         -> memberTray.onKeepAnimDis();
                         case TRANSPARENT_MODE       -> memberTray.onTransparentEn();
                         case NO_TRANSPARENT_MODE    -> memberTray.onTransparentDis();
+                        case MUTE                   -> memberTray.onMuteEn();
+                        case UNMUTE                 -> memberTray.onMuteDis();
                         case CHANGE_STAGE           -> memberTray.onChangeStage();
                     }
                 }
