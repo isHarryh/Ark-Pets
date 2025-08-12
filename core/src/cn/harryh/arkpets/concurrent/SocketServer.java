@@ -30,6 +30,8 @@ public final class SocketServer {
     private final AtomicInteger playingAudios = new AtomicInteger(0);
     private static volatile SocketServer instance = null;
 
+    public int maxAudio;
+
     public static SocketServer getInstance() {
         if (instance == null)
             synchronized (SocketServer.class) {
@@ -108,7 +110,7 @@ public final class SocketServer {
     }
 
 
-    public static class ServerSocketSession extends SocketSession {
+    public class ServerSocketSession extends SocketSession {
         private final HostTray hostTray;
         private MemberTrayProxy tray;
         private UUID uuid = null;
@@ -141,6 +143,18 @@ public final class SocketServer {
                         hostTray.removeMemberTray(uuid);
                         tray.onExit();
                         close();
+                    }
+                    case REQUEST_VOICE -> {
+                        if(playingAudios.get() <= maxAudio) {
+                            playingAudios.incrementAndGet();
+                            this.send(SocketData.ofOperation(uuid, SocketData.Operation.CAN_VOICE));
+                        } else {
+                            this.send(SocketData.ofOperation(uuid, SocketData.Operation.NO_VOICE));
+                        }
+                    }
+                    case END_VOICE -> {
+                        if(playingAudios.get() > 0)
+                            playingAudios.decrementAndGet();
                     }
                     case KEEP_ACTION            -> tray.onKeepAnimEn();
                     case NO_KEEP_ACTION         -> tray.onKeepAnimDis();

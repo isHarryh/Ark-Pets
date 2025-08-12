@@ -28,6 +28,7 @@ public class SocketData implements Serializable {
         ACTIVATE_LAUNCHER,
         // Voice
         REQUEST_VOICE,
+        END_VOICE,
         CAN_VOICE,
         NO_VOICE,
         MUTE,
