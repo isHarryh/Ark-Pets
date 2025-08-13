@@ -1,8 +1,11 @@
 /** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.animations;
+package cn.harryh.arkpets.behavior;
 
+import cn.harryh.arkpets.animations.AnimClipGroup;
+import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.animations.AnimDataWeight;
 import cn.harryh.arkpets.utils.Cached;
 
 import java.util.Arrays;

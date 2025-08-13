@@ -5,9 +5,12 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
-import cn.harryh.arkpets.animations.GeneralBehavior;
+import cn.harryh.arkpets.behavior.GeneralBehavior;
 import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.audio.AudioPlayer;
+import cn.harryh.arkpets.behavior.State;
+import cn.harryh.arkpets.behavior.StateStore;
+import cn.harryh.arkpets.behavior.VoiceBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
@@ -48,13 +51,17 @@ public class ArkPets extends InputApplicationAdaptor {
     private final Cached<HWndCtrl> hWndTopmostGetter;
     private final Cached<Boolean> hWndTransparentSetter;
     private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
+    private final Cached<String> voiceString;
 
     private final String APP_TITLE;
     private int offsetY = 0;
     private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
+
     private AudioPlayer audioPlayer;
+    private StateStore state;
+    private VoiceBehavior voiceBehavior;
 
     public ArkPets(String title) {
         APP_TITLE = title;
@@ -69,6 +76,10 @@ public class ArkPets extends InputApplicationAdaptor {
 
         hWndTransparentSetter = new Cached<>();
         hWndPosSetter = new Cached<>();
+
+        voiceString = new Cached<>();
+        voiceString.setCacheAge(1);
+        voiceString.setValueProducer(() -> voiceString.isExpired() ? voiceBehavior.run() : null);
     }
 
     @Override
@@ -118,7 +129,7 @@ public class ArkPets extends InputApplicationAdaptor {
             hWndMine.setTopmost(true);
         updateWindow();
 
-        // 6.Voice setup
+        // 6.Voice and state setup
         if (config.voice_folder != null &&
                 config.voice_file != null &&
                 config.voice_data != null) {
@@ -127,6 +138,8 @@ public class ArkPets extends InputApplicationAdaptor {
                 audioPlayer.setMute(true);
             }
         }
+        state = new StateStore();
+        voiceBehavior = new VoiceBehavior(state);
 
         // 7.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
@@ -146,6 +159,12 @@ public class ArkPets extends InputApplicationAdaptor {
         if (tray.keepAnim == null) {
             if (behavior.isAutoAnimExpired()) {
                 newAnim = behavior.autoAnim(); // AI anim.
+
+                if (newAnim.animClip().type == AnimClip.AnimType.SLEEP) state.set(State.SLEEPING);
+                else {
+                    state.clear(State.SLEEPING);
+                    state.unmask(State.SLEEPING);
+                }
             } else {
                 newAnim = null;
             }
@@ -173,6 +192,9 @@ public class ArkPets extends InputApplicationAdaptor {
             newAnim = behavior.defaultAnim();
         } else if (plane.getDropped()) { // If dropped, play the dropped anim.
             newAnim = behavior.dropped();
+            if(!state.get(State.FIRST_LANDED)) {
+                state.set(State.FIRST_LANDED);
+            }
         } else if (tray.keepAnim != null) { // If action-mode is enabled.
             if (isLeftPressed()) newAnim = behavior.walkAnim(-1);      // Left pressed
             else if (isRightPressed()) newAnim = behavior.walkAnim(1); // Right pressed
@@ -198,6 +220,15 @@ public class ArkPets extends InputApplicationAdaptor {
         cha.setOutlineColor(ArkConfig.getGdxColorFrom(
                 tray.keepAnim != null ? config.render_outline_emphasis_color : config.render_outline_color
         ));
+
+        // 5.Voice.
+        if(audioPlayer != null) {
+            String voice = voiceString.getValue();
+            if (voice != null && audioPlayer.getStatus() != AudioPlayer.Status.PLAYING) {
+                audioPlayer.playAudio(new AudioPlayer.PlayRequest(voice, calcPan(), config.voice_volume));
+                voiceString.setValue(null);
+            }
+        }
     }
 
     @Override
@@ -308,7 +339,7 @@ public class ArkPets extends InputApplicationAdaptor {
         } else if (getMouseButton() == Input.Buttons.LEFT) {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
-            if(audioPlayer!=null) audioPlayer.playAudio(new AudioPlayer.PlayRequest("CN_034", calcPan(), config.voice_volume)); // todo
+            state.set(State.CLICKED);
             tray.hideDialog();
         }
     }
@@ -556,6 +587,9 @@ public class ArkPets extends InputApplicationAdaptor {
                 StringBuilder builder = new StringBuilder("Showing window list\n");
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
+            });
+            registerKeyTyped('M', () -> {
+                Logger.debug("Debugger",state.toString());
             });
             registerKeyTyped('A', () -> {
                 Logger.debug("Debugger","Current audio pan: " + calcPan());

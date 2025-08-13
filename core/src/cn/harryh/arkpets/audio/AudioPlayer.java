@@ -92,6 +92,10 @@ public class AudioPlayer {
         this.mute = mute;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     private Sound fetchSound(String name) {
         Sound sound = gdxSounds.get(name);
         if (sound == null) {
