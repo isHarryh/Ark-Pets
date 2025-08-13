@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,10 +28,8 @@ public final class SocketServer {
     private final Set<SocketSession> sessionList = new CopyOnWriteArraySet<>();
     private Thread listener;
     private final AtomicBoolean running = new AtomicBoolean(false);
-    private final AtomicInteger playingAudios = new AtomicInteger(0);
+    private Semaphore playingAudios;
     private static volatile SocketServer instance = null;
-
-    public int maxAudio;
 
     public static SocketServer getInstance() {
         if (instance == null)
@@ -49,11 +48,12 @@ public final class SocketServer {
      * @throws PortUtils.NoPortAvailableException If every port is busy.
      * @throws PortUtils.ServerCollisionException If a server is already running.
      */
-    public synchronized void startServer(HostTray hostTray)
+    public synchronized void startServer(HostTray hostTray, int maxVoice)
             throws PortUtils.NoPortAvailableException, PortUtils.ServerCollisionException {
         if (running.get())
             return;
         Logger.info("SocketServer", "Request to start server");
+        this.playingAudios = new Semaphore(maxVoice);
         this.port = PortUtils.getAvailablePort(serverPorts);
         listener = new Thread(() -> {
             try {
@@ -145,16 +145,17 @@ public final class SocketServer {
                         close();
                     }
                     case REQUEST_VOICE -> {
-                        if(playingAudios.get() <= maxAudio) {
-                            playingAudios.incrementAndGet();
+                        if(playingAudios.tryAcquire()) {
+                            Logger.info("SocketServer", "new voice");
                             this.send(SocketData.ofOperation(uuid, SocketData.Operation.CAN_VOICE));
                         } else {
+                            Logger.info("SocketServer", "no voice");
                             this.send(SocketData.ofOperation(uuid, SocketData.Operation.NO_VOICE));
                         }
                     }
                     case END_VOICE -> {
-                        if(playingAudios.get() > 0)
-                            playingAudios.decrementAndGet();
+                        Logger.info("SocketServer", "end voice");
+                        playingAudios.release();
                     }
                     case KEEP_ACTION            -> tray.onKeepAnimEn();
                     case NO_KEEP_ACTION         -> tray.onKeepAnimDis();

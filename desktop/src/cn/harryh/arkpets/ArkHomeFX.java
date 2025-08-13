@@ -94,8 +94,7 @@ public class ArkHomeFX extends Application {
                 hostTray.setOnCloseStage(() -> Platform.runLater(rootModule::exit));
                 hostTray.setOnShowStage(() -> Platform.runLater(stage::show));
                 SocketServer server = SocketServer.getInstance();
-                server.maxAudio = config.voice_max_play;
-                server.startServer(hostTray);
+                server.startServer(hostTray,config.voice_max_play);
                 hostTray.applyTrayIcon();
             } catch (PortUtils.NoPortAvailableException ex) {
                 Logger.error("SocketServer", "No available port, thus server cannot be started");
