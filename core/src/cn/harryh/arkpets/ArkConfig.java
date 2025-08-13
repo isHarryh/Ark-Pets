@@ -130,6 +130,8 @@ public class ArkConfig implements Serializable {
     public float        voice_volume;
     /** @since ArkPets 3.11 */ @JSONField(defaultValue = "4")
     public int          voice_max_play;
+    /** @since ArkPets 3.11 */ @JSONField(defaultValue = "true")
+    public boolean      voice_mute_standalone;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")

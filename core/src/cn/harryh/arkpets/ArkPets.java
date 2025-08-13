@@ -119,8 +119,14 @@ public class ArkPets extends InputApplicationAdaptor {
         updateWindow();
 
         // 6.Voice setup
-        if (config.voice_folder != null && config.voice_file != null && config.voice_data != null)
+        if (config.voice_folder != null &&
+                config.voice_file != null &&
+                config.voice_data != null) {
             initVoice(config.voice_folder, config.voice_file, config.voice_data);
+            if (config.voice_mute_standalone) {
+                audioPlayer.setMute(true);
+            }
+        }
 
         // 7.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());

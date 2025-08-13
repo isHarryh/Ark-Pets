@@ -99,6 +99,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private Button configVoiceStereoHelp;
     @FXML
+    private CheckBox configVoiceMuteStandalone;
+    @FXML
+    private Button configVoiceMuteStandaloneHelp;
+    @FXML
     private Slider configVoiceVolume;
     @FXML
     private Label configVoiceVolumeValue;
@@ -376,6 +380,22 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         configVoiceStereo.setSelected(app.config.voice_stereo);
         configVoiceStereo.setOnAction(e -> {
             app.config.voice_stereo = configVoiceStereo.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body,configVoiceMuteStandaloneHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configVoiceMuteStandalone) {
+                    @Override
+                    public String getContent() {
+                        return "启用后，桌宠将会在启动器退出或无法连接到启动器时自动静音。";
+                    }
+                };
+            }
+        };
+        configVoiceMuteStandalone.setSelected(app.config.voice_mute_standalone);
+        configVoiceMuteStandalone.setOnAction(e -> {
+            app.config.voice_mute_standalone = configVoiceMuteStandalone.isSelected();
             app.config.save();
         });
 

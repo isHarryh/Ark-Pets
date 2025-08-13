@@ -121,6 +121,10 @@
                     <JFXButton fx:id="configVoiceStereoHelp"/>
                 </HBox>
                 <HBox>
+                    <JFXCheckBox fx:id="configVoiceMuteStandalone" mnemonicParsing="false" text="独立运行时静音"/>
+                    <JFXButton fx:id="configVoiceMuteStandaloneHelp"/>
+                </HBox>
+                <HBox>
                     <Label text="语音音量"/>
                     <JFXSlider fx:id="configVoiceVolume"/>
                     <Label fx:id="configVoiceVolumeValue" text="0"/>

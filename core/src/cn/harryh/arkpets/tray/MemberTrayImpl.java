@@ -60,7 +60,7 @@ public class MemberTrayImpl extends MemberTray {
         if (arkPets.canChangeStage())
             popMenu.add(optChangeStage);
         if (arkPets.audioPlayerAvailable())
-            popMenu.add(optMuteEn);
+            popMenu.add(arkPets.config.voice_mute_standalone ? optMuteDis : optMuteEn);
         popMenu.add(optExit);
         popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
@@ -181,6 +181,7 @@ public class MemberTrayImpl extends MemberTray {
         Logger.info("MemberTray", "Integrated tray service connected");
         SystemTray.getSystemTray().remove(icon);
         client.sendRequest(SocketData.ofLogin(uuid, name));
+        if (arkPets.config.voice_mute_standalone) onMuteDis();
         if (arkPets.canChangeStage())
             sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
         if (arkPets.audioPlayerAvailable())
@@ -198,7 +199,7 @@ public class MemberTrayImpl extends MemberTray {
         Logger.info("MemberTray", "Integrated tray service disconnected");
         Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
         TrayIcon icon = getTrayIcon(image);
-
+        if(arkPets.config.voice_mute_standalone) onMuteEn();
         // Add the ISOLATED tray icon to the system tray.
         try {
             SystemTray.getSystemTray().add(icon);
