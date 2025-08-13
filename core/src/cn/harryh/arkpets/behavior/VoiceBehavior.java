@@ -3,34 +3,26 @@ package cn.harryh.arkpets.behavior;
 
 import cn.harryh.arkpets.utils.Logger;
 
+import java.util.Iterator;
+
 
 public class VoiceBehavior {
-    public StateStore state;
+    private final StateStore state;
 
     public VoiceBehavior(StateStore data) {
-        this.state =data;
+        this.state = data;
     }
 
     public String run() {
-        String voice = null;
-        // Special Event
-        if (state.get(State.FIRST_LANDED)) {
-            state.clear(State.FIRST_LANDED);
-            state.mask(State.FIRST_LANDED);
-            voice = Math.random() > 0.5f ? "CN_042" : "CN_037";
+        for (Iterator<State> it = state.getStateIter(); it.hasNext(); ) {
+            State s = it.next();
+            Logger.debug("Audio","Running State "+s);
+            String voice = s.run();
+            if(s.isOneShot()) state.mask(s);
+            state.clear(s);
+            Logger.debug("Audio","Select Voice "+voice);
+            return voice;
         }
-        // Interact Event
-        if (state.get(State.CLICKED)) {
-            state.clear(State.CLICKED); // clean
-            voice = Math.random() > 0.7f ? "CN_036" : "CN_034";
-        }
-        // Idle Event
-        if (state.get(State.SLEEPING) && Math.random() > 0.65f) {
-            state.clear(State.SLEEPING);
-            state.mask(State.SLEEPING);
-            voice = "CN_010";
-        }
-        Logger.debug("Audio","Select Voice "+voice);
-        return voice;
+        return null;
     }
 }

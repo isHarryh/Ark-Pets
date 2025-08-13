@@ -1,6 +1,7 @@
 package cn.harryh.arkpets.behavior;
 
 import java.util.EnumSet;
+import java.util.Iterator;
 
 
 public class StateStore {
@@ -35,6 +36,10 @@ public class StateStore {
 
     public boolean getMask(State state) {
         return this.mask.contains(state);
+    }
+
+    public Iterator<State> getStateIter() {
+        return state.iterator();
     }
 
     @Override
