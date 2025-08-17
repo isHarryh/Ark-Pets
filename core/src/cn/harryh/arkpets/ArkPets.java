@@ -235,6 +235,7 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     public void setMute(boolean mute) {
+        if (audioPlayer == null) return;
         audioPlayer.setMute(mute);
     }
 
