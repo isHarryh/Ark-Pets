@@ -160,26 +160,28 @@ public class ArkHomeFX extends Application {
 
     public void popBrowser(URI uri) {
         Logger.info("Launcher", "Request to open URI: " + uri);
-        try {
-            if ("file".equalsIgnoreCase(uri.getScheme())) {
-                // File URI
-                File localFile = new File(uri);
-                if (!localFile.isDirectory())
-                    throw new IOException("Given file URI should be a directory");
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        Desktop.getDesktop().open(localFile);
-                    } catch (IOException e) {
-                        Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
-                    }
-                });
-            } else {
-                // Other types of URI (like HTTP/HTTPS)
-                Desktop.getDesktop().browse(uri);
+        new Thread(() -> {
+            try {
+                if ("file".equalsIgnoreCase(uri.getScheme())) {
+                    // File URI
+                    File localFile = new File(uri);
+                    if (!localFile.isDirectory())
+                        throw new IOException("Given file URI should be a directory");
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            Desktop.getDesktop().open(localFile);
+                        } catch (IOException e) {
+                            Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
+                        }
+                    });
+                } else {
+                    // Other types of URI (like HTTP/HTTPS)
+                    Desktop.getDesktop().browse(uri);
+                }
+            } catch (IOException e) {
+                Logger.error("Launcher", "Failed to open the URI, details see below.", e);
             }
-        } catch (IOException e) {
-            Logger.error("Launcher", "Failed to open the URI, details see below.", e);
-        }
+        }).start();
     }
 
     public void popBrowser(String uri) {
