@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -90,6 +91,20 @@ public class VoiceDataset {
                 return s.getKey();
         }
         return null;
+    }
+
+    public boolean isValid(VoiceItemGroup itemGroup,VoiceLang lang) {
+        if (lang == null) {
+            for (Map.Entry<VoiceLang, VoiceItem> entry : itemGroup.getVariations().entrySet()) {
+                VoiceLang key = entry.getKey();
+                File f = new File(getVoiceFolder(key), getVoiceFile(itemGroup));
+                if(f.exists()) return true;
+            }
+            return false;
+        } else {
+            File f = new File(getVoiceFolder(lang),getVoiceFile(itemGroup));
+            return f.exists();
+        }
     }
 
     protected static class VoiceDatasetBean implements Serializable {

@@ -260,7 +260,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                                 IOUtils.FileUtil.readString(new File(fileVoiceDataPath), charsetDefault)
                         )
                 );
-                //app.voiceDataset.data.removeIf(Predicate.not(ModelItem::isValid));
+                app.voiceDataset.data.values().removeIf(Predicate.not(s -> app.voiceDataset.isValid(s,null)));
                 try {
                     // Check the dataset compatibility
                     Version compatibleVersion = app.voiceDataset.arkPetsCompatibility;
@@ -775,10 +775,11 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private void fetchVoiceData(ModelItem model) {
         VoiceItemGroup itemGroup = app.voiceDataset.getVoiceItemGroup(model.key);
         voiceSelect.setVisible(itemGroup != null);
+        voiceSelect.setManaged(itemGroup != null);
         if (itemGroup == null) return;
         availableVoices.clear();
         availableVoices.add(VoiceLang.OFF);
-        availableVoices.addAll(itemGroup.getVariations().keySet());
+        availableVoices.addAll(itemGroup.getVariations().keySet().stream().filter(l -> app.voiceDataset.isValid(itemGroup,l)).toList());
         if (availableVoices.contains(selectedLang))
             voiceList.getSelectionModel().select(selectedLang);
         else
