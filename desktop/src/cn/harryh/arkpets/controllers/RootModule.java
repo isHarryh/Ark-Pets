@@ -214,6 +214,12 @@ public final class RootModule implements Controller<ArkHomeFX> {
         SourceStrategy.registerStrategy("ModelDataset")
                 .addBackupSource("GitHub", "https://raw.githubusercontent.com/isHarryh/Ark-Models/main/models_data.json")
                 .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/isHarryh/Ark-Models/main/models_data.json");
+        SourceStrategy.registerStrategy("VoiceDownload")
+                .addBackupSource("GitHub", "https://github.com/isHarryh/Ark-Voice/archive/refs/heads/main.zip")
+                .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://github.com/isHarryh/Ark-Voice/archive/refs/heads/main.zip");
+        SourceStrategy.registerStrategy("VoiceDataset")
+                .addBackupSource("GitHub", "https://raw.githubusercontent.com/isHarryh/Ark-Voice/main/voice_data.json")
+                .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/isHarryh/Ark-Voice/main/voice_data.json");
 
         new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.HIDDEN, "auto").start();
     }
