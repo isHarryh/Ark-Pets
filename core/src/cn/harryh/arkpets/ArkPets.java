@@ -5,6 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
+import cn.harryh.arkpets.audio.AudioManager;
 import cn.harryh.arkpets.behavior.GeneralBehavior;
 import cn.harryh.arkpets.assets.VoiceItem;
 import cn.harryh.arkpets.audio.AudioPlayer;
@@ -12,6 +13,7 @@ import cn.harryh.arkpets.behavior.State;
 import cn.harryh.arkpets.behavior.StateStore;
 import cn.harryh.arkpets.behavior.VoiceBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
+import cn.harryh.arkpets.concurrent.SocketData;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
@@ -45,6 +47,7 @@ public class ArkPets extends InputApplicationAdaptor {
     public MemberTrayImpl tray;
     public GeneralBehavior behavior;
     public TransitionVector2 windowPosition; // Window Position Easing
+    public AudioManager audioManager;
 
     private HWndCtrl hWndMine;
     private List<? extends HWndCtrl> hWndList;
@@ -52,6 +55,7 @@ public class ArkPets extends InputApplicationAdaptor {
     private final Cached<Boolean> hWndTransparentSetter;
     private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
     private final Cached<String> voiceString;
+    private final Cached<Void> voiceTimer;
 
     private final String APP_TITLE;
     private int offsetY = 0;
@@ -80,6 +84,10 @@ public class ArkPets extends InputApplicationAdaptor {
         voiceString = new Cached<>();
         voiceString.setCacheAge(1);
         voiceString.setValueProducer(() -> voiceString.isExpired() ? voiceBehavior.run() : null);
+
+        voiceTimer = new Cached<>();
+        voiceTimer.setCacheAge(0.5);
+        voiceTimer.setValueProducer(this::requestVoice);
     }
 
     @Override
@@ -134,15 +142,23 @@ public class ArkPets extends InputApplicationAdaptor {
                 config.voice_file != null &&
                 config.voice_data != null) {
             initVoice(config.voice_folder, config.voice_file, config.voice_data);
+            audioPlayer.setOnFinish(() -> {
+                if (audioManager.isConnected() && audioManager.isVoicing()) {
+                    tray.sendOperation(SocketData.Operation.END_VOICE);
+                    audioManager.setVoicing(false);
+                }
+            });
             if (config.voice_mute_standalone) {
                 audioPlayer.setMute(true);
             }
         }
+        SocketClient client = new SocketClient();
+        audioManager = new AudioManager(audioPlayer,client);
         state = new StateStore();
         voiceBehavior = new VoiceBehavior(state);
 
         // 7.Tray icon setup
-        tray = new MemberTrayImpl(this, new SocketClient());
+        tray = new MemberTrayImpl(this, client);
 
         // Setup complete
         Logger.info("App", "Render");
@@ -222,13 +238,12 @@ public class ArkPets extends InputApplicationAdaptor {
         ));
 
         // 5.Voice.
-        if(audioPlayer != null) {
-            String voice = voiceString.getValue();
-            if (voice != null && audioPlayer.getStatus() != AudioPlayer.Status.PLAYING) {
-                audioPlayer.playAudio(new AudioPlayer.PlayRequest(voice, calcPan(), config.voice_volume));
-                voiceString.setValue(null);
-            }
+        String voice = voiceString.getValue();
+        if (voice != null) {
+            audioManager.enqueue(voice, calcPan(), config.voice_volume);
+            voiceString.setValue(null);
         }
+        voiceTimer.getValue();
     }
 
     @Override
@@ -272,8 +287,21 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     public void setMute(boolean mute) {
-        if (audioPlayer == null) return;
+        if (!audioPlayerAvailable()) return;
         audioPlayer.setMute(mute);
+    }
+
+    private Void requestVoice() {
+        if (!audioManager.isEmpty()) {
+            if (audioManager.isVoicing()) return null;
+            if (audioManager.isConnected() && !audioManager.isVoicing()) { // Online
+                tray.sendOperation(SocketData.Operation.REQUEST_VOICE);
+                audioManager.setVoicing(true);
+            } else if (audioPlayer != null && audioPlayer.getStatus() != AudioPlayer.Status.PLAYING) { // Offline
+                audioManager.dequeue();
+            }
+        }
+        return null;
     }
 
     /* INPUT PROCESS */

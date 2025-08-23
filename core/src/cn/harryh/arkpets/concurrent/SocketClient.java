@@ -112,6 +112,7 @@ public class SocketClient {
                         case MUTE                   -> memberTray.onMuteEn();
                         case UNMUTE                 -> memberTray.onMuteDis();
                         case CHANGE_STAGE           -> memberTray.onChangeStage();
+                        case CAN_VOICE              -> memberTray.onCanVoice();
                     }
                 }
             } catch (JSONException ignored) {

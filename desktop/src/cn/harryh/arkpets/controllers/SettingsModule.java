@@ -411,8 +411,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 }));
         SliderSetup<Integer> setupMaxPlayingVoiceValue = new SimpleIntegerSliderSetup(configMaxPlayingVoice);
         setupMaxPlayingVoiceValue
-                .setDisplay(configMaxPlayingVoiceValue,"%d 个","音量")
-                .setRange(0,10)
+                .setDisplay(configMaxPlayingVoiceValue,"%d 个","语音数")
+                .setRange(1,10)
                 .setTicks(2,1)
                 .setSliderValue(app.config.voice_max_play)
                 .setOnChanged(((observable, oldValue, newValue) -> {

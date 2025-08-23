@@ -17,7 +17,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static cn.harryh.arkpets.Const.serverPorts;
 
@@ -114,6 +113,7 @@ public final class SocketServer {
         private final HostTray hostTray;
         private MemberTrayProxy tray;
         private UUID uuid = null;
+        private boolean voicing;
 
         public ServerSocketSession(HostTray hostTray) {
             super();
@@ -146,16 +146,18 @@ public final class SocketServer {
                     }
                     case REQUEST_VOICE -> {
                         if(playingAudios.tryAcquire()) {
-                            Logger.info("SocketServer", "new voice");
+                            Logger.debug("SocketServer", "Available voice "+ playingAudios.availablePermits());
+                            voicing = true;
                             this.send(SocketData.ofOperation(uuid, SocketData.Operation.CAN_VOICE));
                         } else {
-                            Logger.info("SocketServer", "no voice");
+                            Logger.debug("SocketServer", "No voice "+ playingAudios.availablePermits());
                             this.send(SocketData.ofOperation(uuid, SocketData.Operation.NO_VOICE));
                         }
                     }
                     case END_VOICE -> {
-                        Logger.info("SocketServer", "end voice");
+                        Logger.debug("SocketServer", "End voice");
                         playingAudios.release();
+                        voicing = false;
                     }
                     case KEEP_ACTION            -> tray.onKeepAnimEn();
                     case NO_KEEP_ACTION         -> tray.onKeepAnimDis();
@@ -174,12 +176,20 @@ public final class SocketServer {
         @Override
         protected void onClosed() {
             Logger.info("SocketServer", "(-)" + this + " closed");
+            if (voicing) {
+                voicing = false;
+                playingAudios.release();
+            }
             SocketServer.getInstance().sessionList.remove(this);
         }
 
         @Override
         protected void onBroken() {
             Logger.info("SocketServer", "(x)" + this + " broken");
+            if (voicing) {
+                voicing = false;
+                playingAudios.release();
+            }
             hostTray.removeMemberTray(uuid);
         }
     }

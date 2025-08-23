@@ -7,9 +7,10 @@ import java.util.Queue;
 
 
 public class AudioManager {
-    private final Queue<AudioPlayer.PlayRequest> queue = new LinkedList<AudioPlayer.PlayRequest>();
+    private final Queue<AudioPlayer.PlayRequest> queue = new LinkedList<>();
     private final AudioPlayer player;
-    private SocketClient client;
+    private final SocketClient client;
+    private boolean voicing;
 
     public AudioManager(AudioPlayer player,SocketClient client) {
         this.player = player;
@@ -18,10 +19,30 @@ public class AudioManager {
 
     public void enqueue(String name,float pan,float vol) {
         queue.add(new AudioPlayer.PlayRequest(name,pan,vol));
-        //client.se();
     }
 
     public void dequeue() {
         player.playAudio(queue.poll());
+    }
+
+    public boolean isEmpty() {
+        return queue.isEmpty();
+    }
+
+    public boolean isConnected() {
+        return client.isConnected();
+    }
+
+    public boolean isVoicing() {
+        return voicing;
+    }
+
+    public void setVoicing(boolean voicing) {
+        this.voicing = voicing;
+    }
+
+    @Override
+    public String toString() {
+        return "AudioManager {Pending %d, Voicing %b}".formatted(queue.size(),voicing);
     }
 }

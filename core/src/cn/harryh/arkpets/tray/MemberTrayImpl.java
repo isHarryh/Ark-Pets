@@ -164,6 +164,11 @@ public class MemberTrayImpl extends MemberTray {
         popMenu.add(optMuteEn, 3);
     }
 
+    public void onCanVoice() {
+        Logger.debug("MemberTray", "Can Voice");
+        arkPets.audioManager.dequeue();
+    }
+
     @Override
     public void sendOperation(SocketData.Operation operation) {
         client.sendRequest(SocketData.ofOperation(uuid, operation));

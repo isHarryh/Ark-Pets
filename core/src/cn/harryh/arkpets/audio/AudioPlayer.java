@@ -27,6 +27,7 @@ public class AudioPlayer {
     private int sample;
     private int channel;
     private boolean mute;
+    private Runnable onFinish;
 
     private AudioPlayer(VoiceItem group, File audio) {
         try {
@@ -71,6 +72,7 @@ public class AudioPlayer {
         finishTimer.scheduleTask(new Timer.Task() {
             @Override
             public void run() {
+                if (onFinish != null) onFinish.run();
                 Logger.debug("Audio","End Audio "+ req.name);
                 status = Status.READY;
             }
@@ -112,6 +114,10 @@ public class AudioPlayer {
             gdxSounds.put(name, sound);
         }
         return sound;
+    }
+
+    public void setOnFinish(Runnable onFinish) {
+        this.onFinish = onFinish;
     }
 
     public enum Status{
