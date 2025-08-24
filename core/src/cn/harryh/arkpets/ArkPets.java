@@ -173,7 +173,7 @@ public class ArkPets extends InputApplicationAdaptor {
         // 2.Select a new animation.
         AnimData newAnim;
         if (tray.keepAnim == null) {
-            if (behavior.isAutoAnimExpired()) {
+            if (behavior.isAutoAnimExpired() && !isPlayingVoice()) {
                 newAnim = behavior.autoAnim(); // AI anim.
 
                 if (newAnim.animClip().type == AnimClip.AnimType.SLEEP) state.set(State.SLEEPING);
@@ -181,6 +181,12 @@ public class ArkPets extends InputApplicationAdaptor {
                     state.clear(State.SLEEPING);
                     state.unmask(State.SLEEPING);
                 }
+
+                if (newAnim.animClip().type == AnimClip.AnimType.IDLE
+                        || newAnim.animClip().type == AnimClip.AnimType.SIT
+                        || newAnim.animClip().type == AnimClip.AnimType.SPECIAL)
+                    state.set(State.IDLE);
+                else state.clear(State.IDLE);
             } else {
                 newAnim = null;
             }
@@ -286,6 +292,10 @@ public class ArkPets extends InputApplicationAdaptor {
         return audioPlayer != null;
     }
 
+    public boolean isPlayingVoice() {
+        return audioPlayer != null && audioPlayer.getStatus() == AudioPlayer.Status.PLAYING;
+    }
+
     public void setMute(boolean mute) {
         if (!audioPlayerAvailable()) return;
         audioPlayer.setMute(mute);
@@ -297,7 +307,7 @@ public class ArkPets extends InputApplicationAdaptor {
             if (audioManager.isConnected() && !audioManager.isVoicing()) { // Online
                 tray.sendOperation(SocketData.Operation.REQUEST_VOICE);
                 audioManager.setVoicing(true);
-            } else if (audioPlayer != null && audioPlayer.getStatus() != AudioPlayer.Status.PLAYING) { // Offline
+            } else if (!isPlayingVoice()) { // Offline
                 audioManager.dequeue();
             }
         }
@@ -616,11 +626,10 @@ public class ArkPets extends InputApplicationAdaptor {
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
             });
-            registerKeyTyped('M', () -> {
-                Logger.debug("Debugger",state.toString());
-            });
             registerKeyTyped('A', () -> {
                 Logger.debug("Debugger","Current audio pan: " + calcPan());
+                Logger.debug("Debugger", audioManager.toString());
+                Logger.debug("Debugger", state.toString());
             });
         }
     }

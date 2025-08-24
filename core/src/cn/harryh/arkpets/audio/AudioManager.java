@@ -43,6 +43,6 @@ public class AudioManager {
 
     @Override
     public String toString() {
-        return "AudioManager {Pending %d, Voicing %b}".formatted(queue.size(),voicing);
+        return "AudioManager [Pending %d, Voicing %b], Queue %s".formatted(queue.size(),voicing,queue.toString());
     }
 }
