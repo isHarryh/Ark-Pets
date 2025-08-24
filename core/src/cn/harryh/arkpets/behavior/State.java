@@ -2,23 +2,22 @@ package cn.harryh.arkpets.behavior;
 
 import java.util.function.Supplier;
 
+import static cn.harryh.arkpets.Const.VoiceConfig.*;
+
 
 public enum State {
     // todo adjust by trust
-    FIRST_START(() -> "CN_011",true),
-    SECOND_START(() -> "CN_033",true),
-    AFTER_SCHEDULED_START(() -> Math.random() > 0.6f ? "CN_017" : "CN_018",true),
-    AFTER_FAVORITE_START(() -> "CN_001",true),
-    FIRST_LANDED(() -> Math.random() > 0.5f ? "CN_042" : "CN_037",false),
-    CLICKED(() -> Math.random() > 0.7f ? "CN_036" : "CN_034",false),
-    SLEEPING(() -> Math.random() > 0.75f ? "CN_010" : null,false),
+    FIRST_START(() -> reporting,true),
+    SECOND_START(() -> enterFacility,true),
+    AFTER_SCHEDULED_START(() -> Math.random() > 0.6f ? deployToTeam : appointLeader,true),
+    AFTER_FAVORITE_START(() -> appointAssistant,true),
+    FIRST_LANDED(() -> Math.random() > 0.5f ? greeting : title,false),
+    CLICKED(() -> Math.random() > 0.7f ? trustTouch : tapOnce,false),
+    SLEEPING(() -> Math.random() > 0.75f ? idle : null,false),
     IDLE(() -> {
-        if (Math.random() > 0.85f) {
-            double r = Math.random();
-            if (r>0.66) return "CN_004";
-            else if (r>0.33) return "CN_003";
-            else return "CN_002";
-        } else return null;
+        if (Math.random() > 0.85f)
+            return talkLv1[(int) Math.floor((Math.random() * (talkLv1.length - 1)))];
+        else return null;
     },false);
 
     private final Supplier<String> action;

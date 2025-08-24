@@ -160,4 +160,21 @@ public final class Const {
             }
         }
     }
+
+    public static class VoiceConfig {
+        public static final String   appointAssistant  = "CN_001";
+        public static final String   idle              = "CN_010";
+        public static final String   reporting         = "CN_011";
+        public static final String   deployToTeam      = "CN_017";
+        public static final String   appointLeader     = "CN_018";
+        public static final String   enterFacility     = "CN_033";
+        public static final String   tapOnce           = "CN_034";
+        public static final String   trustTouch        = "CN_036";
+        public static final String   title             = "CN_037";
+        public static final String   greeting          = "CN_042";
+        public static final String[] talkLv1           = new String[]{"CN_002", "CN_003", "CN_004"};
+        public static final String[] talkLv2           = new String[]{"CN_002", "CN_003", "CN_004", "CN_007"};
+        public static final String[] talkLv3           = new String[]{"CN_002", "CN_003", "CN_004", "CN_005", "CN_007", "CN_008"};
+        public static final String[] talkLv4           = new String[]{"CN_002", "CN_003", "CN_004", "CN_005", "CN_006", "CN_007", "CN_008", "CN_009"};
+    }
 }
