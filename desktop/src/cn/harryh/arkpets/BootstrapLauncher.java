@@ -162,6 +162,7 @@ public class BootstrapLauncher {
             // Configure window layout
             config.setDecorated(WindowSystem.needDecorated());
             config.setResizable(WindowSystem.needResize());
+            config.setWindowSizeLimits(1, 1, 65535, 65535);
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);
             // Configure window title
