@@ -63,15 +63,22 @@ ext {
     distName = "${project.ext.appName}-v${project.version}"
 }
 
+task downloadAngle(type: Download, group: 'dist') {
+    src 'https://github.com/litwak913/FetchAngle/releases/download/angle/angle.zip'
+    dest layout.buildDirectory.file('angle.zip')
+    onlyIfModified true
+}
+
 // Generates a distributable JAR file for the app.
-task distJar(dependsOn: classes, type: Jar, group: 'dist') {
+task distJar(dependsOn: [classes, downloadAngle], type: Jar, group: 'dist') {
     duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
     manifest {
         attributes 'Main-Class': project.mainClassName
     }
     dependsOn configurations.runtimeClasspath
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        [zipTree(downloadAngle.dest),
+         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }]
     }
     with jar
     doLast() {
