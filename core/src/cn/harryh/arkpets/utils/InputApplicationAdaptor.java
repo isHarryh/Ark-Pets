@@ -6,7 +6,6 @@ package cn.harryh.arkpets.utils;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 
 import java.util.HashMap;
 

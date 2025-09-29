@@ -25,9 +25,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private final FrameCallback fcb = new FrameCallback();
 
+    private final LevelCallback lcb = new LevelCallback();
+
     private final long windowID;
     private Pointer nsWin;
-    final long layer;
+    long layer;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
@@ -115,10 +117,13 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setTopmost(boolean enable) {
         if(nsWin == null) return;
+        layer = enable ? NSStatusWindowLevel : NSNormalWindowLevel;
         ObjCHelper.msgSend.invokeVoid(new Object[]{
                 nsWin,
-                ObjCHelper.sel("setLevel:"),
-                enable ? NSStatusWindowLevel : NSNormalWindowLevel
+                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
+                ObjCHelper.sel("apRunOnAppKitLevel"),
+                null,
+                1
         });
     }
 
@@ -163,6 +168,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
                 ObjCHelper.sel("class")
         });
         ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
+        ObjCHelper.addRunOnAppKitMethod(cls, lcb, "Level");
     }
 
     static String getWindowName(Pointer value) {
@@ -224,6 +230,17 @@ public class QuartzHWndCtrl extends HWndCtrl {
                     ObjCHelper.sel("setFrame:display:animate:"),
                     newRect,
                     1, 0
+            });
+        }
+    }
+
+    private class LevelCallback implements ObjCHelper.ThreadCallback {
+        @Override
+        public void callback(Pointer id, Pointer _cmd) {
+            ObjCHelper.msgSend.invokeVoid(new Object[]{
+                    nsWin,
+                    ObjCHelper.sel("setLevel:"),
+                    layer
             });
         }
     }
