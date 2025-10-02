@@ -54,11 +54,22 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
     return sum;
 }
 
-vec4 getOutlined() {
-    vec4 texColor = texture2D(u_texture, v_texCoords);
+vec4 getSampleSum(float width) {
+    vec4 texColorUp = texture2D(u_texture, v_texCoords + vec2(0,-width)  / u_textureSize);
+    vec4 texColorDown = texture2D(u_texture, v_texCoords + vec2(0,width) / u_textureSize);
+    vec4 texColorLeft = texture2D(u_texture, v_texCoords + vec2(width,0) / u_textureSize);
+    vec4 texColorRight = texture2D(u_texture, v_texCoords + vec2(-width,0) / u_textureSize);
+    vec4 texColorUpLeft = texture2D(u_texture, v_texCoords + vec2(width,-width)  / u_textureSize);
+    vec4 texColorUpRight = texture2D(u_texture, v_texCoords + vec2(-width,-width) / u_textureSize);
+    vec4 texColorDownLeft = texture2D(u_texture, v_texCoords + vec2(width,width) / u_textureSize);
+    vec4 texColorDownRight = texture2D(u_texture, v_texCoords + vec2(-width,width) / u_textureSize);
+    return (texColorUp + texColorDown + texColorLeft + texColorRight) + (texColorUpLeft + texColorUpRight + texColorDownLeft + texColorDownRight);
+}
+
+vec4 getOutlined(vec4 sum,vec4 texColor) {
     if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
         vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
-        vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
+        vec4 neighbor = sum * c_outlineOverstate;
         if (neighbor.a > c_alphaLow) {
             texColor.rgb = u_outlineColor.rgb;
             texColor.a = min(1.0, neighbor.a) * u_outlineColor.a * u_outlineAlpha;
@@ -67,13 +78,11 @@ vec4 getOutlined() {
     return texColor;
 }
 
-vec4 getBoxShadow() {
+vec4 getBoxShadow(vec4 sum) {
     if (u_shadowColor.a <= 0.0) {
         return vec4(0.0);
     }
-    vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
-    vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
-    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
+    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(sum.a));
 }
 
 void main() {
@@ -82,14 +91,13 @@ void main() {
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
             // Outline effect
-            texColor = getOutlined();
+            texColor = getOutlined(getSampleSum(u_outlineWidth),texColor);
         }
         // Box shadow effect
-        texColor = mix(getBoxShadow(), texColor, texColor.a);
+        texColor = mix(getBoxShadow(getSampleSum(0.1)), texColor, texColor.a);
     } else {
         // No effect
     }
-
     // Ultimate composing
     gl_FragColor = texColor;
     gl_FragColor.a *= u_alpha;
