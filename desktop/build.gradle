@@ -8,6 +8,18 @@ eclipse.project.name = appName + "-desktop"
 
 import org.gradle.internal.os.OperatingSystem
 
+Task getDistTask() {
+    switch (OperatingSystem.current()) {
+        case OperatingSystem.LINUX:
+            return distAppImage
+        case OperatingSystem.WINDOWS:
+            return distExe
+        case OperatingSystem.MAC_OS:
+            return distDmg
+    }
+    return null
+}
+
 processResources {
     includeEmptyDirs = false
     excludes = [
@@ -217,7 +229,7 @@ task distAppImage(dependsOn: jpackage, type: Exec, group: 'dist') {
 
 // Generates ALL kinds of distributing files.
 tasks.register("distAll") {
-    dependsOn = ["distJar", "distZip", "distExe"]
+    dependsOn = ["distJar", "distZip", getDistTask()]
     group = "dist"
 
     doLast() {

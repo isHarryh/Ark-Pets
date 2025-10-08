@@ -3,84 +3,80 @@ name: Build
 on: workflow_dispatch
 
 jobs:
-  buildWin:
-    runs-on: windows-latest
+  build:
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      matrix:
+        target: [
+          { os: windows-latest, dist-ext: exe },
+          { os: macos-26, dist-ext: dmg },
+          { os: macos-latest, dist-ext: dmg },
+          { os: ubuntu-22.04, dist-ext: AppImage },
+          { os: ubuntu-latest, dist-ext: AppImage }
+        ]
     steps:
       - name: Check Ref
         run: |
           echo "Current ref: ${{  github.ref  }}"
+          echo "Current sha: ${{ github.sha }}"
+          echo "Current OS: ${{ matrix.target.os }}"
 
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'liberica'
           cache: 'gradle'
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 8.1.1
+          gradle-version: 8.14.3
+
+      - name: Setup Inno Setup
+        if: ${{ startsWith(matrix.target.os,'windows') }}
+        run: choco install innosetup --no-progress
+
+      - name: Setup Homebrew
+        if: ${{ startsWith(matrix.target.os,'macos') }}
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Setup create-dmg
+        if: ${{ startsWith(matrix.target.os,'macos') }}
+        run: brew install create-dmg
+
+      - name: Setup AppImage tools
+        if: ${{ startsWith(matrix.target.os,'ubuntu') }}
+        run: |
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20250213-2/linuxdeploy-x86_64.AppImage" -O linuxdeploy
+          chmod +x appimagetool linuxdeploy
+          sudo chown root:root appimagetool linuxdeploy
+          sudo mv appimagetool linuxdeploy /usr/bin/
 
       - name: Execute Gradle Tasks
         run: gradle clean distAll
 
-      - name: Upload Exe
-        uses: actions/upload-artifact@v4
+      - name: Upload ${{ matrix.target.dist-ext }}
+        uses: actions/upload-artifact@v6
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ArkPets.exe
-          path: desktop/build/dist/*.exe
+          name: ArkPets-${{ matrix.target.os }}.${{ matrix.target.dist-ext }}
+          path: desktop/build/dist/*.${{ matrix.target.dist-ext }}
 
       - name: Upload Zip
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ArkPets.zip
+          name: ArkPets-${{ matrix.target.os }}.zip
           path: desktop/build/dist/*.zip
 
       - name: Upload Jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ArkPets.jar
+          name: ArkPets-${{ matrix.target.os }}.jar
           path: desktop/build/dist/*.jar
-  buildMac:
-    runs-on: macos-latest
-    steps:
-      - name: Check Ref
-        run: |
-          echo "Current ref: ${{  github.ref  }}"
-
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup Homebrew
-        uses: Homebrew/actions/setup-homebrew@main
-
-      - name: Setup create-dmg
-        run: brew install create-dmg
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'liberica'
-          cache: 'gradle'
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v3
-        with:
-          gradle-version: 8.1.1
-
-      - name: Execute Gradle Tasks
-        run: gradle clean distDmg
-      - name: Upload DMG
-        uses: actions/upload-artifact@v4
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
-        with:
-          name: ArkPets.dmg
-          path: desktop/build/dist/*.dmg
