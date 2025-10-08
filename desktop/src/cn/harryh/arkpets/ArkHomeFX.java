@@ -15,6 +15,7 @@ import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -138,6 +139,8 @@ public class ArkHomeFX extends Application {
             // Post initialization.
             rootModule.configNetwork();
             rootModule.moduleWrapperComposer.activate(0);
+            if (isMac)
+                GuiPrefabs.disableNSWindowRestore(GuiPrefabs.getStageNativeHandle(stage));
 
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);
