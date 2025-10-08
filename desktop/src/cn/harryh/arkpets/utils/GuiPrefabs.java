@@ -7,9 +7,11 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
+import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.network.Connections;
 import cn.harryh.arkpets.network.api.McQueryVersion;
 import com.jfoenix.controls.*;
+import com.sun.javafx.tk.TKStage;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -31,6 +33,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.util.Builder;
 import javafx.util.Duration;
@@ -195,6 +198,25 @@ public class GuiPrefabs {
             stackPane.setCache(false);
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
         }
+    }
+
+    public static long getStageNativeHandle(Stage stage) {
+        try {
+            Field peerField = Window.class.getDeclaredField("peer");
+            peerField.setAccessible(true);
+            return ((TKStage)peerField.get(stage)).getRawHandle();
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    public static void disableNSWindowRestore(long ptr) {
+        ObjCHelper.init();
+        ObjCHelper.msgSend.invokeVoid(new Object[] {
+                ptr,
+                ObjCHelper.sel("setRestorable:"),
+                0
+        });
     }
 
 
