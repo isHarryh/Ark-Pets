@@ -87,8 +87,8 @@ public class X11HWndCtrl extends HWndCtrl {
 
         // 0000 0000 1111 0001
         //clientMsg(hWnd,"_NET_MOVERESIZE_WINDOW",3840,x,y,w,h);
-        x11.XSync(display, false);
         x11.XMoveResizeWindow(display, hWnd, x, y, w, h);
+        x11.XSync(display, false);
     }
 
     @Override

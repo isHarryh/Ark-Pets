@@ -17,6 +17,8 @@ import static cn.harryh.arkpets.platform.X11HWndCtrl.winText;
 public class X11HWndCtrlFactory extends HWndCtrlFactory{
     private static final X11Extension x11 = X11Extension.INSTANCE;
 
+    private static final X11.XErrorHandler handler = new ErrorHandler();
+
     static X11.Display display;
 
 
@@ -28,6 +30,8 @@ public class X11HWndCtrlFactory extends HWndCtrlFactory{
         } else {
             Logger.info("System", "Connected to X display");
         }
+
+        x11.XSetErrorHandler(handler);
     }
 
     @Override
@@ -86,7 +90,7 @@ public class X11HWndCtrlFactory extends HWndCtrlFactory{
 
     @Override
     public boolean needResize() {
-        return false;
+        return true;
     }
 
     @Override
@@ -105,5 +109,13 @@ public class X11HWndCtrlFactory extends HWndCtrlFactory{
         }
 
         return windowList;
+    }
+
+    private static class ErrorHandler implements X11.XErrorHandler {
+        @Override
+        public int apply(X11.Display display, X11.XErrorEvent errorEvent) {
+            Logger.error("System","X Error " + errorEvent.toString());
+            return 0;
+        }
     }
 }
