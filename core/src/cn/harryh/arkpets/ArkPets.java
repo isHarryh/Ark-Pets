@@ -18,7 +18,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -261,8 +260,9 @@ public class ArkPets extends InputApplicationAdaptor {
     protected void onMouseDrag() {
         if (getMouseButton() != Input.Buttons.RIGHT) {
             // Update window position
-            int x = (int) (windowPosition.now().x + getMouseDeltaX());
-            int y = (int) (windowPosition.now().y + getMouseDeltaY());
+            var pos = WindowSystem.getMousePos();
+            int x = pos.x() - getMouseX();
+            int y = pos.y() - getMouseY();
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
             tray.hideDialog();
