@@ -3,6 +3,7 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.rpc.MutterInterface;
 import cn.harryh.arkpets.rpc.MutterPluginInterface;
+import cn.harryh.arkpets.utils.HdpiUtils;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
 import org.freedesktop.dbus.connections.impl.DBusConnectionBuilder;
@@ -60,7 +61,7 @@ public class MutterHWndCtrlFactory extends HWndCtrlFactory{
     @Override
     public HWndCtrl.MousePoint getMousePos() {
         MutterInterface.PointStruct pos = dBusInterface.Mouse();
-        return new HWndCtrl.MousePoint(pos.x, pos.y);
+        return new HWndCtrl.MousePoint(HdpiUtils.toBackBufferX(pos.x), HdpiUtils.toBackBufferY(pos.y));
     }
 
     @Override
