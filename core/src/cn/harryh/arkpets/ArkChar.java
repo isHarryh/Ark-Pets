@@ -10,6 +10,8 @@ import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
 import cn.harryh.arkpets.assets.SkeletonLoader;
+import cn.harryh.arkpets.render.ComplexShader;
+import cn.harryh.arkpets.render.PlainShader;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
@@ -46,8 +48,8 @@ public class ArkChar {
     private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
 
-    private final ShaderProgram shader1;
-    private final ShaderProgram shader2;
+    private final PlainShader shader1;
+    private final ComplexShader shader2;
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
 
@@ -70,8 +72,8 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader, config.render_enable_angle);
-        shader2 = getShader(pass2VShader, pass2FShader, config.render_enable_angle);
+        shader1 = new PlainShader(config.render_enable_angle);
+        shader2 = new ComplexShader(config.render_enable_angle);
         Logger.debug("Shader", "Shader program compiled");
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
@@ -243,7 +245,7 @@ public class ArkChar {
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
-        shader1.setUniformf("u_alpha", 1.0f);
+        shader1.setAlpha(1.0f);
         batch.setShader(shader1);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
@@ -254,12 +256,12 @@ public class ArkChar {
         // Render Pass 2: Render additional effects
         Texture passedTexture = camera.getFBO().getColorBufferTexture();
         shader2.bind();
-        shader2.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        shader2.setUniformf("u_outlineWidth", outlineWidth);
-        shader2.setUniformf("u_outlineAlpha", outlineAlpha.now());
-        shader2.setUniformf("u_shadowColor", shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-        shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
-        shader2.setUniformf("u_alpha", alpha.now());
+        shader2.setOutlineColor(outlineColor);
+        shader2.setOutlineWidth(outlineWidth);
+        shader2.setOutlineAlpha(outlineAlpha.now());
+        shader2.setShadowColor(shadowColor);
+        shader2.setTextureSize(passedTexture);
+        shader2.setAlpha(alpha.now());
         batch.setShader(shader2);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
@@ -285,24 +287,12 @@ public class ArkChar {
         animationState.apply(skeleton);
         batch.getProjectionMatrix().set(camera.combined);
         shader1.bind();
-        shader1.setUniformf("u_alpha", alpha);
+        shader1.setAlpha(alpha);
         batch.setShader(shader1);
         batch.begin();
         renderer.draw(batch, skeleton);
         batch.end();
         batch.setShader(null);
-    }
-
-    private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
-        String ver = gles30 ? "gles30" : "gl21";
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
-        if (!shader.isCompiled()) {
-            Logger.error("Shader", "Shader program failed to compile.");
-            Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);
-            Logger.error("Shader", "Shader log: " + shader.getLog());
-            throw new RuntimeException("Launch ArkPets failed, failed to compile shaders.");
-        }
-        return shader;
     }
 
     private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {

@@ -133,7 +133,7 @@ public final class Const {
         private static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
 
         public static void loadFontsToJavafx() {
-            if (System.getProperty("arkpets.usesystemfont") == null) {
+            if (FlagsConfig.useSystemFont) {
                 javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
                         javafx.scene.text.Font.getDefault().getSize());
                 javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
@@ -142,7 +142,7 @@ public final class Const {
         }
 
         public static void loadFontsToSwing() {
-            if (System.getProperty("arkpets.usesystemfont") == null) {
+            if (FlagsConfig.useSystemFont) {
                 try {
                     InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
                     java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
@@ -155,6 +155,14 @@ public final class Const {
                     Logger.error("System", "Failed to load tray menu font, details see below.", e);
                 }
             }
+        }
+    }
+
+    public static class FlagsConfig {
+        public static final boolean useSystemFont;
+
+        static {
+            useSystemFont = System.getProperty("arkpets.usesystemfont") != null;
         }
     }
 }
