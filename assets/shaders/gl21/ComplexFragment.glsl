@@ -28,6 +28,25 @@ const float gaussianNeighborKernel[25] = float[25](
 0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
 );
 
+const vec2 OFFSETS[16] = vec2[16](
+    vec2(-1.000,  0.000),   // 0 (Left) - Actually 180, but starting here for comparison
+    vec2(-0.924, -0.383),   // 22.5
+    vec2(-0.707, -0.707),   // 45 (Down-Left)
+    vec2(-0.383, -0.924),   // 67.5
+    vec2( 0.000, -1.000),   // 90 (Down)
+    vec2( 0.383, -0.924),   // 112.5
+    vec2( 0.707, -0.707),   // 135 (Down-Right)
+    vec2( 0.924, -0.383),   // 157.5
+    vec2( 1.000,  0.000),   // 180 (Right) - Actually 0
+    vec2( 0.924,  0.383),   // 202.5
+    vec2( 0.707,  0.707),   // 225 (Up-Right)
+    vec2( 0.383,  0.924),   // 247.5
+    vec2( 0.000,  1.000),   // 270 (Up)
+    vec2(-0.383,  0.924),   // 292.5
+    vec2(-0.707,  0.707),   // 315 (Up-Left)
+    vec2(-0.924,  0.383)    // 337.5
+);
+
 vec4[24] getGaussianNeighbors(vec2 unitLength) {
     vec4 neighbors[24];
     int ni = 0;
@@ -54,16 +73,12 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
     return sum;
 }
 
-vec4 getSampleSum(float width) {
-    vec4 texColorUp = texture2D(u_texture, v_texCoords + vec2(0,-width)  / u_textureSize);
-    vec4 texColorDown = texture2D(u_texture, v_texCoords + vec2(0,width) / u_textureSize);
-    vec4 texColorLeft = texture2D(u_texture, v_texCoords + vec2(width,0) / u_textureSize);
-    vec4 texColorRight = texture2D(u_texture, v_texCoords + vec2(-width,0) / u_textureSize);
-    vec4 texColorUpLeft = texture2D(u_texture, v_texCoords + vec2(width,-width)  / u_textureSize);
-    vec4 texColorUpRight = texture2D(u_texture, v_texCoords + vec2(-width,-width) / u_textureSize);
-    vec4 texColorDownLeft = texture2D(u_texture, v_texCoords + vec2(width,width) / u_textureSize);
-    vec4 texColorDownRight = texture2D(u_texture, v_texCoords + vec2(-width,width) / u_textureSize);
-    return (texColorUp + texColorDown + texColorLeft + texColorRight) + (texColorUpLeft + texColorUpRight + texColorDownLeft + texColorDownRight);
+vec4 getSimpleSampleSum(float width) {
+    vec4 sum = vec4(0.0);
+    for (int i = 0; i < OFFSETS.length(); i++) {
+        sum += texture2D(u_texture, v_texCoords + OFFSETS[i]*width  / u_textureSize);;
+    }
+    return sum;
 }
 
 vec4 getOutlined(vec4 sum,vec4 texColor) {
@@ -78,11 +93,13 @@ vec4 getOutlined(vec4 sum,vec4 texColor) {
     return texColor;
 }
 
-vec4 getBoxShadow(vec4 sum) {
+vec4 getBoxShadow() {
     if (u_shadowColor.a <= 0.0) {
         return vec4(0.0);
     }
-    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(sum.a));
+    vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
+    vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
+    return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
 }
 
 void main() {
@@ -91,13 +108,14 @@ void main() {
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
             // Outline effect
-            texColor = getOutlined(getSampleSum(u_outlineWidth),texColor);
+            texColor = getOutlined(getSimpleSampleSum(u_outlineWidth),texColor);
         }
         // Box shadow effect
-        texColor = mix(getBoxShadow(getSampleSum(0.1)), texColor, texColor.a);
+        texColor = mix(getBoxShadow(), texColor, texColor.a);
     } else {
         // No effect
     }
+
     // Ultimate composing
     gl_FragColor = texColor;
     gl_FragColor.a *= u_alpha;
