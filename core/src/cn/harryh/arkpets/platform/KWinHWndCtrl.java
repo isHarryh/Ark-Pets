@@ -1,12 +1,9 @@
 package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.rpc.KWinInterface;
-import cn.harryh.arkpets.utils.HdpiUtils;
 import org.freedesktop.dbus.types.UInt32;
 
 import static cn.harryh.arkpets.platform.KWinHWndCtrlFactory.dBusInterface;
-import static cn.harryh.arkpets.utils.HdpiUtils.toBackBufferX;
-import static cn.harryh.arkpets.utils.HdpiUtils.toBackBufferY;
 
 
 public class KWinHWndCtrl extends WaylandHWndCtrl {
@@ -15,10 +12,10 @@ public class KWinHWndCtrl extends WaylandHWndCtrl {
 
     protected KWinHWndCtrl(KWinInterface.DetailsStruct details) {
         super(details.title, new WindowRect(
-                toBackBufferY(details.y),
-                toBackBufferY(details.y + details.h.intValue()),
-                toBackBufferX(details.x),
-                toBackBufferX(details.x + details.w.intValue())));
+                (details.y),
+                (details.y + details.h.intValue()),
+                (details.x),
+                (details.x + details.w.intValue())));
         this.hWnd = details.id;
         this.details = details;
     }
@@ -50,8 +47,8 @@ public class KWinHWndCtrl extends WaylandHWndCtrl {
 
     @Override
     public void setWindowPosition(HWndCtrl insertAfter, int x, int y, int w, int h) {
-        dBusInterface.MoveResize(hWnd, HdpiUtils.toLogicalX(x), HdpiUtils.toLogicalY(y),
-                new UInt32(HdpiUtils.toLogicalX(w)), new UInt32(HdpiUtils.toLogicalY(h)));
+        dBusInterface.MoveResize(hWnd, (x), (y),
+                new UInt32((w)), new UInt32((h)));
     }
 
     @Override
