@@ -260,9 +260,8 @@ public class ArkPets extends InputApplicationAdaptor {
     protected void onMouseDrag() {
         if (getMouseButton() != Input.Buttons.RIGHT) {
             // Update window position
-            var pos = WindowSystem.getMousePos();
-            int x = pos.x() - getMouseX();
-            int y = pos.y() - getMouseY();
+            int x = (int) (windowPosition.now().x + getMouseDeltaX());
+            int y = (int) (windowPosition.now().y + getMouseDeltaY());
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
             tray.hideDialog();
