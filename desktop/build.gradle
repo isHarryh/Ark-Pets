@@ -82,10 +82,10 @@ ext {
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
     issFileRel = "docs/scripts/ExePacking.iss"
-    distDir = layout.buildDirectory.dir("dist").get().toString()
-    distName = project.appName + "-v" + project.version
     macPackage = "docs/scripts/macPackage.sh"
     appImagePackage = "docs/scripts/appImagePackage.sh"
+    distDir = layout.buildDirectory.dir("dist").get().toString()
+    distName = project.appName + "-v" + project.version
     copyrightText = "Copyright (C) 2022-2026 Harry Huang"
 }
 
