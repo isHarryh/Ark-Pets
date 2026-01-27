@@ -90,7 +90,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
     private HBox toast;
 
     private ArkHomeFX app;
-    private boolean checkEnd;
+    private boolean envChecked;
 
     @Override
     public void initializeWith(ArkHomeFX app) {
@@ -237,14 +237,13 @@ public final class RootModule implements Controller<ArkHomeFX> {
 
     private void initLaunchButton() {
         // Build environment check confirm dialog.
+        List<EnvCheckTask> tasks = EnvCheckTask.getAvailableTasks();
         JFXDialog dialog = GuiPrefabs.Dialogs.createConfirmDialog(body,
                 GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP_ALT, GuiPrefabs.COLOR_INFO),
                 "环境检查",
                 "首次运行环境检查",
                 "这似乎是你第一次运行 ArkPets，我们需要对您的系统进行一些基本检查以确保桌宠能够正常运行。\n你也可以跳过检查，但可能会导致使用体验下降。",
-                () -> {
-                    new CheckEnvironmentTask(app.body,EnvCheckTask.getAvailableTasks(),this::launchArkPets).start();
-                });
+                () -> new CheckEnvironmentTask(app.body,tasks,this::launchArkPets).start());
         Node cancel = ((JFXDialogLayout)dialog.getContent()).getActions().get(0);
         ((JFXButton) cancel).setOnAction(e -> {
             GuiPrefabs.Dialogs.disposeDialog(dialog);
@@ -253,8 +252,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
         // Set handler for internal start button.
         launchBtn.setOnAction(e -> {
             // When request to launch ArkPets:
-            if (isNewcomer && !checkEnd) {
-                checkEnd = true;
+            if (!tasks.isEmpty() && isNewcomer && !envChecked) {
+                envChecked = true;
                 dialog.show();
                 return;
             }
