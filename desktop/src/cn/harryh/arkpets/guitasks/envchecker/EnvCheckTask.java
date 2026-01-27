@@ -39,7 +39,7 @@ public abstract class EnvCheckTask {
         ArrayList<EnvCheckTask> list = new ArrayList<>();
         list.add(new SleepEnvCheckTask(1000));
         if (Const.isWindows) {
-            list.add(new WinGraphicsEnvCheckTask());
+            // TODO
         }
         if (Const.isLinux) {
             String desktop = System.getenv("XDG_CURRENT_DESKTOP");

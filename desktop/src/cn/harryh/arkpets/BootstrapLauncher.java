@@ -4,7 +4,6 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
-import cn.harryh.arkpets.guitasks.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
@@ -107,13 +106,6 @@ public class BootstrapLauncher {
             @Override
             protected void process(String command, String addition) {
                 Titlebar.forceUiStyle = addition.toLowerCase();
-            }
-        };
-        // Remove NVIDIA settings when uninstall on windows.
-        new ArgPending("--remove-nvidia", ArgPending.argCache) {
-            @Override
-            protected void process(String command, String addition) {
-                new WinGraphicsEnvCheckTask().removeNvidiaSettings();
             }
         };
         // Disable libdecor to avoid glfw and javafx problem on linux.
