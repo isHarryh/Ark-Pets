@@ -1,0 +1,33 @@
+[versions]
+gdx = "1.11.0"
+jna = "5.12.1"
+spine-libgdx = "3.8.99.1"
+jfoenix = "9.0.1"
+fastjson = "2.0.60"
+commonmark = "0.24.0"
+reload4j = "1.2.26"
+tinypinyin = "2.0.3"
+opencc4j = "1.14.0"
+
+[libraries]
+spine = { module = "com.esotericsoftware.spine:spine-libgdx", version.ref = "spine-libgdx" }
+gdx = { module = "com.badlogicgames.gdx:gdx", version.ref = "gdx" }
+gdx-backend-lwjgl3 = { module = "com.badlogicgames.gdx:gdx-backend-lwjgl3", version.ref = "gdx" }
+gdx-lwjgl3-angle = { module = "com.badlogicgames.gdx:gdx-lwjgl3-angle", version.ref = "gdx" }
+gdx-platform = { module = "com.badlogicgames.gdx:gdx-platform", version.ref = "gdx" }
+jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+jfoenix = { module = "com.jfoenix:jfoenix", version.ref = "jfoenix" }
+fastjson = { module = "com.alibaba.fastjson2:fastjson2", version.ref = "fastjson" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-ext-autolink = { module = "org.commonmark:commonmark-ext-autolink", version.ref = "commonmark" }
+commonmark-ext-gfm-strikethrough = { module = "org.commonmark:commonmark-ext-gfm-strikethrough", version.ref = "commonmark" }
+commonmark-ext-gfm-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
+reload4j = { module = "ch.qos.reload4j:reload4j", version.ref = "reload4j" }
+tinypinyin = { module = "com.github.promeg:tinypinyin", version.ref = "tinypinyin" }
+opencc4j = { module = "com.github.houbb:opencc4j", version.ref = "opencc4j" }
+
+[bundles]
+gdx = ["gdx", "gdx-backend-lwjgl3", "gdx-lwjgl3-angle"]
+jna = ["jna", "jna-platform"]
+commonmark = ["commonmark", "commonmark-ext-autolink", "commonmark-ext-gfm-strikethrough", "commonmark-ext-gfm-tables"]

@@ -1,0 +1,188 @@
+import static cn.harryh.arkpets.build.BuildConsts.*
+import static cn.harryh.arkpets.build.BuildConsts.PackageConfig.*
+
+/* EXECUTION TASKS */
+
+// Runs the app without debug.
+tasks.register("run", JavaExec) {
+    dependsOn = ["classes"]
+    group = "execute"
+
+    mainClass = mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = assetsDir
+
+    setIgnoreExitValue(true)
+
+    if (org.gradle.internal.os.OperatingSystem.current() == org.gradle.internal.os.OperatingSystem.MAC_OS) {
+        jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
+    }
+}
+
+// Runs the app within debug.
+tasks.register("debug", JavaExec) {
+    dependsOn = ["classes"]
+    group = "execute"
+
+    mainClass = mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = assetsDir
+
+    setIgnoreExitValue(true)
+    setDebug(true)
+}
+
+
+/* DISTRIBUTION TASKS */
+
+// Environment vars
+def rootDir = project.rootDir
+def javaHome = System.getProperty('java.home')
+def osName = System.getProperty('os.name').toLowerCase(Locale.ROOT).split(' ')[0]
+def osPathSep = File.pathSeparatorChar
+
+// Distribution related vars
+def jarLibDir = layout.buildDirectory.dir("libs").get().toString()
+def jarLibName = project.name + "-" + project.version
+def jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
+def jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
+def distDir = layout.buildDirectory.dir("dist").get().toString()
+def distName = appName + "-v" + project.version
+
+
+// Generates a distributable JAR file for the app.
+tasks.register("distJar", Jar) {
+    dependsOn = ["classes"]
+    group = "dist"
+
+    doLast() {
+        copy {
+            from "${jarLibDir}/${jarLibName}.jar"
+            into distDir
+            rename "${jarLibName}.jar", "${distName}.jar"
+        }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+// Creates a customized Java Runtime Environment for the app.
+tasks.register("jlink", Exec) {
+    dependsOn = ["distJar"]
+    group = "dist"
+
+    doFirst() { delete jlinkDir }
+
+    workingDir project.projectDir
+    inputs.property("runtime", "${jlinkDir}/runtime")
+    commandLine = [
+            "${javaHome}/bin/jlink",
+            '--module-path', "${javaHome}/jmods",
+            '--add-modules', jlinkModuleList,
+            '--output', "${jlinkDir}/runtime",
+            '--strip-debug',
+            '--no-header-files',
+            '--no-man-pages',
+            '--vm=server',
+            '--compress=1',
+            '--include-locales', jlinkLocalesList
+    ] as List<String>
+    outputs.dir(jlinkDir)
+}
+
+// Packs the app into an EXE.
+tasks.register("jpackage", Exec) {
+    dependsOn = ["jlink"]
+    group = "dist"
+
+    doFirst() {
+        fileTree(jarLibDir).size()
+        if (fileTree(jarLibDir).size() > 1)
+            throw new RuntimeException("There may be legacy jars in the libs dir, please run 'clean' first.")
+        delete jpackageDir
+    }
+    doLast() {
+        copy {
+            from "${rootDir}/LICENSE"
+            into jpackageDir
+        }
+    }
+
+    workingDir project.projectDir
+    def commands = [
+            "${javaHome}/bin/jpackage",
+            '--input', jarLibDir,
+            '--dest', jpackageDir,
+            '--type', 'app-image',
+            '--name', appName,
+            '--vendor', appAuthor,
+            '--app-version', project.version,
+            '--main-class', mainClassName,
+            '--main-jar', jar.archiveFile.get().asFile.getName(),
+            '--runtime-image', "${jlinkDir}/runtime"
+    ]
+    if (osName.contains('windows')) {
+        commands << '--icon'
+        commands << "${assetsDir}/icons/icon.ico"
+    } else if (osName.contains('linux')) {
+        commands << '--icon'
+        commands << "${assetsDir}/icons/icon.png"
+    } else if (osName.contains('mac')) {
+        commands << '--java-options'
+        commands << "-XstartOnFirstThread"
+    }
+    commandLine = commands as List<String>
+}
+
+// Generates a distributable ZIP file for the app.
+tasks.register("distZip", Zip) {
+    dependsOn = ["jpackage"]
+    group = "dist"
+
+    from(jpackageDir) { include("**") }
+    from(rootDir) { include("README.md") }
+    archiveFileName = "${distName}.zip"
+    destinationDirectory = file(distDir)
+}
+
+// Generates a distributable EXE file for the app, using Inno Setup.
+// Note that you must install Inno Setup in your environment and add it to PATH before running this task.
+tasks.register("distExe", Exec) {
+    dependsOn = ["jpackage"]
+    group = "dist"
+
+    workingDir rootDir
+    def commands = [
+            "iscc",
+            "/Q",
+            issFileRel
+    ]
+    commandLine = commands
+}
+
+// Generates ALL kinds of distributing files.
+tasks.register("distAll") {
+    dependsOn = ["distJar", "distZip", "distExe"]
+    group = "dist"
+
+    doLast() {
+        logger.lifecycle("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
+        try {
+            delete jarLibDir
+            delete jlinkDir
+            delete jpackageDir
+        } catch (Exception ignored) {
+            logger.lifecycle("Unable to delete temp files.")
+        }
+    }
+}

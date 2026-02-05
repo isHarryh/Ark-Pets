@@ -1,0 +1,13 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    maven { url = "https://maven.aliyun.com/repository/gradle-plugin/" }
+    mavenLocal()
+    gradlePluginPortal()
+}
+
+dependencies {
+    implementation("org.openjfx.javafxplugin:org.openjfx.javafxplugin.gradle.plugin:0.1.0")
+}

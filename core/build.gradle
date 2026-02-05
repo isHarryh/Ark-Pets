@@ -1,4 +1,17 @@
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+plugins {
+    id 'arkpets-conventions'
+}
+
 sourceSets.main.java.srcDirs += [ "src/" ]
 
-eclipse.project.name = appName + "-core"
+dependencies {
+    api libs.spine
+    api libs.bundles.gdx
+    api libs.bundles.jna
+    api libs.jfoenix
+    api libs.fastjson
+    api libs.bundles.commonmark
+    api libs.reload4j
+    api libs.tinypinyin
+    api libs.opencc4j
+}
