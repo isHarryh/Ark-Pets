@@ -7,6 +7,7 @@
 !/docs/
 !/gradle/
 !/.github/
+!/buildSrc/
 
 # Exclude generated files
 bin/

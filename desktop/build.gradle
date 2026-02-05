@@ -1,9 +1,9 @@
+import static cn.harryh.arkpets.build.BuildConsts.*;
+import static cn.harryh.arkpets.build.BuildConsts.PackageConfig.*;
+
 [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
 sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.main.resources.srcDirs = ["../assets"]
-
-project.ext.mainClassName = "cn.harryh.arkpets.DesktopLauncher"
-project.ext.assetsDir = new File("../assets")
 eclipse.project.name = appName + "-desktop"
 
 import org.gradle.internal.os.OperatingSystem
@@ -40,10 +40,10 @@ tasks.register("debug", JavaExec) {
     dependsOn = ["classes"]
     group = "execute"
 
-    mainClass = project.mainClassName
+    mainClass = mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    workingDir = project.assetsDir
+    workingDir = assetsDir
 
     setIgnoreExitValue(true)
     setDebug(true)
@@ -62,12 +62,9 @@ ext {
     jarLibDir = layout.buildDirectory.dir("libs").get().toString()
     jarLibName = project.name + "-" + project.version
     jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
-    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
-    jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
-    issFileRel = "docs/scripts/ExePacking.iss"
     distDir = layout.buildDirectory.dir("dist").get().toString()
-    distName = project.appName + "-v" + project.version
+    distName = appName + "-v" + project.version
 }
 
 // Generates a distributable JAR file for the app.
