@@ -73,7 +73,7 @@ public class ArkChar {
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
         shader1 = new PlainShader(config.render_enable_angle);
-        shader2 = new ComplexShader(config.render_enable_angle);
+        shader2 = new ComplexShader(config.render_enable_angle, config.render_shader_low_quality);
         Logger.debug("Shader", "Shader program compiled");
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);

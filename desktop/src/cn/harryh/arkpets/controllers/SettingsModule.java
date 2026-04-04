@@ -86,6 +86,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private ComboBox<NamedItem<Integer>> configRenderShadowColor;
     @FXML
+    private CheckBox configEnableLowQuality;
+    @FXML
+    private Button configEnableLowQualityHelp;
+    @FXML
     private CheckBox configEnableAngle;
     @FXML
     private Button configEnableAngleHelp;
@@ -306,6 +310,23 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
+        configEnableLowQuality.setSelected(app.config.render_shader_low_quality);
+        configEnableLowQuality.setOnAction(e -> {
+            app.config.render_shader_low_quality = configEnableLowQuality.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableLowQualityHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableLowQuality.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会通过降低阴影和描边的平滑度来提高性能。\n" +
+                                "禁用时，桌宠将会以更精确的方式渲染阴影和描边。";
+                    }
+                };
+            }
+        };
         configEnableMipMap.setSelected(app.config.render_enable_mipmap);
         configEnableMipMap.setOnAction(e -> {
             app.config.render_enable_mipmap = configEnableMipMap.isSelected();

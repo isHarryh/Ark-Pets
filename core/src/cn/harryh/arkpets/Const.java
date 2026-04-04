@@ -65,6 +65,7 @@ public final class Const {
     public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
     public static final String pass2VShader     = "shaders/%s/PlainVertex.glsl";
     public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
+    public static final String pass2FShaderLow  = "shaders/%s/ComplexFragmentLow.glsl";
 
     // Changeable constants
     public static boolean isUpdateAvailable     = false;

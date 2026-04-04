@@ -28,25 +28,6 @@ const float gaussianNeighborKernel[25] = float[25](
 0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434
 );
 
-const vec2 OFFSETS[16] = vec2[16](
-    vec2(-1.000,  0.000),   // 0 (Left) - Actually 180, but starting here for comparison
-    vec2(-0.924, -0.383),   // 22.5
-    vec2(-0.707, -0.707),   // 45 (Down-Left)
-    vec2(-0.383, -0.924),   // 67.5
-    vec2( 0.000, -1.000),   // 90 (Down)
-    vec2( 0.383, -0.924),   // 112.5
-    vec2( 0.707, -0.707),   // 135 (Down-Right)
-    vec2( 0.924, -0.383),   // 157.5
-    vec2( 1.000,  0.000),   // 180 (Right) - Actually 0
-    vec2( 0.924,  0.383),   // 202.5
-    vec2( 0.707,  0.707),   // 225 (Up-Right)
-    vec2( 0.383,  0.924),   // 247.5
-    vec2( 0.000,  1.000),   // 270 (Up)
-    vec2(-0.383,  0.924),   // 292.5
-    vec2(-0.707,  0.707),   // 315 (Up-Left)
-    vec2(-0.924,  0.383)    // 337.5
-);
-
 vec4[24] getGaussianNeighbors(vec2 unitLength) {
     vec4 neighbors[24];
     int ni = 0;
@@ -73,18 +54,10 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
     return sum;
 }
 
-vec4 getSimpleSampleSum(float width) {
-    vec4 sum = vec4(0.0);
-    for (int i = 0; i < OFFSETS.length(); i++) {
-        sum += texture2D(u_texture, v_texCoords + OFFSETS[i]*width  / u_textureSize);;
-    }
-    return sum;
-}
-
-vec4 getOutlined(vec4 sum,vec4 texColor) {
+vec4 getOutlined(vec4 texColor) {
     if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
         vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
-        vec4 neighbor = sum * c_outlineOverstate;
+        vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
         if (neighbor.a > c_alphaLow) {
             texColor.rgb = u_outlineColor.rgb;
             texColor.a = min(1.0, neighbor.a) * u_outlineColor.a * u_outlineAlpha;
@@ -108,7 +81,7 @@ void main() {
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
             // Outline effect
-            texColor = getOutlined(getSimpleSampleSum(u_outlineWidth),texColor);
+            texColor = getOutlined(texColor);
         }
         // Box shadow effect
         texColor = mix(getBoxShadow(), texColor, texColor.a);

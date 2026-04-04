@@ -3,13 +3,13 @@ package cn.harryh.arkpets.render;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 
-import static cn.harryh.arkpets.Const.pass2FShader;
-import static cn.harryh.arkpets.Const.pass2VShader;
+import static cn.harryh.arkpets.Const.*;
 
 
 public class ComplexShader extends BaseShader {
-    public ComplexShader(boolean gles30) {
-        super(String.format(pass2VShader, gles30 ? "gles30" : "gl21"),String.format(pass2FShader, gles30 ? "gles30" : "gl21"));
+    public ComplexShader(boolean gles30, boolean low) {
+        super(String.format(pass2VShader, gles30 ? "gles30" : "gl21"),
+                String.format(low ? pass2FShaderLow : pass2FShader, gles30 ? "gles30" : "gl21"));
     }
 
     public void setAlpha(float alpha) {

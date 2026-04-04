@@ -110,6 +110,8 @@ public class ArkConfig implements Serializable {
     public String       render_outline_emphasis_color;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
     public float        render_outline_width;
+    /** @since ArkPets 3.12 */@JSONField(defaultValue = "false")
+    public boolean      render_shader_low_quality;
     /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")
     public String       render_shadow_color;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
