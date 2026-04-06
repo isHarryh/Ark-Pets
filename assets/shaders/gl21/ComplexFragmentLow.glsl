@@ -59,8 +59,27 @@ vec4 getOutlined(vec4 sum, vec4 texColor) {
     return texColor;
 }
 
-vec4 getBoxShadow() {
-    // TODO
+vec4 getBoxShadow(vec4 texColor) {
+    if (u_shadowColor.a > 0.0) {
+        // Calculate the shadow offset in texture coordinate space
+        vec2 shadowOffset = vec2(c_shadowOffset, -c_shadowOffset) / vec2(u_textureSize);
+
+        // Sample the texture at the offset position to get shadow alpha
+        vec4 shadowSample = texture2D(u_texture, v_texCoords - shadowOffset);
+
+        // Only apply shadow where the current pixel is transparent/semi-transparent
+        // and the offset source pixel is opaque
+        if (shadowSample.a > c_alphaLow && texColor.a < c_alphaHigh) {
+            float shadowAlpha = shadowSample.a * u_shadowColor.a;
+
+            // Blend shadow with current texColor using "over" compositing
+            // Shadow sits behind, so only fill where texColor is not already visible
+            float blendFactor = shadowAlpha * (1.0 - texColor.a);
+            texColor.rgb = mix(texColor.rgb, u_shadowColor.rgb, blendFactor);
+            texColor.a   = texColor.a + blendFactor;
+        }
+    }
+    return texColor;
 }
 
 void main() {
@@ -72,7 +91,7 @@ void main() {
             texColor = getOutlined(getSimpleSampleSum(u_outlineWidth),texColor);
         }
         // Box shadow effect
-        // TODO
+        texColor = getBoxShadow(texColor);
     } else {
         // No effect
     }
