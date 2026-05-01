@@ -290,11 +290,9 @@ public class ArkChar {
         spineBatch.getProjectionMatrix().set(camera.combined);
         shader1.bind();
         shader1.setAlpha(alpha);
-        spineBatch.setShader(shader1);
         spineBatch.begin();
         renderer.draw(spineBatch, skeleton);
         spineBatch.end();
-        spineBatch.setShader(null);
     }
 
     private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {
