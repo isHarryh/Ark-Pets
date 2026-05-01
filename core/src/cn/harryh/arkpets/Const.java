@@ -63,7 +63,7 @@ public final class Const {
     // %s will be replaced by GL version (gl21, gles30)
     public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
     public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
-    public static final String pass2VShader     = "shaders/%s/PlainVertex.glsl";
+    public static final String pass2VShader     = "shaders/%s/ComplexVertex.glsl";
     public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
     public static final String pass2FShaderLow  = "shaders/%s/ComplexFragmentLow.glsl";
 
