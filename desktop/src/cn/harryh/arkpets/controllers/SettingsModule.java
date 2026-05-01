@@ -86,9 +86,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private ComboBox<NamedItem<Integer>> configRenderShadowColor;
     @FXML
-    private CheckBox configEnableLowQuality;
+    private CheckBox configEnableHighQuality;
     @FXML
-    private Button configEnableLowQualityHelp;
+    private Button configEnableHighQualityHelp;
     @FXML
     private CheckBox configEnableAngle;
     @FXML
@@ -310,19 +310,19 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        configEnableLowQuality.setSelected(app.config.render_shader_low_quality);
-        configEnableLowQuality.setOnAction(e -> {
-            app.config.render_shader_low_quality = configEnableLowQuality.isSelected();
+        configEnableHighQuality.setSelected(app.config.render_shader_high_quality);
+        configEnableHighQuality.setOnAction(e -> {
+            app.config.render_shader_high_quality = configEnableHighQuality.isSelected();
             app.config.save();
         });
-        new HelpHandbookEntrance(app.body, configEnableLowQualityHelp) {
+        new HelpHandbookEntrance(app.body, configEnableHighQualityHelp) {
             @Override
             protected Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configEnableLowQuality.getParent().getChildrenUnmodifiable().get(0)) {
+                return new ControlHelpHandbook((Labeled) configEnableHighQuality.getParent().getChildrenUnmodifiable().get(0)) {
                     @Override
                     public String getContent() {
-                        return "启用时，将会通过降低阴影和描边的平滑度来提高性能。\n" +
-                                "禁用时，桌宠将会以更精确的方式渲染阴影和描边。";
+                        return "启用时，将会在阴影和描边上使用高质量滤波算法来提高渲染精度。\n" +
+                                "禁用时，桌宠将会以简单的方式渲染阴影和描边。";
                     }
                 };
             }

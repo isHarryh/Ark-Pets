@@ -104,8 +104,8 @@
                     <Tab text="其他">
                         <VBox>
                             <HBox>
-                                <JFXCheckBox fx:id="configEnableLowQuality" mnemonicParsing="false" text="流畅模式"/>
-                                <JFXButton fx:id="configEnableLowQualityHelp"/>
+                                <JFXCheckBox fx:id="configEnableHighQuality" mnemonicParsing="false" text="高质量滤波"/>
+                                <JFXButton fx:id="configEnableHighQualityHelp"/>
                             </HBox>
                             <HBox>
                                 <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="MipMap 抗锯齿"/>

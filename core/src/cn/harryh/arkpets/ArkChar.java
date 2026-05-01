@@ -76,7 +76,7 @@ public class ArkChar {
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
         shader1 = new PlainShader(config.render_enable_angle);
-        shader2 = new ComplexShader(config.render_enable_angle, config.render_shader_low_quality);
+        shader2 = new ComplexShader(config.render_enable_angle, config.render_shader_high_quality);
         Logger.debug("Shader", "Shader program compiled");
         spineBatch.setShader(shader1);
         finalBatch.setShader(shader2);

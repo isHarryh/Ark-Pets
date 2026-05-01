@@ -7,9 +7,9 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class ComplexShader extends BaseShader {
-    public ComplexShader(boolean gles30, boolean low) {
+    public ComplexShader(boolean gles30, boolean high) {
         super(String.format(pass2VShader, gles30 ? "gles30" : "gl21"),
-                String.format(low ? pass2FShaderLow : pass2FShader, gles30 ? "gles30" : "gl21"));
+                String.format(high ? pass2FShader : pass2FShaderLow, gles30 ? "gles30" : "gl21"));
     }
 
     public void setAlpha(float alpha) {
