@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -50,6 +50,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private CheckBox configBehaviorAllowInteract;
     @FXML
     private CheckBox configBehaviorDoPeerRepulsion;
+    @FXML
+    private ComboBox<NamedItem<Integer>> configDirectionSwitching;
     @FXML
     private CheckBox configDeployMultiMonitors;
     @FXML
@@ -143,7 +145,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         SliderSetup<Integer> setupBehaviorAiActivation = new SimpleIntegerSliderSetup(configBehaviorAiActivation);
         setupBehaviorAiActivation
                 .setDisplay(configBehaviorAiActivationValue, "%d 级", "活跃级别 (activation level)")
-                .setRange(0, 8)
+                .setRange(0, 16)
                 .setTicks(1, 0)
                 .setSliderValue(app.config.behavior_ai_activation)
                 .setOnChanged((observable, oldValue, newValue) -> {
@@ -172,6 +174,16 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
             app.config.behavior_do_peer_repulsion = configBehaviorDoPeerRepulsion.isSelected();
             app.config.save();
         });
+
+        new ComboBoxSetup<>(configDirectionSwitching).setItems(new NamedItem<>("禁用", 0),
+                        new NamedItem<>("松开拖拽时", 1),
+                        new NamedItem<>("拖拽时", 2),
+                        new NamedItem<>("光标掠过时", 3))
+                .selectValue(app.config.behavior_direction_switching, app.config.behavior_direction_switching + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.behavior_direction_switching = newValue.value();
+                    app.config.save();
+                });
 
         configDeployMultiMonitors.setSelected(app.config.display_multi_monitors);
         configDeployMultiMonitors.setOnAction(e -> {

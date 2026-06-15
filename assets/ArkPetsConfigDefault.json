@@ -5,6 +5,7 @@
     "behavior_allow_sleep":false,
     "behavior_allow_special":true,
     "behavior_allow_walk":true,
+    "behavior_direction_switching":1,
     "behavior_do_peer_repulsion":true,
     "behavior_walk_speed": 30.0,
     "canvas_color":"#00000000",

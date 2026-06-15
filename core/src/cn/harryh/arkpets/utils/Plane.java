@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.utils;
@@ -8,7 +8,7 @@ import com.badlogic.gdx.math.Vector3;
 
 import java.util.ArrayList;
 
-import static cn.harryh.arkpets.Const.droppedThreshold;
+import static cn.harryh.arkpets.Const.droppedYThreshold;
 
 
 public class Plane {
@@ -166,7 +166,7 @@ public class Plane {
     public boolean getDropped() {
         if (dropped) {
             dropped = false; // Reset
-            if (droppedHeight >= droppedThreshold) {
+            if (droppedHeight >= droppedYThreshold) {
                 droppedHeight = 0; // Reset
                 return true;
             }
@@ -178,7 +178,7 @@ public class Plane {
      * @return true=dropping.
      */
     public boolean getDropping() {
-        return Math.abs(position.y - borderBottom()) > droppedThreshold;
+        return Math.abs(position.y - borderBottom()) > droppedYThreshold;
     }
 
     /** Gets the debug message.

@@ -1,12 +1,12 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.assets;
 
 import cn.harryh.arkpets.utils.Logger;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.github.promeg.pinyinhelper.Pinyin;
 
 import java.io.File;
@@ -188,7 +188,7 @@ public class ModelItem implements Serializable {
                                 list.addAll(temp);
                                 map.put(fileType, new ArrayList<>(temp));
                             }
-                        } catch (com.alibaba.fastjson.JSONException | com.alibaba.fastjson2.JSONException ex) {
+                        } catch (com.alibaba.fastjson2.JSONException ex) {
                             String oneFile; // Try to get as string
                             if ((oneFile = fileMap.getString(fileType)) != null) {
                                 list.add(oneFile);

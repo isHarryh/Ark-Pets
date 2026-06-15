@@ -6,74 +6,65 @@ on:
       - 'v*'
     branches:
       - 'v*'
-    paths:
-      - 'assets/**'
-      - 'core/**'
-      - 'desktop/**'
   pull_request:
     tags:
       - 'v*'
     branches:
       - 'v*'
-    paths:
-      - 'assets/**'
-      - 'core/**'
-      - 'desktop/**'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      ARTIFACT_NAME: ArkPets
     steps:
-      - name: Check Ref
+      - name: Show meta info
         run: |
-          echo "Current ref: ${{  github.ref  }}"
+          echo "Current ref: ${{ github.ref }}"
+          echo "Current sha: ${{ github.sha }}"
 
-      - name: Clone Repo
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v6
 
-      - name: Setup JavaJDK
-        uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'liberica'
-          cache: 'gradle'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: 8.1.1
+          gradle-version: '8.14.3'
 
       - name: Setup Inno Setup
         run: choco install innosetup --no-progress
 
-      - name: Execute Gradle Tasks
+      - name: Execute gradle tasks
         run: gradle clean distAll
 
-      - name: Upload Exe
-        uses: actions/upload-artifact@v4
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+      - name: Upload exe
+        uses: actions/upload-artifact@v6
         with:
-          name: ArkPets.exe
+          name: ${{ env.ARTIFACT_NAME }}-Setup.exe
           path: desktop/build/dist/*.exe
 
-      - name: Upload Zip
-        uses: actions/upload-artifact@v4
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+      - name: Upload zip
+        uses: actions/upload-artifact@v6
         with:
-          name: ArkPets.zip
+          name: ${{ env.ARTIFACT_NAME }}.zip
           path: desktop/build/dist/*.zip
 
-      - name: Upload Jar
-        uses: actions/upload-artifact@v4
-        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+      - name: Upload jar
+        uses: actions/upload-artifact@v6
         with:
-          name: ArkPets.jar
+          name: ${{ env.ARTIFACT_NAME }}.jar
           path: desktop/build/dist/*.jar
 
 # DUE TO JLINK ISSUES, AUTO RELEASE WAS TEMPORARILY BANNED.
 #
-#      - name: Publish Release
+#      - name: Publish release
 #        uses: marvinpinto/action-automatic-releases@latest
 #        if: ${{ startsWith(github.ref, 'refs/tags/') }}
 #        with:

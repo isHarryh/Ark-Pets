@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
@@ -25,15 +25,22 @@ import static cn.harryh.arkpets.Const.*;
  * @see ArkPets
  */
 public class EmbeddedLauncher {
+    public static File customConfig;
     // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 
     public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
+        // Config
+        new ArgPending("--config", args) {
+            protected void process(String command, String addition) {
+                customConfig = new File(addition);
+            }
+        };
+        ArkConfig appConfig = Objects.requireNonNull(customConfig == null ? ArkConfig.getConfig() : ArkConfig.getConfig(customConfig));
         // Logger
         Logger.initialize(LogConfig.logCorePath, LogConfig.logCoreMaxKeep);
-        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig());
         try {
             Logger.setLevel(appConfig.logging_level);
         } catch (Exception ignored) {
@@ -114,7 +121,7 @@ public class EmbeddedLauncher {
                 }
             });
             // Instantiate the App
-            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
+            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE, appConfig), config);
         } catch (Exception e) {
             WindowSystem.free();
             Logger.error("System", "A fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);

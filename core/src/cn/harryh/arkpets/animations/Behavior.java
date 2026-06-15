@@ -1,34 +1,38 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.animations;
 
+import cn.harryh.arkpets.animations.StochasticMatrix.StochasticState;
 import cn.harryh.arkpets.utils.Cached;
-
-import java.util.Arrays;
 
 
 abstract public class Behavior {
-    protected AnimClipGroup animList;
-    protected AnimDataWeight[] actionList;
-    protected Cached<AnimData> actionAutoGetter;
-    private int idxRec;
+    protected final Cached<AnimData> actionAutoGetter;
+    protected StochasticMatrix currentMatrix;
+    protected StochasticState currentState;
 
     private static final double minAnimCacheAge = 0.5;
 
     /** Character Behavior Controller Instance.
-     * @param animList The animation clip list.
      */
-    public Behavior(AnimClipGroup animList) {
-        actionList = null;
-        this.animList = animList;
+    public Behavior() {
         actionAutoGetter = new Cached<>();
-        actionAutoGetter.setValueProducer(this::getRandomAction);
+        actionAutoGetter.setValueProducer(() -> {
+            StochasticState newState = currentMatrix.transitedAnimOf(currentState);
+            if (newState == null) {
+                return currentMatrix.getStateAnim(currentState);
+            } else {
+                currentState = newState;
+                return currentMatrix.getStateAnim(newState);
+            }
+        });
         actionAutoGetter.setCacheAgeProducer(() -> {
             AnimData cache = actionAutoGetter.getCachedValue();
             return cache == null ? minAnimCacheAge : Math.max(minAnimCacheAge, cache.animClip().duration);
         });
-        idxRec = 0;
+        currentMatrix = null;
+        currentState = null;
     }
 
     /** Checks whether the random animation is expired or empty.
@@ -38,7 +42,7 @@ abstract public class Behavior {
         return actionAutoGetter.isExpired();
     }
 
-    /** Gets a random animation.
+    /** Gets a random animation. This method has caching mechanism.
      * @return AnimData object.
      */
     public final AnimData autoAnim() {
@@ -49,81 +53,70 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData nextAnim() {
-        if (actionList.length > 0) {
-            idxRec = idxRec >= actionList.length - 1 ? 0 : idxRec + 1;
-            return actionList[idxRec].anim();
-        }
-        return new AnimData(null);
+        if (currentMatrix.isAllDisabled()) return null;
+        AnimData newAnim = currentMatrix.nextAnimOf(currentState);
+        currentState = currentState.next();
+        return newAnim;
     }
 
     /** Gets the previous animation.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public final AnimData prevAnim() {
-        if (actionList.length > 0) {
-            idxRec = idxRec <= 0 ? actionList.length - 1 : idxRec - 1;
-            return actionList[idxRec].anim();
-        }
-        return new AnimData(null);
-    }
-
-    private AnimData getRandomAction() {
-        if (actionList.length > 0) {
-            // Calculate the sum of all action's weight
-            int weightSum = Arrays.stream(actionList).mapToInt(AnimDataWeight::weight).sum();
-            // Random select a weight
-            int weightSelect = (int) Math.ceil(Math.random() * weightSum);
-            // Figure out which action is selected
-            int weight = 0;
-            for (AnimDataWeight animDataWeight : actionList) {
-                weight += animDataWeight.weight();
-                if (weightSelect <= weight)
-                    return animDataWeight.anim();
-            }
-        }
-        return new AnimData(null);
+        if (currentMatrix.isAllDisabled()) return null;
+        AnimData newAnim = currentMatrix.prevAnimOf(currentState);
+        currentState = currentState.prev();
+        return newAnim;
     }
 
     /** Gets the default animation.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData defaultAnim() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the walk animation.
      * @param mobility 1=GoRight, -1=GoLeft.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData walkAnim(int mobility) {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when mouse-down.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData clickStart() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when mouse-up.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData clickEnd() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when the user starts dragging.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData dragging() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when character dropped.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData dropped() {
-        return new AnimData(null);
+        return null;
+    }
+
+    public int[][] getDebugMatrix() {
+        return currentMatrix.getDebugMatrix();
+    }
+
+    public StochasticState getCurrentMatrixState() {
+        return currentState;
     }
 }

@@ -9,7 +9,7 @@ ArkPets 的命令行启动方法。
 ### 用法
 `ArkPets.exe`：
 ```
-ArkPets [--direct-start [--load-lib <path>] [--enable-snapshot]]
+ArkPets [--direct-start [--config <path>] [--load-lib <path>]]
         [--quiet|--warn|--info|--debug]
 ```
 
@@ -20,6 +20,7 @@ ArkPets [--direct-start [--load-lib <path>] [--enable-snapshot]]
 | `--warn`              | 以`WARN`日志等级运行，记录日志和警告信息。(v2.0.0+)                                                     |
 | `--info`              | 以`INFO`日志等级运行，此为默认日志等级。(v2.0.0+)                                                      |
 | `--debug`             | 以`DEBUG`日志等级运行，记录完整的调试信息，同时启用[调试功能](Debug.md)。(v2.0.0+)                               |
+| * `--config <path>`   | 加载指定的配置文件以启动桌宠。(v3.11.0+)                                                             |
 | * `--load-lib <path>` | *调试时使用* 加载外部库文件（例如 [RenderDoc](https://renderdoc.org)），其中 `<path>` 是文件的绝对路径。(v3.5.0+) |
 
 上表中，标有 * 的选项需要与`--direct-start` 同时使用。

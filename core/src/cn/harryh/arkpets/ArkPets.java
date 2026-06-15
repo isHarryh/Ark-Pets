@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
@@ -17,14 +17,13 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
+import static cn.harryh.arkpets.Const.changeDirectionXThreshold;
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
@@ -48,7 +47,7 @@ public class ArkPets extends InputApplicationAdaptor {
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
-    public ArkPets(String title) {
+    public ArkPets(String title, ArkConfig appConfig) {
         APP_TITLE = title;
 
         hWndTopmostGetter = new Cached<>();
@@ -61,6 +60,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         hWndTransparentSetter = new Cached<>();
         hWndPosSetter = new Cached<>();
+        config = appConfig;
     }
 
     @Override
@@ -68,7 +68,6 @@ public class ArkPets extends InputApplicationAdaptor {
         // When the APP was created
         // 1.App setup
         Logger.info("App", "Create with title \"" + APP_TITLE + "\"");
-        config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setForegroundFPS(config.display_fps);
         registerDebugger();
@@ -219,12 +218,24 @@ public class ArkPets extends InputApplicationAdaptor {
             offsetY = (int) (animData.animClip().type.offsetY * config.display_scale);
     }
 
+    private void changeMobilitySign(int sign) {
+        cha.position.reset(cha.position.end().x, cha.position.end().y, sign);
+        if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
+            AnimData anim = cha.getPlaying();
+            cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * sign));
+        }
+        if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
+            AnimData anim = tray.keepAnim;
+            tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * sign);
+        }
+    }
+
     /* INPUT PROCESS */
     @Override
     protected void onMouseDown() {
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            RelativeWindowPosition rwp = getUnderlyingRWP();
             if (rwp != null)
                 rwp.sendMouseEvent(switch (getMouseButton()) {
                     case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONDOWN;
@@ -253,25 +264,19 @@ public class ArkPets extends InputApplicationAdaptor {
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
             tray.hideDialog();
+            if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
+                changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         }
     }
 
     @Override
     protected void onMouseUp() {
         if (isMouseDragging()) {
-            // Update the z-axis of the character
-            cha.position.reset(cha.position.end().x, cha.position.end().y, getMouseIntention());
-            if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
-                AnimData anim = cha.getPlaying();
-                cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * getMouseIntention()));
-            }
-            if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
-                AnimData anim = tray.keepAnim;
-                tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * getMouseIntention());
-            }
+            if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 1)
+                changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         } else if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            RelativeWindowPosition rwp = getUnderlyingRWP();
             if (rwp != null)
                 rwp.sendMouseEvent(switch (getMouseButton()) {
                     case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONUP;
@@ -287,37 +292,44 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     @Override
+    protected void onMouseMoved() {
+        if (!isMouseAtSolidPixel()) {
+            // Transfer mouse event
+            RelativeWindowPosition rwp = getUnderlyingRWP();
+            if (rwp != null)
+                rwp.sendMouseEvent(HWndCtrl.MouseEvent.MOUSEMOVE);
+        } else {
+            if (Math.abs(getLastMoveDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 3)
+                changeMobilitySign((int) Math.signum(getLastMoveDeltaX()));
+        }
+    }
+
+    @Override
     protected void onKeyDown(int keycode) {
         if (tray.keepAnim != null) { // Switch animation in action mode
             AnimData data;
             if (isUpPressed()) {
                 do {
                     data = behavior.prevAnim();
-                } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
-                tray.keepAnim = data;
-                Logger.debug("Animation", "Switch to previous " + data);
+                } while (data != null && data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
+                if (data != null) {
+                    tray.keepAnim = data;
+                    Logger.debug("Animation", "Switch to previous " + data);
+                }
             } else if (isDownPressed()) {
                 do {
                     data = behavior.nextAnim();
-                } while (data.animClip().type == AnimClip.AnimType.MOVE);
-                tray.keepAnim = data;
-                Logger.debug("Animation", "Switch to next " + data);
+                } while (data != null && data.animClip().type == AnimClip.AnimType.MOVE);
+                if (data != null) {
+                    tray.keepAnim = data;
+                    Logger.debug("Animation", "Switch to next " + data);
+                }
             }
         }
     }
 
     @Override
     protected void onKeyUp(int keycode) {
-    }
-
-    @Override
-    protected void onMouseMoved() {
-        if (!isMouseAtSolidPixel()) {
-            // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
-            if (rwp != null)
-                rwp.sendMouseEvent(HWndCtrl.MouseEvent.MOUSEMOVE);
-        }
     }
 
     private boolean isMouseAtSolidPixel() {
@@ -349,11 +361,11 @@ public class ArkPets extends InputApplicationAdaptor {
         }
     }
 
-    private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {
+    private RelativeWindowPosition getUnderlyingRWP() {
         if (hWndList == null)
             return null;
-        int absX = x + (int) (windowPosition.now().x);
-        int absY = y + (int) (windowPosition.now().y);
+        int absX = getMouseX() + (int) (windowPosition.now().x);
+        int absY = getMouseY() + (int) (windowPosition.now().y);
         for (HWndCtrl hWndCtrl : hWndList) {
             if (coreTitleManager.getNumber(hWndCtrl) < 0)
                 if (hWndCtrl.posLeft <= absX && hWndCtrl.posRight > absX)
@@ -488,11 +500,11 @@ public class ArkPets extends InputApplicationAdaptor {
             });
             registerKeyTyped('P', () -> Logger.debug("Debugger", "Showing plane info\n" + plane.getDebugMsg()));
             registerKeyTyped('S', () -> {
-                String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
-                Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
-                PixmapIO.writePNG(new FileHandle(name), snapshot);
-                snapshot.dispose();
-                Logger.debug("Debugger", "Snapshot saved to `" + name + "`");
+                FileHandle file = new FileHandle(tempDirPath).child("snapshot-" + System.currentTimeMillis() + ".png");
+                PixmapWrapper pw = PixmapWrapper.fromCamera(cha.camera);
+                pw.savePixmap(file, true);
+                pw.dispose();
+                Logger.debug("Debugger", "Saved snapshot to: " + file.path());
             });
             registerKeyTyped('W', () -> {
                 StringBuilder builder = new StringBuilder("Showing window list\n");

@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -18,7 +18,7 @@ import cn.harryh.arkpets.platform.StartupConfig;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.JFXDialog;
 import javafx.application.Platform;

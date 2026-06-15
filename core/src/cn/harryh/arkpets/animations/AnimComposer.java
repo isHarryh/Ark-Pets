@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.animations;
@@ -17,12 +17,12 @@ public class AnimComposer {
         state.addListener(new AnimationState.AnimationStateAdapter() {
             @Override
             public void complete(AnimationState.TrackEntry entry) {
-                if (composer.playing != null && !composer.playing.isEmpty() && entry.getAnimation() != null) {
+                if (composer.playing != null && entry.getAnimation() != null) {
                     if (entry.getAnimation().getName().equals(composer.playing.animClip().fullName)) {
                         AnimData completed = composer.playing;
                         if (!completed.isLoop()) {
                             composer.reset();
-                            if (completed.animNext() != null && !completed.animNext().isEmpty()) {
+                            if (completed.animNext() != null) {
                                 composer.offer(completed.animNext());
                             }
                         }
@@ -33,8 +33,8 @@ public class AnimComposer {
     }
 
     public boolean offer(AnimData animData) {
-        if (animData != null && !animData.isEmpty()) {
-            if (playing == null || playing.isEmpty() || (!playing.isStrict() && !playing.equals(animData))) {
+        if (animData != null) {
+            if (playing == null || (!playing.isStrict() && !playing.equals(animData))) {
                 playing = animData;
                 state.setAnimation(coreTrackId, playing.name(), playing.isLoop());
                 onApply(playing);

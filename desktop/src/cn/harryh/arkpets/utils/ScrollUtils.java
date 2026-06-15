@@ -1,4 +1,5 @@
 // Copy from https://github.com/palexdev/MaterialFX/blob/c8038ce2090f5cddf923a19d79cc601db86a4d17/materialfx/src/main/java/io/github/palexdev/materialfx/utils/ScrollUtils.java
+// Copy from https://github.com/HMCL-dev/HMCL/blob/2865f2ffca9ec3390c5637e8f7adfb07cbd0f278/HMCL/src/main/java/org/jackhuang/hmcl/ui/ScrollUtils.java
 
 /*
  * Copyright (C) 2022 Parisi Alessandro
@@ -26,6 +27,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.control.skin.ListViewSkin;
+import javafx.scene.control.skin.VirtualFlow;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.util.Duration;
@@ -117,9 +120,46 @@ public final class ScrollUtils {
         smoothScroll(scrollPane, speed, trackPadAdjustment);
     }
 
+    //================================================================================
+    // ListViews
+    //================================================================================
+
+    /** Adds a smooth scrolling effect to the given list view,
+     * calls {@link #addSmoothScrolling(ListView, double)} with a
+     * default speed value of 0.5.
+     */
+    public static <T> void addSmoothScrolling(ListView<T> listView) {
+        addSmoothScrolling(listView, 0.5);
+    }
+
+    /** Adds a smooth scrolling effect to the given list view with the given scroll speed.
+     * Calls {@link #addSmoothScrolling(ListView, double, double)}
+     * with a default trackPadAdjustment of 7.
+     */
+    public static <T> void addSmoothScrolling(ListView<T> listView, double speed) {
+        addSmoothScrolling(listView, speed, 7);
+    }
+
+    /** Adds a smooth scrolling effect to the given list view with the given
+     * scroll speed and the given trackPadAdjustment.
+     * <p>
+     * The trackPadAdjustment is a value used to slow down the scrolling if a trackpad is used.
+     * This is kind of a workaround, and it's not perfect, but at least it's way better than before.
+     * The default value is 7, tested up to 10, further values can cause scrolling misbehavior.
+     */
+    public static <T> void addSmoothScrolling(ListView<T> listView, double speed, double trackPadAdjustment) {
+        listView.setSkin(new ListViewSkin<>(listView) {
+            {
+                VirtualFlow<ListCell<T>> flow = getVirtualFlow();
+                smoothScroll(flow, speed, trackPadAdjustment);
+            }
+        });
+    }
+
     private static final double[] FRICTIONS = {0.99, 0.1, 0.05, 0.04, 0.03, 0.02, 0.01, 0.04, 0.01, 0.008, 0.008, 0.008, 0.008, 0.0006, 0.0005, 0.00003, 0.00001};
     private static final Duration DURATION = Duration.millis(3);
 
+    /// @author Parisi Alessandro
     private static void smoothScroll(ScrollPane scrollPane, double speed, double trackPadAdjustment) {
         final double[] derivatives = new double[FRICTIONS.length];
 
@@ -178,7 +218,52 @@ public final class ScrollUtils {
                     break;
             }
 
-            if (Math.abs(dy) < 0.001) {
+            if (Math.abs(dy) < 0.01) {
+                timeline.stop();
+            }
+        }));
+        timeline.setCycleCount(Animation.INDEFINITE);
+    }
+
+    /// @author Glavo
+    private static void smoothScroll(VirtualFlow<?> virtualFlow, double speed, double trackPadAdjustment) {
+        if (!virtualFlow.isVertical())
+            return;
+
+        final double[] derivatives = new double[FRICTIONS.length];
+
+        Timeline timeline = new Timeline();
+        final EventHandler<MouseEvent> mouseHandler = event -> timeline.stop();
+        final EventHandler<ScrollEvent> scrollHandler = event -> {
+            if (event.getEventType() == ScrollEvent.SCROLL) {
+                ScrollDirection scrollDirection = determineScrollDirection(event);
+                if (scrollDirection == ScrollDirection.LEFT || scrollDirection == ScrollDirection.RIGHT) {
+                    return;
+                }
+                double currentSpeed = isTrackPad(event, scrollDirection) ? speed / trackPadAdjustment : speed;
+
+                derivatives[0] += scrollDirection.intDirection * currentSpeed;
+                if (timeline.getStatus() == Status.STOPPED) {
+                    timeline.play();
+                }
+                event.consume();
+            }
+        };
+        virtualFlow.addEventFilter(MouseEvent.MOUSE_PRESSED, mouseHandler);
+        virtualFlow.addEventFilter(ScrollEvent.ANY, scrollHandler);
+
+        timeline.getKeyFrames().add(new KeyFrame(DURATION, event -> {
+            for (int i = 0; i < derivatives.length; i++) {
+                derivatives[i] *= FRICTIONS[i];
+            }
+            for (int i = 1; i < derivatives.length; i++) {
+                derivatives[i] += derivatives[i - 1];
+            }
+
+            double dy = derivatives[derivatives.length - 1];
+            virtualFlow.scrollPixels(dy);
+
+            if (Math.abs(dy) < 0.01) {
                 timeline.stop();
             }
         }));

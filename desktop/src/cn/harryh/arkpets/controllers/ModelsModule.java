@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -15,7 +15,7 @@ import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.*;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
@@ -144,6 +144,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         this.app = app;
         this.selectedModel = new ModelItemWrapper();
         this.modelListView.setItems(targetList);
+        ScrollUtils.addSmoothScrolling(modelListView);
+
         infoPaneComposer = new GuiPrefabs.PeerNodeComposer();
         infoPaneComposer.add(0, infoPane);
         infoPaneComposer.add(1,

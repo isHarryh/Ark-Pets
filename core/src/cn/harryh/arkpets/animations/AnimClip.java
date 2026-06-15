@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.animations;
@@ -28,18 +28,18 @@ public class AnimClip {
      */
     public enum AnimType {
         NONE("", 5),
-        DEFAULT("^Default.?$", 5),
-        IDLE("^((Idle)|(Relax)).?$", 5),
-        MOVE("^Move.?$", 5),
+        DEFAULT("^Default.{0,2}$", 5),
+        IDLE("^((Id.?le)|(Relax)).{0,2}$", 5),
+        MOVE("^Move.{0,2}$", 5),
         SIT("^Sit$", 50),
         SLEEP("^Sleep$", 25),
         SPECIAL("^Special$", 5),
         INTERACT("^Interact$", 5),
-        ATTACK("^((Attack)|(Combat)).?$", 5),
-        SKILL("^Skill.?$", 5),
-        START("^Start.?$", 5),
-        DIE("^Die.?$", 5),
-        REVIVE("^((Revive)|(Reborn)).?$", 5);
+        ATTACK("^((Attack)|(Combat)).{0,2}$", 5),
+        SKILL("^Skill.{0,2}$", 5),
+        START("^Start.{0,2}$", 5),
+        DIE("^Die.{0,2}$", 5),
+        REVIVE("^((Revive)|(Reborn)).{0,2}$", 5);
 
         /** The regex pattern of this type of animation, which is case-insensitive. */
         public final Pattern pattern;
@@ -233,7 +233,7 @@ public class AnimClip {
 
     private RecognitionResult<AnimStage> recognizeStage(ArrayList<String> elements) {
         final AnimType[] exMatchingTypes = new AnimType[]{AnimType.IDLE, AnimType.MOVE, AnimType.ATTACK};
-        final Pattern exMatchingPattern = Pattern.compile("\\d", Pattern.CASE_INSENSITIVE);
+        final Pattern exMatchingPattern = Pattern.compile("0?(\\d)", Pattern.CASE_INSENSITIVE);
         for (var iterator = elements.listIterator(); iterator.hasNext(); ) {
             String s = iterator.next();
             /* Simple matching */
@@ -252,9 +252,12 @@ public class AnimClip {
                     if (!separation.fragments().isEmpty()) s1 = separation.fragments().get(0);
                     else if (iterator.hasNext()) s1 = elements.get(iterator.nextIndex());
                     else break;
-                    if (exMatchingPattern.matcher(s1).matches()) {
+
+                    Matcher s1Matcher = exMatchingPattern.matcher(s1);
+                    if (s1Matcher.matches()) {
                         // NO iterator.remove();
-                        return new RecognitionResult<>(new AnimStage('C' + s1), s1);
+                        String n = s1Matcher.group(1);
+                        return new RecognitionResult<>(new AnimStage('C' + n), s1);
                     }
                 }
             }

@@ -4,14 +4,14 @@
 ; Download Inno Setup: https://jrsoftware.org/isdl.php
 
 #define MyAppName "ArkPets"
-#define MyAppVersion "3.10.0"
+#define MyAppVersion "3.11.1"
 #define MyAppPublisher "Harry Huang"
 #define MyAppURL "https://arkpets.harryh.cn/"
 
 [Setup]
 ; WARN: The value of AppId uniquely identifies this app. Do not use the same AppId value in installers for other apps.
 ; (To generate a new GUID, click Tools | Generate GUID inside the Inno Setup IDE.)
-AppCopyright        = Copyright (C) 2022-2025 {#MyAppPublisher}
+AppCopyright        = Copyright (C) 2022-2026 {#MyAppPublisher}
 AppId               ={{213DB689-8F8A-4DEA-BE79-545FAD7769A6}
 AppName             ={#MyAppName}
 AppVersion          ={#MyAppVersion}
@@ -114,9 +114,13 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppName}.exe"; Tasks: d
 [Run]
 Filename: "{app}\{#MyAppName}.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
+[InstallDelete]
+Type: files; Name: "{app}\app\desktop*.jar"
+
 [UninstallDelete]
 Type: files; Name: "{app}\ArkPetsConfig.json"
 Type: files; Name: "{app}\models_data.json"
+Type: files; Name: "{app}\hs_err_pid*.log"
 Type: filesandordirs; Name: "{app}\logs"
 Type: filesandordirs; Name: "{app}\temp"
 Type: filesandordirs; Name: "{app}\models"

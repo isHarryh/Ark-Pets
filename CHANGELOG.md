@@ -1,5 +1,30 @@
 # 更新日志 / CHANGELOG
 
+## v3.11
+| **新增**                                 |                                                  |
+|:---------------------------------------|:-------------------------------------------------|
+| [`#152`]<br>[`ce00662`]                | 新增了可以通过命令行选项 `--config` 来载入特定的配置文件的功能。           |
+| [`#142`]<br>[`92ce842`]<br>[`669f3b1`] | 新增了基于马尔可夫矩阵的动作行为机制，现在动作的切换将更加自然。                 |
+| [`0408a2b`]                            | 新增了可以调节桌宠的交互式朝向翻转的触发条件的功能，现在可以让桌宠在拖拽时或光标掠过时翻转朝向。 |
+
+| **修复**                  |                                  |
+|:------------------------|:---------------------------------|
+| [`55b30b8`]             | 修复了使用 Windows 安装包更新软件后存在残留文件的问题。 |
+| [`2edb6f9`]             | 修复了在特定的窗口边界计算方式下，部分模型无法正常启动的问题。  |
+
+| **优化**                                 |                                                |
+|:---------------------------------------|:-----------------------------------------------|
+| [`25f3ff7`]                            | 优化了调试性截图的绘制与保存逻辑。                              |
+| [`#158`]<br>[`14f007f`]                | 优化了启动器界面中列表视图（ListView）的交互体验。                  |
+| [`604ff70`]<br>[`3a7ddb2`]             | 升级了 fastjson2 和 opencc4j 依赖库的版本，并移除了某些残留的依赖库。  |
+| [`#159`]<br>[`a8829c4`]<br>[`823b904`] | 将 Gradle 版本从 8.1 升级到 8.14，并移除了过时的 Gradle 脚本语法。 |
+| [`1c7200d`]                            | 优化了 GitHub Actions 的 `build` 工作流脚本，并升级了其依赖项版本。 |
+
+| **补丁**                   |                                             |
+|:-------------------------|:--------------------------------------------|
+| `v3.11.1`<br>[`deedced`] | 修复了此版本引入的由阶段过滤问题导致的个别多阶段的敌方模型无法正常启动的问题。     |
+| `v3.11.1`<br>[`69ef274`] | 修复了之前版本中的阶段名称前导零适配问题导致的个别多阶段的敌方模型无法正常启动的问题。 |
+
 ## v3.10
 | **新增**                  |                                                               |
 |:------------------------|:--------------------------------------------------------------|
@@ -39,11 +64,12 @@
 |:------------------------|:-----------------------------|
 | [`#126`]<br>[`51b7806`] | 修复了在特定情况下，桌宠在被鼠标拖拽后会原地消失的问题。 |
 
-| **优化**                                 |                                  |
-|:---------------------------------------|:---------------------------------|
-| [`#125`]<br>[`e0f2dce`]                | 优化了日志模块的安全性，现在采用的是 reload4j 日志库。 |
-| [`#113`]<br>[`4d35feb`]<br>[`f6a9c64`] | 优化了桌宠输入控制模块的代码逻辑。                |
-| [`f5b0d9e`]<br>[`601f522`]             | 优化了网络模块的代码逻辑。                    |
+| **优化**                                 |                                                  |
+|:---------------------------------------|:-------------------------------------------------|
+| [`#113`]<br>[`8ccef37`]                | 移除了 `--enable-snapshot` 命令行参数，现在使用 `--debug` 替代。 |
+| [`#113`]<br>[`4d35feb`]<br>[`f6a9c64`] | 优化了桌宠输入控制模块的代码逻辑。                                |
+| [`f5b0d9e`]<br>[`601f522`]             | 优化了网络模块的代码逻辑。                                    |
+| [`#125`]<br>[`e0f2dce`]                | 优化了日志模块的安全性，现在采用的是 reload4j 日志库。                 |
 
 | **补丁**                                 |                            |
 |:---------------------------------------|:---------------------------|
@@ -109,14 +135,14 @@
 | [`c277dae`]            | 优化了桌宠的渲染偏移（OffsetY）参数，使得某些额外内容得以正常显示（例如对角色脚底的高亮描边）。 |
 
 ## v3.5
-| **新增**                                |                                         |
-|:--------------------------------------|:----------------------------------------|
-| [`#86`]<br>[`e998e4a`]<br>[`7042699`] | 新增了**收藏模型**的功能，现在可以对模型进行收藏并在列表中单独显示它们。  |
-| [`88ffa1e`]                           | 新增了启动器界面的**窗口圆角和窗口阴影**，使得启动器的外观更加现代。    |                                      
-| [`#90`]<br>[`8183242`]<br>[`a38e737`] | 新增了命令行选项 `--load-lib` 用于载入外部库。          |
-| [`#93`]<br>[`16b34aa`]                | 新增了命令行选项 `--enable-snapshot` 用于启用调试性截图。 |
-| [`c36ec5e`]<br>[`f5c09bd`]            | 新增了可以调节桌宠的动画交叉过渡时长等过渡设置的功能。             |
-| [`97095c9`]                           | 新增了启动器模型页面的列表中“没有符合条件的模型”时的一个提示。        |
+| **新增**                                |                                             |
+|:--------------------------------------|:--------------------------------------------|
+| [`#86`]<br>[`e998e4a`]<br>[`7042699`] | 新增了**收藏模型**的功能，现在可以对模型进行收藏并在列表中单独显示它们。      |
+| [`88ffa1e`]                           | 新增了启动器界面的**窗口圆角和窗口阴影**，使得启动器的外观更加现代。        |                                      
+| [`#90`]<br>[`8183242`]<br>[`a38e737`] | 新增了命令行选项 `--load-lib` 用于载入外部库。              |
+| [`#93`]<br>[`16b34aa`]                | ~~新增了命令行选项 `--enable-snapshot` 用于启用调试性截图。~~ |
+| [`c36ec5e`]<br>[`f5c09bd`]            | 新增了可以调节桌宠的动画交叉过渡时长等过渡设置的功能。                 |
+| [`97095c9`]                           | 新增了启动器模型页面的列表中“没有符合条件的模型”时的一个提示。            |
 
 | **修复**                            |                                           |
 |:----------------------------------|:------------------------------------------|
@@ -573,7 +599,11 @@
 [`#139`]: https://github.com/isHarryh/Ark-Pets/pull/139
 [`#140`]: https://github.com/isHarryh/Ark-Pets/pull/140
 [`#141`]: https://github.com/isHarryh/Ark-Pets/pull/141
+[`#142`]: https://github.com/isHarryh/Ark-Pets/pull/142
 [`#146`]: https://github.com/isHarryh/Ark-Pets/issues/146
+[`#152`]: https://github.com/isHarryh/Ark-Pets/pull/152
+[`#158`]: https://github.com/isHarryh/Ark-Pets/pull/158
+[`#159`]: https://github.com/isHarryh/Ark-Pets/pull/159
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -666,6 +696,7 @@
 [`a41e489`]: https://github.com/isHarryh/Ark-Pets/commit/a41e489c84661c30303c6cfcc3d10c4ad86293c5
 [`49d13b6`]: https://github.com/isHarryh/Ark-Pets/commit/49d13b6627a73cd4cfe628db15062c7240cca334
 [`0b2d11e`]: https://github.com/isHarryh/Ark-Pets/commit/0b2d11e519ccc4395e801379b9b1085cfb1779e2
+[`8ccef37`]: https://github.com/isHarryh/Ark-Pets/commit/8ccef3704ccc2b5d2cd628009c79817a77706445
 [`4d35feb`]: https://github.com/isHarryh/Ark-Pets/commit/4d35febd0954e961b47150ff805e9b15a517cfee
 [`f6a9c64`]: https://github.com/isHarryh/Ark-Pets/commit/f6a9c640ade62dc6e1dea72db62dc72a173760ce
 [`fd45fe6`]: https://github.com/isHarryh/Ark-Pets/commit/fd45fe6d45759ed7261b4d8cb2eff497390171b7
@@ -703,3 +734,18 @@
 [`60be366`]: https://github.com/isHarryh/Ark-Pets/commit/60be366813df03a30c7dc81a03a809fddb831d9c
 [`6bd28d3`]: https://github.com/isHarryh/Ark-Pets/commit/6bd28d360f96a5bf09f8ec409cfe944177da775d
 [`59469b8`]: https://github.com/isHarryh/Ark-Pets/commit/59469b865651a4d63ccd95d8dd3adeae333186fc
+[`ce00662`]: https://github.com/isHarryh/Ark-Pets/commit/ce006627fe4abe5564c88cb1f41097056f1be92a
+[`92ce842`]: https://github.com/isHarryh/Ark-Pets/commit/92ce8428b28979482d74ab5083b41179ad3bdaf4
+[`669f3b1`]: https://github.com/isHarryh/Ark-Pets/commit/669f3b124467477b992f52bfef7dba075ce5c0e9
+[`55b30b8`]: https://github.com/isHarryh/Ark-Pets/commit/55b30b8169c7eb02ac3b4a2e48fb3170f819da43
+[`25f3ff7`]: https://github.com/isHarryh/Ark-Pets/commit/25f3ff7e5c31fd7e9f490db5ba3c0c1b91669a63
+[`2edb6f9`]: https://github.com/isHarryh/Ark-Pets/commit/2edb6f9052d26c5bdb08eebadf9cfe08eba5c235
+[`14f007f`]: https://github.com/isHarryh/Ark-Pets/commit/14f007fc9376df2277e12914af1493d1ea4b07b6
+[`0408a2b`]: https://github.com/isHarryh/Ark-Pets/commit/0408a2b99f2d82fd5b2f25b1066e06c66c658cb3
+[`604ff70`]: https://github.com/isHarryh/Ark-Pets/commit/604ff70de4fdb807cb37c43d72da300c735d0b61
+[`3a7ddb2`]: https://github.com/isHarryh/Ark-Pets/commit/3a7ddb2ae0338cc27a248c094b4c272056a48669
+[`a8829c4`]: https://github.com/isHarryh/Ark-Pets/commit/a8829c4546110a003b045f32c8ef4b6ff645bfbd
+[`823b904`]: https://github.com/isHarryh/Ark-Pets/commit/823b904e5a0a88fd1cd9981d83fc167d9a5c07b8
+[`1c7200d`]: https://github.com/isHarryh/Ark-Pets/commit/1c7200d1ef78aa82efee9fcb3b38f65ab5d1eec3
+[`deedced`]: https://github.com/isHarryh/Ark-Pets/commit/deedced4b7c14defde4c60d2ec52e6e153de15fd
+[`69ef274`]: https://github.com/isHarryh/Ark-Pets/commit/69ef2741ad703aab4a8490c7a3307b556982374d

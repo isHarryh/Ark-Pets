@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
@@ -7,9 +7,9 @@ import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.SecretUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.badlogic.gdx.graphics.Color;
 
 import java.io.File;
@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.charsetDefault;
 import static cn.harryh.arkpets.Const.hexColorRegex;
+import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
 
 
 public class ArkConfig implements Serializable {
@@ -42,6 +43,8 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_allow_special;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "true")
     public boolean      behavior_allow_walk;
+    /** @since ArkPets 3.11 */ @JSONField(defaultValue = "1")
+    public int          behavior_direction_switching;
     /** @since ArkPets 1.6 */ @JSONField(defaultValue = "true")
     public boolean      behavior_do_peer_repulsion;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "30.0")
@@ -133,7 +136,7 @@ public class ArkConfig implements Serializable {
     @JSONField(serialize = false)
     public void save() {
         try {
-            FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, true), false);
+            FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, PrettyFormat), false);
             Logger.debug("Config", "Config saved");
         } catch (IOException e) {
             Logger.error("Config", "Config saving failed, details see below.", e);
@@ -182,8 +185,8 @@ public class ArkConfig implements Serializable {
         download_mc_cdk = "";
     }
 
-    /** Gets the custom ArkConfig object by reading the external config file.
-     * If the external config file does not exist, a default config file will be generated.
+    /** Gets the custom ArkConfig object by reading the default custom config file.
+     * If the default custom config file does not exist, a default config file will be generated.
      * @return An ArkConfig object. {@code null} if failed.
      */
     public static ArkConfig getConfig() {
@@ -195,17 +198,26 @@ public class ArkConfig implements Serializable {
                 config.save();
             return getDefaultConfig();
         } else {
-            // Read and parse the external config file.
+            return getConfig(configCustom);
+        }
+    }
+
+    /** Gets the ArkConfig object by reading the specific config file.
+     * @return An ArkConfig object. {@code null} if failed or config file not found.
+     */
+    public static ArkConfig getConfig(File configFile) {
+        if (configFile.exists()) {
+            // Read and parse the config file.
             try {
                 return Objects.requireNonNull(
-                        JSONObject.parseObject(FileUtil.readString(configCustom, charsetDefault), ArkConfig.class),
+                        JSONObject.parseObject(FileUtil.readString(configFile, charsetDefault), ArkConfig.class),
                         "JSON parsing returns null."
                 );
             } catch (IOException | NullPointerException e) {
                 Logger.error("Config", "Failed to get the custom config, details see below.", e);
             }
-            return null;
         }
+        return null;
     }
 
     /** Gets the default ArkConfig object by reading the internal config file.

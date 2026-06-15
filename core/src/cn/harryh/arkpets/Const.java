@@ -1,15 +1,17 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.platform.HWndCtrl.NumberedTitleManager;
+import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -22,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public final class Const {
     // App version
-    public static final Version appVersion              = new Version(3, 10, 0);
+    public static final Version appVersion              = new Version(3, 11, 1);
     public static final Version datasetLowestVersion    = new Version(2, 2, 0);
 
     // App name
@@ -45,8 +47,8 @@ public final class Const {
     public static final float skelBaseScale     = 0.3f;
 
     // Behavior presets
-    public static final int behaviorBaseWeight      = 320;
-    public static final float droppedThreshold      = 10f;
+    public static final float changeDirectionXThreshold = 4f;
+    public static final float droppedYThreshold         = 10f;
 
     // Duration presets
     public static final Duration durationFast   = new Duration(150);
@@ -60,6 +62,7 @@ public final class Const {
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
+    public static final String fontDirInternal  = "/fonts/";
     // %s will be replaced by GL version (gl21, gles30)
     public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
     public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
@@ -99,7 +102,7 @@ public final class Const {
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
         public static final String urlMirrorChyan   = "https://mirrorchyan.com/?source=" + appName + "Gui";
         public static final String urlWikiPrefix    = "https://prts.wiki/w/";
-        public static final String tempDirPath      = "temp/";
+        public static final String tempDirPath                  = "temp/";
         public static final String fileModelsZipName            = "ArkModels";
         public static final String fileModelsDataPath           = "models_data.json";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
@@ -127,35 +130,56 @@ public final class Const {
     }
 
 
-    /** Fonts provider class.
+    /** Fonts provider enum.
      */
-    public static class FontsConfig {
-        private static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
-        private static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
+    public enum FontsConfig {
+        REGULAR("SourceHanSansCN-Regular.otf", 8331636),
+        BOLD("SourceHanSansCN-Bold.otf", 8543504);
 
-        public static void loadFontsToJavafx() {
+        private final String name;
+        private final int fileSize;
+
+        FontsConfig(String name, int fileSize) {
+            this.name = name;
+            this.fileSize = fileSize;
+        }
+
+        public void loadFontToJavafx() {
             if (System.getProperty("arkpets.usesystemfont") == null) {
-                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
-                        javafx.scene.text.Font.getDefault().getSize());
-                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
+                javafx.scene.text.Font.loadFont(Objects.requireNonNull(extractFont()).toURI().toString(),
                         javafx.scene.text.Font.getDefault().getSize());
             }
         }
 
-        public static void loadFontsToSwing() {
+        public void loadFontToSwing() {
             if (System.getProperty("arkpets.usesystemfont") == null) {
                 try {
-                    InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
-                    java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
-                    if (font != null) {
-                        UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
-                        UIManager.put("Menu.font", font.deriveFont(11f));
-                        UIManager.put("MenuItem.font", font.deriveFont(11f));
-                    }
+                    File fontFile = Objects.requireNonNull(extractFont());
+                    java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, fontFile);
+                    UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
+                    UIManager.put("Menu.font", font.deriveFont(11f));
+                    UIManager.put("MenuItem.font", font.deriveFont(11f));
                 } catch (FontFormatException | IOException e) {
                     Logger.error("System", "Failed to load tray menu font, details see below.", e);
                 }
             }
         }
+
+        private File extractFont() {
+            try {
+                File tempFont = new File(PathConfig.tempDirPath, name);
+                if (tempFont.exists() && tempFont.length() == fileSize)
+                    return tempFont;
+                Logger.debug("System", "Extracting font " + name + " into " + tempFont.getAbsolutePath());
+                InputStream stream = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontDirInternal + name));
+                IOUtils.FileUtil.writeStream(tempFont, stream, false);
+                stream.close();
+                return tempFont;
+            } catch (IOException e) {
+                Logger.error("System", "Failed to extract font " + name + ", details see below.", e);
+            }
+            return null;
+        }
     }
+
 }

@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.utils;
@@ -17,7 +17,10 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     private int mouseDeltaX = 0;
     private int mouseDeltaY = 0;
     private int mouseButton = 0;
-    private int mouseIntention = 1;
+    private int lastDragDeltaX = 0;
+    private int lastDragDeltaY = 0;
+    private int lastMoveDeltaX = 0;
+    private int lastMoveDeltaY = 0;
     private boolean isMouseDragging = false;
     private boolean isMouseDown = false;
 
@@ -78,8 +81,20 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
         return mouseButton;
     }
 
-    public final int getMouseIntention() {
-        return mouseIntention;
+    public final int getLastDragDeltaX() {
+        return lastDragDeltaX;
+    }
+
+    public final int getLastDragDeltaY() {
+        return lastDragDeltaY;
+    }
+
+    public final int getLastMoveDeltaX() {
+        return lastMoveDeltaX;
+    }
+
+    public final int getLastMoveDeltaY() {
+        return lastMoveDeltaY;
     }
 
     public final double getLastActiveDeltaTime() {
@@ -136,6 +151,10 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
             mouseY = screenY;
             mouseDeltaX = 0;
             mouseDeltaY = 0;
+            lastDragDeltaX = 0;
+            lastDragDeltaY = 0;
+            lastMoveDeltaX = 0;
+            lastMoveDeltaY = 0;
             mouseButton = button;
             isMouseDown = true;
             onMouseDown();
@@ -168,8 +187,9 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
         if (pointer <= 0) {
             mouseDeltaX = screenX - mouseX;
             mouseDeltaY = screenY - mouseY;
+            lastDragDeltaX = mouseDeltaX * lastDragDeltaX <= 0 ? mouseDeltaX : lastDragDeltaX + mouseDeltaX;
+            lastDragDeltaY = mouseDeltaY * lastDragDeltaY <= 0 ? mouseDeltaY : lastDragDeltaY + mouseDeltaY;
             isMouseDragging = true;
-            mouseIntention = mouseDeltaX == 0 ? mouseIntention : mouseDeltaX > 0 ? 1 : -1;
             onMouseDrag();
         }
         return false;
@@ -178,8 +198,12 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        int dx = screenX - mouseX;
+        int dy = screenY - mouseY;
         mouseX = screenX;
         mouseY = screenY;
+        lastMoveDeltaX = dx * lastMoveDeltaX <= 0 ? dx : lastMoveDeltaX + dx;
+        lastMoveDeltaY = dy * lastMoveDeltaY <= 0 ? dy : lastMoveDeltaY + dy;
         onMouseMoved();
         return true;
     }
