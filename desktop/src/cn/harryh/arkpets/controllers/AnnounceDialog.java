@@ -35,6 +35,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static cn.harryh.arkpets.Const.durationFast;
+import static cn.harryh.arkpets.Const.durationLong;
 import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
@@ -111,7 +112,16 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
-        new FetchAnnounceTask(app.body, doPopNotice ? GuiTaskStyle.COMMON : GuiTaskStyle.HIDDEN, annoItemList).start();
+        new FetchAnnounceTask(app.body, doPopNotice ? GuiTaskStyle.COMMON : GuiTaskStyle.HIDDEN, annoItemList) {
+            @Override
+            protected void onReceivedData(JSONObject json) {
+                super.onReceivedData(json);
+
+                if (doPopNotice) {
+                    app.toast.showText("已载入 " + annoItemList.size() + " 条公告", durationLong);
+                }
+            }
+        }.start();
 
         annoListView.getItems().clear();
         annoItemList.addListener((ListChangeListener<AnnounceItem>) change -> {
