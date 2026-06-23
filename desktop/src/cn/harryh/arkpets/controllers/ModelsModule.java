@@ -622,7 +622,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             if (willGc)
                 System.gc();
             Logger.info("ModelManager", "Reloaded");
-            if (doPopNotice) app.toast.showText("已载入 " + modelCount + " 个模型", durationLong);
+            if (doPopNotice) app.toast.showText("已载入 " + modelCount + " 个模型",
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS), durationLong);
         });
     }
 

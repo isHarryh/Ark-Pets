@@ -118,7 +118,8 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
                 super.onReceivedData(json);
 
                 if (doPopNotice) {
-                    app.toast.showText("已载入 " + annoItemList.size() + " 条公告", durationLong);
+                    app.toast.showText("已载入 " + annoItemList.size() + " 条公告",
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS),durationLong);
                 }
             }
         }.start();
