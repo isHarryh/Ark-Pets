@@ -30,6 +30,8 @@ tasks.register("run", JavaExec) {
 
     setIgnoreExitValue(true)
 
+    jvmArgs += "-Dfile.encoding=UTF-8"
+
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
     }
@@ -147,7 +149,8 @@ tasks.register("jpackage", Exec) {
             '--app-version', project.version,
             '--main-class', mainClassName,
             '--main-jar', jar.archiveFile.get().asFile.getName(),
-            '--runtime-image', "${jlinkDir}/runtime"
+            '--runtime-image', "${jlinkDir}/runtime",
+            '--java-options', '-Dfile.encoding=UTF-8'
     ]
     if (osName.contains('windows')) {
         commands << '--icon'
