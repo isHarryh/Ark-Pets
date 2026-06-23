@@ -577,7 +577,8 @@ ProgressBar:indeterminate>.bar {
 #Toast {
     -fx-padding: 4px 8px;
     -fx-background-color: white;
-    -fx-background-radius: 3px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(gaussian, #00000054, 5, 0.0, 0.5, 0.5);
 }
 
 /*******************************************************************************

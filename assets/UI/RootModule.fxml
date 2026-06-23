@@ -197,7 +197,7 @@
 
         <!-- ********** 4. Toast ********** -->
         <HBox fx:id="toast" id="Toast" maxHeight="30.0" maxWidth="-Infinity" minWidth="-Infinity" minHeight="-Infinity"
-              styleClass="shadowed" prefHeight="40.0" StackPane.alignment="BOTTOM_CENTER" spacing="6" alignment="CENTER"
+              prefHeight="40.0" StackPane.alignment="BOTTOM_CENTER" spacing="6" alignment="CENTER"
               managed="false" visible="false">
             <StackPane.margin>
                 <Insets bottom="20.0"/>
