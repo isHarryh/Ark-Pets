@@ -343,7 +343,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         configPhysicRestore.setOnMouseClicked(e -> {
             configPhysicRestoreEvent.handle(e);
             app.rootModule.moduleWrapperComposer.activate(1);
-            app.toast.showText("已恢复默认物理设置", Const.durationLong);
+            app.toast.showText("已恢复默认物理设置",
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS), Const.durationLong);
         });
     }
 

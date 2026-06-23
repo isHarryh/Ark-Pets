@@ -707,8 +707,11 @@ public class GuiComponents {
             this.pane = toastPane;
         }
 
-        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed) {
+        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, SVGPath icon) {
             pane.getChildren().clear();
+            if (icon != null) {
+                pane.getChildren().add(icon);
+            }
             Text txt = new Text(text);
             txt.setTextAlignment(TextAlignment.CENTER);
             pane.getChildren().add(txt);
@@ -780,7 +783,14 @@ public class GuiComponents {
         /** Show a simple toast.
          */
         public void showText(String text, Duration time) {
-            buildToast(text, null, null, null, null);
+            buildToast(text, null, null, null, null, null);
+            playAnim(time, null);
+        }
+
+        /** Show a simple toast with icon.
+         */
+        public void showText(String text, SVGPath icon, Duration time) {
+            buildToast(text, null, null, null, null, icon);
             playAnim(time, null);
         }
 
@@ -790,7 +800,17 @@ public class GuiComponents {
             buildToast(text, null, "撤销", null, () -> {
                 line.stop();
                 undoPressed.run();
-            });
+            }, null);
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with undo button and custom icon.
+         */
+        public void showUndo(String text, Runnable undoPressed, Runnable onDismissed, SVGPath icon, Duration time) {
+            buildToast(text, null, "撤销", null, () -> {
+                line.stop();
+                undoPressed.run();
+            }, icon);
             playAnim(time, onDismissed);
         }
 
@@ -800,21 +820,45 @@ public class GuiComponents {
             buildToast(text, null, undoText, null, () -> {
                 line.stop();
                 undoPressed.run();
-            });
+            }, null);
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with undo button, custom text and icon.
+         */
+        public void showUndo(String text, String undoText, Runnable undoPressed, Runnable onDismissed, SVGPath icon, Duration time) {
+            buildToast(text, null, undoText, null, () -> {
+                line.stop();
+                undoPressed.run();
+            }, icon);
             playAnim(time, onDismissed);
         }
 
         /** Show a toast with ok and cancel button.
          */
         public void showOkCancel(String text, Runnable okPressed, Runnable cancelPressed, Duration time) {
-            buildToast(text, null, null, okPressed, cancelPressed);
+            buildToast(text, null, null, okPressed, cancelPressed, null);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with ok, cancel button and custom icon.
+         */
+        public void showOkCancel(String text, Runnable okPressed, Runnable cancelPressed, SVGPath icon, Duration time) {
+            buildToast(text, null, null, okPressed, cancelPressed, icon);
             playAnim(time, null);
         }
 
         /** Show a toast with custom ok and cancel button.
          */
         public void showOkCancel(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, Duration time) {
-            buildToast(text, okText, cancelText, okPressed, cancelPressed);
+            buildToast(text, okText, cancelText, okPressed, cancelPressed, null);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with custom ok, cancel button and icon.
+         */
+        public void showOkCancel(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, SVGPath icon, Duration time) {
+            buildToast(text, okText, cancelText, okPressed, cancelPressed, icon);
             playAnim(time, null);
         }
     }
