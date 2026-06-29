@@ -1,0 +1,24 @@
+plugins {
+    id "java-library"
+    id "org.openjfx.javafxplugin"
+}
+
+group = rootProject.group
+version = rootProject.version
+
+javafx {
+    version = "17.0.15"
+    modules = ['javafx.base','javafx.graphics','javafx.controls', 'javafx.fxml']
+}
+
+tasks.withType(JavaCompile.class) {
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
+    options.encoding = "UTF-8"
+}
+
+repositories {
+    maven { url = "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+    mavenLocal()
+    mavenCentral()
+}

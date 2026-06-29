@@ -1,1 +1,12 @@
+pluginManagement {
+    repositories {
+        maven { url = "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+        maven { url = "https://maven.aliyun.com/repository/gradle-plugin/" }
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 include 'desktop', 'core'
+rootProject.name = "Ark-Pets"
