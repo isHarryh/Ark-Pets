@@ -303,9 +303,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
         searchModelRandom.setOnAction(e -> modelRandom());
 
-        searchModelReload.setOnAction(e -> {
-            modelReload(true);
-        });
+        searchModelReload.setOnAction(e -> modelReload(true));
     }
 
     private void initModelFilter() {

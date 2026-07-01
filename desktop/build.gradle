@@ -40,10 +40,10 @@ tasks.register("debug", JavaExec) {
     dependsOn = ["classes"]
     group = "execute"
 
-    mainClass = project.mainClassName
+    mainClass = mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    workingDir = project.assetsDir
+    workingDir = assetsDir
 
     setIgnoreExitValue(true)
     setDebug(true)
