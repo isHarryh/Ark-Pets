@@ -1,7 +1,7 @@
 /** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.render;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;

@@ -1,7 +1,7 @@
 /** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.utils;
+package cn.harryh.arkpets.render;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
@@ -82,10 +82,22 @@ public class PixmapWrapper {
         int shift;
         int mask;
         switch (channel) {
-            case "r", "R" -> { mask = 0xFF000000; shift = 24; }
-            case "g", "G" -> { mask = 0x00FF0000; shift = 16; }
-            case "b", "B" -> { mask = 0x0000FF00; shift = 8; }
-            case "a", "A" -> { mask = 0x000000FF; shift = 0; }
+            case "r", "R" -> {
+                mask = 0xFF000000;
+                shift = 24;
+            }
+            case "g", "G" -> {
+                mask = 0x00FF0000;
+                shift = 16;
+            }
+            case "b", "B" -> {
+                mask = 0x0000FF00;
+                shift = 8;
+            }
+            case "a", "A" -> {
+                mask = 0x000000FF;
+                shift = 0;
+            }
             default -> throw new IllegalArgumentException("Unsupported channel: " + channel);
         }
 
