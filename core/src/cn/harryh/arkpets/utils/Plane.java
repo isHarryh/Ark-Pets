@@ -110,17 +110,6 @@ public class Plane {
             speed.y = 0;
         }
         position.set(limitX(deltaX + position.x), limitY(deltaY + position.y));
-        if (isPositionInvalid()) {
-            // If the position is out of bounds, reset it to a fallback position.
-            Vector2 p = getFallbackPosition();
-            if (p != null) {
-                position.set(p);
-                speed.set(0, 0);
-            } else {
-                position.set(0, 0);
-                speed.set(0, 0);
-            }
-        }
     }
 
     /** Sets a line barrier that can support the object.
@@ -284,91 +273,126 @@ public class Plane {
         return Math.max(borderBottom(), Math.min(y, borderTop() - obj.y));
     }
 
-    private boolean isPositionInvalid() {
-        return position.x == Float.MAX_VALUE ||
-                position.x == Float.MIN_VALUE ||
-                position.y == Float.MAX_VALUE ||
-                position.y == Float.MIN_VALUE;
-    }
+    /** Gets the area that the object's anchor (bottom-center) currently belongs to.
+     * The anchor decides the local terrain because the vertical borders are derived from this single area.
+     * @return The active area, or null if the world is empty.
+     */
+    private RectArea getActiveArea() {
+        if (world.isEmpty())
+            return null;
+        final float anchorX = position.x + obj.x / 2f;
+        final float anchorY = position.y;
 
-    private Vector2 getFallbackPosition() {
-        Vector2 nearest = null;
-        double minDist = Long.MAX_VALUE;
-        for (RectArea area : world) {
-            float[][] points = {
-                    {area.left, area.top - obj.y}, // ↖
-                    {area.left, area.bottom}, // ↙
-                    {area.right - obj.x, area.top - obj.y}, // ↗
-                    {area.right - obj.x, area.bottom} // ↘
-            };
-            long px = (long) (position.x == Float.MAX_VALUE ? Integer.MAX_VALUE :
-                    position.x == Float.MIN_VALUE ? Integer.MIN_VALUE : position.x);
-            long py = (long) (position.y == Float.MAX_VALUE ? Integer.MAX_VALUE :
-                    position.y == Float.MIN_VALUE ? Integer.MIN_VALUE : position.y);
-            for (float[] p : points) {
-                double d = Math.hypot(px - (long) p[0], py - (long) p[1]);
-                if (d < minDist || nearest == null) {
-                    minDist = d;
-                    if (nearest == null)
-                        nearest = new Vector2();
-                    nearest.set(p[0], p[1]);
-                }
+        // 1. Prefer the area that geometrically contains the anchor point.
+        RectArea contained = null;
+        for (RectArea a : world)
+            if (a.isInArea(anchorX, anchorY))
+                // On overlap, prefer the area with the topmost floor (the one right beneath the feet).
+                if (contained == null || a.bottom > contained.bottom)
+                    contained = a;
+        if (contained != null)
+            return contained;
+
+        // 2. Fallback: the nearest area.
+        // This will pull the object back into a visible area on the next clamp.
+        RectArea nearestArea = world.get(0);
+        double minDist = Double.MAX_VALUE;
+        for (RectArea a : world) {
+            float cx = Math.max(a.left, Math.min(anchorX, a.right));
+            float cy = Math.max(a.bottom, Math.min(anchorY, a.top));
+            double d = Math.hypot(anchorX - cx, anchorY - cy);
+            if (d < minDist) {
+                minDist = d;
+                nearestArea = a;
             }
         }
-        return nearest;
+        return nearestArea;
     }
 
-    /** Gets the position of the top border.
+    /** Tests whether two areas are horizontally contiguous, i.e. they share a vertical
+     * edge and their vertical overlap is tall enough for the object to pass between them.
+     * @param a One area.
+     * @param b The other area.
+     * @return true=the object can walk directly from one area to the other.
+     */
+    private boolean isXContiguous(RectArea a, RectArea b) {
+        final float edgeEps = 1f;
+        boolean edgeTouch = Math.abs(a.right - b.left) <= edgeEps || Math.abs(a.left - b.right) <= edgeEps;
+        float overlap = Math.min(a.top, b.top) - Math.max(a.bottom, b.bottom);
+        return edgeTouch && overlap >= obj.y;
+    }
+
+    /** Computes the horizontal walkable span: the maximal run of areas reachable from the
+     * active area through contiguous edges. The object may walk across this whole run but
+     * never jump a gap to a disconnected area.
+     * @return {left, right} of the run (px), or null if the world is empty.
+     */
+    private float[] getHorizontalRun() {
+        RectArea active = getActiveArea();
+        if (active == null)
+            return null;
+        ArrayList<RectArea> run = new ArrayList<>();
+        run.add(active);
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (RectArea a : world) {
+                if (run.contains(a))
+                    continue;
+                for (RectArea m : run)
+                    if (isXContiguous(m, a)) {
+                        run.add(a);
+                        changed = true;
+                        break;
+                    }
+            }
+        }
+        float left = Float.MAX_VALUE;
+        float right = -Float.MAX_VALUE;
+        for (RectArea a : run) {
+            left = Math.min(left, a.left);
+            right = Math.max(right, a.right);
+        }
+        return new float[]{left, right};
+    }
+
+    /** Gets the position of the top border, derived from the active (local) area.
      * @return Y (px).
      */
     public float borderTop() {
-        float t = -Float.MAX_VALUE;
-        for (RectArea a : world)
-            if (a.isXInOrthographic(position.x, obj.x))
-                if (a.top > t)
-                    t = a.top;
-        return t;
+        RectArea active = getActiveArea();
+        return active == null ? Float.MAX_VALUE : active.top;
     }
 
-    /** Gets the position of the bottom border.
+    /** Gets the position of the bottom border, derived from the active (local) area,
+     * overridden by any supporting barrier beneath the object.
      * @return Y (px).
      */
     public float borderBottom() {
+        final float ceiling = borderTop();
         for (Vector3 i : barriers)
             if (i.x <= position.x + obj.x && position.x <= i.x + i.z)
-                if (position.y + obj.y > i.y && borderTop() - obj.y > i.y)
+                if (position.y + obj.y > i.y && ceiling - obj.y > i.y)
                     return i.y;
 
-        float t = Float.MAX_VALUE;
-        for (RectArea a : world)
-            if (a.isXInOrthographic(position.x, obj.x))
-                if (a.bottom < t)
-                    t = a.bottom;
-        return t;
+        RectArea active = getActiveArea();
+        return active == null ? -Float.MAX_VALUE : active.bottom;
     }
 
-    /** Gets the position of the right border.
+    /** Gets the position of the right border, derived from the horizontal walkable run.
      * @return X (px).
      */
     public float borderRight() {
-        float t = -Float.MAX_VALUE;
-        for (RectArea a : world)
-            if (a.isYInOrthographic(position.y, obj.y))
-                if (a.right > t)
-                    t = a.right;
-        return t;
+        float[] run = getHorizontalRun();
+        return run == null ? Float.MAX_VALUE : run[1];
     }
 
-    /** Gets the position of the left border.
+    /** Gets the position of the left border, derived from the horizontal walkable run.
      * @return X (px).
      */
     public float borderLeft() {
-        float t = Float.MAX_VALUE;
-        for (RectArea a : world)
-            if (a.isYInOrthographic(position.y, obj.y))
-                if (a.left < t)
-                    t = a.left;
-        return t;
+        float[] run = getHorizontalRun();
+        return run == null ? -Float.MAX_VALUE : run[0];
     }
 
     @Override
