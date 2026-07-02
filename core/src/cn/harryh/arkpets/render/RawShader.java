@@ -5,8 +5,8 @@ import static cn.harryh.arkpets.Const.pass1FShader;
 import static cn.harryh.arkpets.Const.pass1VShader;
 
 
-public class PlainShader extends BaseShader {
-    public PlainShader() {
+public class RawShader extends BaseShader {
+    public RawShader() {
         super(pass1VShader, pass1FShader);
     }
 

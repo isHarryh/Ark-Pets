@@ -10,11 +10,11 @@ import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
 import cn.harryh.arkpets.assets.SkeletonLoader;
-import cn.harryh.arkpets.render.ComplexShader;
 import cn.harryh.arkpets.render.DynamicOrthographicCamara;
 import cn.harryh.arkpets.render.DynamicOrthographicCamara.Insert;
+import cn.harryh.arkpets.render.EffectShader;
 import cn.harryh.arkpets.render.PixmapWrapper;
-import cn.harryh.arkpets.render.PlainShader;
+import cn.harryh.arkpets.render.RawShader;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
@@ -55,8 +55,8 @@ public class ArkChar {
     private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
 
-    private final PlainShader shader1;
-    private final ComplexShader shader2;
+    private final RawShader shader1;
+    private final EffectShader shader2;
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
 
@@ -80,8 +80,8 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = new PlainShader();
-        shader2 = new ComplexShader(config.render_shader_high_quality);
+        shader1 = new RawShader();
+        shader2 = new EffectShader(config.render_shader_high_quality);
         Logger.debug("Shader", "Shader program compiled");
         spineBatch.setShader(shader1);
         finalBatch.setShader(shader2);

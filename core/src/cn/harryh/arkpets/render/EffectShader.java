@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import static cn.harryh.arkpets.Const.*;
 
 
-public class ComplexShader extends BaseShader {
-    public ComplexShader(boolean high) {
+public class EffectShader extends BaseShader {
+    public EffectShader(boolean high) {
         super(pass2VShader, high ? pass2FShader : pass2FShaderLow);
     }
 
