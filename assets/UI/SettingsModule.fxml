@@ -111,10 +111,7 @@
                                 <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="MipMap 抗锯齿"/>
                                 <JFXButton fx:id="configEnableMipMapHelp"/>
                             </HBox>
-                            <HBox>
-                                <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="Angle 原生渲染"/>
-                                <JFXButton fx:id="configEnableAngleHelp"/>
-                            </HBox>
+
                         </VBox>
                     </Tab>
                 </JFXTabPane>

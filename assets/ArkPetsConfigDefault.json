@@ -33,7 +33,6 @@
     "physic_speed_limit_y":1000.0,
     "physic_static_friction_acc":500.0,
     "render_animation_mixture":0.3,
-    "render_enable_angle":true,
     "render_enable_mipmap":true,
     "render_outline":1,
     "render_outline_color":"#FFFF00FF",

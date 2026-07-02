@@ -90,10 +90,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private Button configEnableHighQualityHelp;
     @FXML
-    private CheckBox configEnableAngle;
-    @FXML
-    private Button configEnableAngleHelp;
-    @FXML
     private CheckBox configEnableMipMap;
     @FXML
     private Button configEnableMipMapHelp;
@@ -345,27 +341,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
         };
 
-        configEnableAngle.setSelected(app.config.render_enable_angle);
-        configEnableAngle.setOnAction(e -> {
-            app.config.render_enable_angle = configEnableAngle.isSelected();
-            app.config.save();
-        });
-        new HelpHandbookEntrance(app.body, configEnableAngleHelp) {
-            @Override
-            protected Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configEnableAngle.getParent().getChildrenUnmodifiable().get(0)) {
-                    @Override
-                    public String getContent() {
-                        String apiText;
-                        if (com.sun.jna.Platform.isWindows()) apiText = "DirectX 11";
-                        else if (com.sun.jna.Platform.isMac()) apiText = "Metal";
-                        else apiText = "";
-                        return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
-                                "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
-                    }
-                };
-            }
-        };
+
     }
 
     private void initConfigAdvanced() {

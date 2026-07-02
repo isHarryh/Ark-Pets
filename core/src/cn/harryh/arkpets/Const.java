@@ -63,12 +63,11 @@ public final class Const {
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
     public static final String fontDirInternal  = "/fonts/";
-    // %s will be replaced by GL version (gl21, gles30)
-    public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
-    public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
-    public static final String pass2VShader     = "shaders/%s/ComplexVertex.glsl";
-    public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
-    public static final String pass2FShaderLow  = "shaders/%s/ComplexFragmentLow.glsl";
+    public static final String pass1VShader     = "shaders/PlainVertex.glsl";
+    public static final String pass1FShader     = "shaders/PlainFragment.glsl";
+    public static final String pass2VShader     = "shaders/ComplexVertex.glsl";
+    public static final String pass2FShader     = "shaders/ComplexFragment.glsl";
+    public static final String pass2FShaderLow  = "shaders/ComplexFragmentLow.glsl";
 
     // Changeable constants
     public static boolean isUpdateAvailable     = false;

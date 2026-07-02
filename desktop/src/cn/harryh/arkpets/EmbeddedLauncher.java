@@ -90,11 +90,9 @@ public class EmbeddedLauncher {
             WindowSystem.init();
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             // Configure ANGLE
-            if (appConfig.render_enable_angle) {
-                Logger.info("System", "Using ANGLE renderer");
-                config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
-                Configuration.OPENGL_EXPLICIT_INIT.set(true);
-            }
+            Logger.info("System", "Using ANGLE renderer");
+            config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
+            Configuration.OPENGL_EXPLICIT_INIT.set(true);
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);
