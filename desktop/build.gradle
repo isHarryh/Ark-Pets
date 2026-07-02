@@ -49,6 +49,8 @@ tasks.register("debug", JavaExec) {
 
     setIgnoreExitValue(true)
     setDebug(true)
+
+    jvmArgs += "-Dfile.encoding=UTF-8"
 }
 
 
