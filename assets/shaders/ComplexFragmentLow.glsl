@@ -1,5 +1,5 @@
 #version 300 es
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 

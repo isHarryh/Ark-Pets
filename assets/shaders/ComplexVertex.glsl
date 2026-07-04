@@ -1,4 +1,7 @@
 #version 300 es
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
+ * At GPL-3.0 License
+ */
 
 in vec4 a_position;
 in vec4 a_color;

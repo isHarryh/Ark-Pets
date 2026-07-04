@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.render;
 
 import com.badlogic.gdx.graphics.Color;
