@@ -100,8 +100,6 @@ public class ArkConfig implements Serializable {
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
     public float        render_animation_mixture;
     /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
-    public boolean      render_enable_angle;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
     public boolean      render_enable_mipmap;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
     public int          render_outline;

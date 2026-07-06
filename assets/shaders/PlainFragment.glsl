@@ -5,15 +5,10 @@
 
 // Plain fragment shader for TwoColorPolygonBatch.
 
-#ifdef GL_ES
-    #define LOWP lowp
-    precision mediump float;
-#else
-    #define LOWP
-#endif
+precision mediump float;
 
-in LOWP vec4 v_light;           // From VS
-in LOWP vec4 v_dark;            // From VS
+in lowp vec4 v_light;           // From VS
+in lowp vec4 v_dark;            // From VS
 in vec2 v_texCoords;            // From VS
 uniform float u_pma;            // From TCPB
 uniform sampler2D u_texture;    // From TCPB

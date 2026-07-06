@@ -1,13 +1,15 @@
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.render;
-
 
 import static cn.harryh.arkpets.Const.pass1FShader;
 import static cn.harryh.arkpets.Const.pass1VShader;
 
 
-public class PlainShader extends BaseShader {
-    public PlainShader(boolean gles30) {
-        super(String.format(pass1VShader, gles30 ? "gles30" : "gl21"), String.format(pass1FShader, gles30 ? "gles30" : "gl21"));
+public class RawShader extends BaseShader {
+    public RawShader() {
+        super(pass1VShader, pass1FShader);
     }
 
     public void setAlpha(float alpha) {

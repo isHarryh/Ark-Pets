@@ -1,3 +1,6 @@
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
+ * At GPL-3.0 License
+ */
 package cn.harryh.arkpets.render;
 
 import com.badlogic.gdx.graphics.Color;
@@ -6,10 +9,9 @@ import com.badlogic.gdx.graphics.Texture;
 import static cn.harryh.arkpets.Const.*;
 
 
-public class ComplexShader extends BaseShader {
-    public ComplexShader(boolean gles30, boolean high) {
-        super(String.format(pass2VShader, gles30 ? "gles30" : "gl21"),
-                String.format(high ? pass2FShader : pass2FShaderLow, gles30 ? "gles30" : "gl21"));
+public class EffectShader extends BaseShader {
+    public EffectShader(boolean high) {
+        super(pass2VShader, high ? pass2FShader : pass2FShaderLow);
     }
 
     public void setAlpha(float alpha) {

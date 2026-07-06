@@ -1,11 +1,13 @@
-#version 120
-/** Copyright (c) 2022-2024, Harry Huang
+#version 300 es
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 
 // Complex fragment shader for TwoColorPolygonBatch with outline and box shadow effect. (Low Quality Version)
 
-varying vec2 v_texCoords;       // From VS
+precision mediump float;
+
+in vec2 v_texCoords;       // From VS
 uniform sampler2D u_texture;    // From TCPB
 uniform vec4 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
@@ -13,6 +15,8 @@ uniform float u_outlineAlpha;   // Required
 uniform vec4 u_shadowColor;     // Required
 uniform ivec2 u_textureSize;    // Required
 uniform float u_alpha;          // Required
+
+out vec4 fragColor;
 
 const float c_alphaLow = 0.1;
 const float c_alphaHigh = 0.9;
@@ -42,14 +46,14 @@ const vec2 OFFSETS[16] = vec2[16](
 vec4 getSimpleSampleSum(float width) {
     vec4 sum = vec4(0.0);
     for (int i = 0; i < OFFSETS.length(); i++) {
-        sum += texture2D(u_texture, v_texCoords + OFFSETS[i] * width / u_textureSize);
+        sum += texture(u_texture, v_texCoords + OFFSETS[i] * width / vec2(u_textureSize));
     }
     return sum;
 }
 
 vec4 getOutlined(vec4 sum, vec4 texColor) {
     if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
-        vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
+        vec2 relOutlineWidth = vec2(1.0) / vec2(u_textureSize) * u_outlineWidth;
         vec4 neighbor = sum * c_outlineOverstate;
         if (neighbor.a > c_alphaLow) {
             texColor.rgb = u_outlineColor.rgb;
@@ -79,7 +83,7 @@ vec4 getBoxShadow(vec4 texColor) {
 }
 
 void main() {
-    vec4 texColor = texture2D(u_texture, v_texCoords);
+    vec4 texColor = texture(u_texture, v_texCoords);
 
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
@@ -93,6 +97,6 @@ void main() {
     }
 
     // Ultimate composing
-    gl_FragColor = texColor;
-    gl_FragColor.a *= u_alpha;
+    fragColor = texColor;
+    fragColor.a *= u_alpha;
 }
