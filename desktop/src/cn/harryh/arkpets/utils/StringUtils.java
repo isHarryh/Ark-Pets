@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -46,6 +47,7 @@ public class StringUtils {
                         + ' ' + sizeMap.get(unitSize);
             }
         }
+        //noinspection HardcodedFileSeparator
         return "N/A";
     }
 
@@ -57,6 +59,7 @@ public class StringUtils {
     public static String getMaskedURL(URL url) {
         StringBuilder sb = new StringBuilder();
         sb.append(url.getProtocol());
+        //noinspection HardcodedFileSeparator
         sb.append("://");
         sb.append(url.getHost());
         sb.append(url.getPath());
@@ -71,6 +74,7 @@ public class StringUtils {
      */
     public static String getRelatedTimeString(Instant instant) {
         if (instant == null || instant.toEpochMilli() <= 0)
+            //noinspection HardcodedFileSeparator
             return "N/A";
 
         Instant now = Instant.now();
@@ -104,6 +108,7 @@ public class StringUtils {
      */
     public static String getSimpleTimeString(Instant instant) {
         if (instant == null || instant.toEpochMilli() <= 0)
+            //noinspection HardcodedFileSeparator
             return "N/A";
 
         LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
@@ -134,6 +139,7 @@ public class StringUtils {
         private static final int MAX_QUERY_COUNT = 2048;
 
         private final String url;
+        private final ArrayList<String> pathSegments;
         private final LinkedHashMap<String, String> params;
         private String buildCache;
 
@@ -144,8 +150,24 @@ public class StringUtils {
             if (baseUrl == null || baseUrl.isEmpty())
                 throw new IllegalArgumentException("Base URL cannot be null or empty");
             url = baseUrl;
+            pathSegments = new ArrayList<>(4);
             params = new LinkedHashMap<>(8);
             buildCache = null;
+        }
+
+        /** Adds a path segment to the URL string being built.
+         * @param segment The path segment, cannot be {@code null}, empty, or contain slashes.
+         * @return The current {@link URLStringBuilder} instance for method chaining.
+         */
+        public URLStringBuilder addPath(String segment) {
+            if (segment == null || segment.isEmpty())
+                throw new IllegalArgumentException("Path segment cannot be null or empty");
+            //noinspection HardcodedFileSeparator
+            if (segment.contains("/") || segment.contains("\\"))
+                throw new IllegalArgumentException("Path segment cannot contain slashes");
+            pathSegments.add(segment);
+            buildCache = null;
+            return this;
         }
 
         /** Adds a query parameter to the URL string being built.
@@ -180,10 +202,21 @@ public class StringUtils {
         @Override
         public String toString() {
             if (buildCache == null) {
-                if (params.isEmpty()) {
-                    buildCache = url;
-                } else {
-                    StringBuilder sb = new StringBuilder(url);
+                StringBuilder sb = new StringBuilder(url);
+
+                // Path segments
+                for (String segment : pathSegments) {
+                    if (sb.isEmpty())
+                        throw new RuntimeException("Cannot append path segment to empty string");
+                    //noinspection HardcodedFileSeparator
+                    if (sb.charAt(sb.length() - 1) != '/')
+                        //noinspection HardcodedFileSeparator
+                        sb.append('/');
+                    sb.append(encodePathSegment(segment));
+                }
+
+                // Query params
+                if (!params.isEmpty()) {
                     int i = 0;
                     for (Map.Entry<String, String> entry : params.entrySet()) {
                         sb.append(i++ == 0 ? '?' : '&');
@@ -191,12 +224,16 @@ public class StringUtils {
                         sb.append('=');
                         sb.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
                     }
-                    buildCache = sb.toString();
                 }
+                buildCache = sb.toString();
             }
             if (buildCache.length() > MAX_LENGTH)
                 throw new RuntimeException("Constructed URL exceeds max length limit");
             return buildCache;
+        }
+
+        private static String encodePathSegment(String segment) {
+            return URLEncoder.encode(segment, StandardCharsets.UTF_8).replace("+", "%20");
         }
 
         @Override
