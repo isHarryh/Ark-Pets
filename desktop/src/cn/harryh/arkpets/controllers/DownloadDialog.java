@@ -120,7 +120,11 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     }
 
     private void initMc() {
-        mcPurchase.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlMirrorChyan));
+        mcPurchase.setOnMouseClicked(e -> app.popBrowser(
+                new StringUtils.URLStringBuilder(Const.PathConfig.urlMirrorChyan)
+                        .addQuery("source", Const.mirrorChyanAID)
+                        .toString()
+        ));
         mcCdkInput.setOnKeyPressed(e -> {
             if (e.getCode().getName().equals(KeyCode.ENTER.getName()))
                 submitMcCdk();

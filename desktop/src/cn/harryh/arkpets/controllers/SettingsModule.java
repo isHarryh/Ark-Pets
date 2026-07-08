@@ -485,7 +485,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                             () -> executeAppUpdate());
                     Button gotoButton = new GuiPrefabs.ButtonBuilder()
                             .setText("访问官网")
-                            .setOnAction(e -> app.popBrowser(PathConfig.urlDownload))
+                            .setOnAction(e -> app.popBrowser(PathConfig.urlOfficialDownloadPage))
                             .build();
                     GuiPrefabs.Dialogs.attachAction(dialog, gotoButton, 0);
                     dialog.show();
@@ -525,9 +525,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 }
             }.start();
         });
-        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficialHomePage));
+        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlRepoReadmePage));
+        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlRepoPage));
     }
 
     private void initNoticeBox() {
@@ -700,7 +700,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     "自动更新不可用",
                     "请您手动下载新版程序文件并进行安装",
                     "您使用的似乎不是安装包版本的 ArkPets，或者您的系统环境存在限制，所以无法自动更新哦~ 是否前往 ArkPets 官网下载？",
-                    () -> app.popBrowser(PathConfig.urlDownload)).show();
+                    () -> app.popBrowser(PathConfig.urlOfficialDownloadPage)).show();
         } else {
             assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override

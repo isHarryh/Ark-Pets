@@ -9,14 +9,14 @@ import javafx.scene.layout.StackPane;
 import java.io.File;
 import java.net.URL;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 
 
 public class DownloadModelsTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
     public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempDirPath);
+        super(parent, style, tempDirPath);
         selectedSource = null;
     }
 

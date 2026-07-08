@@ -90,21 +90,27 @@ public final class Const {
             "KeyCastOW"          // KeyCastOW
     }).map(Pattern::compile).toList();
 
+    // 3rd-party distribution constants
+    public static final String mirrorChyanAID           = "ArkPetsGui";
+    public static final String mirrorChyanRID           = "ArkPetsApp";
+    public static final String mirrorChyanModelRepoRID  = "ArkModelsRepo";
+
+
     /** Paths presets definition class.
      */
     public static class PathConfig {
-        public static final String urlApi           = "https://arkpets.harryh.cn/p/arkpets/client/api.php";
-        public static final String urlDownload      = "https://arkpets.harryh.cn/p/arkpets/?from=client#/download";
-        public static final String urlHelp          = "https://arkpets.harryh.cn/p/arkpets/?from=client#/help";
-        public static final String urlOfficial      = "https://arkpets.harryh.cn/p/arkpets/?from=client";
-        public static final String urlReadme        = "https://github.com/isHarryh/Ark-Pets#readme";
-        public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
-        public static final String urlMirrorChyan   = "https://mirrorchyan.com/?source=" + appName + "Gui";
-        public static final String urlWikiPrefix    = "https://prts.wiki/w/";
-        public static final String tempDirPath                  = "temp/";
-        public static final String fileModelsZipName            = "ArkModels";
-        public static final String fileModelsDataPath           = "models_data.json";
-        public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
+        public static final String urlOfficialApi           = "https://arkpets.harryh.cn/api/client";
+        public static final String urlOfficialDownloadPage  = "https://arkpets.harryh.cn/downloads?from=client";
+        public static final String urlOfficialHelpPage      = "https://arkpets.harryh.cn/help?from=client";
+        public static final String urlOfficialHomePage      = "https://arkpets.harryh.cn/?from=client";
+        public static final String urlRepoPage              = "https://github.com/isHarryh/Ark-Pets";
+        public static final String urlRepoReadmePage        = "https://github.com/isHarryh/Ark-Pets#readme";
+        public static final String urlMirrorChyan           = "https://mirrorchyan.com/";
+        public static final String urlWikiPrefix            = "https://prts.wiki/w/";
+        public static final String tempDirPath              = "temp/";
+        public static final String fileModelsZipName        = "ArkModels";
+        public static final String fileModelsDataPath       = "models_data.json";
+        public static final String tempModelsUnzipDirPath   = tempDirPath + "models_unzipped/";
     }
 
 

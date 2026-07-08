@@ -374,7 +374,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                app.popBrowser(urlDownload);
+                app.popBrowser(urlOfficialDownloadPage);
             }
         };
 
@@ -483,7 +483,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             }
         });
 
-        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
+        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlOfficialHelpPage));
     }
 
     public void modelSearch(String keyWords) {

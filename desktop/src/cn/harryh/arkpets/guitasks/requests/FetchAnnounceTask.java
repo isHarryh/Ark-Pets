@@ -14,7 +14,7 @@ import javafx.scene.layout.StackPane;
 import java.net.URL;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.urlOfficialApi;
 import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
@@ -33,8 +33,8 @@ public class FetchAnnounceTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
-                .addQuery("type", "queryAnnouncement")
+        return new StringUtils.URLStringBuilder(urlOfficialApi)
+                .addPath("announcement")
                 .toURL();
     }
 

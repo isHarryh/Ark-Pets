@@ -9,7 +9,9 @@ import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 
-import static cn.harryh.arkpets.Const.appName;
+import static cn.harryh.arkpets.Const.PathConfig.urlMirrorChyan;
+import static cn.harryh.arkpets.Const.mirrorChyanAID;
+import static cn.harryh.arkpets.Const.mirrorChyanModelRepoRID;
 
 
 public class McCheckModelsUpdateTask extends FetchAsDataTask {
@@ -27,9 +29,13 @@ public class McCheckModelsUpdateTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkModelsRepo/latest")
+        return new StringUtils.URLStringBuilder(urlMirrorChyan)
+                .addPath("api")
+                .addPath("resources")
+                .addPath(mirrorChyanModelRepoRID)
+                .addPath("latest")
                 .addQuery("cdk", cdk)
-                .addQuery("user_agent", appName + "Gui")
+                .addQuery("user_agent", mirrorChyanAID)
                 .toURL();
     }
 

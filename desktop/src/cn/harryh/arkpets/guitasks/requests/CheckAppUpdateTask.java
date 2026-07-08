@@ -16,7 +16,7 @@ import javafx.scene.layout.StackPane;
 import java.net.URL;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.urlOfficialApi;
 import static cn.harryh.arkpets.Const.appVersion;
 
 
@@ -44,8 +44,8 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
-                .addQuery("type", "queryVersion")
+        return new StringUtils.URLStringBuilder(urlOfficialApi)
+                .addPath("version")
                 .addQuery("cliVer", appVersion.toString())
                 .addQuery("source", sourceStr)
                 .toURL();
