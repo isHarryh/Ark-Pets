@@ -1,5 +1,22 @@
 # 更新日志 / CHANGELOG
 
+## v3.12
+| **新增**                     |                                                   |
+|:---------------------------|:--------------------------------------------------|
+| [`#166`]<br>[`185f738`]    | 新增了可调节滤波器采样质量的选项，并微调了相关的着色器算法。                    |
+| [`#164`]<br>[`b490ad9`]    | 新增了 Toast 组件的图标支持，并增加了模型导入完成、模型刷新完成、模型总数和公告总数等提示。 |
+| [`#167`]<br>[`be19be1`]    | 新增了默认启用 UTF-8 JVM 参数的特性。                          |
+
+| **修复**                                                            |                                         |
+|:------------------------------------------------------------------|:----------------------------------------|
+| [`#161`]<br>[`#162`]<br>[`e655a88`]<br>[`a89ef84`]<br>[`1209b13`] | 修复了异常退出时可能产生残留字体文件的问题，现在会将字体显式解压到临时文件夹。 |
+| [`8c75b08`]                                                       | 修复了特定的多显示器布局下，桌宠可能离开显示器区域的问题。           |
+
+| **优化**                                 |                                                                       |
+|:---------------------------------------|:----------------------------------------------------------------------|
+| [`#169`]<br>[`e6d39c2`]<br>[`2d032ad`] | 移除了对 GL120 着色器的支持，现在统一使用 ANGLE 作为渲染后端（ANGLE 将始终启用，ANGLE 的切换选项也因此被移除）。 |
+| [`543190b`]<br>[`928f1fe`]             | 迁移到最新的官方网站的页面和 API 路径，并优化了部分 URL 构建逻辑。                                |
+
 ## v3.11
 | **新增**                                 |                                                  |
 |:---------------------------------------|:-------------------------------------------------|
@@ -604,6 +621,12 @@
 [`#152`]: https://github.com/isHarryh/Ark-Pets/pull/152
 [`#158`]: https://github.com/isHarryh/Ark-Pets/pull/158
 [`#159`]: https://github.com/isHarryh/Ark-Pets/pull/159
+[`#161`]: https://github.com/isHarryh/Ark-Pets/pull/161
+[`#162`]: https://github.com/isHarryh/Ark-Pets/pull/162
+[`#164`]: https://github.com/isHarryh/Ark-Pets/pull/164
+[`#166`]: https://github.com/isHarryh/Ark-Pets/pull/166
+[`#167`]: https://github.com/isHarryh/Ark-Pets/pull/167
+[`#169`]: https://github.com/isHarryh/Ark-Pets/pull/169
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -749,3 +772,14 @@
 [`1c7200d`]: https://github.com/isHarryh/Ark-Pets/commit/1c7200d1ef78aa82efee9fcb3b38f65ab5d1eec3
 [`deedced`]: https://github.com/isHarryh/Ark-Pets/commit/deedced4b7c14defde4c60d2ec52e6e153de15fd
 [`69ef274`]: https://github.com/isHarryh/Ark-Pets/commit/69ef2741ad703aab4a8490c7a3307b556982374d
+[`e655a88`]: https://github.com/isHarryh/Ark-Pets/commit/e655a885278a9a37460d239b95bc26139fd68c40
+[`a89ef84`]: https://github.com/isHarryh/Ark-Pets/commit/a89ef840144002bd4da0d703d690562b4065bf9d
+[`1209b13`]: https://github.com/isHarryh/Ark-Pets/commit/1209b1353df23af09900acd097da23562bc4fe1a
+[`185f738`]: https://github.com/isHarryh/Ark-Pets/commit/185f7384e9cbcca93c8865812c57a5633d5314f8
+[`b490ad9`]: https://github.com/isHarryh/Ark-Pets/commit/b490ad96edab5bac599354d50352b36e4ca8ff06
+[`8c75b08`]: https://github.com/isHarryh/Ark-Pets/commit/8c75b08fa482db91a391f92aff381136c7d4c3e1
+[`e6d39c2`]: https://github.com/isHarryh/Ark-Pets/commit/e6d39c22606bb708aaab623d8cb18b9c5b3ae4e3
+[`2d032ad`]: https://github.com/isHarryh/Ark-Pets/commit/2d032ad32cc09213a4ec63f4eb488a3fd039df07
+[`be19be1`]: https://github.com/isHarryh/Ark-Pets/commit/be19be10adc4829d1ebfb11315d8ac864feb968e
+[`543190b`]: https://github.com/isHarryh/Ark-Pets/commit/543190b38dc3a3540393487d7a91ef47596cb63d
+[`928f1fe`]: https://github.com/isHarryh/Ark-Pets/commit/928f1fec6eeb6de7ab3b7b9e68dd6715b484df43
