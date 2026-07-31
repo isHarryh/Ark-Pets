@@ -43,8 +43,6 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -435,19 +433,19 @@ public class GuiPrefabs {
             layout.setHeading(Dialogs.getHeading(Icons.getIcon(Icons.SVG_DANGER, COLOR_DANGER), "发生异常", COLOR_DANGER));
             layout.setBody(content);
 
-            JFXButton button = new JFXButton();
-            button.setText("导出日志");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            button.setOnAction(ev -> {
+            JFXButton exportButton = new JFXButton();
+            exportButton.setText("导出日志");
+            exportButton.setTextFill(COLOR_WHITE);
+            exportButton.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
+            exportButton.setOnAction(ev -> {
                 Logger.debug("ErrorDialog", "Ready to export logs");
+                List<String> pathList;
+                if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
+                    pathList = CrashUtils.collectLogs(exception);
+                } else {
+                    pathList = CrashUtils.collectLogs(null);
+                }
 
-                // Collect related log files
-                List<String> pathList = new ArrayList<>();
-                pathList.add("%s.%d.log".formatted(Const.LogConfig.logDesktopPath, ProcessHandle.current().pid()));
-                if (e instanceof ProcessPool.UnexpectedExitCodeException exception)
-                    pathList.add("%s.%d.log".formatted(Const.LogConfig.logCorePath, exception.getProcessId()));
-                pathList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
                 if (pathList.isEmpty()) {
                     Logger.info("ErrorDialog", "Logs not exported, no log file to export");
                     return;
@@ -470,7 +468,25 @@ public class GuiPrefabs {
                 disposeDialog(dialog);
             });
 
-            layout.setActions(button, Dialogs.getOkayButton(dialog, null));
+            JFXButton uploadButton = new JFXButton();
+            uploadButton.setText("上传日志");
+            uploadButton.setTextFill(COLOR_WHITE);
+            uploadButton.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
+            uploadButton.setOnAction(ev -> {
+                Logger.debug("ErrorDialog", "Ready to upload logs");
+                List<String> pathList;
+                Throwable uploadException = e;
+                if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
+                    pathList = CrashUtils.collectLogs(exception);
+                    uploadException = exception.getCause() != null ? exception.getCause() : e;
+                } else {
+                    pathList = CrashUtils.collectLogs(null);
+                }
+                SentryHelper.uploadLog(uploadException, pathList);
+                disposeDialog(dialog);
+            });
+
+            layout.setActions(uploadButton, exportButton, Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (e instanceof ProcessPool.UnexpectedExitCodeException) {

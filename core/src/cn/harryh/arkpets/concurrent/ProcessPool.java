@@ -3,7 +3,12 @@
  */
 package cn.harryh.arkpets.concurrent;
 
+import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.utils.CrashUtils;
+import cn.harryh.arkpets.utils.Logger;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -98,6 +103,10 @@ public final class ProcessPool implements Executor {
         public UnexpectedExitCodeException(int exitCode, long processId) {
             this.exitCode = exitCode;
             this.processId = processId;
+            Exception process = getProcessException();
+            if (process != null) {
+                this.initCause(getProcessException());
+            }
         }
 
         @Override
@@ -107,6 +116,16 @@ public final class ProcessPool implements Executor {
 
         public long getProcessId() {
             return processId;
+        }
+
+        private Exception getProcessException() {
+            Exception e = null;
+            try {
+                e = CrashUtils.readException(new File(Const.LogConfig.logDir, Const.LogConfig.logCrashPattern.formatted(processId)));
+            } catch (IOException ex) {
+                Logger.warn("System", "Failed to read crash exception for process " + processId);
+            }
+            return e;
         }
     }
 }

@@ -113,11 +113,11 @@ public class ArkChar {
                 Logger.debug("Character", "Skeleton loaded with Spine version " + skeletonLoader.version);
             } catch (Exception e) {
                 Logger.error("Character", "Failed to load skeleton, details see below.", e);
-                throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
+                throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.", e);
             }
         } catch (SerializationException | GdxRuntimeException e) {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
-            throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
+            throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.", e);
         }
         skeleton = new Skeleton(skeletonData);
         skeleton.updateWorldTransform();

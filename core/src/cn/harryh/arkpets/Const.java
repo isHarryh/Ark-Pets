@@ -124,6 +124,7 @@ public final class Const {
         public static final String logDir           = "logs/";
         public static final String logCorePath      = logDir + "core";
         public static final String logDesktopPath   = logDir + "desktop";
+        public static final String logCrashPattern  = "core.%d.crash.bin";
 
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";

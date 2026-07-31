@@ -4,15 +4,13 @@ import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.Const;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
-import io.sentry.Sentry;
-import io.sentry.SentryAttribute;
-import io.sentry.SentryAttributes;
-import io.sentry.SentryLogLevel;
+import io.sentry.*;
 import io.sentry.logger.SentryLogParameters;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.charsetDefault;
@@ -46,18 +44,27 @@ public class SentryHelper {
     }
 
     public static void reportModel(String asset,String label,boolean isStopping) {
+        reportModel(asset,label,isStopping,false);
+    }
+
+    public static void reportModel(String asset,String label,boolean isStopping, boolean isCrashed) {
         if (!enable) return;
         Sentry.logger().log(
                 SentryLogLevel.INFO,
                 SentryLogParameters.create(
                         SentryAttributes.of(
                                 SentryAttribute.stringAttribute("arkpets.character_asset", asset),
-                                SentryAttribute.stringAttribute("arkpets.character_label", label)
+                                SentryAttribute.stringAttribute("arkpets.character_label", label),
+                                SentryAttribute.booleanAttribute("arkpets.instance_crashed", isCrashed)
                         )
                 ),
                 "%s_MODEL",
                 isStopping ? "STOP" : "START"
         );
+    }
+
+    public static void uploadLog(Throwable e, List<String> fileList) {
+        Sentry.captureException(e, Hint.withAttachments(fileList.stream().map(Attachment::new).toList()));
     }
 
     public static boolean isEnable() {

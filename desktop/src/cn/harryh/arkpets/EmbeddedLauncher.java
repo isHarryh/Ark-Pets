@@ -5,6 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.CrashUtils;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
@@ -123,6 +124,11 @@ public class EmbeddedLauncher {
         } catch (Exception e) {
             WindowSystem.free();
             Logger.error("System", "A fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);
+            try {
+                CrashUtils.writeException(new File(LogConfig.logDir,LogConfig.logCrashPattern.formatted(ProcessHandle.current().pid())), e);
+            } catch (Exception ignore) {
+                Logger.warn("System", "Failed to write crash exception");
+            }
             System.exit(-1);
         }
         WindowSystem.free();

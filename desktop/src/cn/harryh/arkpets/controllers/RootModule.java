@@ -17,6 +17,7 @@ import cn.harryh.arkpets.utils.GuiComponents.Handbook;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -181,6 +182,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     case LogConfig.debug -> LogConfig.debugArg;
                     default -> "";
                 };
+                String asset = app.config.character_asset;
+                String label = app.config.character_label;
                 args.add(temp);
                 // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
@@ -191,9 +194,11 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     int exitCode = future.get().exitValue();
                     Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + exitCode + "). Please check the log file for details.");
                     lastLaunchFailed = future.get().toException();
+                    SentryHelper.reportModel(asset, label, true, true);
                     return false;
                 }
                 Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
+                SentryHelper.reportModel(asset, label, true);
                 return true;
             }
         };
@@ -202,6 +207,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 Logger.error("Launcher", "Detected an unexpected failure of an ArkPets thread, details see below.", task.getException())
         );
         thread.start();
+        SentryHelper.reportModel(app.config.character_asset, app.config.character_label, false);
     }
 
     /** Configures the basic network settings and fetches a regular check-app-up-date request from the ArkPets server.
