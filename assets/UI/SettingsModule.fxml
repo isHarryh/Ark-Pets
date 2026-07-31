@@ -128,6 +128,7 @@
                 </HBox>
                 <HBox>
                     <JFXCheckBox fx:id="configEcoMode" mnemonicParsing="false" text="长时间未交互时降低帧率"/>
+                    <JFXCheckBox fx:id="configTelemetry" mnemonicParsing="false" text="启用匿名遥测"/>
                 </HBox>
                 <HBox spacing="20.0">
                     <Label text="日志级别"/>

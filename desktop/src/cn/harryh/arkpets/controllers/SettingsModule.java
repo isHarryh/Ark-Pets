@@ -110,6 +110,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private Button configWindowToolwindowHelp;
     @FXML
     private CheckBox configEcoMode;
+    @FXML
+    private CheckBox configTelemetry;
 
     @FXML
     private TextField configNetworkSource;
@@ -434,6 +436,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             app.config.eco_mode = configEcoMode.isSelected();
             app.config.save();
         });
+
+        configTelemetry.setSelected(app.config.enable_telemetry);
+        configTelemetry.setOnAction(e -> {
+            SentryHelper.setEnable(configTelemetry.isSelected());
+            app.config.enable_telemetry = configTelemetry.isSelected();
+            app.config.save();
+        });
+
     }
 
     private void initNetwork() {

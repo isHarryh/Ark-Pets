@@ -15,6 +15,7 @@ import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -132,8 +133,10 @@ public class ArkHomeFX extends Application {
             // Post initialization.
             rootModule.configNetwork();
             rootModule.moduleWrapperComposer.activate(0);
+            SentryHelper.setEnable(config.enable_telemetry);
 
             Logger.info("Launcher", "Finished starting");
+            SentryHelper.reportApp(false);
         }, Duration.ZERO, durationFast);
     }
 
@@ -146,6 +149,7 @@ public class ArkHomeFX extends Application {
         SocketServer.getInstance().stopServer();
         ProcessPool.getInstance().shutdown();
         Logger.debug("Launcher", "Finished stopping");
+        SentryHelper.reportApp(true);
     }
 
     public void popLoading(EventHandler<ActionEvent> handler) {

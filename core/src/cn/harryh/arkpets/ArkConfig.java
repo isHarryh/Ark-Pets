@@ -75,6 +75,8 @@ public class ArkConfig implements Serializable {
     public String       download_mc_cdk;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "false")
     public boolean      eco_mode;
+    /** @since ArkPets 3.13 */ @JSONField(defaultValue = "true")
+    public boolean      enable_telemetry;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
     public float        initial_position_x;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")

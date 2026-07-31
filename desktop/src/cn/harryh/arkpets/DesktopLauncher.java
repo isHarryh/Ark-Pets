@@ -5,6 +5,7 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
 import javafx.application.Application;
 
 import java.io.File;
@@ -61,6 +62,8 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
+
+        SentryHelper.init();
 
         // Init temp folder
         File temp = new File(PathConfig.tempDirPath);

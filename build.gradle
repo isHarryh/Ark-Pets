@@ -31,6 +31,7 @@ allprojects {
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.15"
+        sentryVersion = "8.51.0"
     }
 
     repositories {
@@ -46,6 +47,9 @@ project(":desktop") {
         implementation project(":core")
         // libGDX Desktop
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        // Sentry
+        implementation platform("io.sentry:sentry-bom:$sentryVersion")
+        implementation('io.sentry:sentry')
     }
 }
 
