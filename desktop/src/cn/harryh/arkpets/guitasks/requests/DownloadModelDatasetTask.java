@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.guitasks.requests;
@@ -9,14 +9,14 @@ import javafx.scene.layout.StackPane;
 import java.io.File;
 import java.net.URL;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 
 
 public class DownloadModelDatasetTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
     public DownloadModelDatasetTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempDirPath);
+        super(parent, style, tempDirPath);
         selectedSource = null;
     }
 

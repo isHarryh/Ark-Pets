@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
@@ -19,6 +19,7 @@ import org.lwjgl.system.MemoryUtil;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -28,11 +29,19 @@ import static cn.harryh.arkpets.Const.*;
 public class BootstrapLauncher {
     private static boolean useCustomGLFW;
     private static boolean isDirectStart = false;
+    public static File customConfig;
 
     public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
+        // Config
+        new ArgPending("--config", args) {
+            protected void process(String command, String addition) {
+                customConfig = new File(addition);
+            }
+        };
+        ArkConfig appConfig = Objects.requireNonNull(customConfig == null ? ArkConfig.getConfig() : ArkConfig.getConfig(customConfig));
         // Logger
         new ArgPending("--direct-start", args) {
             protected void process(String command, String addition) {
@@ -44,7 +53,6 @@ public class BootstrapLauncher {
         } else {
             Logger.initialize(LogConfig.logDesktopPath, LogConfig.logDesktopMaxKeep);
         }
-        ArkConfig appConfig = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         try {
             Logger.setLevel(appConfig.logging_level);
         } catch (Exception ignored) {
@@ -73,6 +81,11 @@ public class BootstrapLauncher {
         };
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
+        // Init temp folder
+        File temp = new File(PathConfig.tempDirPath);
+        if (!(temp.exists() || temp.mkdir())) {
+            Logger.error("System", "Failed to create the temporary directory.");
+        }
         // If requested to start the core app directly
         if (isDirectStart) {
             startCore(appConfig);
@@ -140,11 +153,9 @@ public class BootstrapLauncher {
             WindowSystem.init(windowSystem);
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
             // Configure ANGLE
-            if (appConfig.render_enable_angle) {
-                Logger.info("System", "Using ANGLE renderer");
-                config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
-                Configuration.OPENGL_EXPLICIT_INIT.set(true);
-            }
+            Logger.info("System", "Using ANGLE renderer");
+            config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
+            Configuration.OPENGL_EXPLICIT_INIT.set(true);
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);
@@ -179,7 +190,7 @@ public class BootstrapLauncher {
                 }
             });
             // Instantiate the App
-            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE), config);
+            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE, appConfig), config);
         } catch (Exception e) {
             WindowSystem.free();
             Logger.error("System", "A fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);

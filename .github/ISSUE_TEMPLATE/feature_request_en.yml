@@ -1,0 +1,26 @@
+name: "[English] Feature Request"
+description: "Request a new feature or suggest an improvement."
+labels: ["Type: Enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting, please make sure you have checked the [existing GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) and found no similar requests.
+  - type: input
+    id: version
+    attributes:
+      label: Software Version
+      description: What version of the software are you using?
+      placeholder: vX.X.X
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: Please describe the feature or improvement you would like to see.
+      placeholder: |
+        Please describe in detail the expected behavior and your reasons for the request.
+    validations:
+      required: true

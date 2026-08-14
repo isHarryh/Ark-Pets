@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2022-2025, Harry Huang
+    Copyright (c) 2022-2026, Harry Huang
     At GPL-3.0 License
 -->
 
@@ -30,7 +30,8 @@
             <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                         prefHeight="376.0" prefWidth="600.0" StackPane.alignment="BOTTOM_CENTER">
                 <!-- ***** 1.1. Sidebar ***** -->
-                <Pane id="Sidebar" fx:id="sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                <Pane id="Sidebar" fx:id="sidebar" cache="true" cacheHint="SPEED"
+                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                       minWidth="-Infinity" prefHeight="376.0" prefWidth="140.0" styleClass="shadowed"
                       AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" StackPane.alignment="BOTTOM_LEFT">
                     <Text id="Title" layoutX="12.0" layoutY="48.0" text="ArkPets" textAlignment="CENTER"
@@ -162,7 +163,7 @@
 
         <!-- ********** 4. Toast ********** -->
         <HBox fx:id="toast" id="Toast" maxHeight="30.0" maxWidth="-Infinity" minWidth="-Infinity" minHeight="-Infinity"
-              styleClass="shadowed" prefHeight="40.0" StackPane.alignment="BOTTOM_CENTER" spacing="6" alignment="CENTER"
+              prefHeight="40.0" StackPane.alignment="BOTTOM_CENTER" spacing="6" alignment="CENTER"
               managed="false" visible="false">
             <StackPane.margin>
                 <Insets bottom="20.0"/>

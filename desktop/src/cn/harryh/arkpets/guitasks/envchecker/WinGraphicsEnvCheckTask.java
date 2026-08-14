@@ -1,6 +1,5 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.naitves.NVAPIWrapper;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -16,7 +15,6 @@ import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 import java.io.File;
-import java.util.Objects;
 
 import static com.sun.jna.platform.win32.WinNT.*;
 import static com.sun.jna.platform.win32.WinReg.HKEY_CURRENT_USER;
@@ -77,11 +75,6 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     setWinGraphicsCard(javaBin, false);
                     setNvidiaGLSettings(false, launcherPath, javaBin);
                 }
-                case ANGLE -> {
-                    ArkConfig config = Objects.requireNonNull(ArkConfig.getConfig());
-                    config.render_enable_angle = true;
-                    config.save();
-                }
             }
         } catch (Exception e) {
             Logger.error("System", "Failed to modify graphics settings", e);
@@ -120,11 +113,11 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
                     }
                     return true;
                 } else if (cards.contains("AMD") && cards.contains("NVIDIA")) {
-                    fix = FixMode.ANGLE;
-                    return false;
+                    // ANGLE is always enabled, no fix needed
+                    return true;
                 } else if (cards.contains("AMD")) {
-                    fix = FixMode.ANGLE;
-                    return false;
+                    // ANGLE is always enabled, no fix needed
+                    return true;
                 } else if (cards.contains("NVIDIA")) {
                     // NVIDIA only
                     boolean status = checkNvidiaGLSettings();
@@ -276,7 +269,6 @@ public class WinGraphicsEnvCheckTask extends EnvCheckTask {
     private enum FixMode {
         WIN_SAV,     // Windows Power-saving
         WIN_SAV_NV,  // Windows and NVIDIA Power-saving
-        ANGLE,       // Enable ANGLE
         NV,          // NVIDIA OpenGL GDI and Present method
         FAIL         // Can't Fix
     }

@@ -110,11 +110,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-        // not necessary in macOS.
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         getNSWindow(windowID);
         ObjCHelper.msgSend.invokeVoid(new Object[]{

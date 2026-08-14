@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang, Litwak913
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.startup;
@@ -56,11 +56,11 @@ public class WindowsStartupConfig extends StartupConfig {
             IShellLink lnk = IShellLink.create();
             IPersistFile pf = lnk.getPF();
             String cd = System.getProperty("user.dir");
-            cd = cd.replaceAll("\"", "\"\"");
+            cd = cd.replace("\"", "\"\"");
             lnk.SetPath(cd + "\\" + startupTarget);
             lnk.SetArguments("--direct-start");
             lnk.SetWorkingDirectory(cd);
-            pf.Save(startupFile.getAbsolutePath().replaceAll("\"", "\"\""));
+            pf.Save(startupFile.getAbsolutePath().replace("\"", "\"\""));
             pf.Release();
             lnk.Release();
             Logger.info("Config", "Auto-startup added.");

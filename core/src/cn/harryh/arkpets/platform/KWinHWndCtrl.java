@@ -68,11 +68,6 @@ public class KWinHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         dBusInterface.Above(hWnd, enable);
     }

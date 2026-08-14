@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -21,9 +21,9 @@ import cn.harryh.arkpets.startup.StartupConfig;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.badlogic.gdx.graphics.Color;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.ScheduledService;
@@ -32,7 +32,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import org.apache.log4j.Level;
@@ -52,81 +51,79 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private Pane noticeBox;
 
     @FXML
-    private JFXComboBox<NamedItem<Float>> configDisplayScale;
+    private ComboBox<NamedItem<Float>> configDisplayScale;
     @FXML
-    private JFXButton configDisplayScaleHelp;
+    private Button configDisplayScaleHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configDisplayFps;
+    private ComboBox<NamedItem<Integer>> configDisplayFps;
     @FXML
-    private JFXButton configDisplayFpsHelp;
+    private Button configDisplayFpsHelp;
 
     @FXML
-    private JFXTabPane configRenderTabPane;
+    private TabPane configRenderTabPane;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
+    private ComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
+    private ComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
-    private JFXButton configCanvasCoverageHelp;
+    private Button configCanvasCoverageHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
+    private ComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutline;
+    private ComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineColor;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
+    private ComboBox<NamedItem<Float>> configRenderOutlineWidth;
     @FXML
-    private JFXSlider configRenderOpacityNormal;
+    private Slider configRenderOpacityNormal;
     @FXML
     private Label configRenderOpacityNormalValue;
     @FXML
-    private JFXSlider configRenderOpacityDim;
+    private Slider configRenderOpacityDim;
     @FXML
     private Label configRenderOpacityDimValue;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
+    private ComboBox<NamedItem<Integer>> configRenderShadowColor;
     @FXML
-    private HBox configAngleBox;
+    private CheckBox configEnableHighQuality;
     @FXML
-    private JFXCheckBox configEnableAngle;
+    private Button configEnableHighQualityHelp;
     @FXML
-    private JFXButton configEnableAngleHelp;
+    private CheckBox configEnableMipMap;
     @FXML
-    private JFXCheckBox configEnableMipMap;
-    @FXML
-    private JFXButton configEnableMipMapHelp;
+    private Button configEnableMipMapHelp;
 
     @FXML
-    private JFXCheckBox configWindowTopmost;
+    private CheckBox configWindowTopmost;
     @FXML
-    private JFXComboBox<String> configLoggingLevel;
+    private ComboBox<String> configLoggingLevel;
     @FXML
-    private JFXButton exportLog;
+    private Button exportLog;
     @FXML
-    private JFXCheckBox configAutoStartup;
+    private CheckBox configAutoStartup;
     @FXML
-    private JFXCheckBox configSolidExit;
+    private CheckBox configSolidExit;
     @FXML
-    private JFXCheckBox configWindowToolwindow;
+    private CheckBox configWindowToolwindow;
     @FXML
-    private JFXButton configWindowToolwindowHelp;
+    private Button configWindowToolwindowHelp;
     @FXML
-    private JFXCheckBox configEcoMode;
+    private CheckBox configEcoMode;
     @FXML
-    private JFXComboBox<NamedItem<String>> configWindowSystem;
+    private ComboBox<NamedItem<String>> configWindowSystem;
     @FXML
-    private JFXButton configWindowSystemHelp;
+    private Button configWindowSystemHelp;
     @FXML
     private Label runEnvCheck;
     @FXML
-    private JFXTextField configNetworkSource;
+    private TextField configNetworkSource;
     @FXML
-    private JFXTextField configNetworkProxy;
+    private TextField configNetworkProxy;
     @FXML
     private Label configNetworkProxyStatus;
 
@@ -157,8 +154,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initNetwork();
         initAbout();
         initScheduledListener();
-
-        javafx.application.Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
+        ScrollUtils.addSmoothScrolling(moduleScroll);
+        Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
     private void initConfigDisplay() {
@@ -318,6 +315,23 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
+        configEnableHighQuality.setSelected(app.config.render_shader_high_quality);
+        configEnableHighQuality.setOnAction(e -> {
+            app.config.render_shader_high_quality = configEnableHighQuality.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableHighQualityHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableHighQuality.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会在阴影和描边上使用高质量滤波算法来提高渲染精度。\n" +
+                                "禁用时，桌宠将会以简单的方式渲染阴影和描边。";
+                    }
+                };
+            }
+        };
         configEnableMipMap.setSelected(app.config.render_enable_mipmap);
         configEnableMipMap.setOnAction(e -> {
             app.config.render_enable_mipmap = configEnableMipMap.isSelected();
@@ -336,33 +350,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
         };
 
-        if(isMac || isLinux) {
-            // Because some ANGLE Metal bug (background), temporary hide on macOS.
-            // Hide on Linux because the primary graphics API is OpenGL.
-            configAngleBox.setVisible(false);
-            configAngleBox.setManaged(false);
-        }
-        configEnableAngle.setSelected(app.config.render_enable_angle);
-        configEnableAngle.setOnAction(e -> {
-            app.config.render_enable_angle = configEnableAngle.isSelected();
-            app.config.save();
-        });
-        new HelpHandbookEntrance(app.body, configEnableAngleHelp) {
-            @Override
-            protected Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configEnableAngle.getParent().getChildrenUnmodifiable().get(0)) {
-                    @Override
-                    public String getContent() {
-                        String apiText;
-                        if (isWindows) apiText = "DirectX 11";
-                        else if (isMac) apiText = "Metal";
-                        else apiText = "";
-                        return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
-                                "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
-                    }
-                };
-            }
-        };
     }
 
     private void initConfigAdvanced() {
@@ -569,8 +556,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                             "检测到软件有新的版本！",
                             "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n是否要现在进行更新？",
                             () -> executeAppUpdate());
-                    JFXButton gotoButton = new JFXButton("访问官网");
-                    gotoButton.setOnAction(e -> app.popBrowser(PathConfig.urlDownload));
+                    Button gotoButton = new GuiPrefabs.ButtonBuilder()
+                            .setText("访问官网")
+                            .setOnAction(e -> app.popBrowser(PathConfig.urlOfficialDownloadPage))
+                            .build();
                     GuiPrefabs.Dialogs.attachAction(dialog, gotoButton, 0);
                     dialog.show();
                 }
@@ -585,12 +574,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                             "尚未发现新的正式版本。",
                             "当前版本 " + appVersion + " 已是最新",
                             null);
-                    JFXButton forceBtn = new JFXButton("强制重装");
-                    forceBtn.setOnAction(e -> {
-                        executeAppUpdate();
-                        GuiPrefabs.Dialogs.disposeDialog(dialog);
-                    });
-                    GuiPrefabs.Dialogs.attachAction(dialog, forceBtn, 0);
+                    Button forceButton = new GuiPrefabs.ButtonBuilder()
+                            .setText("强制重装")
+                            .setOnAction(e -> {
+                                executeAppUpdate();
+                                GuiPrefabs.Dialogs.disposeDialog(dialog);
+                            })
+                            .build();
+                    GuiPrefabs.Dialogs.attachAction(dialog, forceButton, 0);
                     dialog.show();
                 }
 
@@ -607,9 +598,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 }
             }.start();
         });
-        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficialHomePage));
+        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlRepoReadmePage));
+        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlRepoPage));
     }
 
     private void initNoticeBox() {
@@ -782,7 +773,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     "自动更新不可用",
                     "请您手动下载新版程序文件并进行安装",
                     "您使用的似乎不是安装包版本的 ArkPets，或者您的系统环境存在限制，所以无法自动更新哦~ 是否前往 ArkPets 官网下载？",
-                    () -> app.popBrowser(PathConfig.urlDownload)).show();
+                    () -> app.popBrowser(PathConfig.urlOfficialDownloadPage)).show();
         } else {
             assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
                 @Override

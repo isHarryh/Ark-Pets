@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2022-2025, Harry Huang
+    Copyright (c) 2022-2026, Harry Huang
     At GPL-3.0 License
 -->
 
@@ -104,12 +104,12 @@
                     <Tab text="其他">
                         <VBox>
                             <HBox>
+                                <JFXCheckBox fx:id="configEnableHighQuality" mnemonicParsing="false" text="高质量滤波"/>
+                                <JFXButton fx:id="configEnableHighQualityHelp"/>
+                            </HBox>
+                            <HBox>
                                 <JFXCheckBox fx:id="configEnableMipMap" mnemonicParsing="false" text="MipMap 抗锯齿"/>
                                 <JFXButton fx:id="configEnableMipMapHelp"/>
-                            </HBox>
-                            <HBox fx:id="configAngleBox">
-                                <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="Angle 原生渲染"/>
-                                <JFXButton fx:id="configEnableAngleHelp"/>
                             </HBox>
                         </VBox>
                     </Tab>

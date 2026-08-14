@@ -1,7 +1,10 @@
-/** Copyright (c) 2022-2024, Harry Huang, Litwak913
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.platform;
+
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +18,7 @@ public abstract class HWndCtrl {
     public final int posRight;
     public final int windowWidth;
     public final int windowHeight;
+    protected long glfwHandle;
 
     public HWndCtrl(String windowText, WindowRect windowRect) {
         this.windowText = windowText;
@@ -77,11 +81,6 @@ public abstract class HWndCtrl {
      */
     public abstract void setTaskbar(boolean enable);
 
-    /** Sets the window's layered style.
-     * @param enable Whether to enable the window's layered style.
-     */
-    public abstract void setLayered(boolean enable);
-
     /** Sets the window's topmost style.
      * @param enable Whether to enable the topmost style.
      */
@@ -90,7 +89,10 @@ public abstract class HWndCtrl {
     /** Sets the window's ability to be passed through.
      * @param enable Whether the window can be passed through.
      */
-    public abstract void setTransparent(boolean enable);
+    public void setTransparent(boolean enable) {
+        if (glfwHandle == 0) return;
+        GLFW.glfwSetWindowAttrib(glfwHandle, GLFW.GLFW_MOUSE_PASSTHROUGH, enable ? 1 : 0);
+    }
 
     /** Sends a mouse event message to the window.
      * @param msg The window message value.
@@ -98,6 +100,13 @@ public abstract class HWndCtrl {
      * @param y The Y-axis coordinate, related to the top border of the window.
      */
     public abstract void sendMouseEvent(MouseEvent msg, int x, int y);
+
+    /** Attach a GLFW window handle to the window.
+     * @param graphics The Lwjgl3Graphics instance.
+     */
+    public void attachGLFWWindow(Lwjgl3Graphics graphics) {
+        this.glfwHandle = graphics.getWindow().getWindowHandle();
+    }
 
     @Override
     public abstract boolean equals(Object o);
@@ -159,6 +168,10 @@ public abstract class HWndCtrl {
         public WindowRect() {
             this(0, 0, 0, 0);
         }
+
+        public int width() { return right - left; }
+
+        public int height() { return bottom - top; }
     }
 
     public enum MouseEvent {
@@ -170,5 +183,8 @@ public abstract class HWndCtrl {
         RBUTTONUP,
         MBUTTONDOWN,
         MBUTTONUP,
+    }
+
+    public record MousePoint(int x, int y) {
     }
 }

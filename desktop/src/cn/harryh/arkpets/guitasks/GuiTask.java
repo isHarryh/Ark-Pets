@@ -1,11 +1,12 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.guitasks;
 
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
@@ -136,12 +137,11 @@ abstract public class GuiTask {
         JFXDialogLayout layout = new JFXDialogLayout();
         layout.setHeading(bar);
         layout.setBody(content);
-        layout.setActions(GuiPrefabs.Dialogs.getOkayButton(dialog));
         dialog.setContent(layout);
+
+        // Set the actions of the dialog
         if (cancelable) {
-            JFXButton cancel = GuiPrefabs.Dialogs.getCancelButton(dialog);
-            cancel.setOnAction(e -> boundTask.cancel());
-            layout.setActions(cancel);
+            layout.setActions(GuiPrefabs.Dialogs.getCancelButton(dialog, e -> boundTask.cancel()));
         } else {
             layout.setActions(List.of());
         }

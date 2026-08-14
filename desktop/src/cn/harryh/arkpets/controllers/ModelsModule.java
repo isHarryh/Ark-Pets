@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -14,23 +14,19 @@ import cn.harryh.arkpets.guitasks.requests.McCheckModelsUpdateTask;
 import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.IOUtils;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Version;
-import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.*;
+import cn.harryh.arkpets.utils.*;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -44,6 +40,8 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -60,19 +58,19 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane loadFailureTip;
     @FXML
-    private JFXButton searchModelConfirm;
+    private Button searchModelConfirm;
     @FXML
-    private JFXButton searchModelReset;
+    private Button searchModelReset;
     @FXML
-    private JFXButton searchModelRandom;
+    private Button searchModelRandom;
     @FXML
-    private JFXButton searchModelReload;
+    private Button searchModelReload;
     @FXML
-    private JFXTextField searchModelInput;
+    private TextField searchModelInput;
     @FXML
     private Label searchModelStatus;
     @FXML
-    private JFXListView<JFXListCell<ModelItem>> modelListView;
+    private ListView<ModelItem> modelListView;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -82,9 +80,13 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label selectedModelType;
     @FXML
-    private JFXButton modelFavorite;
+    private Button modelWiki;
     @FXML
-    private JFXButton topFavorite;
+    private Button modelFavorite;
+    @FXML
+    public SVGPath modelFavoriteIconFill;
+    @FXML
+    private Button topFavorite;
 
     @FXML
     private AnchorPane infoPane;
@@ -93,9 +95,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private AnchorPane managePane;
     @FXML
-    private JFXButton toggleFilterPane;
+    private Button toggleFilterPane;
     @FXML
-    private JFXButton toggleManagePane;
+    private Button toggleManagePane;
     @FXML
     private ScrollPane infoPaneTagScroll;
     @FXML
@@ -110,39 +112,40 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private VBox noticeBox;
     @FXML
-    private JFXButton modelUpdate;
+    private Button modelUpdate;
     @FXML
-    private JFXButton modelFetch;
+    private Button modelFetch;
     @FXML
-    private JFXButton modelVerify;
+    private Button modelVerify;
     @FXML
-    private JFXButton modelReFetch;
+    private Button modelReFetch;
     @FXML
-    private JFXButton modelImport;
+    private Button modelImport;
     @FXML
-    private JFXButton modelExport;
+    private Button modelExport;
     @FXML
     private Label modelHelp;
 
     private ModelItemGroup assetItemList;
-    private JFXListCell<ModelItem> selectedModelCell;
-    private ArrayList<JFXListCell<ModelItem>> modelCellList = new ArrayList<>();
+    private ModelItemWrapper selectedModel;
+    private final ObservableList<ModelItem> targetList = FXCollections.observableArrayList();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
+    private boolean filterFavorite;
 
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
     private GuiPrefabs.PeerNodeComposer mngBtnComposer;
     private NoticeBar datasetTooLowVerNotice;
     private NoticeBar datasetTooHighVerNotice;
 
-    private final SVGPath favIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR, GuiPrefabs.COLOR_LIGHT_GRAY);
-    private final SVGPath favFillIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
-    private boolean filterFavorite;
-
     private ArkHomeFX app;
 
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+        this.selectedModel = new ModelItemWrapper();
+        this.modelListView.setItems(targetList);
+        ScrollUtils.addSmoothScrolling(modelListView);
+
         infoPaneComposer = new GuiPrefabs.PeerNodeComposer();
         infoPaneComposer.add(0, infoPane);
         infoPaneComposer.add(1,
@@ -161,9 +164,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelSearch();
         initModelFilter();
         initModelManage();
-        initModelFavorite();
         modelReload(false);
-
         Platform.runLater(() -> {
             GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
             GuiPrefabs.disableScrollPaneCache(filterPaneTagScroll);
@@ -212,13 +213,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         } catch (FileNotFoundException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
             if (doPopNotice) {
-                JFXDialog dialog = GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                GuiPrefabs.Dialogs.createCommonDialog(app.body,
                         GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：未找到数据集。",
                         "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。",
-                        null);
-                dialog.show();
+                        null).show();
             }
         } catch (ModelsDataset.DatasetKeyException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
@@ -245,8 +245,35 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initInfoPane() {
+        // Model info labels
         toggleFilterPane.setOnAction(e -> infoPaneComposer.toggle(1, 0));
         toggleManagePane.setOnAction(e -> infoPaneComposer.toggle(2, 0));
+        selectedModelName.textProperty().bind(selectedModel.nameProperty);
+        selectedModelAppellation.textProperty().bind(selectedModel.appellationProperty);
+        selectedModelType.textProperty().bind(selectedModel.typeProperty);
+        selectedModelSkinGroupName.textProperty().bind(selectedModel.skinGroupNameProperty);
+        GuiPrefabs.addTooltip(selectedModelName, selectedModel.nameProperty);
+        GuiPrefabs.addTooltip(selectedModelAppellation, selectedModel.appellationProperty);
+        GuiPrefabs.addTooltip(selectedModelType, selectedModel.typeProperty);
+        GuiPrefabs.addTooltip(selectedModelSkinGroupName, selectedModel.skinGroupNameProperty);
+
+        // Model quick operations
+        modelWiki.setOnAction(e -> {
+            String name = selectedModel.nameProperty.get();
+            if (name != null && !name.isEmpty()) {
+                app.popBrowser(urlWikiPrefix + URLEncoder.encode(name, StandardCharsets.UTF_8));
+            }
+        });
+        modelWiki.visibleProperty().bind(selectedModel.getHasWikiProperty());
+        GuiPrefabs.addTooltip(modelWiki, "Wiki");
+
+        modelFavorite.setOnAction(e -> {
+            selectedModel.setFavorite(!selectedModel.getFavoriteProperty().get());
+            modelListView.refresh();
+            app.config.save();
+        });
+        modelFavoriteIconFill.visibleProperty().bind(selectedModel.getFavoriteProperty());
+        GuiPrefabs.addTooltip(modelFavorite, "收藏");
     }
 
     private void initModelSearch() {
@@ -280,11 +307,36 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initModelFilter() {
+        ScrollUtils.addSmoothScrolling(filterPaneTagScroll);
         filterPaneTagClear.setOnMouseClicked(e -> app.popLoading(ev -> {
             filterTagSet.clear();
             modelSearch(searchModelInput.getText());
             infoPaneComposer.activate(0);
         }));
+
+        if (app.config.character_favorites == null) {
+            app.config.character_favorites = new JSONObject();
+            app.config.save();
+        }
+
+        topFavorite.setOnAction(e -> {
+            Logger.debug("ModelManager", "Toggle favorite display");
+            modelListView.scrollTo(0);
+            if (filterFavorite) {
+                GuiPrefabs.replaceStyleClass(topFavorite, "btn-primary", "btn-secondary");
+            } else {
+                GuiPrefabs.replaceStyleClass(topFavorite, "btn-secondary", "btn-primary");
+            }
+            filterFavorite = !filterFavorite;
+            modelSearch(searchModelInput.getText());
+            ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
+            if (recentSelected != null)
+                for (ModelItem cell : modelListView.getItems())
+                    if (recentSelected.equals(cell)) {
+                        modelListView.scrollTo(cell);
+                        modelListView.getSelectionModel().select(cell);
+                    }
+        });
     }
 
     private void initModelManage() {
@@ -322,7 +374,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                app.popBrowser(urlDownload);
+                app.popBrowser(urlOfficialDownloadPage);
             }
         };
 
@@ -431,55 +483,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             }
         });
 
-        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
-    }
-
-    private void initModelFavorite() {
-        if (app.config.character_favorites == null) {
-            app.config.character_favorites = new JSONObject();
-            app.config.save();
-        }
-
-        modelFavorite.setGraphic(favIcon);
-        modelFavorite.setRipplerFill(Color.GRAY);
-        modelFavorite.setOnAction(e -> {
-            String key = selectedModelCell.getItem().key;
-            if (app.config.character_favorites.containsKey(key)) {
-                app.config.character_favorites.remove(key);
-                selectedModelCell.getStyleClass().remove("Search-models-item-favorite");
-                modelFavorite.setGraphic(favIcon);
-                Logger.debug("ModelManager", "Remove favorite model " + key);
-            } else {
-                app.config.character_favorites.put(key, new ModelItem.AssetPrefab());
-                selectedModelCell.getStyleClass().add("Search-models-item-favorite");
-                modelFavorite.setGraphic(favFillIcon);
-                Logger.debug("ModelManager", "Add favorite model " + key);
-            }
-            app.config.save();
-        });
-
-        topFavorite.setOnAction(e -> {
-            Logger.debug("ModelManager", "Toggle favorite display");
-            modelListView.scrollTo(0);
-            if (filterFavorite) {
-                GuiPrefabs.replaceStyleClass(topFavorite, "btn-primary", "btn-secondary");
-            } else {
-                GuiPrefabs.replaceStyleClass(topFavorite, "btn-secondary", "btn-primary");
-            }
-            filterFavorite = !filterFavorite;
-            modelSearch(searchModelInput.getText());
-            ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
-            if (recentSelected != null)
-                for (JFXListCell<ModelItem> cell : modelListView.getItems())
-                    if (recentSelected.equals(cell.getItem())) {
-                        modelListView.scrollTo(cell);
-                        modelListView.getSelectionModel().select(cell);
-                    }
-        });
+        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlOfficialHelpPage));
     }
 
     public void modelSearch(String keyWords) {
         modelListView.getItems().clear();
+
         searchModelStatus.setText("");
         if (assertModelLoaded(false)) {
             // Filter assets
@@ -494,10 +503,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             long tEnd = System.nanoTime();
             int curSize = searched.size();
             searchModelStatus.setText((rawSize == curSize ? rawSize : curSize + " / " + rawSize) + " 个模型");
-            // Add cells
-            for (JFXListCell<ModelItem> cell : modelCellList)
-                if (searched.contains(cell.getItem()))
-                    modelListView.getItems().add(cell);
+            targetList.clear();
+            targetList.setAll(searched);
             Logger.info("ModelManager", "Search \"%s\" (%d results, %.1f ms)"
                     .formatted(keyWords, curSize, (tEnd - tStart) / 1000000f));
         }
@@ -516,31 +523,32 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     public void modelReload(boolean doPopNotice) {
         app.popLoading(e -> {
             Logger.info("ModelManager", "Reloading");
-            boolean willGc = modelCellList != null;
-            modelCellList = new ArrayList<>();
+            boolean willGc = !targetList.isEmpty();
             assetItemList = new ModelItemGroup();
 
+            int modelCount = 0;
             if (initModelsDataset(doPopNotice)) {
                 // 1. Update list cells and asset items:
                 try {
                     // Find every model assets.
                     assetItemList.addAll(app.modelsDataset.data.filter(ModelItem::isExisted));
+                    modelCount = assetItemList.size();
                     if (assetItemList.isEmpty())
                         throw new IOException("Found no assets in the target directories.");
                     // Initialize list view.
                     modelListView.getSelectionModel().getSelectedItems().addListener(
-                            (ListChangeListener<JFXListCell<ModelItem>>) (observable -> observable.getList().forEach(
-                                    (Consumer<JFXListCell<ModelItem>>) this::selectCell)
+                            (ListChangeListener<ModelItem>) (observable -> observable.getList().forEach(
+                                    (Consumer<ModelItem>) this::selectCell)
                             )
                     );
+                    modelListView.setCellFactory(listView -> new ModelListCell(listView.getPrefWidth() - 30, 30));
                     modelListView.setFixedCellSize(30);
                     // Write models to menu items.
-                    assetItemList.forEach(assetItem -> modelCellList.add(createCell(assetItem)));
+                    selectedModel.setSortTags(app.modelsDataset.sortTags);
                     Logger.debug("ModelManager", "Initialized model assets successfully.");
                 } catch (IOException ex) {
                     // Explicitly set all lists to empty.
                     Logger.error("ModelManager", "Failed to initialize model assets due to unknown reasons, details see below.", ex);
-                    modelCellList = new ArrayList<>();
                     assetItemList = new ModelItemGroup();
                     if (doPopNotice)
                         GuiPrefabs.Dialogs.createCommonDialog(app.body,
@@ -560,7 +568,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     String s = change.getElementAdded() == null ? change.getElementRemoved() : change.getElementAdded();
                     String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
                     for (Node node : filterPaneTagFlow.getChildren())
-                        if (node instanceof JFXButton tag && t.equals(tag.getText())) {
+                        if (node instanceof Button tag && t.equals(tag.getText())) {
                             String styleFrom = change.getElementAdded() == null ? "info-tag-badge-active" : "info-tag-badge";
                             String styleTo = change.getElementAdded() == null ? "info-tag-badge" : "info-tag-badge-active";
                             GuiPrefabs.replaceStyleClass(tag, styleFrom, styleTo);
@@ -572,15 +580,17 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     sortTags.sort(Comparator.naturalOrder());
                     sortTags.forEach(s -> {
                         String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
-                        JFXButton tag = new JFXButton(t);
-                        tag.getStyleClass().add("info-tag-badge");
-                        tag.setOnAction(ev -> {
-                            if (filterTagSet.contains(s))
-                                filterTagSet.remove(s);
-                            else
-                                filterTagSet.add(s);
-                            modelSearch(searchModelInput.getText());
-                        });
+                        Button tag = new GuiPrefabs.ButtonBuilder()
+                                .setText(t)
+                                .setAdditionalStyleClass("info-tag-badge")
+                                .setOnAction(ev -> {
+                                    if (filterTagSet.contains(s))
+                                        filterTagSet.remove(s);
+                                    else
+                                        filterTagSet.add(s);
+                                    modelSearch(searchModelInput.getText());
+                                })
+                                .build();
                         filterPaneTagFlow.getChildren().add(tag);
                     });
                 }
@@ -589,107 +599,55 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 // 3. Update model list:
                 modelSearch("");
                 searchModelInput.clear();
-                if (assetItemList != null && !modelCellList.isEmpty() &&
+                if (assetItemList != null && !targetList.isEmpty() &&
                         app.config.character_asset != null && !app.config.character_asset.isEmpty()) {
                     // Scroll to recent selected model and then select it.
                     ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
                     if (recentSelected != null) {
-                        for (JFXListCell<ModelItem> cell : modelListView.getItems())
-                            if (recentSelected.equals(cell.getItem())) {
+                        for (ModelItem cell : modelListView.getItems())
+                            if (recentSelected.equals(cell)) {
                                 modelListView.scrollTo(cell);
                                 modelListView.getSelectionModel().select(cell);
+                                selectedModel.setModelItem(cell);
                             }
-                        // Check model favorite:
-                        if (app.config.character_favorites.containsKey(recentSelected.key)) {
-                            modelFavorite.setGraphic(favFillIcon);
-                        }
                     }
                 }
             }
 
             // Post process:
-            loadFailureTip.setVisible(modelCellList.isEmpty());
-            app.rootModule.launchBtn.setDisable(modelCellList.isEmpty());
+            loadFailureTip.setVisible(targetList.isEmpty());
+            app.rootModule.launchBtn.setDisable(targetList.isEmpty());
             if (willGc)
                 System.gc();
             Logger.info("ModelManager", "Reloaded");
+            if (doPopNotice) app.toast.showText("已载入 " + modelCount + " 个模型",
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS), durationLong);
         });
     }
 
-    private JFXListCell<ModelItem> createCell(ModelItem model) {
-        double width = modelListView.getPrefWidth() - 50;
-        double height = 30;
-        double divide = 0.618;
-        JFXListCell<ModelItem> item = new JFXListCell<>();
-        item.getStyleClass().addAll("list-item");
-        Label name = new Label(model.toString());
-        name.getStyleClass().addAll("list-item-label");
-        name.setPrefSize(model.skinGroupName == null ? width : width * divide, height);
-        name.setLayoutX(15);
-        Label alias1 = new Label(model.skinGroupName);
-        alias1.getStyleClass().addAll("list-item-label-sub");
-        alias1.setPrefSize(width * (1 - divide), height);
-        alias1.setLayoutX(model.skinGroupName == null ? 0 : width * divide);
-        SVGPath fav = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
-        fav.getStyleClass().add("Search-models-star");
-        fav.setLayoutX(0);
-        fav.setLayoutY(3);
-        fav.setScaleX(0.75);
-        fav.setScaleY(0.75);
-        item.setPrefSize(width, height);
-        item.setGraphic(new Group(fav, name, alias1));
-        item.setItem(model);
-        item.setId(model.getLocation());
-        if (app.config.character_favorites.containsKey(model.key))
-            item.getStyleClass().add("Search-models-item-favorite");
-        return item;
-    }
-
-    private void selectCell(JFXListCell<ModelItem> cell) {
-        // Reset
-        if (selectedModelCell != null) {
-            selectedModelCell.getStyleClass().setAll("list-item");
-            if (app.config.character_favorites.containsKey(selectedModelCell.getItem().key))
-                selectedModelCell.getStyleClass().add("Search-models-item-favorite");
-        }
-        selectedModelCell = cell;
-        selectedModelCell.getStyleClass().add("list-item-active");
-        // Display details
-        ModelItem model = cell.getItem();
-        selectedModelName.setText(model.name);
-        selectedModelAppellation.setText(model.appellation);
-        selectedModelSkinGroupName.setText(model.skinGroupName);
-        selectedModelType.setText(app.modelsDataset.sortTags == null ?
-                model.type : app.modelsDataset.sortTags.getOrDefault(model.type, model.type));
-        GuiPrefabs.addTooltip(selectedModelName, model.name);
-        GuiPrefabs.addTooltip(selectedModelAppellation, model.appellation);
-        GuiPrefabs.addTooltip(selectedModelSkinGroupName, model.skinGroupName);
-        GuiPrefabs.addTooltip(selectedModelType, model.type);
+    private void selectCell(ModelItem model) {
+        selectedModel.setModelItem(model);
         // Setup tag flow pane
         infoPaneTagFlow.getChildren().clear();
         model.sortTags.forEach(o -> {
             String s = o.toString();
             String t = app.modelsDataset.sortTags == null ?
                     s : app.modelsDataset.sortTags.getOrDefault(s, s);
-            JFXButton tag = new JFXButton(t);
-            tag.getStyleClass().add("info-tag-badge-active");
-            tag.setOnAction(e -> {
-                filterTagSet.clear();
-                filterTagSet.add(s);
-                infoPaneComposer.activate(1);
-                modelSearch(searchModelInput.getText());
-            });
+            Button tag = new GuiPrefabs.ButtonBuilder()
+                    .setText(t)
+                    .setAdditionalStyleClass("info-tag-badge-active")
+                    .setOnAction(e -> {
+                        filterTagSet.clear();
+                        filterTagSet.add(s);
+                        infoPaneComposer.activate(1);
+                        modelSearch(searchModelInput.getText());
+                    })
+                    .build();
             infoPaneTagFlow.getChildren().add(tag);
         });
         // Switch info pane
         if (infoPaneComposer.getActivatedId() != 0)
             infoPaneComposer.activate(0);
-        // Check favorite
-        if (app.config.character_favorites.containsKey(model.key)) {
-            modelFavorite.setGraphic(favFillIcon);
-        } else {
-            modelFavorite.setGraphic(favIcon);
-        }
         // Apply to app.config, but not to save
         app.config.character_asset = model.getLocation();
         app.config.character_files = model.assetList;
@@ -814,6 +772,117 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     "您可以 [重新下载] 模型，以更新模型库版本。",
                     detail).show();
             Logger.info("ModelManager", "Model repo version check finished (not up-to-dated)");
+        }
+    }
+
+
+    private class ModelListCell extends GuiPrefabs.RipperListCell<ModelItem> {
+        private final double width;
+        private final double height;
+        private final SVGPath icon;
+        private final Label name;
+        private final Label alias;
+        private static final double divide = 0.618;
+        private final static DropShadow iconShadow = new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0);
+
+        public ModelListCell(double width, double height) {
+            super();
+            this.width = width;
+            this.height = height;
+
+            icon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
+            icon.setLayoutX(3);
+            icon.setLayoutY(3);
+            icon.setScaleX(0.75);
+            icon.setScaleY(0.75);
+            icon.setOpacity(0);
+            icon.setEffect(iconShadow);
+            name = new Label();
+            name.getStyleClass().add("list-item-label");
+            name.setTranslateX(25);
+            alias = new Label();
+            alias.setPrefSize(width * (1 - divide), height);
+            alias.getStyleClass().add("list-item-label-sub");
+            alias.setTranslateX(20);
+
+            getContent().setAll(icon, name, alias);
+            setPrefSize(width, height);
+        }
+
+        @Override
+        protected void updateItem(ModelItem model, boolean empty) {
+            super.updateItem(model, empty);
+            if (empty || model == null) {
+                setContentVisible(false);
+            } else {
+                name.setText(model.toString());
+                name.setPrefSize(model.skinGroupName == null ? width : width * divide, height);
+                alias.setText(model.skinGroupName);
+                alias.setLayoutX(model.skinGroupName == null ? 0 : width * divide);
+                icon.setOpacity(app.config.character_favorites.containsKey(model.key) ? 1 : 0);
+                setId(model.getLocation());
+                setContentVisible(true);
+            }
+        }
+    }
+
+
+    private class ModelItemWrapper {
+        private final StringProperty nameProperty = new SimpleStringProperty();
+        private final StringProperty typeProperty = new SimpleStringProperty();
+        private final StringProperty skinGroupNameProperty = new SimpleStringProperty();
+        private final StringProperty appellationProperty = new SimpleStringProperty();
+        private HashMap<String, String> sortTags;
+        private ModelItem modelItem;
+
+        private final BooleanBinding hasWikiProperty = new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return modelItem != null && nameProperty.get() != null && !nameProperty.get().isEmpty();
+            }
+        };
+        private final BooleanBinding favoriteProperty = new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return modelItem != null && app.config.character_favorites.containsKey(modelItem.key);
+            }
+        };
+
+        public void setSortTags(HashMap<String, String> sortTags) {
+            this.sortTags = sortTags;
+        }
+
+        public void setModelItem(ModelItem modelItem) {
+            if (modelItem == null) return;
+            this.modelItem = modelItem;
+            nameProperty.set(modelItem.name);
+            typeProperty.set(sortTags == null ?
+                    modelItem.type : sortTags.getOrDefault(modelItem.type, modelItem.type));
+            skinGroupNameProperty.set(modelItem.skinGroupName);
+            appellationProperty.set(modelItem.appellation);
+            favoriteProperty.invalidate();
+            hasWikiProperty.invalidate();
+        }
+
+        public void setFavorite(boolean favorite) {
+            if (modelItem == null) return;
+            app.config.character_favorites.remove(modelItem.key);
+            if (favorite) {
+                app.config.character_favorites.put(modelItem.key, new JSONObject());
+                Logger.debug("ModelManager", "Add favorite model " + modelItem.key);
+            } else {
+                Logger.debug("ModelManager", "Remove favorite model " + modelItem.key);
+            }
+            favoriteProperty.invalidate();
+            hasWikiProperty.invalidate();
+        }
+
+        public BooleanBinding getFavoriteProperty() {
+            return favoriteProperty;
+        }
+
+        public BooleanBinding getHasWikiProperty() {
+            return hasWikiProperty;
         }
     }
 }

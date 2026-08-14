@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang, Litwak913
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.platform;
@@ -143,6 +143,20 @@ public enum WindowSystem {
             }
             default -> {
                 return new NullHWndCtrl();
+            }
+        }
+    }
+
+    /** Gets the mouse position.
+     * @return The MousePoint record.
+     */
+    public static HWndCtrl.MousePoint getMousePos() {
+        switch (PLATFORM) {
+            case USER32 -> {
+                return User32HWndCtrl.getMousePos();
+            }
+            default -> {
+                return new HWndCtrl.MousePoint(0, 0);
             }
         }
     }

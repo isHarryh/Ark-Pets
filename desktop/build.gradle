@@ -19,12 +19,18 @@ processResources {
 }
 
 // Runs the app without debug.
-task run(dependsOn: classes, type: JavaExec, group: 'execute') {
-    mainClass = project.mainClassName
+tasks.register("run", JavaExec) {
+    dependsOn = ["classes"]
+    group = "execute"
+
+    mainClass = mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
+    workingDir = assetsDir
+
+    setIgnoreExitValue(true)
+
+    jvmArgs += "-Dfile.encoding=UTF-8"
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
@@ -32,13 +38,19 @@ task run(dependsOn: classes, type: JavaExec, group: 'execute') {
 }
 
 // Runs the app within debug.
-task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
-    mainClass = project.mainClassName
+tasks.register("debug", JavaExec) {
+    dependsOn = ["classes"]
+    group = "execute"
+
+    mainClass = mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    workingDir = project.assetsDir
-    ignoreExitValue = true
-    debug = true
+    workingDir = assetsDir
+
+    setIgnoreExitValue(true)
+    setDebug(true)
+
+    jvmArgs += "-Dfile.encoding=UTF-8"
 }
 
 
@@ -46,34 +58,27 @@ task debug(dependsOn: classes, type: JavaExec, group: 'execute') {
 
 ext {
     // Environment vars
-    rootDir = file('.').absolutePath
+    rootDir = project.rootDir
     javaHome = System.getProperty('java.home')
     osName = System.getProperty('os.name').toLowerCase(Locale.ROOT).split(' ')[0]
     osPathSep = File.pathSeparatorChar
     // Distribution related vars
-    jarLibDir = "${buildDir}/libs"
-    jarLibName = "${project.name}-${project.version}"
-    jlinkRuntimeDir = "${buildDir}/jlink"
-    jlinkRuntimeImg = "${jlinkRuntimeDir}/runtime"
+    jarLibDir = layout.buildDirectory.dir("libs").get().toString()
+    jarLibName = project.name + "-" + project.version
+    jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
     jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
     jlinkLocalesList = "en-US,zh-CN"
-    jpackageDir = "${buildDir}/jpackage"
+    jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
     issFileRel = "docs/scripts/ExePacking.iss"
-    distDir = "${buildDir}/dist"
-    distName = "${project.ext.appName}-v${project.version}"
+    distDir = layout.buildDirectory.dir("dist").get().toString()
+    distName = project.appName + "-v" + project.version
 }
 
 // Generates a distributable JAR file for the app.
-task distJar(dependsOn: classes, type: Jar, group: 'dist') {
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    manifest {
-        attributes 'Main-Class': project.mainClassName
-    }
-    dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
+tasks.register("distJar", Jar) {
+    dependsOn = ["classes"]
+    group = "dist"
+
     doLast() {
         copy {
             from "${jarLibDir}/${jarLibName}.jar"
@@ -81,18 +86,32 @@ task distJar(dependsOn: classes, type: Jar, group: 'dist') {
             rename "${jarLibName}.jar", "${distName}.jar"
         }
     }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
 }
 
 // Creates a customized Java Runtime Environment for the app.
-task jlink(dependsOn: distJar, type: Exec, group: 'dist') {
-    doFirst() { delete jlinkRuntimeDir }
+tasks.register("jlink", Exec) {
+    dependsOn = ["distJar"]
+    group = "dist"
+
+    doFirst() { delete jlinkDir }
+
     workingDir project.projectDir
-    inputs.property("runtime", jlinkRuntimeImg)
+    inputs.property("runtime", "${jlinkDir}/runtime")
     commandLine = [
             "${javaHome}/bin/jlink",
             '--module-path', "${javaHome}/jmods",
             '--add-modules', jlinkModuleList,
-            '--output', jlinkRuntimeImg,
+            '--output', "${jlinkDir}/runtime",
             '--strip-debug',
             '--no-header-files',
             '--no-man-pages',
@@ -100,11 +119,14 @@ task jlink(dependsOn: distJar, type: Exec, group: 'dist') {
             '--compress=1',
             '--include-locales', jlinkLocalesList
     ] as List<String>
-    outputs.dir(jlinkRuntimeDir)
+    outputs.dir(jlinkDir)
 }
 
 // Packs the app into an EXE.
-task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
+tasks.register("jpackage", Exec) {
+    dependsOn = ["jlink"]
+    group = "dist"
+
     doFirst() {
         fileTree(jarLibDir).size()
         if (fileTree(jarLibDir).size() > 1)
@@ -113,49 +135,56 @@ task jpackage(dependsOn: jlink, type: Exec, group: 'dist') {
     }
     doLast() {
         copy {
-            from "${project.rootDir}/LICENSE"
+            from "${rootDir}/LICENSE"
             into jpackageDir
         }
-        delete jlinkRuntimeDir
     }
+
     workingDir project.projectDir
     def commands = [
             "${javaHome}/bin/jpackage",
             '--input', jarLibDir,
             '--dest', jpackageDir,
             '--type', 'app-image',
-            '--name', project.appName,
-            '--vendor', project.appAuthor,
+            '--name', appName,
+            '--vendor', appAuthor,
             '--app-version', project.version,
-            '--main-class', project.mainClassName,
+            '--main-class', mainClassName,
             '--main-jar', jar.archiveFile.get().asFile.getName(),
-            '--runtime-image', jlinkRuntimeImg
+            '--runtime-image', "${jlinkDir}/runtime",
+            '--java-options', '-Dfile.encoding=UTF-8'
     ]
     if (osName.contains('windows')) {
         commands << '--icon'
-        commands << "${project.assetsDir}/icons/icon.ico"
+        commands << "${assetsDir}/icons/icon.ico"
     } else if (osName.contains('linux')) {
         commands << '--icon'
-        commands << "${project.assetsDir}/icons/icon.png"
+        commands << "${assetsDir}/icons/icon.png"
     } else if (osName.contains('mac')) {
         commands << '--java-options'
         commands << "-XstartOnFirstThread"
     }
-    commandLine = commands
+    commandLine = commands as List<String>
 }
 
 // Generates a distributable ZIP file for the app.
-task distZip(dependsOn: jpackage, type: Zip, group: 'dist') {
+tasks.register("distZip", Zip) {
+    dependsOn = ["jpackage"]
+    group = "dist"
+
     from(jpackageDir) { include("**") }
-    from(project.rootDir) { include("README.md") }
+    from(rootDir) { include("README.md") }
     archiveFileName = "${distName}.zip"
     destinationDirectory = file(distDir)
 }
 
 // Generates a distributable EXE file for the app, using Inno Setup.
 // Note that you must install Inno Setup in your environment and add it to PATH before running this task.
-task distExe(dependsOn: jpackage, type: Exec, group: 'dist') {
-    workingDir project.rootDir
+tasks.register("distExe", Exec) {
+    dependsOn = ["jpackage"]
+    group = "dist"
+
+    workingDir rootDir
     def commands = [
             "iscc",
             "/Q",
@@ -165,15 +194,18 @@ task distExe(dependsOn: jpackage, type: Exec, group: 'dist') {
 }
 
 // Generates ALL kinds of distributing files.
-task distAll(dependsOn: [distJar, distZip, distExe], group: 'dist') {
+tasks.register("distAll") {
+    dependsOn = ["distJar", "distZip", "distExe"]
+    group = "dist"
+
     doLast() {
-        println("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
+        logger.lifecycle("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
         try {
-            delete "${buildDir}/tmp"
-            delete jpackageDir
             delete jarLibDir
+            delete jlinkDir
+            delete jpackageDir
         } catch (Exception ignored) {
-            println("Unable to delete temp files.")
+            logger.lifecycle("Unable to delete temp files.")
         }
     }
 }

@@ -1,15 +1,17 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.utils.StringUtils;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 
-import static cn.harryh.arkpets.Const.appName;
+import static cn.harryh.arkpets.Const.PathConfig.urlMirrorChyan;
+import static cn.harryh.arkpets.Const.mirrorChyanAID;
+import static cn.harryh.arkpets.Const.mirrorChyanRID;
 
 
 public class McCheckAppUpdateTask extends FetchAsDataTask {
@@ -29,9 +31,13 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkPetsApp/latest")
+        return new StringUtils.URLStringBuilder(urlMirrorChyan)
+                .addPath("api")
+                .addPath("resources")
+                .addPath(mirrorChyanRID)
+                .addPath("latest")
                 .addQuery("cdk", cdk)
-                .addQuery("user_agent", appName + "Gui")
+                .addQuery("user_agent", mirrorChyanAID)
                 .addQuery("os", os)
                 .toURL();
     }

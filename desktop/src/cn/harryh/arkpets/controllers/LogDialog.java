@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -6,15 +6,14 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
+import cn.harryh.arkpets.utils.GuiComponents;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
-import com.jfoenix.controls.*;
-import com.jfoenix.controls.datamodels.treetable.*;
+import com.jfoenix.controls.RecursiveTreeItem;
+import com.jfoenix.controls.datamodels.treetable.RecursiveTreeObject;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -22,7 +21,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
-import javafx.util.Callback;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -33,7 +31,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 
 import static cn.harryh.arkpets.Const.LogConfig.logDir;
 
@@ -42,14 +39,14 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
     private AnchorPane dialog;
     @FXML
-    private JFXButton dialogReturn;
+    private Button dialogReturn;
 
     @FXML
     private TreeTableView<LogItem> logView;
     @FXML
-    private JFXButton logRefetch;
+    private Button logRefetch;
     @FXML
-    private JFXButton logExplore;
+    private Button logExplore;
 
     @FXML
     private Label logName;
@@ -64,11 +61,11 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
     private Label logSelectedCount;
     @FXML
-    public JFXButton quickSelectAll;
+    public Button quickSelectAll;
     @FXML
-    public JFXButton quickSelectRecent;
+    public Button quickSelectRecent;
     @FXML
-    private JFXButton exportSelected;
+    private Button exportSelected;
 
     private ObservableList<LogItem> coreLogList;
     private ObservableList<LogItem> desktopLogList;
@@ -96,7 +93,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     }
 
     @Override
-    public JFXButton getReturnButton() {
+    public Button getReturnButton() {
         return dialogReturn;
     }
 
@@ -140,23 +137,21 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     }
 
     private void prepareTable() {
-        TreeTableColumn<LogItem, String> nameCol = new JFXTreeTableColumn<>("文件名");
-        nameCol.setCellValueFactory(
-                new SimpleCellValueFactory<>(logItem -> logItem.name)
-        );
-        nameCol.setReorderable(false);
-
-        TreeTableColumn<LogItem, HumanSize> sizeCol = new JFXTreeTableColumn<>("大小");
-        sizeCol.setCellValueFactory(
-                new SimpleCellValueFactory<>(logItem -> new HumanSize(logItem.size, !logItem.isAvailable()))
-        );
-        sizeCol.setReorderable(false);
-
-        TreeTableColumn<LogItem, HumanInstant> modifiedTimeCol = new JFXTreeTableColumn<>("更新时间");
-        modifiedTimeCol.setCellValueFactory(
-                new SimpleCellValueFactory<>(logItem -> new HumanInstant(logItem.modifiedTime, !logItem.isAvailable()))
-        );
-        modifiedTimeCol.setReorderable(false);
+        new GuiComponents.TreeTableColumnSetup<LogItem, String>()
+                .setText("文件名")
+                .setReorderable(false)
+                .setValueExtractor(logItem -> logItem.name)
+                .attachTo(logView);
+        new GuiComponents.TreeTableColumnSetup<LogItem, HumanSize>()
+                .setText("大小")
+                .setReorderable(false)
+                .setValueExtractor(logItem -> new HumanSize(logItem.size, !logItem.isAvailable()))
+                .attachTo(logView);
+        new GuiComponents.TreeTableColumnSetup<LogItem, HumanInstant>()
+                .setText("更新时间")
+                .setReorderable(false)
+                .setValueExtractor(logItem -> new HumanInstant(logItem.modifiedTime, !logItem.isAvailable()))
+                .attachTo(logView);
 
         LogItem coreLogRoot = new LogItem("桌宠日志");
         LogItem desktopLogRoot = new LogItem("启动器日志");
@@ -174,9 +169,6 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         logView.setRoot(root);
         logView.setShowRoot(false);
-        logView.getColumns().add(nameCol);
-        logView.getColumns().add(sizeCol);
-        logView.getColumns().add(modifiedTimeCol);
         logView.getSelectionModel().setCellSelectionEnabled(false);
         logView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
@@ -360,18 +352,6 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         public boolean isAvailable() {
             return createdTime != null && modifiedTime != null && size > 0 && readable;
-        }
-    }
-
-
-    private record SimpleCellValueFactory<S, T>(Function<S, T> extractor)
-            implements Callback<TreeTableColumn.CellDataFeatures<S, T>, ObservableValue<T>> {
-        @Override
-        public ObservableValue<T> call(TreeTableColumn.CellDataFeatures<S, T> cellDataFeatures) {
-            S value = cellDataFeatures.getValue().getValue();
-            if (value == null || extractor == null)
-                return null;
-            return new SimpleObjectProperty<>(extractor.apply(value));
         }
     }
 

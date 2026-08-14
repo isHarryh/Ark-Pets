@@ -1,10 +1,10 @@
-/** Copyright (c) 2022-2025, Harry Huang, Half Nothing
+/** Copyright (c) 2022-2026, Harry Huang, Half Nothing
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.concurrent;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;

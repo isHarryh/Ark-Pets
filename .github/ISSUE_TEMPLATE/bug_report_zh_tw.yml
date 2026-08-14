@@ -1,0 +1,50 @@
+name: "[繁體中文] 提交問題回報"
+description: "向我們回報程式出現的問題、錯誤或崩潰情形。"
+labels: ["Type: Bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交問題回報前，請確保您：
+        1. 使用的是最新版本的程式。
+        2. 閱讀了[常見問題解答](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/FAQ.md)但未能解決您的問題。
+        3. 瀏覽了[現存的 GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) 但沒有找到類似的問題。
+  - type: input
+    id: version
+    attributes:
+      label: 軟體版本
+      description: 您所使用的軟體版本是：
+      placeholder: vX.X.X
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 作業系統
+      description: 您所使用的作業系統是：
+      placeholder: Windows XX
+  - type: textarea
+    id: description
+    attributes:
+      label: 問題描述
+      description: 請描述您所遇到的問題：
+      placeholder: |
+        請說明您遇到問題的觸發條件與重現步驟，以及問題的具體表現。
+        您可以將截圖貼在此處，以便更清楚地描述您的問題。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 程式日誌
+      description: 請上傳程式的日誌檔案（非必填）：
+      render: text
+      placeholder: |
+        如何上傳日誌檔案？
+        1. 開啟啟動器，進入「選項」頁面，下滑找到並點擊「匯出日誌」按鈕。
+        2. 點擊「選擇近期日誌」，然後點擊「匯出所選的日誌」。
+        3. 選擇日誌檔案的儲存位置並確認。
+        4. 將儲存的日誌檔案拖曳到此處。
+    validations:
+      required: false

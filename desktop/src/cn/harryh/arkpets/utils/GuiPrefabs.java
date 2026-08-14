@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.utils;
@@ -14,10 +14,12 @@ import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.binding.StringExpression;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.skin.ScrollPaneSkin;
@@ -26,9 +28,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Builder;
 import javafx.util.Duration;
 
 import javax.net.ssl.SSLException;
@@ -49,16 +53,16 @@ import java.util.zip.ZipException;
 
 @SuppressWarnings("unused")
 public class GuiPrefabs {
-    public static final Color COLOR_INFO       = Color.web("#37B");
-    public static final Color COLOR_SUCCESS    = Color.web("#5B5");
-    public static final Color COLOR_WARNING    = Color.web("#E93");
-    public static final Color COLOR_DANGER     = Color.web("#F54");
-    public static final Color COLOR_WHITE      = Color.web("#FFF");
-    public static final Color COLOR_BLACK      = Color.web("#000");
-    public static final Color COLOR_DARK_GRAY  = Color.web("#222");
-    public static final Color COLOR_GRAY       = Color.web("#444");
+    public static final Color COLOR_INFO = Color.web("#37B");
+    public static final Color COLOR_SUCCESS = Color.web("#5B5");
+    public static final Color COLOR_WARNING = Color.web("#E93");
+    public static final Color COLOR_DANGER = Color.web("#F54");
+    public static final Color COLOR_WHITE = Color.web("#FFF");
+    public static final Color COLOR_BLACK = Color.web("#000");
+    public static final Color COLOR_DARK_GRAY = Color.web("#222");
+    public static final Color COLOR_GRAY = Color.web("#444");
     public static final Color COLOR_LIGHT_GRAY = Color.web("#666");
-    public static final Color COLOR_THEME      = Color.web("#2A528C");
+    public static final Color COLOR_THEME = Color.web("#2A528C");
 
     private static final double BLUR_VALUE = 9.0;
 
@@ -139,7 +143,7 @@ public class GuiPrefabs {
         timeline.playFromStart();
     }
 
-    public static void bindToggleAndWrapper(JFXButton toggle, Node wrapper, Duration duration) {
+    public static void bindToggleAndWrapper(ButtonBase toggle, Node wrapper, Duration duration) {
         toggle.setOnAction(e -> {
             if (wrapper.isVisible())
                 GuiPrefabs.fadeOutNode(wrapper, duration, null);
@@ -173,6 +177,13 @@ public class GuiPrefabs {
         control.setTooltip(tooltip);
     }
 
+    public static void addTooltip(Control control, StringExpression content) {
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(content);
+        tooltip.setStyle(tooltipStyle);
+        control.setTooltip(tooltip);
+    }
+
     public static void disableScrollPaneCache(ScrollPane scrollPane) {
         // https://bugs.openjdk.org/browse/JDK-8211294
         // https://github.com/javafxports/openjdk-jfx/issues/225
@@ -187,23 +198,135 @@ public class GuiPrefabs {
     }
 
 
+    public static class ButtonBuilder implements Builder<Button> {
+        protected String text;
+        protected Color color;
+        protected Color bgColor;
+        protected int fontSize;
+        protected String styleClass;
+        protected EventHandler<ActionEvent> onAction;
+
+        public ButtonBuilder() {
+            text = "";
+            color = null;
+            bgColor = null;
+            fontSize = 0;
+            onAction = null;
+            styleClass = null;
+        }
+
+        public ButtonBuilder setText(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public ButtonBuilder setTextColor(Color color) {
+            this.color = color;
+            return this;
+        }
+
+        public ButtonBuilder setBackgroundColor(Color bgColor) {
+            this.bgColor = bgColor;
+            return this;
+        }
+
+        public ButtonBuilder setFontSize(int fontSize) {
+            this.fontSize = fontSize;
+            return this;
+        }
+
+        public ButtonBuilder setAdditionalStyleClass(String styleClass) {
+            this.styleClass = styleClass;
+            return this;
+        }
+
+        public ButtonBuilder setOnAction(EventHandler<ActionEvent> onAction) {
+            this.onAction = onAction;
+            return this;
+        }
+
+        @Override
+        public Button build() {
+            Button button = new JFXButton(text);
+
+            if (color != null)
+                button.setTextFill(color);
+            if (onAction != null)
+                button.setOnAction(onAction);
+            if (styleClass != null)
+                button.getStyleClass().add(styleClass);
+
+            StringBuilder styleStringBuilder = new StringBuilder();
+            if (fontSize > 0) {
+                styleStringBuilder.append("-fx-font-size:");
+                styleStringBuilder.append(fontSize);
+                styleStringBuilder.append("px;");
+            }
+            if (bgColor != null) {
+                styleStringBuilder.append("-fx-background-color:");
+                styleStringBuilder.append(toWebColor(bgColor));
+                styleStringBuilder.append(';');
+            }
+            button.setStyle(styleStringBuilder.toString());
+
+            return button;
+        }
+    }
+
+
+    public static class RipperListCell<T> extends ListCell<T> {
+        private final Group group;
+        private final JFXRippler rippler;
+
+        public RipperListCell() {
+            super();
+            group = new Group();
+            rippler = new JFXRippler(group);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+
+        @Override
+        protected final void layoutChildren() {
+            super.layoutChildren();
+            rippler.resizeRelocate(0, 0, getWidth(), getHeight());
+            if (!getChildren().contains(rippler) && !getChildren().isEmpty()) {
+                for (Node child : getChildren()) {
+                    if (child instanceof Control || child instanceof Shape) {
+                        child.setMouseTransparent(true);
+                    }
+                }
+                getChildren().add(0, rippler);
+            }
+        }
+
+        public final ObservableList<Node> getContent() {
+            return group.getChildren();
+        }
+
+        public final void setContentVisible(boolean visible) {
+            setGraphic(visible ? group : null);
+            setText(null);
+        }
+    }
+
+
     public static class Icons {
-        public static final String SVG_INFO        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
-        public static final String SVG_INFO_ALT    = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
-        public static final String SVG_HELP        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1.25 17c0 .69-.559 1.25-1.25 1.25-.689 0-1.25-.56-1.25-1.25s.561-1.25 1.25-1.25c.691 0 1.25.56 1.25 1.25zm1.393-9.998c-.608-.616-1.515-.955-2.551-.955-2.18 0-3.59 1.55-3.59 3.95h2.011c0-1.486.829-2.013 1.538-2.013.634 0 1.307.421 1.364 1.226.062.847-.39 1.277-.962 1.821-1.412 1.343-1.438 1.993-1.432 3.468h2.005c-.013-.664.03-1.203.935-2.178.677-.73 1.519-1.638 1.536-3.022.011-.924-.284-1.719-.854-2.297z";
-        public static final String SVG_HELP_ALT    = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 18.25c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25c.691 0 1.25.56 1.25 1.25s-.559 1.25-1.25 1.25zm1.961-5.928c-.904.975-.947 1.514-.935 2.178h-2.005c-.007-1.475.02-2.125 1.431-3.468.573-.544 1.025-.975.962-1.821-.058-.805-.73-1.226-1.365-1.226-.709 0-1.538.527-1.538 2.013h-2.01c0-2.4 1.409-3.95 3.59-3.95 1.036 0 1.942.339 2.55.955.57.578.865 1.372.854 2.298-.016 1.383-.857 2.291-1.534 3.021z";
-        public static final String SVG_SUCCESS     = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z";
+        public static final String SVG_INFO = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
+        public static final String SVG_INFO_ALT = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
+        public static final String SVG_HELP = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1.25 17c0 .69-.559 1.25-1.25 1.25-.689 0-1.25-.56-1.25-1.25s.561-1.25 1.25-1.25c.691 0 1.25.56 1.25 1.25zm1.393-9.998c-.608-.616-1.515-.955-2.551-.955-2.18 0-3.59 1.55-3.59 3.95h2.011c0-1.486.829-2.013 1.538-2.013.634 0 1.307.421 1.364 1.226.062.847-.39 1.277-.962 1.821-1.412 1.343-1.438 1.993-1.432 3.468h2.005c-.013-.664.03-1.203.935-2.178.677-.73 1.519-1.638 1.536-3.022.011-.924-.284-1.719-.854-2.297z";
+        public static final String SVG_HELP_ALT = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm0 18.25c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25c.691 0 1.25.56 1.25 1.25s-.559 1.25-1.25 1.25zm1.961-5.928c-.904.975-.947 1.514-.935 2.178h-2.005c-.007-1.475.02-2.125 1.431-3.468.573-.544 1.025-.975.962-1.821-.058-.805-.73-1.226-1.365-1.226-.709 0-1.538.527-1.538 2.013h-2.01c0-2.4 1.409-3.95 3.59-3.95 1.036 0 1.942.339 2.55.955.57.578.865 1.372.854 2.298-.016 1.383-.857 2.291-1.534 3.021z";
+        public static final String SVG_SUCCESS = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm4.393 7.5l-5.643 5.784-2.644-2.506-1.856 1.858 4.5 4.364 7.5-7.643-1.857-1.857z";
         public static final String SVG_SUCCESS_ALT = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z";
-        public static final String SVG_WARNING     = "m12 5.177l8.631 15.823h-17.262l8.631-15.823zm0-4.177l-12 22h24l-12-22zm-1 9h2v6h-2v-6zm1 9.75c-.689 0-1.25-.56-1.25-1.25s.561-1.25 1.25-1.25 1.25.56 1.25 1.25-.561 1.25-1.25 1.25z";
+        public static final String SVG_WARNING = "m12 5.177l8.631 15.823h-17.262l8.631-15.823zm0-4.177l-12 22h24l-12-22zm-1 9h2v6h-2v-6zm1 9.75c-.689 0-1.25-.56-1.25-1.25s.561-1.25 1.25-1.25 1.25.56 1.25 1.25-.561 1.25-1.25 1.25z";
         public static final String SVG_WARNING_ALT = "m12 1l-12 22h24l-12-22zm-1 8h2v7h-2v-7zm1 11.25c-.69 0-1.25-.56-1.25-1.25s.56-1.25 1.25-1.25 1.25.56 1.25 1.25-.56 1.25-1.25 1.25z";
-        public static final String SVG_DANGER      = "m16.142 2l5.858 5.858v8.284l-5.858 5.858h-8.284l-5.858-5.858v-8.284l5.858-5.858h8.284zm.829-2h-9.942l-7.029 7.029v9.941l7.029 7.03h9.941l7.03-7.029v-9.942l-7.029-7.029zm-8.482 16.992l3.518-3.568 3.554 3.521 1.431-1.43-3.566-3.523 3.535-3.568-1.431-1.432-3.539 3.583-3.581-3.457-1.418 1.418 3.585 3.473-3.507 3.566 1.419 1.417z";
-        public static final String SVG_DANGER_ALT  = "m16.971 0h-9.942l-7.029 7.029v9.941l7.029 7.03h9.941l7.03-7.029v-9.942l-7.029-7.029zm-1.402 16.945l-3.554-3.521-3.518 3.568-1.418-1.418 3.507-3.566-3.586-3.472 1.418-1.417 3.581 3.458 3.539-3.583 1.431 1.431-3.535 3.568 3.566 3.522-1.431 1.43z";
-        public static final String SVG_DIAMOND     = "m11.262 2.306c.196-.196.461-.306.738-.306s.542.11.738.306c1.917 1.917 7.039 7.039 8.956 8.956.196.196.306.461.306.738s-.11.542-.306.738c-1.917 1.917-7.039 7.039-8.956 8.956-.196.196-.461.306-.738.306s-.542-.11-.738-.306c-1.917-1.917-7.039-7.039-8.956-8.956-.196-.196-.306-.461-.306-.738s.11-.542.306-.738c1.917-1.917 7.039-7.039 8.956-8.956z";
-        public static final String SVG_UPDATE      = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 15.889v-2.223s-3.78-.114-7 3.333c1.513-6.587 7-7.778 7-7.778v-2.221l5 4.425-5 4.464z";
-        public static final String SVG_STAR        = "m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm3.15.45l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15zm0-5.025";
+        public static final String SVG_DANGER = "m16.142 2l5.858 5.858v8.284l-5.858 5.858h-8.284l-5.858-5.858v-8.284l5.858-5.858h8.284zm.829-2h-9.942l-7.029 7.029v9.941l7.029 7.03h9.941l7.03-7.029v-9.942l-7.029-7.029zm-8.482 16.992l3.518-3.568 3.554 3.521 1.431-1.43-3.566-3.523 3.535-3.568-1.431-1.432-3.539 3.583-3.581-3.457-1.418 1.418 3.585 3.473-3.507 3.566 1.419 1.417z";
+        public static final String SVG_DANGER_ALT = "m16.971 0h-9.942l-7.029 7.029v9.941l7.029 7.03h9.941l7.03-7.029v-9.942l-7.029-7.029zm-1.402 16.945l-3.554-3.521-3.518 3.568-1.418-1.418 3.507-3.566-3.586-3.472 1.418-1.417 3.581 3.458 3.539-3.583 1.431 1.431-3.535 3.568 3.566 3.522-1.431 1.43z";
+        public static final String SVG_DIAMOND = "m11.262 2.306c.196-.196.461-.306.738-.306s.542.11.738.306c1.917 1.917 7.039 7.039 8.956 8.956.196.196.306.461.306.738s-.11.542-.306.738c-1.917 1.917-7.039 7.039-8.956 8.956-.196.196-.461.306-.738.306s-.542-.11-.738-.306c-1.917-1.917-7.039-7.039-8.956-8.956-.196-.196-.306-.461-.306-.738s.11-.542.306-.738c1.917-1.917 7.039-7.039 8.956-8.956z";
+        public static final String SVG_UPDATE = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm1 15.889v-2.223s-3.78-.114-7 3.333c1.513-6.587 7-7.778 7-7.778v-2.221l5 4.425-5 4.464z";
+        public static final String SVG_STAR = "m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm3.15.45l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15zm0-5.025";
         public static final String SVG_STAR_FILLED = "m12 17.275l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15z";
-        public static final String SVG_CHECK       = "m9.55 15.15l8.475-8.475q.3-.3.7-.3t.7.3t.3.713t-.3.712l-9.175 9.2q-.3.3-.7.3t-.7-.3L4.55 13q-.3-.3-.288-.712t.313-.713t.713-.3t.712.3z";
-        public static final String SVG_CANCEL      = "m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z";
+        public static final String SVG_CHECK = "m9.55 15.15l8.475-8.475q.3-.3.7-.3t.7.3t.3.713t-.3.712l-9.175 9.2q-.3.3-.7.3t-.7-.3L4.55 13q-.3-.3-.288-.712t.313-.713t.713-.3t.712.3z";
+        public static final String SVG_CANCEL = "m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z";
 
         /** Gets an SVGPath Node using the given path string and color.
          * @param svg The SVG path string.
@@ -252,7 +375,7 @@ public class GuiPrefabs {
             JFXDialogLayout layout = new JFXDialogLayout();
             layout.setHeading(Dialogs.getHeading(graphic, title, COLOR_LIGHT_GRAY));
             layout.setBody(body);
-            layout.setActions(Dialogs.getOkayButton(dialog));
+            layout.setActions(Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (detail != null && !detail.isEmpty()) {
@@ -279,12 +402,8 @@ public class GuiPrefabs {
             JFXDialogLayout layout = new JFXDialogLayout();
             layout.setHeading(Dialogs.getHeading(graphic, title, COLOR_LIGHT_GRAY));
             layout.setBody(body);
-            JFXButton confirmButton = getOkayButton(dialog);
-            JFXButton cancelButton = getCancelButton(dialog);
-            confirmButton.setOnAction(e -> {
-                dialog.setOnDialogClosed(ev -> onConfirmed.run());
-                dialog.close();
-            });
+            Button confirmButton = getOkayButton(dialog, e -> dialog.setOnDialogClosed(ev -> onConfirmed.run()));
+            Button cancelButton = getCancelButton(dialog, null);
             layout.setActions(cancelButton, confirmButton);
             dialog.setContent(layout);
             return dialog;
@@ -351,7 +470,7 @@ public class GuiPrefabs {
                 disposeDialog(dialog);
             });
 
-            layout.setActions(button, Dialogs.getOkayButton(dialog));
+            layout.setActions(button, Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (e instanceof ProcessPool.UnexpectedExitCodeException) {
@@ -400,13 +519,19 @@ public class GuiPrefabs {
             } else if (e instanceof SSLException) {
                 h2.setText("无法建立安全的神经连接");
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
-                JFXButton apply = Dialogs.getTrustButton(dialog);
-                apply.setOnAction(ev -> {
+                Button trustButton = new ButtonBuilder()
+                        .setText("信 任")
+                        .setTextColor(COLOR_WHITE)
+                        .setBackgroundColor(COLOR_WARNING)
+                        .setFontSize(13)
+                        .setOnAction(ev -> disposeDialog(dialog))
+                        .build();
+                trustButton.setOnAction(ev -> {
                     Logger.warn("ErrorDialog", "Set SSL trust all to true");
                     Connections.trustAllUnsafe = true;
                     Dialogs.disposeDialog(dialog);
                 });
-                Dialogs.attachAction(dialog, apply, 0);
+                Dialogs.attachAction(dialog, trustButton, 0);
             } else if (e instanceof ZipException) {
                 h3.setText("压缩文件相关错误。可能是文件不完整或已损坏，请稍后重试。");
             }
@@ -447,40 +572,32 @@ public class GuiPrefabs {
             return h3;
         }
 
-        public static JFXButton getCancelButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("取 消");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
+        public static Button getOkayButton(JFXDialog dialog, EventHandler<ActionEvent> afterAction) {
+            return new ButtonBuilder()
+                    .setText("确 认")
+                    .setTextColor(COLOR_WHITE)
+                    .setBackgroundColor(COLOR_INFO)
+                    .setFontSize(13)
+                    .setOnAction(e -> {
+                        disposeDialog(dialog);
+                        if (afterAction != null)
+                            afterAction.handle(e);
+                    })
+                    .build();
         }
 
-        public static JFXButton getOkayButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("确 认");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
-        }
-
-        public static JFXButton getGotoButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("前 往");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_SUCCESS));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
-        }
-
-        public static JFXButton getTrustButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("信 任");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_WARNING));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
+        public static Button getCancelButton(JFXDialog dialog, EventHandler<ActionEvent> afterAction) {
+            return new ButtonBuilder()
+                    .setText("取 消")
+                    .setTextColor(COLOR_WHITE)
+                    .setBackgroundColor(COLOR_INFO)
+                    .setFontSize(13)
+                    .setOnAction(e -> {
+                        disposeDialog(dialog);
+                        if (afterAction != null)
+                            afterAction.handle(e);
+                    })
+                    .build();
         }
     }
 

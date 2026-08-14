@@ -1,16 +1,18 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXTreeTableColumn;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +34,7 @@ import javafx.util.Duration;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Function;
 
 
 public class GuiComponents {
@@ -317,6 +320,49 @@ public class GuiComponents {
     }
 
 
+    /** A useful tool to create a {@link TreeTableColumn}.
+     * @param <S> The type of the cell items.
+     * @param <T> The type of the cell values.
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static class TreeTableColumnSetup<S, T> {
+        private final TreeTableColumn<S, T> column;
+
+        public TreeTableColumnSetup(TreeTableColumn<S, T> column) {
+            this.column = column;
+        }
+
+        public TreeTableColumnSetup() {
+            this(new JFXTreeTableColumn<>());
+        }
+
+        public TreeTableColumnSetup<S, T> setText(String text) {
+            column.setText(text);
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> setReorderable(boolean reorderable) {
+            column.setReorderable(reorderable);
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> setValueExtractor(Function<S, T> extractor) {
+            column.setCellValueFactory(cellDataFeatures -> {
+                S rawValue = cellDataFeatures.getValue().getValue();
+                if (rawValue == null || extractor == null)
+                    return null;
+                return new SimpleObjectProperty<>(extractor.apply(rawValue));
+            });
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> attachTo(TreeTableView<S> treeTableView) {
+            treeTableView.getColumns().add(column);
+            return this;
+        }
+    }
+
+
     public static final class SimpleIntegerSliderSetup extends SliderSetup<Integer> {
         public SimpleIntegerSliderSetup(Slider slider) {
             super(slider);
@@ -567,10 +613,10 @@ public class GuiComponents {
     abstract public static class HandbookEntrance {
         private static final double scale = 2.0 / 3;
         protected final StackPane root;
-        protected final JFXButton target;
+        protected final ButtonBase target;
         protected final Handbook handbook;
 
-        public HandbookEntrance(StackPane root, JFXButton target) {
+        public HandbookEntrance(StackPane root, ButtonBase target) {
             this.root = root;
             this.target = target;
             handbook = getHandbook();
@@ -580,7 +626,8 @@ public class GuiComponents {
             graphic.setScaleY(scale);
             target.setText("");
             target.setGraphic(graphic);
-            target.setRipplerFill(Color.GRAY);
+            if (target instanceof JFXButton jfxButton)
+                jfxButton.setRipplerFill(Color.GRAY);
             target.setOnAction(e -> getHandbook().show(root));
         }
 
@@ -591,7 +638,7 @@ public class GuiComponents {
 
 
     abstract public static class DangerHandbookEntrance extends HandbookEntrance {
-        public DangerHandbookEntrance(StackPane root, JFXButton target) {
+        public DangerHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
             refresh();
         }
@@ -616,7 +663,7 @@ public class GuiComponents {
 
 
     abstract public static class WarningHandbookEntrance extends HandbookEntrance {
-        public WarningHandbookEntrance(StackPane root, JFXButton target) {
+        public WarningHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
             refresh();
         }
@@ -641,7 +688,7 @@ public class GuiComponents {
 
 
     abstract public static class HelpHandbookEntrance extends HandbookEntrance {
-        public HelpHandbookEntrance(StackPane root, JFXButton target) {
+        public HelpHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
         }
 
@@ -660,8 +707,11 @@ public class GuiComponents {
             this.pane = toastPane;
         }
 
-        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed) {
+        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, SVGPath icon) {
             pane.getChildren().clear();
+            if (icon != null) {
+                pane.getChildren().add(icon);
+            }
             Text txt = new Text(text);
             txt.setTextAlignment(TextAlignment.CENTER);
             pane.getChildren().add(txt);
@@ -733,7 +783,14 @@ public class GuiComponents {
         /** Show a simple toast.
          */
         public void showText(String text, Duration time) {
-            buildToast(text, null, null, null, null);
+            buildToast(text, null, null, null, null, null);
+            playAnim(time, null);
+        }
+
+        /** Show a simple toast with icon.
+         */
+        public void showText(String text, SVGPath icon, Duration time) {
+            buildToast(text, null, null, null, null, icon);
             playAnim(time, null);
         }
 
@@ -743,7 +800,17 @@ public class GuiComponents {
             buildToast(text, null, "撤销", null, () -> {
                 line.stop();
                 undoPressed.run();
-            });
+            }, null);
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with undo button and custom icon.
+         */
+        public void showUndo(String text, Runnable undoPressed, Runnable onDismissed, SVGPath icon, Duration time) {
+            buildToast(text, null, "撤销", null, () -> {
+                line.stop();
+                undoPressed.run();
+            }, icon);
             playAnim(time, onDismissed);
         }
 
@@ -753,21 +820,45 @@ public class GuiComponents {
             buildToast(text, null, undoText, null, () -> {
                 line.stop();
                 undoPressed.run();
-            });
+            }, null);
+            playAnim(time, onDismissed);
+        }
+
+        /** Show a toast with undo button, custom text and icon.
+         */
+        public void showUndo(String text, String undoText, Runnable undoPressed, Runnable onDismissed, SVGPath icon, Duration time) {
+            buildToast(text, null, undoText, null, () -> {
+                line.stop();
+                undoPressed.run();
+            }, icon);
             playAnim(time, onDismissed);
         }
 
         /** Show a toast with ok and cancel button.
          */
         public void showOkCancel(String text, Runnable okPressed, Runnable cancelPressed, Duration time) {
-            buildToast(text, null, null, okPressed, cancelPressed);
+            buildToast(text, null, null, okPressed, cancelPressed, null);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with ok, cancel button and custom icon.
+         */
+        public void showOkCancel(String text, Runnable okPressed, Runnable cancelPressed, SVGPath icon, Duration time) {
+            buildToast(text, null, null, okPressed, cancelPressed, icon);
             playAnim(time, null);
         }
 
         /** Show a toast with custom ok and cancel button.
          */
         public void showOkCancel(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, Duration time) {
-            buildToast(text, okText, cancelText, okPressed, cancelPressed);
+            buildToast(text, okText, cancelText, okPressed, cancelPressed, null);
+            playAnim(time, null);
+        }
+
+        /** Show a toast with custom ok, cancel button and icon.
+         */
+        public void showOkCancel(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, SVGPath icon, Duration time) {
+            buildToast(text, okText, cancelText, okPressed, cancelPressed, icon);
             playAnim(time, null);
         }
     }

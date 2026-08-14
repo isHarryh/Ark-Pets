@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -11,8 +11,7 @@ import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
-import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.*;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -29,20 +28,20 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     @FXML
     private AnchorPane dialog;
     @FXML
-    private JFXButton dialogReturn;
+    private Button dialogReturn;
 
     @FXML
     private Label mcIndicator;
     @FXML
     private Label mcPurchase;
     @FXML
-    private JFXTextField mcCdkInput;
+    private TextField mcCdkInput;
     @FXML
-    private JFXButton mcConfirm;
+    private Button mcConfirm;
     @FXML
     private Label psIndicator;
     @FXML
-    private JFXButton psConfirm;
+    private Button psConfirm;
 
     private ArkHomeFX app;
 
@@ -68,7 +67,7 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     }
 
     @Override
-    public JFXButton getReturnButton() {
+    public Button getReturnButton() {
         return dialogReturn;
     }
 
@@ -121,7 +120,11 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     }
 
     private void initMc() {
-        mcPurchase.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlMirrorChyan));
+        mcPurchase.setOnMouseClicked(e -> app.popBrowser(
+                new StringUtils.URLStringBuilder(Const.PathConfig.urlMirrorChyan)
+                        .addQuery("source", Const.mirrorChyanAID)
+                        .toString()
+        ));
         mcCdkInput.setOnKeyPressed(e -> {
             if (e.getCode().getName().equals(KeyCode.ENTER.getName()))
                 submitMcCdk();

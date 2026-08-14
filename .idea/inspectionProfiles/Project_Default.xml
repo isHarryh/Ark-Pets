@@ -3,6 +3,20 @@
     <option name="myName" value="Project Default" />
     <inspection_tool class="BooleanMethodIsAlwaysInverted" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ConfigurationAvoidance" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES" />
+    <inspection_tool class="CssInvalidFunction" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="CssInvalidHtmlTagReference" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CssInvalidPseudoSelector" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="CssNonIntegerLengthInPixels" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="CssUnknownProperty" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="myCustomPropertiesEnabled" value="false" />
+      <option name="myIgnoreVendorSpecificProperties" value="false" />
+      <option name="myCustomPropertiesList">
+        <value>
+          <list size="0" />
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="CssUnusedSymbol" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="EmptyMethod" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="EXCLUDE_ANNOS">
         <value>
@@ -15,13 +29,11 @@
       <scope name="Production" level="GRAMMAR_ERROR" enabled="true" />
       <scope name="Tests" level="GRAMMAR_ERROR" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="GrazieStyle" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES" />
     <inspection_tool class="HardcodedFileSeparators" enabled="true" level="TYPO" enabled_by_default="true" editorAttributes="TYPO">
       <option name="m_recognizeExampleMediaType" value="false" />
     </inspection_tool>
     <inspection_tool class="HardcodedLineSeparators" enabled="true" level="TYPO" enabled_by_default="true" editorAttributes="TYPO" />
-    <inspection_tool class="JsonStandardCompliance" enabled="true" level="ERROR" enabled_by_default="true">
-      <option name="myWarnAboutComments" value="false" />
-    </inspection_tool>
     <inspection_tool class="LanguageDetectionInspection" enabled="true" level="TEXT ATTRIBUTES" enabled_by_default="true" editorAttributes="CONSIDERATION_ATTRIBUTES">
       <scope name="Production" level="WARNING" enabled="true" />
       <scope name="Tests" level="WARNING" enabled="true" />

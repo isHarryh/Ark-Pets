@@ -1,10 +1,10 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.controllers.DialogController;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

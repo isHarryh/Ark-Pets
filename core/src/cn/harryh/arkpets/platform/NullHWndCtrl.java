@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang, Litwak913
+/** Copyright (c) 2022-2026, Harry Huang, Litwak913
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.platform;
@@ -63,15 +63,7 @@ public class NullHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
-    }
-
-    @Override
-    public void setTransparent(boolean enable) {
     }
 
     @Override

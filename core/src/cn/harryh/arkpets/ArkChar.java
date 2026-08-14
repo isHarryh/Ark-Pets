@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets;
@@ -9,17 +9,24 @@ import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
+import cn.harryh.arkpets.assets.SkeletonLoader;
+import cn.harryh.arkpets.render.DynamicOrthographicCamara;
+import cn.harryh.arkpets.render.DynamicOrthographicCamara.Insert;
+import cn.harryh.arkpets.render.EffectShader;
+import cn.harryh.arkpets.render.PixmapWrapper;
+import cn.harryh.arkpets.render.RawShader;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
-import cn.harryh.arkpets.utils.DynamicOrthographicCamara;
-import cn.harryh.arkpets.utils.DynamicOrthographicCamara.Insert;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -27,10 +34,9 @@ import com.badlogic.gdx.utils.SerializationException;
 import com.esotericsoftware.spine.*;
 import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 import static cn.harryh.arkpets.Const.*;
 import static java.io.File.separator;
 
@@ -39,7 +45,8 @@ public class ArkChar {
     protected final DynamicOrthographicCamara camera;
     protected final TransitionVector3 position;
 
-    private final TwoColorPolygonBatch batch;
+    private final TwoColorPolygonBatch spineBatch;
+    private final SpriteBatch finalBatch;
     private Texture bgTexture;
     private final float outlineWidth;
     private final Color outlineColor;
@@ -48,8 +55,8 @@ public class ArkChar {
     private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
 
-    private final ShaderProgram shader1;
-    private final ShaderProgram shader2;
+    private final RawShader shader1;
+    private final EffectShader shader2;
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
 
@@ -67,14 +74,17 @@ public class ArkChar {
         camera = new DynamicOrthographicCamara(canvasMaxSize, canvasMaxSize, Math.round(canvasReserveLength * scale));
         camera.setMaxInsert(0);
         camera.setMinInsert(canvasReserveLength - canvasMaxSize);
-        batch = new TwoColorPolygonBatch();
+        spineBatch = new TwoColorPolygonBatch();
+        finalBatch = new SpriteBatch();
         renderer = new SkeletonRenderer();
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader, config.render_enable_angle);
-        shader2 = getShader(pass2VShader, pass2FShader, config.render_enable_angle);
+        shader1 = new RawShader();
+        shader2 = new EffectShader(config.render_shader_high_quality);
         Logger.debug("Shader", "Shader program compiled");
+        spineBatch.setShader(shader1);
+        finalBatch.setShader(shader2);
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
         float easingDuration = Math.max(0, config.transition_duration);
@@ -89,45 +99,31 @@ public class ArkChar {
             ModelAssetAccessor modelAssetAccessor = new ModelAssetAccessor(config.character_files);
             String path2atlas = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".atlas");
             String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
-            // Load atlas
-            FileHandle packFile = Gdx.files.internal(path2atlas);
-            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false);
-            if (config.render_enable_mipmap) {
-                for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
-                    page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
-                    page.useMipMaps = true;
+            FileHandle atlasFile = Gdx.files.internal(path2atlas);
+            FileHandle skelFile = Gdx.files.internal(path2skel);
+            // Load skel
+            try {
+                SkeletonLoader skeletonLoader = new SkeletonLoader(skelFile);
+                Logger.info("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
+                if (skeletonLoader.needFix()) {
+                    skeletonLoader = skeletonLoader.fixed();
+                    Logger.warn("Character", "Skeleton fixed");
                 }
+                skeletonData = skeletonLoader.loadSkeletonDataWith(atlasFile, scale * skelBaseScale, config.render_enable_mipmap);
+                Logger.debug("Character", "Skeleton loaded with Spine version " + skeletonLoader.version);
+            } catch (Exception e) {
+                Logger.error("Character", "Failed to load skeleton, details see below.", e);
+                throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
             }
-            TextureAtlas atlas = new TextureAtlas(atlasData);
-            // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
-            FileHandle data = Gdx.files.internal(path2skel);
-            InputStream is = data.read();
-            char first = (char) is.read();
-            if (first == '{') { // Skeleton is json
-                Logger.debug("Character", "Skeleton format is JSON");
-                SkeletonJson json = new SkeletonJson(atlas);
-                json.setScale(scale * skelBaseScale);
-                skeletonData = json.readSkeletonData(data);
-            } else { // Skeleton is binary
-                Logger.debug("Character", "Skeleton format is binary");
-                SkeletonBinary binary = new SkeletonBinary(atlas);
-                binary.setScale(scale * skelBaseScale);
-                skeletonData = binary.readSkeletonData(data);
-            }
-            is.close();
-        } catch (SerializationException | GdxRuntimeException | IOException e) {
+        } catch (SerializationException | GdxRuntimeException e) {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
             throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
         }
         skeleton = new Skeleton(skeletonData);
         skeleton.updateWorldTransform();
-        animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
-        // 4.Animation mixing
+        // 4.Animation setup
         AnimationStateData asd = new AnimationStateData(skeletonData);
-        for (AnimClip i : animList)
-            for (AnimClip j : animList)
-                if (!i.fullName.equals(j.fullName))
-                    asd.setMix(i.fullName, j.fullName, config.render_animation_mixture);
+        animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
         // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);
@@ -145,6 +141,7 @@ public class ArkChar {
         outlineWidth = config.render_outline_width;
         outlineColor = new Color(Color.CLEAR);
         shadowColor = ArkConfig.getGdxColorFrom(config.render_shadow_color);
+        // 7.Canvas fitting
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
@@ -159,6 +156,8 @@ public class ArkChar {
             }
         }
         camera.setInsertMaxed();
+        // 8.Animation mixing
+        animList.applyCompleteAnimMix(asd, config.render_animation_mixture);
     }
 
     /** Sets the canvas with the specified background color.
@@ -248,42 +247,39 @@ public class ArkChar {
         skeleton.setPosition(position.now().x, position.now().y + offsetY.now());
         skeleton.setScaleX(position.now().z);
         skeleton.updateWorldTransform();
-        batch.getProjectionMatrix().set(camera.combined);
+        spineBatch.getProjectionMatrix().set(camera.combined);
+        finalBatch.getProjectionMatrix().set(camera.combined);
         // Apply current animation
         animationState.apply(skeleton);
         animationState.update(Gdx.graphics.getDeltaTime());
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
-        shader1.setUniformf("u_alpha", 1.0f);
-        batch.setShader(shader1);
+        shader1.setAlpha(1.0f);
         ScreenUtils.clear(0, 0, 0, 0, true);
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
-        batch.setShader(null);
+        spineBatch.begin();
+        renderer.draw(spineBatch, skeleton);
+        spineBatch.end();
         camera.getFBO().end();
         // Render Pass 2: Render additional effects
         Texture passedTexture = camera.getFBO().getColorBufferTexture();
         shader2.bind();
-        shader2.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        shader2.setUniformf("u_outlineWidth", outlineWidth);
-        shader2.setUniformf("u_outlineAlpha", outlineAlpha.now());
-        shader2.setUniformf("u_shadowColor", shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-        shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
-        shader2.setUniformf("u_alpha", alpha.now());
-        batch.setShader(shader2);
+        shader2.setOutlineColor(outlineColor);
+        shader2.setOutlineWidth(outlineWidth);
+        shader2.setOutlineAlpha(outlineAlpha.now());
+        shader2.setShadowColor(shadowColor);
+        shader2.setTextureSize(passedTexture);
+        shader2.setAlpha(alpha.now());
         ScreenUtils.clear(0, 0, 0, 0, true);
-        batch.begin();
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.draw(bgTexture, 0, 0);
-        batch.draw(passedTexture,
+        finalBatch.begin();
+        finalBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        finalBatch.draw(bgTexture, 0, 0);
+        finalBatch.draw(passedTexture,
                 0, 0, 0, 0, camera.getWidth(), camera.getHeight(),
                 1, 1, 0,
                 0, 0, passedTexture.getWidth(), passedTexture.getHeight(),
                 false, true);
-        batch.end();
-        batch.setShader(null);
+        finalBatch.end();
     }
 
     /** Renders the character to the graphics additively, ignoring delta time and complex shaders.
@@ -295,26 +291,12 @@ public class ArkChar {
         skeleton.setScaleX(position.end().z);
         skeleton.updateWorldTransform();
         animationState.apply(skeleton);
-        batch.getProjectionMatrix().set(camera.combined);
+        spineBatch.getProjectionMatrix().set(camera.combined);
         shader1.bind();
-        shader1.setUniformf("u_alpha", alpha);
-        batch.setShader(shader1);
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
-        batch.setShader(null);
-    }
-
-    private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
-        String ver = gles30 ? "gles30" : "gl21";
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
-        if (!shader.isCompiled()) {
-            Logger.error("Shader", "Shader program failed to compile.");
-            Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);
-            Logger.error("Shader", "Shader log: " + shader.getLog());
-            throw new RuntimeException("Launch ArkPets failed, failed to compile shaders.");
-        }
-        return shader;
+        shader1.setAlpha(alpha);
+        spineBatch.begin();
+        renderer.draw(spineBatch, skeleton);
+        spineBatch.end();
     }
 
     private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {
@@ -337,7 +319,9 @@ public class ArkChar {
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
-        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, 1.0 - Math.pow(10.0, -4.0 / totalSamples));
+        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, Math.min(1.0,
+                1.0 - Math.pow(10.0, -4.0 / totalSamples) + Math.pow(10, 1.0 / totalSamples - 2.0)
+        ));
         for (AnimClip animClip : animList.findAnimations(stage)) {
             composer.reset();
             composer.offer(new AnimData(animClip));
@@ -357,13 +341,13 @@ public class ArkChar {
             }
         }
         // Take down the snapshot from the rendered FBO
-        Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, camera.getWidth(), camera.getHeight());
+        PixmapWrapper pw = PixmapWrapper.fromCamera(camera);
         camera.getFBO().end();
         // Crop the canvas in order to fit the snapshot
         float alphaThreshold = Math.max(0f, Math.min(coverage, 1f));
         Insert insert;
         do {
-            insert = camera.getFittedInsert(snapshot, alphaThreshold, false, true);
+            insert = camera.getFittedInsert(pw.getPixmap(), alphaThreshold, false, true);
             if (!insert.equals(camera.getInsert()) || alphaThreshold < 0.75f)
                 break;
             alphaThreshold *= 0.9375f;
@@ -372,18 +356,19 @@ public class ArkChar {
             Logger.warn("Character", stage + " has inappropriate canvas coverage setting, auto adjusted to " + alphaThreshold);
         // For debugging
         if (isDebugEnabled) {
-            snapshot.setColor(Color.RED);
-            snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
-            snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);
-            snapshot.drawLine(-insert.left, 0, -insert.left, camera.getHeight());
-            snapshot.drawLine(camera.getWidth() + insert.right, 0, camera.getWidth() + insert.right, camera.getHeight());
-            FileHandle dir = new FileHandle("temp/");
-            dir.mkdirs();
-            FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
-            PixmapIO.writePNG(file, snapshot);
+            pw.drawCmap("tab16t", "a");
+            pw.drawUnfilledRectangle(Color.RED,
+                    -insert.left,
+                    -insert.bottom,
+                    camera.getWidth() + insert.left + insert.right,
+                    camera.getHeight() + insert.top + insert.bottom,
+                    2);
+            FileHandle file = new FileHandle(tempDirPath).child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
+            pw.savePixmap(file, true);
+            Logger.debug("Character", "Saved acSnapshot to: " + file.path());
         }
         // Complete
         camera.setInsert(insert);
-        snapshot.dispose();
+        pw.dispose();
     }
 }

@@ -1,4 +1,4 @@
-﻿; *** Inno Setup version 6.1.0+ Chinese Simplified (zh-cn) messages ***
+﻿; *** Inno Setup version 6.5.0+ Chinese Simplified (zh-cn) messages ***
 ;
 ; To download user-contributed translations of this file, go to:
 ;   https://jrsoftware.org/files/istrans/
@@ -8,7 +8,7 @@
 ; Setup adds the periods automatically (appending a period would result in
 ; two periods being displayed).
 ;
-; Translated by Harry Huang at 2023-9-1
+; Translated by Harry Huang at 2025-11-13
 ;
 
 [LangOptions]
@@ -214,16 +214,26 @@ ReadyMemoGroup=开始菜单文件夹：
 ReadyMemoTasks=附加任务：
 
 ; *** TDownloadWizardPage wizard page and DownloadTemporaryFile
-DownloadingLabel=正在下载附加文件...
+DownloadingLabel2=正在下载文件...
 ButtonStopDownload=停止下载(&S)
 StopDownload=您确定要停止下载吗？
 ErrorDownloadAborted=下载已中止
 ErrorDownloadFailed=下载失败：%1 %2
 ErrorDownloadSizeFailed=获取下载大小失败：%1 %2
-ErrorFileHash1=校验文件哈希失败：%1
-ErrorFileHash2=无效的文件哈希：%n预期 %1，实际 %2。%n获取的文件可能不完整。
 ErrorProgress=无效的进度值：%1 / %2
 ErrorFileSize=无效的文件大小：%n预期 %1，实际 %2。%n获取的文件可能不完整。
+
+; *** TExtractionWizardPage wizard page and ExtractArchive
+ExtractingLabel=正在解压文件...
+ButtonStopExtraction=停止解压(&S)
+StopExtraction=您确定要停止解压吗？
+ErrorExtractionAborted=解压已中止
+ErrorExtractionFailed=解压失败：%1
+
+; *** Archive extraction failure details
+ArchiveIncorrectPassword=压缩文件密码不正确
+ArchiveIsCorrupted=压缩文件已损坏
+ArchiveUnsupportedFormat=不支持的压缩文件格式
 
 ; *** "Preparing to Install" wizard page
 WizardPreparing=开始安装
@@ -269,11 +279,15 @@ AbortRetryIgnoreSelectAction=选择操作
 AbortRetryIgnoreRetry=重试(&T)
 AbortRetryIgnoreIgnore=忽略错误并继续(&I)
 AbortRetryIgnoreCancel=取消安装
+RetryCancelSelectAction=选择操作
+RetryCancelRetry=重试(&T)
+RetryCancelCancel=取消
 
 ; *** Installation status messages
 StatusClosingApplications=正在关闭应用程序...
 StatusCreateDirs=正在创建目录...
-StatusExtractFiles=正在解压缩文件...
+StatusExtractFiles=正在提取文件...
+StatusDownloadFiles=正在下载文件...
 StatusCreateIcons=正在创建快捷方式...
 StatusCreateIniEntries=正在创建 INI 条目...
 StatusCreateRegistryEntries=正在创建注册表条目...
@@ -303,6 +317,14 @@ FileAbortRetryIgnoreSkipNotRecommended=跳过这个文件(&S)（不推荐）
 FileAbortRetryIgnoreIgnoreNotRecommended=忽略错误并继续(&I)（不推荐）
 SourceIsCorrupted=源文件已损坏
 SourceDoesntExist=源文件 "%1" 不存在
+SourceVerificationFailed=源文件验证失败：%1
+VerificationSignatureDoesntExist=签名文件“%1”不存在
+VerificationSignatureInvalid=签名文件“%1”无效
+VerificationKeyNotFound=签名文件“%1”使用了未知密钥
+VerificationFileNameIncorrect=文件名不正确
+VerificationFileTagIncorrect=文件标签不正确
+VerificationFileSizeIncorrect=文件大小不正确
+VerificationFileHashIncorrect=文件哈希值不正确
 ExistingFileReadOnly2=无法替换已存在的文件，因为它具有只读属性。
 ExistingFileReadOnlyRetry=移除只读属性并重试(&R)
 ExistingFileReadOnlyKeepExisting=保留此文件(&K)
@@ -321,6 +343,8 @@ ErrorChangingAttr=尝试修改文件属性时出错：
 ErrorCreatingTemp=尝试在目标目录中创建文件时出错：
 ErrorReadingSource=尝试读取源文件时出错：
 ErrorCopying=尝试复制文件时出错：
+ErrorDownloading=下载文件时出错：
+ErrorExtracting=提取文件时出错：
 ErrorReplacingExistingFile=尝试替换文件时出错：
 ErrorRestartReplace=重启替换失败：
 ErrorRenamingTemp=尝试重命名目标目录中的文件时出错：

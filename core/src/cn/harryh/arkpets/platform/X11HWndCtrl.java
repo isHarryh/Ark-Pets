@@ -187,11 +187,6 @@ public class X11HWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-        // unnecessary in X11.
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         if (enable) {
             X11Helper.clientMsg(display, hWnd, "_NET_WM_STATE", STATE_ADD, X11Helper.getAtom(display, "_NET_WM_STATE_ABOVE").intValue(), 0, 0, 0);

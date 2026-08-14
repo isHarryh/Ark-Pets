@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 
@@ -144,49 +144,48 @@ JFXButton>AnchorPane>SVGPath {
     -fx-fill: -theme-color;
 }
 
-.list {
+.arklist.list-view {
     -fx-padding: 4px;
     -fx-background-radius: 3px;
 }
 
-.list-item {
+.arklist .list-cell {
     /* Regular */
     -fx-cursor: hand;
     -fx-padding: 4px 2px;
     -fx-text-fill: dimgray;
-    -fx-background-color: transparent;
     -fx-focus-traversable: true;
 }
 
-.list-item-label {
+.arklist .list-cell .list-item-label {
     -fx-font-size: 12px;
     -fx-label-padding: 2px;
     -fx-text-fill: -text-normal;
     -fx-text-overrun: ellipsis;
 }
 
-.list-item-label-sub {
+.arklist .list-cell .list-item-label-sub {
     -fx-font-size: 11px;
     -fx-text-fill: dimgray;
     -fx-text-overrun: ellipsis;
 }
 
-.list-item-active .list-item-label {
+.arklist .list-cell:selected .list-item-label {
     -fx-font-size: 12.5px;
     -fx-text-fill: -text-normal;
 }
 
-.list-item-active .list-item-label-sub {
+.arklist .list-cell:selected .list-item-label-sub {
     -fx-font-size: 11.5px;
     -fx-text-fill: dimgray;
 }
 
-.list:focused .list-item-active .list-item-label {
+.arklist.list-view:focused .list-cell:selected .list-item-label {
     -fx-font-size: 12.5px;
     -fx-text-fill: white;
 }
 
-.list:focused .list-item-active .list-item-label-sub {
+.arklist.list-view:focused .list-cell:selected .list-item-label-sub {
     -fx-font-size: 11.5px;
     -fx-text-fill: white;
 }
@@ -323,14 +322,6 @@ JFXSlider {
     -fx-font-size: 11px;
     -fx-text-fill: -theme-color;
     -fx-label-padding: 0 2px;
-}
-
-.Search-models-star {
-    -fx-opacity: 0;
-}
-
-.Search-models-item-favorite .Search-models-star {
-    -fx-opacity: 1;
 }
 
 #Info-filter-label {
@@ -595,7 +586,8 @@ ProgressBar:indeterminate>.bar {
 #Toast {
     -fx-padding: 4px 8px;
     -fx-background-color: white;
-    -fx-background-radius: 3px;
+    -fx-background-radius: 4px;
+    -fx-effect: dropshadow(gaussian, #00000054, 5, 0.0, 0.5, 0.5);
 }
 
 /*******************************************************************************

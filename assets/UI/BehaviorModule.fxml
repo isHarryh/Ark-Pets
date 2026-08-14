@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2022-2025, Harry Huang
+    Copyright (c) 2022-2026, Harry Huang
     At GPL-3.0 License
 -->
 
@@ -45,6 +45,10 @@
                     <JFXCheckBox fx:id="configBehaviorAllowInteract" mnemonicParsing="false" text="允许触发交互动画"/>
                     <JFXCheckBox fx:id="configBehaviorDoPeerRepulsion" mnemonicParsing="false"
                                  text="允许被其他桌宠排斥"/>
+                </HBox>
+                <HBox>
+                    <Label text="交互式朝向翻转"/>
+                    <JFXComboBox fx:id="configDirectionSwitching" prefWidth="120.0"/>
                 </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="位置"/>

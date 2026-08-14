@@ -70,11 +70,6 @@ public class MutterHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         dBusInterface.Above(hWnd, enable);
     }

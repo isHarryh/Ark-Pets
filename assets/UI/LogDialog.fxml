@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-    Copyright (c) 2022-2025, Harry Huang
+    Copyright (c) 2022-2026, Harry Huang
     At GPL-3.0 License
 -->
 
@@ -11,7 +11,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
 <?import java.lang.String?>
-<AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0" styleClass="wrapper" stylesheets="@Main.css"
+<AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0"
+            cache="true" cacheHint="SPEED" styleClass="wrapper" stylesheets="@Main.css"
             xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="cn.harryh.arkpets.controllers.LogDialog">
     <HBox spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0"

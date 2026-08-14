@@ -3,14 +3,14 @@ import org.gradle.internal.os.OperatingSystem
 
 buildscript {
     repositories {
-        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
-        maven { url "https://maven.aliyun.com/repository/gradle-plugin/" }
+        maven { url = "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+        maven { url = "https://maven.aliyun.com/repository/gradle-plugin/" }
         mavenLocal()
         mavenCentral()
     }
 
     dependencies {
-        classpath "org.openjfx:javafx-plugin:0.0.13"
+        classpath "org.openjfx:javafx-plugin:0.1.0"
     }
 }
 
@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = "3.9.2"
+    version = "3.12.0"
     ext {
         // App Metadata
         appName = "ArkPets"
@@ -31,7 +31,7 @@ allprojects {
         // Prefabs
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
-        javaFXVersion = "17.0.8"
+        javaFXVersion = "17.0.15"
         dbusVersion = "5.1.0"
         lwjglVersion = "3.3.4"
         javaFXPlatform = ""
@@ -71,7 +71,7 @@ allprojects {
     }
 
     repositories {
-        maven { url "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
+        maven { url = "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
         mavenLocal()
         mavenCentral()
     }
@@ -84,7 +84,6 @@ project(":desktop") {
         implementation project(":core")
         // libGDX Desktop
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
     }
 }
 
@@ -112,7 +111,7 @@ project(":core") {
         // JFoenix
         api "com.jfoenix:jfoenix:9.0.1"
         // FastJson
-        api "com.alibaba:fastjson:2.0.39"
+        api "com.alibaba.fastjson2:fastjson2:2.0.60"
         // CommonMark
         api "org.commonmark:commonmark:0.24.0"
         api "org.commonmark:commonmark-ext-autolink:0.24.0"
@@ -133,6 +132,6 @@ project(":core") {
         // TiniPinyin
         api 'com.github.promeg:tinypinyin:2.0.3'
         // OpenCC4j
-        api 'com.github.houbb:opencc4j:1.8.1'
+        api 'com.github.houbb:opencc4j:1.14.0'
     }
 }

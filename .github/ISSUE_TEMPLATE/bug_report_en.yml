@@ -1,0 +1,50 @@
+name: "[English] Bug Report"
+description: "Report a problem, error, or crash you encountered."
+labels: ["Type: Bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting a bug report, please make sure that:
+        1. You are using the latest version of the program.
+        2. You have read the [FAQ](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/FAQ.md) and your issue is not resolved.
+        3. You have browsed [existing GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) and found no similar issues.
+  - type: input
+    id: version
+    attributes:
+      label: Software Version
+      description: What version of the software are you using?
+      placeholder: vX.X.X
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      description: What operating system are you using?
+      placeholder: Windows XX
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem Description
+      description: Please describe the problem you encountered here.
+      placeholder: |
+        Please specify the conditions and steps to reproduce the problem, as well as the specific behavior observed.
+        You can paste screenshots here to help describe your issue more clearly.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Program Logs
+      description: Please upload the program log file here (optional).
+      render: text
+      placeholder: |
+        How to upload log files?
+        1. Open the launcher, go to the "Options" page, scroll down and click the "Export Logs" button.
+        2. Click "Select Recent Logs", then click "Export Selected Logs".
+        3. Choose where to save the log files and confirm.
+        4. Drag and drop the saved log files here.

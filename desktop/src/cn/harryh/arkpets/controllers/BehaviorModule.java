@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2024, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -11,7 +11,7 @@ import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Monitor;
-import com.jfoenix.controls.*;
+import cn.harryh.arkpets.utils.ScrollUtils;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -31,35 +31,37 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private ScrollPane moduleScroll;
 
     @FXML
-    private JFXCheckBox configBehaviorAllowWalk;
+    private CheckBox configBehaviorAllowWalk;
     @FXML
-    private JFXCheckBox configBehaviorAllowSit;
+    private CheckBox configBehaviorAllowSit;
     @FXML
-    private JFXCheckBox configBehaviorAllowSleep;
+    private CheckBox configBehaviorAllowSleep;
     @FXML
-    private JFXCheckBox configBehaviorAllowSpecial;
+    private CheckBox configBehaviorAllowSpecial;
     @FXML
-    private JFXSlider configBehaviorAiActivation;
+    private Slider configBehaviorAiActivation;
     @FXML
     private Label configBehaviorAiActivationValue;
     @FXML
-    private JFXSlider configBehaviorWalkSpeed;
+    private Slider configBehaviorWalkSpeed;
     @FXML
     private Label configBehaviorSpeedWalkValue;
     @FXML
-    private JFXCheckBox configBehaviorAllowInteract;
+    private CheckBox configBehaviorAllowInteract;
     @FXML
-    private JFXCheckBox configBehaviorDoPeerRepulsion;
+    private CheckBox configBehaviorDoPeerRepulsion;
     @FXML
-    private JFXCheckBox configDeployMultiMonitors;
+    private ComboBox<NamedItem<Integer>> configDirectionSwitching;
+    @FXML
+    private CheckBox configDeployMultiMonitors;
     @FXML
     private Label configDeployMultiMonitorsStatus;
     @FXML
-    private JFXSlider configDeployMarginBottom;
+    private Slider configDeployMarginBottom;
     @FXML
     private Label configDeployMarginBottomValue;
     @FXML
-    private JFXButton toggleConfigDeployPosition;
+    private Button toggleConfigDeployPosition;
     @FXML
     private HBox wrapperConfigDeployPosition;
     @FXML
@@ -68,40 +70,40 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configTransitionAnimationLabel;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configTransitionAnimation;
+    private ComboBox<NamedItem<Float>> configTransitionAnimation;
     @FXML
-    private JFXButton configTransitionAnimationHelp;
+    private Button configTransitionAnimationHelp;
     @FXML
     private Label configTransitionDurationLabel;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configTransitionDuration;
+    private ComboBox<NamedItem<Float>> configTransitionDuration;
     @FXML
-    private JFXButton configTransitionDurationHelp;
+    private Button configTransitionDurationHelp;
     @FXML
     private Label configTransitionFunctionLabel;
     @FXML
-    private JFXComboBox<NamedItem<String>> configTransitionFunction;
+    private ComboBox<NamedItem<String>> configTransitionFunction;
     @FXML
-    private JFXButton configTransitionFunctionHelp;
+    private Button configTransitionFunctionHelp;
 
     @FXML
-    private JFXSlider configPhysicGravity;
+    private Slider configPhysicGravity;
     @FXML
     private Label configPhysicGravityValue;
     @FXML
-    private JFXSlider configPhysicAirFriction;
+    private Slider configPhysicAirFriction;
     @FXML
     private Label configPhysicAirFrictionValue;
     @FXML
-    private JFXSlider configPhysicStaticFriction;
+    private Slider configPhysicStaticFriction;
     @FXML
     private Label configPhysicStaticFrictionValue;
     @FXML
-    private JFXSlider configPhysicSpeedLimitX;
+    private Slider configPhysicSpeedLimitX;
     @FXML
     private Label configPhysicSpeedLimitXValue;
     @FXML
-    private JFXSlider configPhysicSpeedLimitY;
+    private Slider configPhysicSpeedLimitY;
     @FXML
     private Label configPhysicSpeedLimitYValue;
     @FXML
@@ -114,7 +116,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         this.app = app;
         initConfigBehavior();
         initScheduledListener();
-
+        ScrollUtils.addSmoothScrolling(moduleScroll);
         Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
@@ -143,7 +145,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         SliderSetup<Integer> setupBehaviorAiActivation = new SimpleIntegerSliderSetup(configBehaviorAiActivation);
         setupBehaviorAiActivation
                 .setDisplay(configBehaviorAiActivationValue, "%d 级", "活跃级别 (activation level)")
-                .setRange(0, 8)
+                .setRange(0, 16)
                 .setTicks(1, 0)
                 .setSliderValue(app.config.behavior_ai_activation)
                 .setOnChanged((observable, oldValue, newValue) -> {
@@ -172,6 +174,16 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
             app.config.behavior_do_peer_repulsion = configBehaviorDoPeerRepulsion.isSelected();
             app.config.save();
         });
+
+        new ComboBoxSetup<>(configDirectionSwitching).setItems(new NamedItem<>("禁用", 0),
+                        new NamedItem<>("松开拖拽时", 1),
+                        new NamedItem<>("拖拽时", 2),
+                        new NamedItem<>("光标掠过时", 3))
+                .selectValue(app.config.behavior_direction_switching, app.config.behavior_direction_switching + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.behavior_direction_switching = newValue.value();
+                    app.config.save();
+                });
 
         configDeployMultiMonitors.setSelected(app.config.display_multi_monitors);
         configDeployMultiMonitors.setOnAction(e -> {
@@ -331,7 +343,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         configPhysicRestore.setOnMouseClicked(e -> {
             configPhysicRestoreEvent.handle(e);
             app.rootModule.moduleWrapperComposer.activate(1);
-            app.toast.showText("已恢复默认物理设置", Const.durationLong);
+            app.toast.showText("已恢复默认物理设置",
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS), Const.durationLong);
         });
     }
 

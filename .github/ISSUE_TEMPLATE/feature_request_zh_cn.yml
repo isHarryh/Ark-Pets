@@ -1,0 +1,26 @@
+name: "[简体中文] 请求新的功能"
+description: "向我们请求添加新的功能，或提供针对现有功能的建议。"
+labels: ["Type: Enhancement"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交诉求前，请确保您浏览了[现有的 GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) 并确认没有找到类似的诉求。
+  - type: input
+    id: version
+    attributes:
+      label: 软件版本
+      description: 您所使用的软件版本是：
+      placeholder: vX.X.X
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 功能描述
+      description: 请描述您希望追加的功能或改进：
+      placeholder: |
+        您需要详细描述您所预期的功能行为，并提供您的理由。
+    validations:
+      required: true

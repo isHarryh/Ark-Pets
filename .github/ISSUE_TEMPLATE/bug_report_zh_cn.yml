@@ -1,0 +1,50 @@
+name: "[简体中文] 提交问题报告"
+description: "向我们反馈程序所出现的问题、错误或者崩溃情形。"
+labels: ["Type: Bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交问题报告前，请确保您：
+        1. 使用的是最新版本的程序。
+        2. 阅读了[常见问题解答](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/FAQ.md)但未能解决您的问题。
+        3. 浏览了[现有的 GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) 但没有找到类似的问题。
+  - type: input
+    id: version
+    attributes:
+      label: 软件版本
+      description: 您所使用的软件版本是：
+      placeholder: vX.X.X
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: 操作系统
+      description: 您所使用的操作系统是：
+      placeholder: Windows XX
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 请描述您所遇到的问题：
+      placeholder: |
+        您需要说明您所遇到的问题的触发条件与复现步骤，以及问题的具体表现。
+        您可以将截图粘贴到此处，以便更清晰地描述您的问题。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 程序日志
+      description: 请上传程序的日志文件（非必填）：
+      render: text
+      placeholder: |
+        如何上传日志文件？
+        1. 打开启动器，进入“选项”页面，下滑找到并点击“导出日志”按钮。
+        2. 点击“选择近期日志”，然后点击“导出所选的日志”。
+        3. 选择日志文件的保存位置并确认。
+        4. 将保存的日志文件拖拽到此处。

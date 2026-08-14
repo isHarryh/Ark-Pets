@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.guitasks.requests;
@@ -7,14 +7,14 @@ import cn.harryh.arkpets.network.api.AppQueryAnnouncement;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.urlOfficialApi;
 import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
@@ -33,8 +33,8 @@ public class FetchAnnounceTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
-                .addQuery("type", "queryAnnouncement")
+        return new StringUtils.URLStringBuilder(urlOfficialApi)
+                .addPath("announcement")
                 .toURL();
     }
 

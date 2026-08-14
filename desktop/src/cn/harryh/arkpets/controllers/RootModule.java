@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.controllers;
@@ -76,15 +76,15 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane sidebar;
     @FXML
-    private JFXButton annoEntrance;
+    private Button annoEntrance;
     @FXML
-    private JFXButton menuBtn1;
+    private Button menuBtn1;
     @FXML
-    private JFXButton menuBtn2;
+    private Button menuBtn2;
     @FXML
-    private JFXButton menuBtn3;
+    private Button menuBtn3;
     @FXML
-    public JFXButton launchBtn;
+    public Button launchBtn;
 
     @FXML
     private HBox toast;

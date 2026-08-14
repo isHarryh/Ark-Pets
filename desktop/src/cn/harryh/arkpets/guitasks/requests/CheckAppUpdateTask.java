@@ -1,4 +1,4 @@
-/** Copyright (c) 2022-2025, Harry Huang
+/** Copyright (c) 2022-2026, Harry Huang
  * At GPL-3.0 License
  */
 package cn.harryh.arkpets.guitasks.requests;
@@ -10,13 +10,13 @@ import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.Version;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.Const.PathConfig.urlOfficialApi;
 import static cn.harryh.arkpets.Const.appVersion;
 
 
@@ -44,8 +44,8 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
 
     @Override
     protected URL getTargetURL() {
-        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
-                .addQuery("type", "queryVersion")
+        return new StringUtils.URLStringBuilder(urlOfficialApi)
+                .addPath("version")
                 .addQuery("cliVer", appVersion.toString())
                 .addQuery("source", sourceStr)
                 .toURL();
