@@ -29,7 +29,11 @@ public class MutterHWndCtrlFactory extends HWndCtrlFactory{
             dBusInterface = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell/Extensions/ArkPets", MutterInterface.class);
             Logger.info("System", "GNOME Integration extension version " + dBusInterface.Version());
         } catch (DBusException e) {
+            closeConnection();
             throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            closeConnection();
+            throw e;
         }
     }
 
@@ -54,7 +58,7 @@ public class MutterHWndCtrlFactory extends HWndCtrlFactory{
     @Override
     public HWndCtrl getTopmostWindow() {
         List<MutterInterface.DetailsStruct> list = dBusInterface.List();
-        return new MutterHWndCtrl(list.get(list.size() - 1));
+        return list.isEmpty() ? null : new MutterHWndCtrl(list.get(list.size() - 1));
     }
 
     @Override
@@ -83,11 +87,31 @@ public class MutterHWndCtrlFactory extends HWndCtrlFactory{
         return false;
     }
 
+    private static void closeConnection() {
+        if (dBusConnection != null) {
+            try {
+                dBusConnection.close();
+            } catch (IOException e) {
+                Logger.error("System", "Failed to close DBus connection.", e);
+            }
+        }
+    }
+
     private static void checkAndEnablePlugin() throws DBusException {
         MutterPluginInterface pi = dBusConnection.getRemoteObject("org.gnome.Shell", "/org/gnome/Shell", MutterPluginInterface.class);
         Map<String, Variant<?>> ext = pi.GetExtensionInfo(Const.gnomePluginName);
         if (ext.isEmpty()) throw new RuntimeException("GNOME Integration plugin not found.");
-        Boolean enable = (Boolean) ext.get("enabled").getValue();
+
+        // GNOME shell before v46 doesn't have the "enabled" property
+        // Refer: https://gitlab.gnome.org/GNOME/gnome-shell/-/blob/46.0/js/misc/extensionUtils.js#L33
+        Variant<?> enabledVariant = ext.get("enabled");
+        boolean enable;
+        if (enabledVariant != null) {
+            enable = (Boolean) enabledVariant.getValue();
+        } else {
+            Variant<?> stateVariant = ext.get("state");
+            enable = stateVariant != null && ((Double) stateVariant.getValue()) == 1.0;
+        }
         if (!enable) {
             Logger.info("System","Enabling GNOME Integration plugin");
             boolean result = pi.EnableExtension(Const.gnomePluginName);
