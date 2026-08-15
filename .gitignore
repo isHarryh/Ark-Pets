@@ -9,6 +9,7 @@
 !/.github/
 
 # Exclude generated files
+.DS_Store
 bin/
 build/
 cache/

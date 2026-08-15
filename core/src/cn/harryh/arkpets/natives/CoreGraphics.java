@@ -31,6 +31,10 @@ public interface CoreGraphics extends Library {
 
     CFDictionaryRef CGSessionCopyCurrentDictionary();
 
+    int CGMainDisplayID();
+
+    CGRect.ByValue CGDisplayBounds(int display);
+
 
     @Structure.FieldOrder({"origin", "size"})
     class CGRect extends Structure {
@@ -48,6 +52,9 @@ public interface CoreGraphics extends Library {
     class CGPoint extends Structure {
         public double x;
         public double y;
+
+        public static class ByValue extends CGPoint implements Structure.ByValue {
+        }
     }
 
     @Structure.FieldOrder({"width", "height"})

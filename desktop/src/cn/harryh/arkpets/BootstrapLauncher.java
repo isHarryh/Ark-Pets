@@ -4,7 +4,6 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
-import cn.harryh.arkpets.guitasks.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
@@ -109,13 +108,6 @@ public class BootstrapLauncher {
                 Titlebar.forceUiStyle = addition.toLowerCase();
             }
         };
-        // Remove NVIDIA settings when uninstall on windows.
-        new ArgPending("--remove-nvidia", ArgPending.argCache) {
-            @Override
-            protected void process(String command, String addition) {
-                new WinGraphicsEnvCheckTask().removeNvidiaSettings();
-            }
-        };
         // Disable libdecor to avoid glfw and javafx problem on linux.
         if(isLinux) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
         // Java FX bootstrap
@@ -162,6 +154,7 @@ public class BootstrapLauncher {
             // Configure window layout
             config.setDecorated(WindowSystem.needDecorated());
             config.setResizable(WindowSystem.needResize());
+            config.setWindowSizeLimits(1, 1, 65535, 65535);
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);
             // Configure window title

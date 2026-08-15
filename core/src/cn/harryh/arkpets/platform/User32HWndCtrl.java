@@ -3,16 +3,10 @@
  */
 package cn.harryh.arkpets.platform;
 
+import cn.harryh.arkpets.natives.TaskbarList;
 import com.sun.jna.Native;
-import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.COM.COMUtils;
-import com.sun.jna.platform.win32.COM.Unknown;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.platform.win32.WinNT.HRESULT;
-import com.sun.jna.ptr.PointerByReference;
-
-import java.util.ArrayList;
 
 
 public class User32HWndCtrl extends HWndCtrl {
@@ -45,18 +39,6 @@ public class User32HWndCtrl extends HWndCtrl {
     protected User32HWndCtrl(HWND hWnd) {
         super(getWindowText(hWnd), getWindowRect(hWnd));
         this.hWnd = hWnd;
-    }
-
-    /** Finds a window.
-     * @param className The class name of the window.
-     * @param windowName The title of the window.
-     */
-    public static HWndCtrl find(String className, String windowName) {
-        HWND hwnd = User32.INSTANCE.FindWindow(className, windowName);
-        if (hwnd != null) {
-            return new User32HWndCtrl(hwnd);
-        }
-        return null;
     }
 
     @Override
@@ -135,43 +117,6 @@ public class User32HWndCtrl extends HWndCtrl {
         User32.INSTANCE.SendMessage(hWnd, wmsg, new WinDef.WPARAM(wParam), new WinDef.LPARAM(lParam));
     }
 
-    /** Gets the current list of windows.
-     * @param only_visible Whether exclude the invisible window.
-     * @return An ArrayList consists of HWndCtrls.
-     */
-    public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible) {
-        ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd)))
-                windowList.add(new User32HWndCtrl(hWnd));
-            return true;
-        }, null);
-        return windowList;
-    }
-
-    /** Gets the current list of windows. (Advanced)
-     * @param only_visible Whether exclude the invisible window.
-     * @param exclude_ws_ex Exclude the specific window-style-extra.
-     * @return An ArrayList consists of HWndCtrls.
-     */
-    public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible, long exclude_ws_ex) {
-        ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
-        User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd))
-                    && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & exclude_ws_ex) != exclude_ws_ex)
-                windowList.add(new User32HWndCtrl(hWnd));
-            return true;
-        }, null);
-        return windowList;
-    }
-
-    public static MousePoint getMousePos() {
-        WinDef.POINT point = new WinDef.POINT();
-        boolean result = User32.INSTANCE.GetCursorPos(point);
-        if (!result) return new MousePoint(0, 0);
-        return new MousePoint(point.x, point.y);
-    }
-
     /** Gets the value of the window's extended styles.
      * @return EX_STYLE value.
      * @see WinUser
@@ -189,13 +134,6 @@ public class User32HWndCtrl extends HWndCtrl {
         User32.INSTANCE.SetWindowPos(hWnd, null, 0, 0, 0, 0, WinUser.SWP_NOSIZE | WinUser.SWP_NOMOVE | WinUser.SWP_NOZORDER | WinUser.SWP_FRAMECHANGED);
     }
 
-    /** Gets the topmost window.
-     * @return The topmost window's HWndCtrl.
-     */
-    protected static User32HWndCtrl getTopmostWindow() {
-        return new User32HWndCtrl(new HWND(Pointer.createConstant(-1)));
-    }
-
     protected static String getWindowText(HWND hWnd) {
         char[] text = new char[1024];
         User32.INSTANCE.GetWindowText(hWnd, text, 1024);
@@ -208,7 +146,7 @@ public class User32HWndCtrl extends HWndCtrl {
         return new WindowRect(rect.top, rect.bottom, rect.left, rect.right);
     }
 
-    protected static boolean isVisible(HWND hWnd) {
+    static boolean isVisible(HWND hWnd) {
         try {
             if (!User32.INSTANCE.IsWindowVisible(hWnd) || !User32.INSTANCE.IsWindowEnabled(hWnd))
                 return false;
@@ -239,67 +177,5 @@ public class User32HWndCtrl extends HWndCtrl {
     public String toString() {
         return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight +
                 " ex-style=0x" + Integer.toHexString(getWindowExStyle());
-    }
-
-
-    /** The Windows taskbar controller that implements the ITaskbarList COM interface.
-     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-itaskbarlist">ITaskbarList</a>
-     */
-    public static class TaskbarList extends Unknown {
-        private static final Guid.GUID CLSID = new Guid.GUID("{56FDF344-FD6D-11d0-958A-006097C9A090}");
-        private static final Guid.GUID IID = new Guid.GUID("{56FDF342-FD6D-11d0-958A-006097C9A090}");
-        private boolean initialized = false;
-
-        private TaskbarList(Pointer ptr) {
-            super(ptr);
-        }
-
-        public static TaskbarList create() {
-            Ole32.INSTANCE.CoInitialize(null);
-            PointerByReference p = new PointerByReference();
-            HRESULT hr = Ole32.INSTANCE.CoCreateInstance(CLSID, Pointer.NULL, WTypes.CLSCTX_INPROC_SERVER, IID, p);
-            COMUtils.checkRC(hr);
-            return new TaskbarList(p.getValue());
-        }
-
-        public static TaskbarList createAndInit() {
-            TaskbarList taskbarList = create();
-            taskbarList.HrInit();
-            return taskbarList;
-        }
-
-        /** Initializes the taskbar list object.
-         * This method must be called before any other ITaskbarList methods can be called.
-         */
-        public void HrInit() {
-            int res = this._invokeNativeInt(3, new Object[]{this.getPointer()});
-            COMUtils.checkRC(new HRESULT(res));
-            initialized = true;
-        }
-
-        /** Adds an item to the taskbar.
-         * @param hwnd The handle of the window to be added.
-         */
-        public void AddTab(HWND hwnd) {
-            if (!initialized)
-                throw new IllegalStateException("TaskbarList not initialized.");
-            int res = this._invokeNativeInt(4, new Object[]{this.getPointer(), hwnd});
-            COMUtils.checkRC(new HRESULT(res));
-        }
-
-        /** Deletes an item from the taskbar.
-         * @param hwnd The handle of the window to be deleted.
-         */
-        public void DeleteTab(HWND hwnd) {
-            if (!initialized)
-                throw new IllegalStateException("TaskbarList not initialized.");
-            int res = this._invokeNativeInt(5, new Object[]{this.getPointer(), hwnd});
-            COMUtils.checkRC(new HRESULT(res));
-        }
-
-        @Override
-        public String toString() {
-            return "TaskbarList{" + "pointer=" + this.getPointer() + '}';
-        }
     }
 }

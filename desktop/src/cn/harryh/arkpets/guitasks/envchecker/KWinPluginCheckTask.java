@@ -1,7 +1,7 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.natives.KWinPluginInterface;
+import cn.harryh.arkpets.rpc.KWinPluginInterface;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
@@ -61,7 +61,7 @@ public class KWinPluginCheckTask extends EnvCheckTask {
             return false;
         }
         try {
-            String result = IOUtils.CommandUtil.runCommand("plasmashell --version", null, null);
+            String result = IOUtils.CommandUtil.runCommand(new String[] {"plasmashell", "--version"}, null, null);
             Pattern pattern = Pattern.compile("plasmashell (\\d+)");
             if (result == null) return false;
             Matcher matcher = pattern.matcher(result);

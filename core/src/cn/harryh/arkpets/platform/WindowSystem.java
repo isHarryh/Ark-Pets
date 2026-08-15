@@ -5,9 +5,7 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Platform;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,6 +19,7 @@ public enum WindowSystem {
     NULL;
 
     private static WindowSystem PLATFORM = null;
+    private static HWndCtrlFactory factory;
 
     public static WindowSystem detectWindowSystem() {
         if (Const.isWindows) {
@@ -33,10 +32,11 @@ public enum WindowSystem {
             if (desktop != null && type != null) {
                 if (type.equals("x11")) {
                     return WindowSystem.X11;
-                } else if (type.equals("wayland") && desktop.equals("GNOME")) {
-                    return WindowSystem.MUTTER;
-                } else if (type.equals("wayland") && desktop.equals("KDE")) {
-                    return WindowSystem.KWIN;
+                } else if (type.equals("wayland")) {
+                    for (String desktopName : desktop.split(":")) {
+                        if (desktopName.equals("GNOME")) return WindowSystem.MUTTER;
+                        if (desktopName.equals("KDE")) return WindowSystem.KWIN;
+                    }
                 }
             } else {
                 return WindowSystem.X11;
@@ -55,10 +55,12 @@ public enum WindowSystem {
         }
         Logger.info("System", "Using " + PLATFORM.toString() + " Window System");
         switch (PLATFORM) {
-            case MUTTER -> MutterHWndCtrl.init();
-            case KWIN -> KWinHWndCtrl.init();
-            case X11 -> X11HWndCtrl.init();
-            case QUARTZ -> QuartzHWndCtrl.init();
+            case USER32 -> factory = new User32HWndCtrlFactory();
+            case MUTTER -> factory = new MutterHWndCtrlFactory();
+            case KWIN -> factory = new KWinHWndCtrlFactory();
+            case X11 -> factory = new X11HWndCtrlFactory();
+            case QUARTZ -> factory = new QuartzHWndCtrlFactory();
+            case NULL -> factory = new NullHWndCtrlFactory();
         }
     }
 
@@ -75,26 +77,7 @@ public enum WindowSystem {
      * @return The HWndCtrl, which may be null indicates not found.
      */
     public static HWndCtrl findWindow(String className, String windowText) {
-        switch (PLATFORM) {
-            case USER32 -> {
-                return User32HWndCtrl.find(className, windowText);
-            }
-            case MUTTER -> {
-                return MutterHWndCtrl.find(className, windowText);
-            }
-            case KWIN -> {
-                return KWinHWndCtrl.find(className, windowText);
-            }
-            case X11 -> {
-                return X11HWndCtrl.find(className, windowText);
-            }
-            case QUARTZ -> {
-                return QuartzHWndCtrl.find(className, windowText);
-            }
-            default -> {
-                return NullHWndCtrl.find(className, windowText);
-            }
-        }
+        return factory.findWindow(className, windowText);
     }
 
     /** Gets the list of current windows.
@@ -102,105 +85,40 @@ public enum WindowSystem {
      * @return An ArrayList consists of HWndCtrls.
      */
     public static List<? extends HWndCtrl> getWindowList(boolean onlyVisible) {
-        switch (PLATFORM) {
-            case USER32 -> {
-                return User32HWndCtrl.getWindowList(onlyVisible);
-            }
-            case MUTTER -> {
-                return MutterHWndCtrl.getWindowList(onlyVisible);
-            }
-            case KWIN -> {
-                return KWinHWndCtrl.getWindowList(onlyVisible);
-            }
-            case X11 -> {
-                return X11HWndCtrl.getWindowList(onlyVisible);
-            }
-            case QUARTZ -> {
-                return QuartzHWndCtrl.getWindowList(onlyVisible);
-            }
-            default -> {
-                return new ArrayList<>();
-            }
-        }
+        return factory.getWindowList(onlyVisible);
     }
 
     /** Gets the topmost window.
      * @return The topmost window's HWndCtrl.
      */
     public static HWndCtrl getTopmostWindow() {
-        switch (PLATFORM) {
-            case USER32 -> {
-                return User32HWndCtrl.getTopmostWindow();
-            }
-            case MUTTER -> {
-                return MutterHWndCtrl.getTopmostWindow();
-            }
-            case KWIN -> {
-                return KWinHWndCtrl.getTopmostWindow();
-            }
-            case X11 -> {
-                return X11HWndCtrl.getTopmost();
-            }
-            default -> {
-                return new NullHWndCtrl();
-            }
-        }
+        return factory.getTopmostWindow();
     }
 
     /** Gets the mouse position.
      * @return The MousePoint record.
      */
     public static HWndCtrl.MousePoint getMousePos() {
-        switch (PLATFORM) {
-            case USER32 -> {
-                return User32HWndCtrl.getMousePos();
-            }
-            default -> {
-                return new HWndCtrl.MousePoint(0, 0);
-            }
-        }
+        return factory.getMousePos();
     }
 
     /** Frees all the resources.
      */
     public static void free() {
-        switch (PLATFORM) {
-            case MUTTER -> MutterHWndCtrl.free();
-            case KWIN -> KWinHWndCtrl.free();
-            case X11 -> X11HWndCtrl.free();
-            case QUARTZ -> QuartzHWndCtrl.free();
-        }
+        if (factory == null) return;
+        factory.free();
+        factory = null;
     }
 
     /** Return current WindowSystem should enable resize.
      */
     public static boolean needResize() {
-        switch (PLATFORM) {
-            case X11, MUTTER, KWIN -> {
-                return true;
-            }
-            default -> {
-                return false;
-            }
-        }
+        return factory.needResize();
     }
 
     /** Return current WindowSystem should enable decoration.
      */
     public static boolean needDecorated() {
-        return PLATFORM == NULL;
-    }
-
-    /** Return current WindowSystem information request rate.
-     */
-    public static int getRequestRate() {
-        switch (PLATFORM) {
-            case MUTTER,KWIN,X11,QUARTZ -> { // IPC
-                return 6;
-            }
-            default -> {
-                return 4;
-            }
-        }
+        return factory.needDecorated();
     }
 }

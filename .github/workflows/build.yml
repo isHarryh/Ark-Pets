@@ -1,28 +1,25 @@
 name: Build
 
-on:
-  push:
-    tags:
-      - 'v*'
-    branches:
-      - 'v*'
-  pull_request:
-    tags:
-      - 'v*'
-    branches:
-      - 'v*'
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
-    runs-on: windows-latest
-    env:
-      ARTIFACT_NAME: ArkPets
+    runs-on: ${{ matrix.target.os }}
+    strategy:
+      matrix:
+        target: [
+          { os: windows-latest, dist-ext: exe },
+          { os: macos-26, dist-ext: dmg },
+          { os: macos-latest, dist-ext: dmg },
+          { os: ubuntu-22.04, dist-ext: AppImage },
+          { os: ubuntu-latest, dist-ext: AppImage }
+        ]
     steps:
-      - name: Show meta info
+      - name: Check Ref
         run: |
-          echo "Current ref: ${{ github.ref }}"
+          echo "Current ref: ${{  github.ref  }}"
           echo "Current sha: ${{ github.sha }}"
+          echo "Current OS: ${{ matrix.target.os }}"
 
       - name: Checkout repo
         uses: actions/checkout@v6
@@ -32,45 +29,54 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '8.14.3'
+          gradle-version: 8.14.3
 
       - name: Setup Inno Setup
+        if: ${{ startsWith(matrix.target.os,'windows') }}
         run: choco install innosetup --no-progress
 
-      - name: Execute gradle tasks
+      - name: Setup Homebrew
+        if: ${{ startsWith(matrix.target.os,'macos') }}
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Setup create-dmg
+        if: ${{ startsWith(matrix.target.os,'macos') }}
+        run: brew install create-dmg
+
+      - name: Setup AppImage tools
+        if: ${{ startsWith(matrix.target.os,'ubuntu') }}
+        run: |
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O appimagetool
+          wget "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20250213-2/linuxdeploy-x86_64.AppImage" -O linuxdeploy
+          chmod +x appimagetool linuxdeploy
+          sudo chown root:root appimagetool linuxdeploy
+          sudo mv appimagetool linuxdeploy /usr/bin/
+
+      - name: Execute Gradle Tasks
         run: gradle clean distAll
 
-      - name: Upload exe
+      - name: Upload ${{ matrix.target.dist-ext }}
         uses: actions/upload-artifact@v6
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ${{ env.ARTIFACT_NAME }}-Setup.exe
-          path: desktop/build/dist/*.exe
+          name: ArkPets-${{ matrix.target.os }}.${{ matrix.target.dist-ext }}
+          path: desktop/build/dist/*.${{ matrix.target.dist-ext }}
 
-      - name: Upload zip
+      - name: Upload Zip
         uses: actions/upload-artifact@v6
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ${{ env.ARTIFACT_NAME }}.zip
+          name: ArkPets-${{ matrix.target.os }}.zip
           path: desktop/build/dist/*.zip
 
-      - name: Upload jar
+      - name: Upload Jar
         uses: actions/upload-artifact@v6
+        if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
         with:
-          name: ${{ env.ARTIFACT_NAME }}.jar
+          name: ArkPets-${{ matrix.target.os }}.jar
           path: desktop/build/dist/*.jar
-
-# DUE TO JLINK ISSUES, AUTO RELEASE WAS TEMPORARILY BANNED.
-#
-#      - name: Publish release
-#        uses: marvinpinto/action-automatic-releases@latest
-#        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-#        with:
-#          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-#          automatic_release_tag: "${{  github.ref_name  }}"
-#          draft: false
-#          prerelease: false
-#          title: "${{  github.ref_name  }}"
-#          files: desktop/build/dist/*

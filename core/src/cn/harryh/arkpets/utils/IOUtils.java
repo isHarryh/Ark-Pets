@@ -302,15 +302,15 @@ public class IOUtils {
     public static class CommandUtil {
         /**
          * Run a command and get the output.
-         * @param command The command will run.
+         * @param cmdargs The command will run.
          * @param env The environment variable.
          * @param workdir The working directory.
          * @throws IOException If I/O error occurs.
          * @return The command output,Return null if failed.
          */
-        public static String runCommand(String command, String[] env, File workdir) throws IOException {
+        public static String runCommand(String[] cmdargs, String[] env, File workdir) throws IOException {
             Runtime runtime = Runtime.getRuntime();
-            Process process = runtime.exec(command, env, workdir);
+            Process process = runtime.exec(cmdargs, env, workdir);
             try {
                 process.waitFor();
             } catch (InterruptedException ignore) {

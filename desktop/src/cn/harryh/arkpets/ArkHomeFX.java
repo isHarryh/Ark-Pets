@@ -15,6 +15,7 @@ import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -138,6 +139,8 @@ public class ArkHomeFX extends Application {
             // Post initialization.
             rootModule.configNetwork();
             rootModule.moduleWrapperComposer.activate(0);
+            if (isMac)
+                GuiPrefabs.disableNSWindowRestore(GuiPrefabs.getStageNativeHandle(stage));
 
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);
@@ -160,26 +163,28 @@ public class ArkHomeFX extends Application {
 
     public void popBrowser(URI uri) {
         Logger.info("Launcher", "Request to open URI: " + uri);
-        try {
-            if ("file".equalsIgnoreCase(uri.getScheme())) {
-                // File URI
-                File localFile = new File(uri);
-                if (!localFile.isDirectory())
-                    throw new IOException("Given file URI should be a directory");
-                SwingUtilities.invokeLater(() -> {
-                    try {
-                        Desktop.getDesktop().open(localFile);
-                    } catch (IOException e) {
-                        Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
-                    }
-                });
-            } else {
-                // Other types of URI (like HTTP/HTTPS)
-                Desktop.getDesktop().browse(uri);
+        new Thread(() -> {
+            try {
+                if ("file".equalsIgnoreCase(uri.getScheme())) {
+                    // File URI
+                    File localFile = new File(uri);
+                    if (!localFile.isDirectory())
+                        throw new IOException("Given file URI should be a directory");
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            Desktop.getDesktop().open(localFile);
+                        } catch (IOException e) {
+                            Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
+                        }
+                    });
+                } else {
+                    // Other types of URI (like HTTP/HTTPS)
+                    Desktop.getDesktop().browse(uri);
+                }
+            } catch (IOException e) {
+                Logger.error("Launcher", "Failed to open the URI, details see below.", e);
             }
-        } catch (IOException e) {
-            Logger.error("Launcher", "Failed to open the URI, details see below.", e);
-        }
+        }).start();
     }
 
     public void popBrowser(String uri) {

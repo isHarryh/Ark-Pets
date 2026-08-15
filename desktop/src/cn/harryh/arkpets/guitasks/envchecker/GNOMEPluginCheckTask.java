@@ -1,7 +1,7 @@
 package cn.harryh.arkpets.guitasks.envchecker;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.natives.MutterPluginInterface;
+import cn.harryh.arkpets.rpc.MutterPluginInterface;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import org.freedesktop.dbus.connections.impl.DBusConnection;
