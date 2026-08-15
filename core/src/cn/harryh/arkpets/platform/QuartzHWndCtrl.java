@@ -65,16 +65,25 @@ public class QuartzHWndCtrl extends HWndCtrl {
         Memory carr = new Memory(Native.getNativeSize(Integer.class));
         carr.write(0,new int[] {(int) windowID},0,1);
         CFArrayRef arr = CoreFoundation.INSTANCE.CFArrayCreate(null,carr,index,null);
-        if (arr != null) {
-            CFArrayRef win = CoreGraphics.INSTANCE.CGWindowListCreateDescriptionFromArray(arr);
-            arr.release();
-            CFDictionaryRef dict = new CFDictionaryRef(win.getValueAtIndex(0));
-            hwnd=new QuartzHWndCtrl(dict);
-            win.release();
-            carr.close();
+        CFArrayRef win = null;
+        try {
+            if (arr == null) {
+                return new NullHWndCtrl();
+            }
+            win = CoreGraphics.INSTANCE.CGWindowListCreateDescriptionFromArray(arr);
+            if (win == null || win.getCount() == 0) {
+                return new NullHWndCtrl();
+            }
+            Pointer first = win.getValueAtIndex(0);
+            if (first == null) {
+                return new NullHWndCtrl();
+            }
+            hwnd = new QuartzHWndCtrl(new CFDictionaryRef(first));
             return hwnd;
-        } else {
-            return new NullHWndCtrl();
+        } finally {
+            if (arr != null) arr.release();
+            if (win != null) win.release();
+            carr.close();
         }
     }
 
