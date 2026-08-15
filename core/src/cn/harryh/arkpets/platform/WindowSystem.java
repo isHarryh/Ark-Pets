@@ -32,10 +32,11 @@ public enum WindowSystem {
             if (desktop != null && type != null) {
                 if (type.equals("x11")) {
                     return WindowSystem.X11;
-                } else if (type.equals("wayland") && desktop.equals("GNOME")) {
-                    return WindowSystem.MUTTER;
-                } else if (type.equals("wayland") && desktop.equals("KDE")) {
-                    return WindowSystem.KWIN;
+                } else if (type.equals("wayland")) {
+                    for (String desktopName : desktop.split(":")) {
+                        if (desktopName.equals("GNOME")) return WindowSystem.MUTTER;
+                        if (desktopName.equals("KDE")) return WindowSystem.KWIN;
+                    }
                 }
             } else {
                 return WindowSystem.X11;

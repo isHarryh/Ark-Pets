@@ -26,7 +26,11 @@ public class KWinHWndCtrlFactory extends HWndCtrlFactory{
             dBusInterface = dBusConnection.getRemoteObject("org.kde.KWin", "/ArkPets", KWinInterface.class);
             Logger.info("System", "KDE Integration plugin version " + dBusInterface.Version());
         } catch (DBusException e) {
+            closeConnection();
             throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            closeConnection();
+            throw e;
         }
     }
 
@@ -50,7 +54,7 @@ public class KWinHWndCtrlFactory extends HWndCtrlFactory{
     @Override
     public HWndCtrl getTopmostWindow() {
         List<KWinInterface.DetailsStruct> list = dBusInterface.List();
-        return new KWinHWndCtrl(list.get(list.size() - 1));
+        return list.isEmpty() ? null : new KWinHWndCtrl(list.get(list.size() - 1));
     }
 
     @Override
@@ -77,6 +81,16 @@ public class KWinHWndCtrlFactory extends HWndCtrlFactory{
     @Override
     public boolean needDecorated() {
         return false;
+    }
+
+    private static void closeConnection() {
+        if (dBusConnection != null) {
+            try {
+                dBusConnection.close();
+            } catch (IOException e) {
+                Logger.error("System", "Failed to close DBus connection.", e);
+            }
+        }
     }
 
     private static void checkAndEnablePlugin() throws DBusException {
