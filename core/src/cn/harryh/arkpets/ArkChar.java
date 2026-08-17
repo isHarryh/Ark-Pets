@@ -106,11 +106,12 @@ public class ArkChar {
                 SkeletonLoader skeletonLoader = new SkeletonLoader(skelFile);
                 Logger.info("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
                 if (skeletonLoader.needFix()) {
+                    Logger.warn("Character", "Skeleton parsing compatibility issue detected, fixing");
                     skeletonLoader = skeletonLoader.fixed();
                     Logger.warn("Character", "Skeleton fixed");
                 }
                 skeletonData = skeletonLoader.loadSkeletonDataWith(atlasFile, scale * skelBaseScale, config.render_enable_mipmap);
-                Logger.debug("Character", "Skeleton loaded with Spine version " + skeletonLoader.version);
+                Logger.info("Character", "Skeleton loaded with Spine version " + skeletonLoader.version);
             } catch (Exception e) {
                 Logger.error("Character", "Failed to load skeleton, details see below.", e);
                 throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");

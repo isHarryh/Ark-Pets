@@ -16,11 +16,9 @@ import com.esotericsoftware.spine.SkeletonJson;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 
@@ -120,13 +118,16 @@ public class SkeletonLoader {
     /** Checks if the skeleton file needs to be fixed.
      * @return True if it needs to be fixed; false otherwise.
      * @see <a href="https://github.com/isHarryh/Ark-Pets/issues/150">ArkPets Issue #150</a>
+     * @see <a href="https://github.com/isHarryh/Ark-Pets/issues/160">ArkPets Issue #160</a>
      */
     public boolean needFix() {
         if (isJson) {
             return false;
         }
         for (String s : strings) {
-            if (s.matches(".*\\s")) {
+            byte[] utf8Bytes = s.getBytes(StandardCharsets.UTF_8);
+            byte[] defaultCharsetBytes = s.getBytes(Charset.defaultCharset());
+            if (s.matches(".*\\s") || !Arrays.equals(utf8Bytes, defaultCharsetBytes)) {
                 return true;
             }
         }
@@ -160,9 +161,7 @@ public class SkeletonLoader {
                 writeString(os, audio_path != null ? audio_path : "");
             }
             // Write strings pool
-            List<String> fixedStrings = strings.stream()
-                    .map(s -> s.replaceAll("\\s+$", ""))
-                    .toList();
+            List<String> fixedStrings = strings.stream().map(SkeletonLoader::fixString).toList();
             writeVarInt(os, fixedStrings.size());
             for (String s : fixedStrings) {
                 writeString(os, s);
@@ -219,6 +218,21 @@ public class SkeletonLoader {
             }
         }
         return loadSkeletonDataWith(new TextureAtlas(atlasData), scale);
+    }
+
+    protected static String fixString(String s) {
+        // Remove trailing whitespaces, see ArkPets Issue #150.
+        // https://github.com/isHarryh/Ark-Pets/issues/150
+        s = s.replaceAll("\\s+$", "");
+
+        // Re-encode non-ASCII characters into the default charset, see ArkPets Issue #160.
+        // https://github.com/isHarryh/Ark-Pets/issues/160
+        byte[] utf8Bytes = s.getBytes(StandardCharsets.UTF_8);
+        byte[] defaultCharsetBytes = s.getBytes(Charset.defaultCharset());
+        if (!Arrays.equals(utf8Bytes, defaultCharsetBytes))
+            s = new String(utf8Bytes, Charset.defaultCharset());
+
+        return s;
     }
 
     protected static boolean isJson(FileHandle file) throws IOException {
