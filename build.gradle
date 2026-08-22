@@ -28,7 +28,7 @@ allprojects {
         appYearCurrent = new Date().format("yyyy", TimeZone.getTimeZone("GMT+0:00"))
         appCopyright = "Copyright (c) ${appYearBegin}-${appYearCurrent} ${appAuthor}" as GStringImpl
         // Prefabs
-        gdxVersion = "1.11.0"
+        gdxVersion = "1.14.2"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.15"
     }
@@ -45,7 +45,7 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         // libGDX Desktop
-        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.amilego.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
 
@@ -55,9 +55,9 @@ project(":core") {
         // Spine Runtime
         api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
         // libGDX
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
-        api "com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"
+        api "com.amilego.gdx:gdx:$gdxVersion"
+        api "com.amilego.gdx:gdx-backend-lwjgl3:$gdxVersion"
+        api "com.amilego.gdx:gdx-lwjgl3-angle:$gdxVersion"
         // JNA
         api "net.java.dev.jna:jna:$jnaVersion"
         api "net.java.dev.jna:jna-platform:$jnaVersion"
