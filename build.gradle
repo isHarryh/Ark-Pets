@@ -28,14 +28,13 @@ allprojects {
         appYearCurrent = new Date().format("yyyy", TimeZone.getTimeZone("GMT+0:00"))
         appCopyright = "Copyright (c) ${appYearBegin}-${appYearCurrent} ${appAuthor}" as GStringImpl
         // Prefabs
-        gdxVersion = "1.14.2-SNAPSHOT"
+        gdxVersion = "1.14.2"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.15"
     }
 
     repositories {
         maven { url = "https://maven.aliyun.com/repository/public/" } // Aliyun Mirrors
-        maven { url = "https://central.sonatype.com/repository/maven-snapshots/"}
         mavenLocal()
         mavenCentral()
     }
