@@ -134,6 +134,7 @@ public class ArkHomeFX extends Application {
             rootModule.configNetwork();
             rootModule.moduleWrapperComposer.activate(0);
             SentryHelper.setEnable(config.enable_telemetry);
+            SentryHelper.consumePendingWal();
 
             Logger.info("Launcher", "Finished starting");
             SentryHelper.reportApp(false);
@@ -150,6 +151,7 @@ public class ArkHomeFX extends Application {
         ProcessPool.getInstance().shutdown();
         Logger.debug("Launcher", "Finished stopping");
         SentryHelper.reportApp(true);
+        SentryHelper.consumePendingWal();
     }
 
     public void popLoading(EventHandler<ActionEvent> handler) {

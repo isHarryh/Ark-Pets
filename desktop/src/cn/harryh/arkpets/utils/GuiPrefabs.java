@@ -43,6 +43,8 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -441,9 +443,9 @@ public class GuiPrefabs {
                 Logger.debug("ErrorDialog", "Ready to export logs");
                 List<String> pathList;
                 if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
-                    pathList = CrashUtils.collectLogs(exception);
+                    pathList = collectLogFiles(exception.getProcessId());
                 } else {
-                    pathList = CrashUtils.collectLogs(null);
+                    pathList = collectLogFiles(null);
                 }
 
                 if (pathList.isEmpty()) {
@@ -475,14 +477,12 @@ public class GuiPrefabs {
             uploadButton.setOnAction(ev -> {
                 Logger.debug("ErrorDialog", "Ready to upload logs");
                 List<String> pathList;
-                Throwable uploadException = e;
                 if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
-                    pathList = CrashUtils.collectLogs(exception);
-                    uploadException = exception.getCause() != null ? exception.getCause() : e;
+                    pathList = collectLogFiles(exception.getProcessId());
                 } else {
-                    pathList = CrashUtils.collectLogs(null);
+                    pathList = collectLogFiles(null);
                 }
-                SentryHelper.uploadLog(uploadException, pathList);
+                SentryHelper.captureLogFeedback(pathList);
                 disposeDialog(dialog);
             });
 
@@ -552,6 +552,21 @@ public class GuiPrefabs {
                 h3.setText("压缩文件相关错误。可能是文件不完整或已损坏，请稍后重试。");
             }
             return dialog;
+        }
+
+        private static List<String> collectLogFiles(Long coreProcessId) {
+            List<String> pathList = new ArrayList<>();
+            pathList.add("%s.%d.log".formatted(Const.LogConfig.logDesktopPath, ProcessHandle.current().pid()));
+            if (coreProcessId != null) {
+                pathList.add("%s.%d.log".formatted(Const.LogConfig.logCorePath, coreProcessId));
+                pathList.add("hs_err_pid%d.log".formatted(coreProcessId));
+            }
+            pathList.removeIf(logFile -> Files.notExists(Path.of(logFile)));
+            if (pathList.isEmpty()) {
+                Logger.info("ErrorDialog", "No log file to collect");
+                return List.of();
+            }
+            return pathList;
         }
 
         public static void attachAction(JFXDialog dialog, Node action, int index) {

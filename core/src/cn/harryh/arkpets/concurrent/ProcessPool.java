@@ -3,9 +3,10 @@
  */
 package cn.harryh.arkpets.concurrent;
 
-import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.utils.CrashUtils;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.wal.WalExceptionCodec;
+import cn.harryh.arkpets.wal.WalReader;
+import cn.harryh.arkpets.wal.WalRecord;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,13 +120,15 @@ public final class ProcessPool implements Executor {
         }
 
         private Exception getProcessException() {
-            Exception e = null;
-            try {
-                e = CrashUtils.readException(new File(Const.LogConfig.logDir, Const.LogConfig.logCrashPattern.formatted(processId)));
+            try (WalReader reader = WalReader.open(processId)) {
+                for (WalRecord record : reader.readAll()) {
+                    if (record.type().equals(WalExceptionCodec.INSTANCE.type()))
+                        return WalExceptionCodec.INSTANCE.decode(record.payload());
+                }
             } catch (IOException ex) {
                 Logger.warn("System", "Failed to read crash exception for process " + processId);
             }
-            return e;
+            return null;
         }
     }
 }
