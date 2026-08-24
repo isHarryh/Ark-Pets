@@ -61,7 +61,6 @@ public final class Const {
     // Paths of static files and internal files
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
-    public static final String configSentry     = "/SentryConfig.json";
     public static final String iconFilePng      = "/icons/icon.png";
     public static final String fontDirInternal  = "/fonts/";
     public static final String pass1VShader     = "shaders/PlainVertex.glsl";

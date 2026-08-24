@@ -1,40 +1,30 @@
 package cn.harryh.arkpets.utils;
 
-import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.wal.*;
-import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson2.annotation.JSONField;
 import io.sentry.*;
 import io.sentry.logger.SentryLogParameters;
 import io.sentry.protocol.Feedback;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-
-import static cn.harryh.arkpets.Const.charsetDefault;
 
 
 public class SentryHelper {
-    private static final URL configDefault = Objects.requireNonNull(ArkConfig.class.getResource(Const.configSentry));
-    private static SentryConfig config;
     private static boolean enable = false;
 
     public static void init() {
-        config = getDefaultConfig();
         Sentry.init(options -> {
-            if (config != null && config.dsn != null) {
-                options.setDsn(config.dsn);
-                options.setEnvironment(config.env);
-            } else {
-                Logger.warn("System", "Failed to load Sentry Config");
-                options.setEnabled(false);
-            }
+            // Set -Dsentry.dsn Java option or SENTRY_DSN environment variable to customize DSN.
+            // If not set, telemetry features will be unavailable.
+            options.setEnableExternalConfiguration(true);
+
+            // Set -Dsentry.environment=production in releases to switch telemetry environment.
+            // If not changed, "dev" will be used as the environment.
+            options.setEnvironment("dev");
+
             options.setSendDefaultPii(true);
             options.setTracesSampleRate(1.0);
             options.getLogs().setEnabled(true);
@@ -140,24 +130,5 @@ public class SentryHelper {
 
     public static void setEnable(boolean enable) {
         SentryHelper.enable = enable;
-    }
-
-    private static SentryConfig getDefaultConfig() {
-        try (InputStream inputStream = configDefault.openStream()) {
-            return Objects.requireNonNull(
-                    JSONObject.parseObject(new String(inputStream.readAllBytes(), charsetDefault), SentryConfig.class),
-                    "JSON parsing returns null."
-            );
-        } catch (IOException e) {
-            Logger.error("Config", "Failed to get the sentry config, details see below.", e);
-        }
-        return null;
-    }
-
-    private static class SentryConfig {
-        @JSONField
-        public String dsn;
-        @JSONField(defaultValue = "production")
-        public String env;
     }
 }
