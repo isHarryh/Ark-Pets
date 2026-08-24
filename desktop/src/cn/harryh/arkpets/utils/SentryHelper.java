@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 public class SentryHelper {
@@ -52,9 +53,8 @@ public class SentryHelper {
                 SentryLogParameters.create(
                         new SentryLongDate(endTimeMillis * 1_000_000L),
                         SentryAttributes.of(
-                                SentryAttribute.stringAttribute("arkpets.character_asset", heartbeat.asset()),
-                                SentryAttribute.stringAttribute("arkpets.character_label", heartbeat.label()),
-                                SentryAttribute.integerAttribute("arkpets.session_duration", (int) durationSeconds)
+                                SentryAttribute.stringAttribute("core.character_asset", normalizeAsset(heartbeat.asset())),
+                                SentryAttribute.integerAttribute("core.session_duration", (int) durationSeconds)
                         )
                 ),
                 "MODEL_SESSION"
@@ -69,11 +69,45 @@ public class SentryHelper {
                 SentryLogParameters.create(
                         new SentryLongDate(endTimeMillis * 1_000_000L),
                         SentryAttributes.of(
-                                SentryAttribute.integerAttribute("arkpets.session_duration", (int) durationSeconds)
+                                SentryAttribute.integerAttribute("desktop.session_duration", (int) durationSeconds)
                         )
                 ),
                 "DESKTOP_SESSION"
         );
+    }
+
+    private static void reportConfig(Map<String, Object> config, long timestampMillis) {
+        if (!enable) return;
+        Sentry.logger().log(
+                SentryLogLevel.INFO,
+                SentryLogParameters.create(
+                        new SentryLongDate(timestampMillis * 1_000_000L),
+                        configAttributes(config)
+                ),
+                "CONFIG"
+        );
+    }
+
+    private static String normalizeAsset(String asset) {
+        return asset == null ? null : asset.replace('\\', '/');
+    }
+
+    private static SentryAttributes configAttributes(Map<String, Object> config) {
+        SentryAttributes attributes = SentryAttributes.of();
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            String key = "core_config." + entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Boolean) {
+                attributes.add(SentryAttribute.booleanAttribute(key, (Boolean) value));
+            } else if (value instanceof Integer) {
+                attributes.add(SentryAttribute.integerAttribute(key, (Integer) value));
+            } else if (value instanceof Double) {
+                attributes.add(SentryAttribute.doubleAttribute(key, (Double) value));
+            } else if (value instanceof String) {
+                attributes.add(SentryAttribute.stringAttribute(key, (String) value));
+            }
+        }
+        return attributes;
     }
 
     public static void captureLogFeedback(List<String> fileList) {
@@ -113,6 +147,8 @@ public class SentryHelper {
         WalDesktopHeartbeatEvent lastDesktopHeartbeat = null;
         long lastDesktopHeartbeatTime = 0;
         WalRecord exceptionRecord = null;
+        Map<String, Object> configSnapshot = null;
+        long configTimestamp = 0;
         for (WalRecord record : records) {
             try {
                 if (record.type().equals(WalHeartbeatCodec.INSTANCE.type())) {
@@ -123,10 +159,15 @@ public class SentryHelper {
                     lastDesktopHeartbeatTime = record.timestamp();
                 } else if (record.type().equals(WalExceptionCodec.INSTANCE.type())) {
                     exceptionRecord = record;
+                } else if (record.type().equals(WalConfigCodec.INSTANCE.type())) {
+                    configSnapshot = WalConfigCodec.INSTANCE.decode(record.payload());
+                    configTimestamp = record.timestamp();
                 }
             } catch (IOException ignored) {
             }
         }
+        if (configSnapshot != null)
+            reportConfig(configSnapshot, configTimestamp);
         if (lastModelHeartbeat != null) {
             long endTimeMillis;
             SentryLogLevel level;

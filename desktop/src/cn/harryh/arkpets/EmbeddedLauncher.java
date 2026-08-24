@@ -6,9 +6,7 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.wal.HeartbeatSession;
-import cn.harryh.arkpets.wal.WalHeartbeatCodec;
-import cn.harryh.arkpets.wal.WalHeartbeatEvent;
+import cn.harryh.arkpets.wal.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -18,7 +16,9 @@ import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.*;
@@ -29,6 +29,7 @@ import static cn.harryh.arkpets.Const.*;
  */
 public class EmbeddedLauncher {
     public static File customConfig;
+
     // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 
     public static void main(String[] args) {
@@ -89,9 +90,11 @@ public class EmbeddedLauncher {
         if (!(temp.exists() || temp.mkdir())) {
             Logger.error("System", "Failed to create the temporary directory.");
         }
-        // Start session heartbeat.
+        // Start telemetry heartbeat
+        writeConfigRecord(WalConfigSnapshot.collect(appConfig));
         HeartbeatSession<WalHeartbeatEvent> session = new HeartbeatSession<>(WalHeartbeatCodec.INSTANCE,
-                (startTime, stopped) -> new WalHeartbeatEvent(appConfig.character_asset, appConfig.character_label, startTime, stopped));
+                (startTime, stopped) -> new WalHeartbeatEvent(appConfig.character_asset, startTime, stopped));
+
         try {
             WindowSystem.init();
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -136,5 +139,13 @@ public class EmbeddedLauncher {
         session.finish();
         Logger.info("System", "Exited from EmbeddedLauncher successfully");
         System.exit(0);
+    }
+
+    private static void writeConfigRecord(Map<String, Object> config) {
+        try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
+            writer.append(WalConfigCodec.INSTANCE, config);
+        } catch (IOException e) {
+            Logger.warn("System", "Failed to write config snapshot");
+        }
     }
 }

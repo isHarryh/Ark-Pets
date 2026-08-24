@@ -21,7 +21,6 @@ public final class WalHeartbeatCodec implements WalCodec<WalHeartbeatEvent> {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream dos = new DataOutputStream(bos)) {
             dos.writeUTF(value.asset());
-            dos.writeUTF(value.label());
             dos.writeLong(value.startTime());
             dos.writeBoolean(value.stopped());
         }
@@ -32,10 +31,9 @@ public final class WalHeartbeatCodec implements WalCodec<WalHeartbeatEvent> {
     public WalHeartbeatEvent decode(byte[] payload) throws IOException {
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(payload))) {
             String asset = dis.readUTF();
-            String label = dis.readUTF();
             long startTime = dis.readLong();
             boolean stopped = dis.readBoolean();
-            return new WalHeartbeatEvent(asset, label, startTime, stopped);
+            return new WalHeartbeatEvent(asset, startTime, stopped);
         }
     }
 }
