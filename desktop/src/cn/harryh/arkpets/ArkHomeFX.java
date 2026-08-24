@@ -137,7 +137,6 @@ public class ArkHomeFX extends Application {
             SentryHelper.consumePendingWal();
 
             Logger.info("Launcher", "Finished starting");
-            SentryHelper.reportApp(false);
         }, Duration.ZERO, durationFast);
     }
 
@@ -150,7 +149,7 @@ public class ArkHomeFX extends Application {
         SocketServer.getInstance().stopServer();
         ProcessPool.getInstance().shutdown();
         Logger.debug("Launcher", "Finished stopping");
-        SentryHelper.reportApp(true);
+        SentryHelper.endDesktopSession();
         SentryHelper.consumePendingWal();
     }
 

@@ -32,9 +32,16 @@ public class SentryHelper {
         });
     }
 
-    public static void reportApp(boolean isStopping) {
-        if (!enable) return;
-        Sentry.logger().info("%s_APP", isStopping ? "STOP" : "START");
+    private static HeartbeatSession<WalDesktopHeartbeatEvent> desktopSession;
+
+    public static void beginDesktopSession() {
+        desktopSession = new HeartbeatSession<>(WalDesktopHeartbeatCodec.INSTANCE,
+                (startTime, stopped) -> new WalDesktopHeartbeatEvent(startTime, stopped));
+    }
+
+    public static void endDesktopSession() {
+        if (desktopSession != null)
+            desktopSession.finish();
     }
 
     private static void reportModelSession(WalHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
@@ -51,6 +58,21 @@ public class SentryHelper {
                         )
                 ),
                 "MODEL_SESSION"
+        );
+    }
+
+    private static void reportDesktopSession(WalDesktopHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
+        if (!enable) return;
+        long durationSeconds = Math.max(0, (endTimeMillis - heartbeat.startTime()) / 1000);
+        Sentry.logger().log(
+                level,
+                SentryLogParameters.create(
+                        new SentryLongDate(endTimeMillis * 1_000_000L),
+                        SentryAttributes.of(
+                                SentryAttribute.integerAttribute("arkpets.session_duration", (int) durationSeconds)
+                        )
+                ),
+                "DESKTOP_SESSION"
         );
     }
 
@@ -86,42 +108,53 @@ public class SentryHelper {
     }
 
     private static void consumeWalRecords(List<WalRecord> records) {
-        WalHeartbeatEvent lastHeartbeat = null;
-        long lastHeartbeatTime = 0;
+        WalHeartbeatEvent lastModelHeartbeat = null;
+        long lastModelHeartbeatTime = 0;
+        WalDesktopHeartbeatEvent lastDesktopHeartbeat = null;
+        long lastDesktopHeartbeatTime = 0;
         WalRecord exceptionRecord = null;
         for (WalRecord record : records) {
             try {
                 if (record.type().equals(WalHeartbeatCodec.INSTANCE.type())) {
-                    lastHeartbeat = WalHeartbeatCodec.INSTANCE.decode(record.payload());
-                    lastHeartbeatTime = record.timestamp();
+                    lastModelHeartbeat = WalHeartbeatCodec.INSTANCE.decode(record.payload());
+                    lastModelHeartbeatTime = record.timestamp();
+                } else if (record.type().equals(WalDesktopHeartbeatCodec.INSTANCE.type())) {
+                    lastDesktopHeartbeat = WalDesktopHeartbeatCodec.INSTANCE.decode(record.payload());
+                    lastDesktopHeartbeatTime = record.timestamp();
                 } else if (record.type().equals(WalExceptionCodec.INSTANCE.type())) {
                     exceptionRecord = record;
                 }
             } catch (IOException ignored) {
             }
         }
-        if (lastHeartbeat == null)
-            return;
-        long endTimeMillis;
-        SentryLogLevel level;
-        if (exceptionRecord != null) {
-            endTimeMillis = exceptionRecord.timestamp();
-            level = SentryLogLevel.ERROR;
-            try {
-                Exception exception = WalExceptionCodec.INSTANCE.decode(exceptionRecord.payload());
-                SentryEvent event = new SentryEvent(exception);
-                event.setTimestamp(new Date(exceptionRecord.timestamp()));
-                Sentry.captureEvent(event);
-            } catch (IOException ignored) {
+        if (lastModelHeartbeat != null) {
+            long endTimeMillis;
+            SentryLogLevel level;
+            if (exceptionRecord != null) {
+                endTimeMillis = exceptionRecord.timestamp();
+                level = SentryLogLevel.ERROR;
+                try {
+                    Exception exception = WalExceptionCodec.INSTANCE.decode(exceptionRecord.payload());
+                    SentryEvent event = new SentryEvent(exception);
+                    event.setTimestamp(new Date(exceptionRecord.timestamp()));
+                    Sentry.captureEvent(event);
+                } catch (IOException ignored) {
+                }
+            } else if (lastModelHeartbeat.stopped()) {
+                endTimeMillis = lastModelHeartbeatTime;
+                level = SentryLogLevel.INFO;
+            } else {
+                endTimeMillis = lastModelHeartbeatTime;
+                level = SentryLogLevel.WARN;
             }
-        } else if (lastHeartbeat.stopped()) {
-            endTimeMillis = lastHeartbeatTime;
-            level = SentryLogLevel.INFO;
-        } else {
-            endTimeMillis = lastHeartbeatTime;
-            level = SentryLogLevel.WARN;
+            reportModelSession(lastModelHeartbeat, endTimeMillis, level);
+        } else if (lastDesktopHeartbeat != null) {
+            reportDesktopSession(
+                    lastDesktopHeartbeat,
+                    lastDesktopHeartbeatTime,
+                    lastDesktopHeartbeat.stopped() ? SentryLogLevel.INFO : SentryLogLevel.WARN
+            );
         }
-        reportModelSession(lastHeartbeat, endTimeMillis, level);
     }
 
     public static boolean isEnable() {

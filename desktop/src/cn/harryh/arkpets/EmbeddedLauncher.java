@@ -6,10 +6,9 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.wal.WalExceptionCodec;
+import cn.harryh.arkpets.wal.HeartbeatSession;
 import cn.harryh.arkpets.wal.WalHeartbeatCodec;
 import cn.harryh.arkpets.wal.WalHeartbeatEvent;
-import cn.harryh.arkpets.wal.WalWriter;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -19,7 +18,6 @@ import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -92,9 +90,8 @@ public class EmbeddedLauncher {
             Logger.error("System", "Failed to create the temporary directory.");
         }
         // Start session heartbeat.
-        long startTime = System.currentTimeMillis();
-        writeWalHeartbeat(appConfig, startTime, false);
-        startHeartbeatThread(appConfig, startTime);
+        HeartbeatSession<WalHeartbeatEvent> session = new HeartbeatSession<>(WalHeartbeatCodec.INSTANCE,
+                (startTime, stopped) -> new WalHeartbeatEvent(appConfig.character_asset, appConfig.character_label, startTime, stopped));
         try {
             WindowSystem.init();
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
@@ -132,51 +129,12 @@ public class EmbeddedLauncher {
         } catch (Exception e) {
             WindowSystem.free();
             Logger.error("System", "A fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);
-            writeWalException(e);
+            session.crash(e);
             System.exit(-1);
         }
         WindowSystem.free();
-        writeWalHeartbeat(appConfig, startTime, true);
+        session.finish();
         Logger.info("System", "Exited from EmbeddedLauncher successfully");
         System.exit(0);
-    }
-
-    private static final long HEARTBEAT_INTERVAL = 60_000L;
-    private static final Object WAL_LOCK = new Object();
-
-    private static void writeWalHeartbeat(ArkConfig config, long startTime, boolean stopped) {
-        synchronized (WAL_LOCK) {
-            try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
-                writer.append(WalHeartbeatCodec.INSTANCE,
-                        new WalHeartbeatEvent(config.character_asset, config.character_label, startTime, stopped));
-            } catch (IOException e) {
-                Logger.warn("System", "Failed to write heartbeat");
-            }
-        }
-    }
-
-    private static void writeWalException(Exception e) {
-        synchronized (WAL_LOCK) {
-            try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
-                writer.append(WalExceptionCodec.INSTANCE, e);
-            } catch (IOException ignore) {
-                Logger.warn("System", "Failed to write crash exception");
-            }
-        }
-    }
-
-    private static void startHeartbeatThread(ArkConfig config, long startTime) {
-        Thread thread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(HEARTBEAT_INTERVAL);
-                } catch (InterruptedException e) {
-                    break;
-                }
-                writeWalHeartbeat(config, startTime, false);
-            }
-        });
-        thread.setDaemon(true);
-        thread.start();
     }
 }

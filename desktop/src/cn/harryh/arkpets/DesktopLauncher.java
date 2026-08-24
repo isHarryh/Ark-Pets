@@ -12,9 +12,7 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.LogConfig;
-import static cn.harryh.arkpets.Const.PathConfig;
-import static cn.harryh.arkpets.Const.appVersion;
+import static cn.harryh.arkpets.Const.*;
 
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
@@ -64,6 +62,7 @@ public class DesktopLauncher {
         };
 
         SentryHelper.init();
+        SentryHelper.beginDesktopSession();
 
         // Init temp folder
         File temp = new File(PathConfig.tempDirPath);
