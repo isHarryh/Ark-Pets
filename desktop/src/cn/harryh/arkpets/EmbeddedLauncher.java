@@ -4,6 +4,7 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
 import cn.harryh.arkpets.telemetry.HeartbeatSession;
 import cn.harryh.arkpets.telemetry.wal.WalConfigCodec;
 import cn.harryh.arkpets.telemetry.wal.WalCoreHeartbeatCodec;
@@ -94,9 +95,15 @@ public class EmbeddedLauncher {
             Logger.error("System", "Failed to create the temporary directory.");
         }
         // Start telemetry heartbeat
+        CorePerformanceSampler performanceSampler = appConfig.enable_telemetry ? new CorePerformanceSampler() : null;
         writeConfigRecord(WalConfigCodec.WalConfigSnapshot.collect(appConfig));
         HeartbeatSession<WalCoreHeartbeatCodec.WalHeartbeatEvent> session = new HeartbeatSession<>(WalCoreHeartbeatCodec.INSTANCE,
-                (startTime, stopped) -> new WalCoreHeartbeatCodec.WalHeartbeatEvent(appConfig.character_asset, startTime, stopped));
+                (startTime, stopped) -> new WalCoreHeartbeatCodec.WalHeartbeatEvent(
+                        appConfig.character_asset,
+                        startTime,
+                        stopped,
+                        performanceSampler == null ? null : performanceSampler.snapshot()
+                ));
 
         try {
             WindowSystem.init();
@@ -131,7 +138,7 @@ public class EmbeddedLauncher {
                 }
             });
             // Instantiate the App
-            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE, appConfig), config);
+            Lwjgl3Application app = new Lwjgl3Application(new ArkPets(TITLE, appConfig, performanceSampler), config);
         } catch (Exception e) {
             WindowSystem.free();
             Logger.error("System", "A fatal error occurs in the runtime of Lwjgl3Application, details see below.", e);

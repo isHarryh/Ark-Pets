@@ -10,6 +10,7 @@ import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.render.PixmapWrapper;
+import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
@@ -42,14 +43,16 @@ public class ArkPets extends InputApplicationAdaptor {
     private final Cached<HWndCtrl> hWndTopmostGetter;
     private final Cached<Boolean> hWndTransparentSetter;
     private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
+    private final CorePerformanceSampler performanceSampler;
 
     private final String APP_TITLE;
     private int offsetY = 0;
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
-    public ArkPets(String title, ArkConfig appConfig) {
+    public ArkPets(String title, ArkConfig appConfig, CorePerformanceSampler performanceSampler) {
         APP_TITLE = title;
+        this.performanceSampler = performanceSampler;
 
         hWndTopmostGetter = new Cached<>();
         hWndTopmostGetter.setValueProducer(this::refreshWindowIndex);
@@ -121,6 +124,9 @@ public class ArkPets extends InputApplicationAdaptor {
 
     @Override
     public void render() {
+        if (performanceSampler != null)
+            performanceSampler.beginFrame();
+
         // 1.Render the next frame.
         cha.render();
         Gdx.graphics.setForegroundFPS((int) getReducedFPS());
@@ -182,6 +188,14 @@ public class ArkPets extends InputApplicationAdaptor {
         cha.setOutlineColor(ArkConfig.getGdxColorFrom(
                 tray.keepAnim != null ? config.render_outline_emphasis_color : config.render_outline_color
         ));
+
+        if (performanceSampler != null) {
+            performanceSampler.endFrame(
+                    Gdx.graphics.getDeltaTime(),
+                    cha.camera.getWidth(),
+                    cha.camera.getHeight()
+            );
+        }
     }
 
     @Override

@@ -13,7 +13,7 @@ import java.io.IOException;
  * @param <T> The heartbeat snapshot type.
  */
 public final class HeartbeatSession<T> {
-    private static final long HEARTBEAT_INTERVAL = 60_000L;
+    private static final long HEARTBEAT_INTERVAL = 30_000L;
 
     private final WalCodec<T> codec;
     private final HeartbeatFactory<T> factory;

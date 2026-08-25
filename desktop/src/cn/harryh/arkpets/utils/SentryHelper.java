@@ -1,14 +1,18 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.telemetry.CorePerformanceSnapshot;
 import cn.harryh.arkpets.telemetry.HeartbeatSession;
 import cn.harryh.arkpets.telemetry.wal.*;
 import io.sentry.*;
 import io.sentry.logger.SentryLogParameters;
+import io.sentry.metrics.MetricsUnit;
+import io.sentry.metrics.SentryMetricsParameters;
 import io.sentry.protocol.Feedback;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +92,90 @@ public class SentryHelper {
         );
     }
 
+    private static void reportCorePerformance(
+            CorePerformanceSnapshot performance,
+            String asset,
+            long timestampMillis
+    ) {
+        if (!enable || performance == null) return;
+
+        SentryAttributes resourceAttributes = SentryAttributes.of(
+                SentryAttribute.stringAttribute("core.character_asset", normalizeAsset(asset))
+        );
+        reportGauge(
+                "core.memory.heap_used",
+                (double) performance.heapUsedBytes(),
+                MetricsUnit.Information.BYTE,
+                timestampMillis,
+                resourceAttributes
+        );
+        if (performance.processCpuRatio() != null) {
+            reportGauge(
+                    "core.cpu.process_usage",
+                    performance.processCpuRatio(),
+                    MetricsUnit.Fraction.RATIO,
+                    timestampMillis,
+                    resourceAttributes
+            );
+        }
+
+        for (CorePerformanceSnapshot.RenderMetrics metrics : performance.renderMetrics()) {
+            SentryAttributes attributes = SentryAttributes.of(
+                    SentryAttribute.stringAttribute("core.character_asset", normalizeAsset(asset)),
+                    SentryAttribute.integerAttribute("core.render.width", metrics.width()),
+                    SentryAttribute.integerAttribute("core.render.height", metrics.height()),
+                    SentryAttribute.integerAttribute("core.render.pixels", (int) metrics.pixels())
+            );
+            reportDistribution(
+                    "core.render.callback_time",
+                    metrics.renderTimeAverageMillis(),
+                    MetricsUnit.Duration.MILLISECOND,
+                    timestampMillis,
+                    attributes
+            );
+            reportDistribution(
+                    "core.render.callback_time_ppx",
+                    metrics.renderTimeAveragePpx(),
+                    null,
+                    timestampMillis,
+                    attributes
+            );
+
+            reportDistribution("core.render.fps", metrics.fps(), null, timestampMillis, attributes);
+        }
+    }
+
+    private static void reportGauge(
+            String name,
+            double value,
+            String unit,
+            long timestampMillis,
+            SentryAttributes attributes
+    ) {
+        Sentry.metrics().gauge(
+                name,
+                value,
+                unit,
+                SentryMetricsParameters.create(new SentryLongDate(timestampMillis * 1_000_000L), attributes)
+        );
+    }
+
+    private static void reportDistribution(
+            String name,
+            double value,
+            String unit,
+            long timestampMillis,
+            SentryAttributes attributes
+    ) {
+        if (!Double.isFinite(value)) return;
+        Sentry.metrics().distribution(
+                name,
+                value,
+                unit,
+                SentryMetricsParameters.create(new SentryLongDate(timestampMillis * 1_000_000L), attributes)
+        );
+    }
+
     private static String normalizeAsset(String asset) {
         return asset == null ? null : asset.replace('\\', '/');
     }
@@ -149,11 +237,13 @@ public class SentryHelper {
         WalRecord exceptionRecord = null;
         Map<String, Object> configSnapshot = null;
         long configTimestamp = 0;
+        List<ModelHeartbeatRecord> modelHeartbeats = new ArrayList<>();
         for (WalRecord record : records) {
             try {
                 if (record.type().equals(WalCoreHeartbeatCodec.INSTANCE.type())) {
                     lastModelHeartbeat = WalCoreHeartbeatCodec.INSTANCE.decode(record.payload());
                     lastModelHeartbeatTime = record.timestamp();
+                    modelHeartbeats.add(new ModelHeartbeatRecord(lastModelHeartbeat, record.timestamp()));
                 } else if (record.type().equals(WalDesktopHeartbeatCodec.INSTANCE.type())) {
                     lastDesktopHeartbeat = WalDesktopHeartbeatCodec.INSTANCE.decode(record.payload());
                     lastDesktopHeartbeatTime = record.timestamp();
@@ -168,6 +258,13 @@ public class SentryHelper {
         }
         if (configSnapshot != null)
             reportConfig(configSnapshot, configTimestamp);
+        for (ModelHeartbeatRecord heartbeatRecord : modelHeartbeats) {
+            reportCorePerformance(
+                    heartbeatRecord.heartbeat().performance(),
+                    heartbeatRecord.heartbeat().asset(),
+                    heartbeatRecord.timestampMillis()
+            );
+        }
         if (lastModelHeartbeat != null) {
             long endTimeMillis;
             SentryLogLevel level;
@@ -196,6 +293,12 @@ public class SentryHelper {
                     lastDesktopHeartbeat.stopped() ? SentryLogLevel.INFO : SentryLogLevel.WARN
             );
         }
+    }
+
+    private record ModelHeartbeatRecord(
+            WalCoreHeartbeatCodec.WalHeartbeatEvent heartbeat,
+            long timestampMillis
+    ) {
     }
 
     public static boolean isEnable() {
