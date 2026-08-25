@@ -1,14 +1,14 @@
-package cn.harryh.arkpets.wal;
+package cn.harryh.arkpets.telemetry.wal;
 
 import java.io.*;
 
 
-/** Encodes and decodes model session heartbeats.
+/** Encodes and decodes core session heartbeats.
  */
-public final class WalHeartbeatCodec implements WalCodec<WalHeartbeatEvent> {
-    public static final WalHeartbeatCodec INSTANCE = new WalHeartbeatCodec();
+public final class WalCoreHeartbeatCodec implements WalCodec<WalCoreHeartbeatCodec.WalHeartbeatEvent> {
+    public static final WalCoreHeartbeatCodec INSTANCE = new WalCoreHeartbeatCodec();
 
-    private WalHeartbeatCodec() {
+    private WalCoreHeartbeatCodec() {
     }
 
     @Override
@@ -35,5 +35,13 @@ public final class WalHeartbeatCodec implements WalCodec<WalHeartbeatEvent> {
             boolean stopped = dis.readBoolean();
             return new WalHeartbeatEvent(asset, startTime, stopped);
         }
+    }
+
+    /** A heartbeat snapshot of a model session.
+     * @param asset The model asset id.
+     * @param startTime The session start time in epoch milliseconds.
+     * @param stopped Whether this heartbeat is written on a normal exit.
+     */
+    public record WalHeartbeatEvent(String asset, long startTime, boolean stopped) {
     }
 }

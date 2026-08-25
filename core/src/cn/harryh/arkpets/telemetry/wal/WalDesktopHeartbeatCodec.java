@@ -1,11 +1,11 @@
-package cn.harryh.arkpets.wal;
+package cn.harryh.arkpets.telemetry.wal;
 
 import java.io.*;
 
 
 /** Encodes and decodes desktop session heartbeats.
  */
-public final class WalDesktopHeartbeatCodec implements WalCodec<WalDesktopHeartbeatEvent> {
+public final class WalDesktopHeartbeatCodec implements WalCodec<WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent> {
     public static final WalDesktopHeartbeatCodec INSTANCE = new WalDesktopHeartbeatCodec();
 
     private WalDesktopHeartbeatCodec() {
@@ -33,5 +33,12 @@ public final class WalDesktopHeartbeatCodec implements WalCodec<WalDesktopHeartb
             boolean stopped = dis.readBoolean();
             return new WalDesktopHeartbeatEvent(startTime, stopped);
         }
+    }
+
+    /** A heartbeat snapshot of a desktop session.
+     * @param startTime The session start time in epoch milliseconds.
+     * @param stopped Whether this heartbeat is written on a normal exit.
+     */
+    public record WalDesktopHeartbeatEvent(long startTime, boolean stopped) {
     }
 }

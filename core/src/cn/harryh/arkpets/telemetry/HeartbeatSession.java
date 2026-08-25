@@ -1,5 +1,8 @@
-package cn.harryh.arkpets.wal;
+package cn.harryh.arkpets.telemetry;
 
+import cn.harryh.arkpets.telemetry.wal.WalCodec;
+import cn.harryh.arkpets.telemetry.wal.WalExceptionCodec;
+import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.utils.Logger;
 
 import java.io.IOException;
@@ -41,6 +44,7 @@ public final class HeartbeatSession<T> {
         }
     }
 
+    @SuppressWarnings("BusyWait")
     private void startHeartbeatThread() {
         Thread thread = new Thread(() -> {
             while (running) {

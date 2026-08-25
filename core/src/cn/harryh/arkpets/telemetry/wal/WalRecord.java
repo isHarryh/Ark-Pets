@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.wal;
+package cn.harryh.arkpets.telemetry.wal;
 
 
 /** A single, immutable record read from a WAL file.

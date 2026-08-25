@@ -1,7 +1,8 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.wal.*;
+import cn.harryh.arkpets.telemetry.HeartbeatSession;
+import cn.harryh.arkpets.telemetry.wal.*;
 import io.sentry.*;
 import io.sentry.logger.SentryLogParameters;
 import io.sentry.protocol.Feedback;
@@ -33,11 +34,10 @@ public class SentryHelper {
         });
     }
 
-    private static HeartbeatSession<WalDesktopHeartbeatEvent> desktopSession;
+    private static HeartbeatSession<WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent> desktopSession;
 
     public static void beginDesktopSession() {
-        desktopSession = new HeartbeatSession<>(WalDesktopHeartbeatCodec.INSTANCE,
-                (startTime, stopped) -> new WalDesktopHeartbeatEvent(startTime, stopped));
+        desktopSession = new HeartbeatSession<>(WalDesktopHeartbeatCodec.INSTANCE, WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent::new);
     }
 
     public static void endDesktopSession() {
@@ -45,7 +45,7 @@ public class SentryHelper {
             desktopSession.finish();
     }
 
-    private static void reportModelSession(WalHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
+    private static void reportModelSession(WalCoreHeartbeatCodec.WalHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
         if (!enable) return;
         long durationSeconds = Math.max(0, (endTimeMillis - heartbeat.startTime()) / 1000);
         Sentry.logger().log(
@@ -61,7 +61,7 @@ public class SentryHelper {
         );
     }
 
-    private static void reportDesktopSession(WalDesktopHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
+    private static void reportDesktopSession(WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
         if (!enable) return;
         long durationSeconds = Math.max(0, (endTimeMillis - heartbeat.startTime()) / 1000);
         Sentry.logger().log(
@@ -142,17 +142,17 @@ public class SentryHelper {
     }
 
     private static void consumeWalRecords(List<WalRecord> records) {
-        WalHeartbeatEvent lastModelHeartbeat = null;
+        WalCoreHeartbeatCodec.WalHeartbeatEvent lastModelHeartbeat = null;
         long lastModelHeartbeatTime = 0;
-        WalDesktopHeartbeatEvent lastDesktopHeartbeat = null;
+        WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent lastDesktopHeartbeat = null;
         long lastDesktopHeartbeatTime = 0;
         WalRecord exceptionRecord = null;
         Map<String, Object> configSnapshot = null;
         long configTimestamp = 0;
         for (WalRecord record : records) {
             try {
-                if (record.type().equals(WalHeartbeatCodec.INSTANCE.type())) {
-                    lastModelHeartbeat = WalHeartbeatCodec.INSTANCE.decode(record.payload());
+                if (record.type().equals(WalCoreHeartbeatCodec.INSTANCE.type())) {
+                    lastModelHeartbeat = WalCoreHeartbeatCodec.INSTANCE.decode(record.payload());
                     lastModelHeartbeatTime = record.timestamp();
                 } else if (record.type().equals(WalDesktopHeartbeatCodec.INSTANCE.type())) {
                     lastDesktopHeartbeat = WalDesktopHeartbeatCodec.INSTANCE.decode(record.payload());

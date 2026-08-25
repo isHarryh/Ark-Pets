@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.wal;
+package cn.harryh.arkpets.telemetry.wal;
 
 import cn.harryh.arkpets.Const;
 

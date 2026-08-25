@@ -4,9 +4,12 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.telemetry.HeartbeatSession;
+import cn.harryh.arkpets.telemetry.wal.WalConfigCodec;
+import cn.harryh.arkpets.telemetry.wal.WalCoreHeartbeatCodec;
+import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.wal.*;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -91,9 +94,9 @@ public class EmbeddedLauncher {
             Logger.error("System", "Failed to create the temporary directory.");
         }
         // Start telemetry heartbeat
-        writeConfigRecord(WalConfigSnapshot.collect(appConfig));
-        HeartbeatSession<WalHeartbeatEvent> session = new HeartbeatSession<>(WalHeartbeatCodec.INSTANCE,
-                (startTime, stopped) -> new WalHeartbeatEvent(appConfig.character_asset, startTime, stopped));
+        writeConfigRecord(WalConfigCodec.WalConfigSnapshot.collect(appConfig));
+        HeartbeatSession<WalCoreHeartbeatCodec.WalHeartbeatEvent> session = new HeartbeatSession<>(WalCoreHeartbeatCodec.INSTANCE,
+                (startTime, stopped) -> new WalCoreHeartbeatCodec.WalHeartbeatEvent(appConfig.character_asset, startTime, stopped));
 
         try {
             WindowSystem.init();
