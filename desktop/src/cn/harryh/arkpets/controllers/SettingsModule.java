@@ -112,6 +112,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private CheckBox configEcoMode;
     @FXML
     private CheckBox configTelemetry;
+    @FXML
+    private Button configTelemetryHelp;
 
     @FXML
     private TextField configNetworkSource;
@@ -443,6 +445,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             app.config.enable_telemetry = configTelemetry.isSelected();
             app.config.save();
         });
+        new HelpHandbookEntrance(app.body, configTelemetryHelp) {
+            @Override
+            public Handbook getHandbook() {
+                return new ControlHelpHandbook(configTelemetry) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，程序将定期匿名上传崩溃报告、配置偏好与性能数据（如渲染耗时、内存与 CPU 占用），用于改进使用体验和稳定性。上传内容不包含任何个人信息。如有顾虑，您可立即关闭此功能。";
+                    }
+                };
+            }
+        };
 
     }
 

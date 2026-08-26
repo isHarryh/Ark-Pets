@@ -39,8 +39,9 @@ public final class HeartbeatSession<T> {
     private synchronized void write(T value) {
         try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
             writer.append(codec, value);
+            Logger.debug("Telemetry", "Written heartbeat WAL");
         } catch (IOException e) {
-            Logger.warn("System", "Failed to write heartbeat");
+            Logger.warn("Telemetry", "Failed to write heartbeat");
         }
     }
 
@@ -73,8 +74,9 @@ public final class HeartbeatSession<T> {
         synchronized (this) {
             try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
                 writer.append(WalExceptionCodec.INSTANCE, e);
+                Logger.debug("Telemetry", "Written crashing heartbeat WAL");
             } catch (IOException ignore) {
-                Logger.warn("System", "Failed to write crash exception");
+                Logger.warn("Telemetry", "Failed to write crash exception");
             }
         }
     }

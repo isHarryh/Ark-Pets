@@ -6,7 +6,6 @@ package cn.harryh.arkpets.concurrent;
 import cn.harryh.arkpets.telemetry.wal.WalExceptionCodec;
 import cn.harryh.arkpets.telemetry.wal.WalReader;
 import cn.harryh.arkpets.telemetry.wal.WalRecord;
-import cn.harryh.arkpets.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -125,8 +124,7 @@ public final class ProcessPool implements Executor {
                     if (record.type().equals(WalExceptionCodec.INSTANCE.type()))
                         return WalExceptionCodec.INSTANCE.decode(record.payload());
                 }
-            } catch (IOException ex) {
-                Logger.warn("System", "Failed to read crash exception for process " + processId);
+            } catch (IOException ignored) {
             }
             return null;
         }

@@ -63,6 +63,7 @@ public class SentryHelper {
                 ),
                 "MODEL_SESSION"
         );
+        Logger.debug("Telemetry", "Uploaded a MODEL_SESSION event");
     }
 
     private static void reportDesktopSession(WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent heartbeat, long endTimeMillis, SentryLogLevel level) {
@@ -78,6 +79,7 @@ public class SentryHelper {
                 ),
                 "DESKTOP_SESSION"
         );
+        Logger.debug("Telemetry", "Uploaded a DESKTOP_SESSION event");
     }
 
     private static void reportConfig(Map<String, Object> config, long timestampMillis) {
@@ -90,6 +92,7 @@ public class SentryHelper {
                 ),
                 "CONFIG"
         );
+        Logger.debug("Telemetry", "Uploaded a CONFIG event");
     }
 
     private static void reportCorePerformance(
@@ -143,6 +146,7 @@ public class SentryHelper {
 
             reportDistribution("core.render.fps", metrics.fps(), null, timestampMillis, attributes);
         }
+        Logger.debug("Telemetry", "Uploaded a core performance metrics");
     }
 
     private static void reportGauge(
@@ -203,30 +207,33 @@ public class SentryHelper {
                 new Feedback("User uploaded ArkPets log files."),
                 Hint.withAttachments(fileList.stream().map(Attachment::new).toList())
         );
+        Logger.debug("Telemetry", "Uploaded a user log feedback");
     }
 
     public static void consumePendingWal() {
+        // If telemetry features were disabled, delete all WAL files and skip consuming.
         if (!enable) {
+            Logger.debug("Telemetry", "Telemetry disabled, now deleting existing WAL files");
             for (File file : WalReader.listWalFiles())
-                file.delete();
+                if (!file.delete())
+                    Logger.warn("Telemetry", "Failed to delete existing WAL file " + file.getName());
             return;
         }
+
         for (File file : WalReader.listWalFiles()) {
-            if (isProcessAlive(WalReader.parsePid(file)))
+            // Skip WAL file whose process is still alive
+            if (ProcessHandle.of(WalReader.parsePid(file)).map(ProcessHandle::isAlive).orElse(false))
                 continue;
             try (WalReader reader = WalReader.open(file)) {
+                Logger.debug("Telemetry", "Consuming WAL file " + file.getName());
                 consumeWalRecords(reader.readAll());
             } catch (IOException e) {
-                Logger.warn("System", "Failed to consume WAL file " + file.getName() + ", will retry later");
+                Logger.warn("Telemetry", "Failed to consume WAL file " + file.getName() + ", will retry later");
                 continue;
             }
             if (!file.delete())
-                Logger.warn("System", "Failed to delete consumed WAL file " + file.getName());
+                Logger.warn("Telemetry", "Failed to delete consumed WAL file " + file.getName());
         }
-    }
-
-    private static boolean isProcessAlive(long pid) {
-        return ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false);
     }
 
     private static void consumeWalRecords(List<WalRecord> records) {

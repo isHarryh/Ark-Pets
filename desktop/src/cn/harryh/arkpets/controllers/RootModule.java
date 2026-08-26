@@ -182,6 +182,8 @@ public final class RootModule implements Controller<ArkHomeFX> {
                     default -> "";
                 };
                 args.add(temp);
+
+                // Start ArkPets core.
                 Logger.info("Launcher", "Launching " + app.config.character_asset);
                 Logger.debug("Launcher", "With args " + args);
                 Future<ProcessPool.ProcessResult> future = ProcessPool.getInstance().submit(EmbeddedLauncher.class, List.of(), args);

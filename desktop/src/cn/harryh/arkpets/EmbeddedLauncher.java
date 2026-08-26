@@ -146,8 +146,8 @@ public class EmbeddedLauncher {
             System.exit(-1);
         }
         WindowSystem.free();
-        session.finish();
         Logger.info("System", "Exited from EmbeddedLauncher successfully");
+        session.finish();
         System.exit(0);
     }
 

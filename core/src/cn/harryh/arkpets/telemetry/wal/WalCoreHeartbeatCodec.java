@@ -95,8 +95,5 @@ public final class WalCoreHeartbeatCodec implements WalCodec<WalCoreHeartbeatCod
             boolean stopped,
             CorePerformanceSnapshot performance
     ) {
-        public WalHeartbeatEvent(String asset, long startTime, boolean stopped) {
-            this(asset, startTime, stopped, null);
-        }
     }
 }
