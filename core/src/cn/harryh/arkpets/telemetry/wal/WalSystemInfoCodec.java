@@ -3,8 +3,13 @@ package cn.harryh.arkpets.telemetry.wal;
 import java.io.*;
 
 
-public class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.SystemInfo>{
+/** Encodes and decodes system information.
+ */
+public final class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.SystemInfo> {
     public static final WalSystemInfoCodec INSTANCE = new WalSystemInfoCodec();
+
+    private WalSystemInfoCodec() {
+    }
 
     @Override
     public String type() {
@@ -12,7 +17,7 @@ public class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.SystemInf
     }
 
     @Override
-    public byte[] encode(WalSystemInfoCodec.SystemInfo value) throws IOException {
+    public byte[] encode(SystemInfo value) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try (DataOutputStream dos = new DataOutputStream(bos)) {
             dos.writeUTF(value.gpuName());
@@ -24,7 +29,7 @@ public class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.SystemInf
     }
 
     @Override
-    public WalSystemInfoCodec.SystemInfo decode(byte[] payload) throws IOException {
+    public SystemInfo decode(byte[] payload) throws IOException {
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(payload))) {
             String gpuInfo = dis.readUTF();
             String gpuVersion = dis.readUTF();

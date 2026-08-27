@@ -549,7 +549,7 @@ public class ArkPets extends InputApplicationAdaptor {
                     Gdx.gl.glGetString(GL20.GL_VERSION)
             ));
         } catch (IOException e) {
-            Logger.warn("System", "Failed to write config snapshot");
+            Logger.warn("System", "Failed to write system info");
         }
     }
 }

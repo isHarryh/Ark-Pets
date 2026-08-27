@@ -102,10 +102,10 @@ public class SentryHelper {
                 SentryLogParameters.create(
                         new SentryLongDate(timestampMillis * 1_000_000L),
                         SentryAttributes.of(
-                                SentryAttribute.stringAttribute("gpu.name", info.gpuName()),
-                                SentryAttribute.stringAttribute("gpu.version", info.gpuVersion()),
-                                SentryAttribute.stringAttribute("os.name", info.osName()),
-                                SentryAttribute.stringAttribute("os.arch", info.osArch())
+                                SentryAttribute.stringAttribute("core.gpu.name", info.gpuName()),
+                                SentryAttribute.stringAttribute("core.gpu.version", info.gpuVersion()),
+                                SentryAttribute.stringAttribute("core.os.name", info.osName()),
+                                SentryAttribute.stringAttribute("core.os.arch", info.osArch())
                         )
                 ),
                 "SYSTEM_INFO"
@@ -255,6 +255,22 @@ public class SentryHelper {
     }
 
     private static void consumeWalRecords(List<WalRecord> records) {
+        WalData data = collectWalRecords(records);
+        if (data.configSnapshot() != null)
+            reportConfig(data.configSnapshot(), data.configTimestamp());
+        if (data.systemInfo() != null)
+            reportSystemInfo(data.systemInfo(), data.systemInfoTimestamp());
+        for (ModelHeartbeatRecord heartbeatRecord : data.modelHeartbeats()) {
+            reportCorePerformance(
+                    heartbeatRecord.heartbeat().performance(),
+                    heartbeatRecord.heartbeat().asset(),
+                    heartbeatRecord.timestampMillis()
+            );
+        }
+        reportSession(data);
+    }
+
+    private static WalData collectWalRecords(List<WalRecord> records) {
         WalCoreHeartbeatCodec.WalHeartbeatEvent lastModelHeartbeat = null;
         long lastModelHeartbeatTime = 0;
         WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent lastDesktopHeartbeat = null;
@@ -286,45 +302,60 @@ public class SentryHelper {
             } catch (IOException ignored) {
             }
         }
-        if (configSnapshot != null)
-            reportConfig(configSnapshot, configTimestamp);
-        if (systemInfo != null)
-            reportSystemInfo(systemInfo, systemInfoTimestamp);
-        for (ModelHeartbeatRecord heartbeatRecord : modelHeartbeats) {
-            reportCorePerformance(
-                    heartbeatRecord.heartbeat().performance(),
-                    heartbeatRecord.heartbeat().asset(),
-                    heartbeatRecord.timestampMillis()
-            );
-        }
+        return new WalData(
+                lastModelHeartbeat, lastModelHeartbeatTime,
+                lastDesktopHeartbeat, lastDesktopHeartbeatTime,
+                exceptionRecord,
+                configSnapshot, configTimestamp,
+                modelHeartbeats,
+                systemInfo, systemInfoTimestamp
+        );
+    }
+
+    private static void reportSession(WalData data) {
+        WalCoreHeartbeatCodec.WalHeartbeatEvent lastModelHeartbeat = data.lastModelHeartbeat();
         if (lastModelHeartbeat != null) {
             long endTimeMillis;
             SentryLogLevel level;
-            if (exceptionRecord != null) {
-                endTimeMillis = exceptionRecord.timestamp();
+            if (data.exceptionRecord() != null) {
+                endTimeMillis = data.exceptionRecord().timestamp();
                 level = SentryLogLevel.ERROR;
                 try {
-                    Exception exception = WalExceptionCodec.INSTANCE.decode(exceptionRecord.payload());
+                    Exception exception = WalExceptionCodec.INSTANCE.decode(data.exceptionRecord().payload());
                     SentryEvent event = new SentryEvent(exception);
-                    event.setTimestamp(new Date(exceptionRecord.timestamp()));
+                    event.setTimestamp(new Date(data.exceptionRecord().timestamp()));
                     Sentry.captureEvent(event);
                 } catch (IOException ignored) {
                 }
             } else if (lastModelHeartbeat.stopped()) {
-                endTimeMillis = lastModelHeartbeatTime;
+                endTimeMillis = data.lastModelHeartbeatTime();
                 level = SentryLogLevel.INFO;
             } else {
-                endTimeMillis = lastModelHeartbeatTime;
+                endTimeMillis = data.lastModelHeartbeatTime();
                 level = SentryLogLevel.WARN;
             }
             reportModelSession(lastModelHeartbeat, endTimeMillis, level);
-        } else if (lastDesktopHeartbeat != null) {
+        } else if (data.lastDesktopHeartbeat() != null) {
             reportDesktopSession(
-                    lastDesktopHeartbeat,
-                    lastDesktopHeartbeatTime,
-                    lastDesktopHeartbeat.stopped() ? SentryLogLevel.INFO : SentryLogLevel.WARN
+                    data.lastDesktopHeartbeat(),
+                    data.lastDesktopHeartbeatTime(),
+                    data.lastDesktopHeartbeat().stopped() ? SentryLogLevel.INFO : SentryLogLevel.WARN
             );
         }
+    }
+
+    private record WalData(
+            WalCoreHeartbeatCodec.WalHeartbeatEvent lastModelHeartbeat,
+            long lastModelHeartbeatTime,
+            WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent lastDesktopHeartbeat,
+            long lastDesktopHeartbeatTime,
+            WalRecord exceptionRecord,
+            Map<String, Object> configSnapshot,
+            long configTimestamp,
+            List<ModelHeartbeatRecord> modelHeartbeats,
+            WalSystemInfoCodec.SystemInfo systemInfo,
+            long systemInfoTimestamp
+    ) {
     }
 
     private record ModelHeartbeatRecord(
