@@ -18,6 +18,10 @@ processResources {
     ]
 }
 
+def sentryDsn = project.hasProperty("SENTRY_DSN")
+        ? project.getProperties().get("SENTRY_DSN") as String
+        : "https://examplePublicKey@o0.ingest.sentry.io/0"
+
 // Runs the app without debug.
 tasks.register("run", JavaExec) {
     dependsOn = ["classes"]
@@ -31,6 +35,7 @@ tasks.register("run", JavaExec) {
     setIgnoreExitValue(true)
 
     jvmArgs += "-Dfile.encoding=UTF-8"
+    jvmArgs += "-Dsentry.dsn=${sentryDsn}"
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
@@ -51,6 +56,7 @@ tasks.register("debug", JavaExec) {
     setDebug(true)
 
     jvmArgs += "-Dfile.encoding=UTF-8"
+    jvmArgs += "-Dsentry.dsn=${sentryDsn}"
 }
 
 
@@ -152,7 +158,9 @@ tasks.register("jpackage", Exec) {
             '--main-class', mainClassName,
             '--main-jar', jar.archiveFile.get().asFile.getName(),
             '--runtime-image', "${jlinkDir}/runtime",
-            '--java-options', '-Dfile.encoding=UTF-8'
+            '--java-options', '-Dfile.encoding=UTF-8',
+            '--java-options', "-Dsentry.dsn=${sentryDsn}",
+            '--java-options', '-Dsentry.environment=production'
     ]
     if (osName.contains('windows')) {
         commands << '--icon'

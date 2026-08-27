@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.telemetry.PrivacyField;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
@@ -71,10 +72,12 @@ public class ArkConfig implements Serializable {
     public boolean      display_multi_monitors;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "1.0")
     public float        display_scale;
-    /** @since ArkPets 3.9 */ @JSONField()
+    /** @since ArkPets 3.9 */ @JSONField() @PrivacyField()
     public String       download_mc_cdk;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "false")
     public boolean      eco_mode;
+    /** @since ArkPets 3.13 */ @JSONField(defaultValue = "true")
+    public boolean      enable_telemetry;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
     public float        initial_position_x;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "0.2")
@@ -119,7 +122,7 @@ public class ArkConfig implements Serializable {
     public float        transition_duration;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "EASE_OUT_CUBIC")
     public String       transition_type;
-    /** @since ArkPets 3.7 */ @JSONField()
+    /** @since ArkPets 3.7 */ @JSONField() @PrivacyField()
     public JSONObject   user_announcement_read;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_toolwindow;

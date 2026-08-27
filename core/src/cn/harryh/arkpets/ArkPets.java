@@ -10,6 +10,9 @@ import cn.harryh.arkpets.concurrent.SocketClient;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.render.PixmapWrapper;
+import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
+import cn.harryh.arkpets.telemetry.wal.WalSystemInfoCodec;
+import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
@@ -19,6 +22,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -42,14 +46,16 @@ public class ArkPets extends InputApplicationAdaptor {
     private final Cached<HWndCtrl> hWndTopmostGetter;
     private final Cached<Boolean> hWndTransparentSetter;
     private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
+    private final CorePerformanceSampler performanceSampler;
 
     private final String APP_TITLE;
     private int offsetY = 0;
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
-    public ArkPets(String title, ArkConfig appConfig) {
+    public ArkPets(String title, ArkConfig appConfig, CorePerformanceSampler performanceSampler) {
         APP_TITLE = title;
+        this.performanceSampler = performanceSampler;
 
         hWndTopmostGetter = new Cached<>();
         hWndTopmostGetter.setValueProducer(this::refreshWindowIndex);
@@ -116,11 +122,16 @@ public class ArkPets extends InputApplicationAdaptor {
         tray = new MemberTrayImpl(this, new SocketClient());
 
         // Setup complete
+        writeSystemInfo();
+
         Logger.info("App", "Render");
     }
 
     @Override
     public void render() {
+        if (performanceSampler != null)
+            performanceSampler.beginFrame();
+
         // 1.Render the next frame.
         cha.render();
         Gdx.graphics.setForegroundFPS((int) getReducedFPS());
@@ -182,6 +193,14 @@ public class ArkPets extends InputApplicationAdaptor {
         cha.setOutlineColor(ArkConfig.getGdxColorFrom(
                 tray.keepAnim != null ? config.render_outline_emphasis_color : config.render_outline_color
         ));
+
+        if (performanceSampler != null) {
+            performanceSampler.endFrame(
+                    Gdx.graphics.getDeltaTime(),
+                    cha.camera.getWidth(),
+                    cha.camera.getHeight()
+            );
+        }
     }
 
     @Override
@@ -520,6 +539,17 @@ public class ArkPets extends InputApplicationAdaptor {
             if (msg == HWndCtrl.MouseEvent.EMPTY) return;
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
+        }
+    }
+
+    private void writeSystemInfo() {
+        try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
+            writer.append(WalSystemInfoCodec.INSTANCE, new WalSystemInfoCodec.SystemInfo(
+                    Gdx.gl.glGetString(GL20.GL_VENDOR),
+                    Gdx.gl.glGetString(GL20.GL_VERSION)
+            ));
+        } catch (IOException e) {
+            Logger.warn("System", "Failed to write system info");
         }
     }
 }

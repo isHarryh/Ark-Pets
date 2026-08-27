@@ -5,15 +5,14 @@ package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
 import javafx.application.Application;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
-import static cn.harryh.arkpets.Const.LogConfig;
-import static cn.harryh.arkpets.Const.PathConfig;
-import static cn.harryh.arkpets.Const.appVersion;
+import static cn.harryh.arkpets.Const.*;
 
 
 /** The entrance of the whole program, also the bootstrap for ArkHomeFX.
@@ -61,6 +60,9 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
+
+        SentryHelper.init();
+        SentryHelper.beginDesktopSession();
 
         // Init temp folder
         File temp = new File(PathConfig.tempDirPath);
