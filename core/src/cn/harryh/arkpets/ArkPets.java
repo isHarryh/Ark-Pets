@@ -11,6 +11,8 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.render.PixmapWrapper;
 import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
+import cn.harryh.arkpets.telemetry.wal.WalSystemInfoCodec;
+import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
@@ -20,6 +22,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -119,6 +122,8 @@ public class ArkPets extends InputApplicationAdaptor {
         tray = new MemberTrayImpl(this, new SocketClient());
 
         // Setup complete
+        writeSystemInfo();
+
         Logger.info("App", "Render");
     }
 
@@ -534,6 +539,17 @@ public class ArkPets extends InputApplicationAdaptor {
             if (msg == HWndCtrl.MouseEvent.EMPTY) return;
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
+        }
+    }
+
+    private void writeSystemInfo() {
+        try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
+            writer.append(WalSystemInfoCodec.INSTANCE, new WalSystemInfoCodec.SystemInfo(
+                    Gdx.gl.glGetString(GL20.GL_VENDOR),
+                    Gdx.gl.glGetString(GL20.GL_VERSION)
+            ));
+        } catch (IOException e) {
+            Logger.warn("System", "Failed to write config snapshot");
         }
     }
 }

@@ -95,6 +95,24 @@ public class SentryHelper {
         Logger.debug("Telemetry", "Uploaded a CONFIG event");
     }
 
+    private static void reportSystemInfo(WalSystemInfoCodec.SystemInfo info, long timestampMillis) {
+        if (!enable) return;
+        Sentry.logger().log(
+                SentryLogLevel.INFO,
+                SentryLogParameters.create(
+                        new SentryLongDate(timestampMillis * 1_000_000L),
+                        SentryAttributes.of(
+                                SentryAttribute.stringAttribute("gpu.name", info.gpuName()),
+                                SentryAttribute.stringAttribute("gpu.version", info.gpuVersion()),
+                                SentryAttribute.stringAttribute("os.name", info.osName()),
+                                SentryAttribute.stringAttribute("os.arch", info.osArch())
+                        )
+                ),
+                "SYSTEM_INFO"
+        );
+        Logger.debug("Telemetry", "Uploaded a SYSTEM_INFO event");
+    }
+
     private static void reportCorePerformance(
             CorePerformanceSnapshot performance,
             String asset,
@@ -245,6 +263,8 @@ public class SentryHelper {
         Map<String, Object> configSnapshot = null;
         long configTimestamp = 0;
         List<ModelHeartbeatRecord> modelHeartbeats = new ArrayList<>();
+        WalSystemInfoCodec.SystemInfo systemInfo = null;
+        long systemInfoTimestamp = 0;
         for (WalRecord record : records) {
             try {
                 if (record.type().equals(WalCoreHeartbeatCodec.INSTANCE.type())) {
@@ -259,12 +279,17 @@ public class SentryHelper {
                 } else if (record.type().equals(WalConfigCodec.INSTANCE.type())) {
                     configSnapshot = WalConfigCodec.INSTANCE.decode(record.payload());
                     configTimestamp = record.timestamp();
+                } else if (record.type().equals(WalSystemInfoCodec.INSTANCE.type())) {
+                    systemInfo = WalSystemInfoCodec.INSTANCE.decode(record.payload());
+                    systemInfoTimestamp = record.timestamp();
                 }
             } catch (IOException ignored) {
             }
         }
         if (configSnapshot != null)
             reportConfig(configSnapshot, configTimestamp);
+        if (systemInfo != null)
+            reportSystemInfo(systemInfo, systemInfoTimestamp);
         for (ModelHeartbeatRecord heartbeatRecord : modelHeartbeats) {
             reportCorePerformance(
                     heartbeatRecord.heartbeat().performance(),
