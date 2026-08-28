@@ -418,7 +418,10 @@ public class ArkPets extends InputApplicationAdaptor {
             if (wndNum == -1) {
                 boolean isBlackListWindow = false;
                 for (Pattern pattern : Const.titleBlacklist) {
-                    isBlackListWindow = pattern.matcher(hWndCtrl.windowText).matches();
+                    if (pattern.matcher(hWndCtrl.windowText).find()) {
+                        isBlackListWindow = true;
+                        break;
+                    }
                 }
                 if (isBlackListWindow) continue;
                 if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
