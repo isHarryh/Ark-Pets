@@ -5,15 +5,20 @@
 <div align="center" style="text-align:center">
    <h1> Ark-Pets </h1>
    <img alt="ArkPets icon" width="64" src="https://raw.githubusercontent.com/isHarryh/Ark-Pets/v3.x/assets/icons/icon.png">
+   <p>Arknights Desktop Pets | 明日方舟桌宠 (ArkPets)</p>
    <p>
-      Arknights Desktop Pets | 明日方舟桌宠 (ArkPets) <br>
-      <code><b> v3.12 </b></code>
+      <img alt="GitHub Latest Release" src="https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Release&sort=semver&include_prereleases">
+      <img alt="GitHub Stars" src="https://img.shields.io/github/stars/isHarryh/Ark-Pets?label=Stars">
    </p>
+   <hr>
    <p>
       <img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/isHarryh/Ark-Pets?label=Java">
       <img alt="GitHub License" src="https://img.shields.io/github/license/isHarryh/Ark-Pets?label=License">
       <img alt="Code Factor Grade" src="https://img.shields.io/codefactor/grade/github/isHarryh/Ark-Pets?label=CodeFactor">
       <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/isHarryh/Ark-Pets/build.yml?label=Build">
+   </p>
+   <p>
+      <a href="https://arkpets.harryh.cn?from=readme">🔗官方网站 | Official Website</a>
    </p>
    <sub>
       <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
@@ -74,17 +79,15 @@
 - 全面更新依赖库的版本
 - 支持透明模式等配置的记忆
 
-### 相关文档
+### 常用文档
 
-- 门户网站 > [点击访问](https://arkpets.harryh.cn)
-- 更新日志 > [点击查看](CHANGELOG.md)
-- 常见问题解答 > [点击查看](docs/FAQ.md)
+- **更新日志** > [点击查看](CHANGELOG.md)
+- **常见问题解答** > [点击查看](docs/FAQ.md)
+- **遥测功能说明** > [点击查看](docs/Telemetry.md)
 
 ## 使用方法 <sub>Usage</sub>
 
-|                                                                                             **目前最新版本**                                                                                              |                                  **支持的操作系统**                                  |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
-| [![GitHub Latest Release](https://img.shields.io/github/v/release/isHarryh/Ark-Pets?display_name=tag&label=Release&sort=semver&include_prereleases)](https://github.com/isHarryh/Ark-Pets/releases) | ![Windows](https://img.shields.io/badge/7%2B-blue?logo=Windows&label=Windows) |
+目前仅支持 Windows 7 及以上的图形操作系统。
 
 ### 快速上手
 
@@ -160,8 +163,12 @@
 -----
 
 <div align="center">
-    <p><i>GitHub 历史星标图</i></p>
-    <a href="https://starchart.cc/isHarryh/Ark-Pets">
-       <img alt="Stars Chart" src="https://starchart.cc/isHarryh/Ark-Pets.svg?variant=adaptive">
-    </a>
+   <p><i>GitHub Star History</i></p>
+   <picture>
+      <!--suppress HtmlUnknownTarget -->
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=isHarryh/Ark-Pets&type=date&theme=dark&legend=top-left&sealed_token=-hBNTJMB8JJLlN0Nzzg9Vd9lUkK3fVRMRHpHjy0cBTUzdR0niBpUbRQ8qVof2QRG1UC2k8L9OVvkra1_RHYwzV9IBgA2zY9nPbzZAsAUD3xfYHg5FtO-vw" />
+      <!--suppress HtmlUnknownTarget -->
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=isHarryh/Ark-Pets&type=date&legend=top-left&sealed_token=-hBNTJMB8JJLlN0Nzzg9Vd9lUkK3fVRMRHpHjy0cBTUzdR0niBpUbRQ8qVof2QRG1UC2k8L9OVvkra1_RHYwzV9IBgA2zY9nPbzZAsAUD3xfYHg5FtO-vw" />
+      <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=isHarryh/Ark-Pets&type=date&legend=top-left&sealed_token=-hBNTJMB8JJLlN0Nzzg9Vd9lUkK3fVRMRHpHjy0cBTUzdR0niBpUbRQ8qVof2QRG1UC2k8L9OVvkra1_RHYwzV9IBgA2zY9nPbzZAsAUD3xfYHg5FtO-vw" />
+   </picture>
 </div>
