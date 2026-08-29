@@ -72,7 +72,7 @@ ext {
     jarLibDir = layout.buildDirectory.dir("libs").get().toString()
     jarLibName = project.name + "-" + project.version
     jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
-    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
+    jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.management,jdk.unsupported"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
     issFileRel = "docs/scripts/ExePacking.iss"
