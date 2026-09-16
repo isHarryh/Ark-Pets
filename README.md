@@ -19,7 +19,7 @@
    </p>
    <p>
       <a href="https://arkpets.harryh.cn?from=readme">🔗官方网站 | Official Website</a>
-      <a href="README.en.md">🌐English Documentation</a>
+      <a href="README.EN.md">🌐English Documentation</a>
    </p>
 </div>
 
