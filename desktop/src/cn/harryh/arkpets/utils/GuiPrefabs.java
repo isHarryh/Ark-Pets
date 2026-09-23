@@ -378,18 +378,15 @@ public class GuiPrefabs {
             layout.setActions(Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
-            if (detail != null && !detail.isEmpty()) {
-                JFXTextArea textArea = new JFXTextArea();
-                textArea.setEditable(false);
-                textArea.setScrollTop(0);
-                textArea.getStyleClass().add("popup-detail-field");
-                textArea.appendText(detail);
-                body.getChildren().add(textArea);
-            }
+            appendDetail(body, detail);
             return dialog;
         }
 
         public static JFXDialog createConfirmDialog(StackPane parent, Node graphic, String title, String header, String content, Runnable onConfirmed) {
+            return createConfirmDialog(parent, graphic, title, header, content, null, onConfirmed);
+        }
+
+        public static JFXDialog createConfirmDialog(StackPane parent, Node graphic, String title, String header, String content, String detail, Runnable onConfirmed) {
             JFXDialog dialog = Dialogs.createCenteredDialog(parent, true);
             VBox body = new VBox();
             Label h2 = Dialogs.getPrefabsH2(header);
@@ -398,6 +395,7 @@ public class GuiPrefabs {
             body.getChildren().add(h2);
             body.getChildren().add(new Separator());
             body.getChildren().add(h3);
+            appendDetail(body, detail);
 
             JFXDialogLayout layout = new JFXDialogLayout();
             layout.setHeading(Dialogs.getHeading(graphic, title, COLOR_LIGHT_GRAY));
@@ -407,6 +405,17 @@ public class GuiPrefabs {
             layout.setActions(cancelButton, confirmButton);
             dialog.setContent(layout);
             return dialog;
+        }
+
+        private static void appendDetail(VBox body, String detail) {
+            if (detail == null || detail.isEmpty())
+                return;
+            JFXTextArea textArea = new JFXTextArea();
+            textArea.setEditable(false);
+            textArea.setScrollTop(0);
+            textArea.getStyleClass().add("popup-detail-field");
+            textArea.appendText(detail);
+            body.getChildren().add(textArea);
         }
 
         public static JFXDialog createErrorDialog(StackPane parent, Throwable e) {
@@ -470,23 +479,10 @@ public class GuiPrefabs {
                 disposeDialog(dialog);
             });
 
-            JFXButton uploadButton = new JFXButton();
-            uploadButton.setText("上传日志");
-            uploadButton.setTextFill(COLOR_WHITE);
-            uploadButton.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            uploadButton.setOnAction(ev -> {
-                Logger.debug("ErrorDialog", "Ready to upload logs");
-                List<String> pathList;
-                if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
-                    pathList = collectLogFiles(exception.getProcessId());
-                } else {
-                    pathList = collectLogFiles(null);
-                }
-                SentryHelper.captureLogFeedback(pathList);
-                disposeDialog(dialog);
-            });
-
-            layout.setActions(uploadButton, exportButton, Dialogs.getOkayButton(dialog, null));
+            if (SentryHelper.isSdkAvailable())
+                layout.setActions(createUploadButton(parent, dialog, e), exportButton, Dialogs.getOkayButton(dialog, null));
+            else
+                layout.setActions(exportButton, Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (e instanceof ProcessPool.UnexpectedExitCodeException) {
@@ -552,6 +548,61 @@ public class GuiPrefabs {
                 h3.setText("压缩文件相关错误。可能是文件不完整或已损坏，请稍后重试。");
             }
             return dialog;
+        }
+
+        private static Button createUploadButton(StackPane parent, JFXDialog dialog, Throwable e) {
+            JFXButton uploadButton = new JFXButton();
+            uploadButton.setText("上传日志");
+            uploadButton.setTextFill(COLOR_WHITE);
+            uploadButton.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
+            uploadButton.setOnAction(ev -> {
+                Logger.debug("ErrorDialog", "Ready to upload logs");
+                List<String> pathList;
+                if (e instanceof ProcessPool.UnexpectedExitCodeException exception) {
+                    pathList = collectLogFiles(exception.getProcessId());
+                } else {
+                    pathList = collectLogFiles(null);
+                }
+
+                if (pathList.isEmpty()) {
+                    Logger.info("ErrorDialog", "Logs not uploaded, no log file to upload");
+                    createCommonDialog(parent,
+                            Icons.getIcon(Icons.SVG_WARNING, COLOR_WARNING),
+                            "上传日志",
+                            "没有可上传的日志文件",
+                            "未找到本次错误的日志文件。您可尝试其他方式反馈问题。",
+                            null).show();
+                    return;
+                }
+
+                JFXDialog confirmDialog = createConfirmDialog(parent,
+                        Icons.getIcon(Icons.SVG_INFO_ALT, COLOR_INFO),
+                        "上传日志",
+                        "是否确认上传日志？",
+                        "我们将上传本次错误的日志给开发团队，以便诊断问题。\n您有机会在上传之前检查下述文件的内容。",
+                        String.join("\n", pathList.stream().map(path -> new File(path).getAbsolutePath()).toList()),
+                        () -> {
+                            if (SentryHelper.captureLogFeedback(pathList)) {
+                                disposeDialog(dialog);
+                                createCommonDialog(parent,
+                                        Icons.getIcon(Icons.SVG_SUCCESS_ALT, COLOR_SUCCESS),
+                                        "上传日志",
+                                        "日志已提交上传",
+                                        "感谢您的反馈！日志将在后台上传，网络异常时可能失败或延迟。",
+                                        null).show();
+                            } else {
+                                Logger.warn("ErrorDialog", "Logs not uploaded, failed to submit them to the Sentry SDK");
+                                createCommonDialog(parent,
+                                        Icons.getIcon(Icons.SVG_WARNING, COLOR_WARNING),
+                                        "上传日志",
+                                        "日志上传失败",
+                                        "由于内部错误，无法上传日志。请您稍后重试或改用“导出日志”。",
+                                        null).show();
+                            }
+                        });
+                confirmDialog.show();
+            });
+            return uploadButton;
         }
 
         private static List<String> collectLogFiles(Long coreProcessId) {

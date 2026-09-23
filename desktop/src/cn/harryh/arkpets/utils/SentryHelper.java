@@ -9,6 +9,7 @@ import io.sentry.logger.SentryLogParameters;
 import io.sentry.metrics.MetricsUnit;
 import io.sentry.metrics.SentryMetricsParameters;
 import io.sentry.protocol.Feedback;
+import io.sentry.protocol.SentryId;
 
 import java.io.File;
 import java.io.IOException;
@@ -230,16 +231,21 @@ public class SentryHelper {
         return attributes;
     }
 
-    public static void captureLogFeedback(List<String> fileList) {
+    public static boolean captureLogFeedback(List<String> fileList) {
         if (!sdkAvailable) {
             Logger.warn("Telemetry", "Sentry SDK unavailable, unable to upload the user log feedback");
-            return;
+            return false;
         }
-        Sentry.feedback().capture(
+        SentryId sentryId = Sentry.feedback().capture(
                 new Feedback("User uploaded ArkPets log files."),
                 Hint.withAttachments(fileList.stream().map(Attachment::new).toList())
         );
-        Logger.debug("Telemetry", "Uploaded a user log feedback");
+        if (SentryId.EMPTY_ID.equals(sentryId)) {
+            Logger.warn("Telemetry", "Failed to submit a user log feedback to the Sentry SDK");
+            return false;
+        }
+        Logger.info("Telemetry", "Submitted a user log feedback, Sentry ID is " + sentryId);
+        return true;
     }
 
     public static void consumePendingWal() {
@@ -385,6 +391,10 @@ public class SentryHelper {
 
     public static boolean isEnable() {
         return enable;
+    }
+
+    public static boolean isSdkAvailable() {
+        return sdkAvailable;
     }
 
     public static void setEnable(boolean enable) {
