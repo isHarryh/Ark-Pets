@@ -20,22 +20,32 @@ import java.util.Map;
 
 public class SentryHelper {
     private static boolean enable = false;
+    private static boolean sdkAvailable = false;
 
     public static void init() {
-        Sentry.init(options -> {
-            // Set -Dsentry.dsn Java option or SENTRY_DSN environment variable to customize DSN.
-            // If not set, telemetry features will be unavailable.
-            options.setEnableExternalConfiguration(true);
+        try {
+            Sentry.init(options -> {
+                // An empty DSN will disable the SDK gracefully.
+                options.setDsn("");
+                // A non-empty value from external configuration will override it.
+                // Set -Dsentry.dsn Java option or SENTRY_DSN environment variable to customize DSN.
+                options.setEnableExternalConfiguration(true);
 
-            // Set -Dsentry.environment=production in releases to switch telemetry environment.
-            // If not changed, "dev" will be used as the environment.
-            options.setEnvironment("dev");
+                // Set -Dsentry.environment=production in releases to switch telemetry environment.
+                // If not changed, "dev" will be used as the environment.
+                options.setEnvironment("dev");
 
-            options.setSendDefaultPii(true);
-            options.setTracesSampleRate(1.0);
-            options.getLogs().setEnabled(true);
-            options.setRelease(Const.appVersion.toString());
-        });
+                options.setSendDefaultPii(true);
+                options.setTracesSampleRate(1.0);
+                options.getLogs().setEnabled(true);
+                options.setRelease(Const.appVersion.toString());
+            });
+        } catch (Exception | LinkageError e) {
+            Logger.warn("Telemetry", "Failed to initialize the Sentry SDK, telemetry is unavailable. " + e);
+        }
+        sdkAvailable = Sentry.isEnabled();
+        if (!sdkAvailable)
+            Logger.info("Telemetry", "Sentry SDK is not active due to missing, invalid or disabled configuration, telemetry is unavailable");
     }
 
     private static HeartbeatSession<WalDesktopHeartbeatCodec.WalDesktopHeartbeatEvent> desktopSession;
@@ -221,6 +231,10 @@ public class SentryHelper {
     }
 
     public static void captureLogFeedback(List<String> fileList) {
+        if (!sdkAvailable) {
+            Logger.warn("Telemetry", "Sentry SDK unavailable, unable to upload the user log feedback");
+            return;
+        }
         Sentry.feedback().capture(
                 new Feedback("User uploaded ArkPets log files."),
                 Hint.withAttachments(fileList.stream().map(Attachment::new).toList())
@@ -229,6 +243,11 @@ public class SentryHelper {
     }
 
     public static void consumePendingWal() {
+        if (!sdkAvailable) {
+            Logger.debug("Telemetry", "Sentry SDK unavailable, now keeping existing WAL files");
+            return;
+        }
+
         // If telemetry features were disabled, delete all WAL files and skip consuming.
         if (!enable) {
             Logger.debug("Telemetry", "Telemetry disabled, now deleting existing WAL files");
@@ -369,6 +388,6 @@ public class SentryHelper {
     }
 
     public static void setEnable(boolean enable) {
-        SentryHelper.enable = enable;
+        SentryHelper.enable = enable && sdkAvailable;
     }
 }

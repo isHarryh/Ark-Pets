@@ -18,9 +18,7 @@ processResources {
     ]
 }
 
-def sentryDsn = project.hasProperty("SENTRY_DSN")
-        ? project.getProperties().get("SENTRY_DSN") as String
-        : "https://examplePublicKey@o0.ingest.sentry.io/0"
+def sentryDsn = (project.findProperty("SENTRY_DSN") ?: "").trim()
 
 // Runs the app without debug.
 tasks.register("run", JavaExec) {
@@ -35,7 +33,8 @@ tasks.register("run", JavaExec) {
     setIgnoreExitValue(true)
 
     jvmArgs += "-Dfile.encoding=UTF-8"
-    jvmArgs += "-Dsentry.dsn=${sentryDsn}"
+    if (sentryDsn)
+        jvmArgs += "-Dsentry.dsn=${sentryDsn}"
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
@@ -56,7 +55,8 @@ tasks.register("debug", JavaExec) {
     setDebug(true)
 
     jvmArgs += "-Dfile.encoding=UTF-8"
-    jvmArgs += "-Dsentry.dsn=${sentryDsn}"
+    if (sentryDsn)
+        jvmArgs += "-Dsentry.dsn=${sentryDsn}"
 }
 
 
@@ -159,9 +159,12 @@ tasks.register("jpackage", Exec) {
             '--main-jar', jar.archiveFile.get().asFile.getName(),
             '--runtime-image', "${jlinkDir}/runtime",
             '--java-options', '-Dfile.encoding=UTF-8',
-            '--java-options', "-Dsentry.dsn=${sentryDsn}",
             '--java-options', '-Dsentry.environment=production'
     ]
+    if (sentryDsn) {
+        commands << '--java-options'
+        commands << "-Dsentry.dsn=${sentryDsn}"
+    }
     if (osName.contains('windows')) {
         commands << '--icon'
         commands << "${assetsDir}/icons/icon.ico"

@@ -87,16 +87,29 @@ ArkPets 由两个独立 JVM 进程构成：**Desktop**（JavaFX 启动器）与 
 
 #### Sentry 数据源名称（DSN）
 
-- **Gradle 任务**：Gradle 项目属性 `SENTRY_DSN` 是唯一来源，定义于 `desktop/build.gradle`（缺失时回退到占位黑洞 DSN）：
+- **Gradle 任务**：Gradle 项目属性 `SENTRY_DSN` 是唯一来源，定义于 `desktop/build.gradle`。属性缺失或为空时不注入任何 DSN。
   - `run` / `debug` 系列任务会通过 `jvmArgs` 注入 `-Dsentry.dsn=...`；
   - `dist` 系列任务会通过 jpackage `--java-options` 将 DSN 固化进发行版启动配置。
 
-- **CI 构建**：由 `.github/workflows/build.yml` 通过 `ORG_GRADLE_PROJECT_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}` 提供密钥。
+- **CI 构建**：由 `.github/workflows/build.yml` 通过 `ORG_GRADLE_PROJECT_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}` 提供密钥。密钥缺失时同样不会注入 DSN。
 
 - **其他情景**：如果不是在以上两类情景中运行的程序（例如直接使用 IDEA 运行了入口点），您还可以通过以下三种方式手动配置（优先级从高到低）：
   1. Java 系统属性 `-Dsentry.dsn`；
   2. 环境变量 `SENTRY_DSN`；
   3. `sentry.properties` 文件。
+
+  当 Gradle 属性为空时不会注入系统属性，因此上述环境变量等方式在 Gradle 任务中同样生效。
+
+#### 配置缺失或错误时的语义
+
+不管以何种方式运行，DSN 的解析与失败行为都是统一的（由 `SentryHelper` 集中处理），程序在任何配置问题下都不会崩溃：
+
+|       DSN 情况       |     SDK 及程序行为      | 未上报的 WAL 数据 |
+|:------------------:|:------------------:|:------------|
+|       缺失或为空        | SDK 将禁用，记录 INFO 日志 | 保留，待日后补传    |
+|      非空但格式非法       | SDK 将禁用，记录 WARN 日志 | 保留，待日后补偿    |
+|      有效且开启遥测       |   SDK 将启用，遥测正常上报   | 上报成功后在本地删除  |
+|      有效但关闭遥测       |   SDK 将启用，遥测停止上报   | 在本地删除       |
 
 #### Sentry 环境标识（environment）
 
