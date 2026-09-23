@@ -549,7 +549,8 @@ public class ArkPets extends InputApplicationAdaptor {
         try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
             writer.append(WalSystemInfoCodec.INSTANCE, new WalSystemInfoCodec.SystemInfo(
                     Gdx.gl.glGetString(GL20.GL_VENDOR),
-                    Gdx.gl.glGetString(GL20.GL_VERSION)
+                    Gdx.gl.glGetString(GL20.GL_VERSION),
+                    Gdx.gl.glGetString(GL20.GL_RENDERER)
             ));
         } catch (IOException e) {
             Logger.warn("System", "Failed to write system info");
