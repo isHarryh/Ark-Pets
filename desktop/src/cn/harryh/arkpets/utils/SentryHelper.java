@@ -39,7 +39,7 @@ public class SentryHelper {
                 options.setSendDefaultPii(true);
                 options.setTracesSampleRate(1.0);
                 options.getLogs().setEnabled(true);
-                options.setRelease(Const.appVersion.toString());
+                options.setRelease("arkpets@"+ Const.appVersion);
             });
         } catch (Exception | LinkageError e) {
             Logger.warn("Telemetry", "Failed to initialize the Sentry SDK, telemetry is unavailable. " + e);
