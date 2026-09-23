@@ -24,6 +24,7 @@ public final class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.Sys
             dos.writeUTF(value.gpuVersion());
             dos.writeUTF(value.osName());
             dos.writeUTF(value.osArch());
+            dos.writeUTF(value.gpuRenderer()); // for compatibility
         }
         return bos.toByteArray();
     }
@@ -35,13 +36,14 @@ public final class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.Sys
             String gpuVersion = dis.readUTF();
             String osName = dis.readUTF();
             String osArch = dis.readUTF();
-            return new SystemInfo(gpuInfo, gpuVersion, osName, osArch);
+            String gpuRenderer = dis.readUTF(); // for compatibility
+            return new SystemInfo(gpuInfo, gpuVersion, osName, osArch, gpuRenderer);
         }
     }
 
-    public record SystemInfo(String gpuName, String gpuVersion, String osName, String osArch) {
-        public SystemInfo(String gpuInfo, String gpuVersion) {
-            this(gpuInfo, gpuVersion, System.getProperty("os.name"), System.getProperty("os.arch"));
+    public record SystemInfo(String gpuName, String gpuVersion, String osName, String osArch, String gpuRenderer) {
+        public SystemInfo(String gpuInfo, String gpuVersion, String gpuRenderer) {
+            this(gpuInfo, gpuVersion, System.getProperty("os.name"), System.getProperty("os.arch"), gpuRenderer);
         }
     }
 }
