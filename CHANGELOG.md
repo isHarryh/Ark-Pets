@@ -16,6 +16,12 @@
 |:------------|:--------------------------------------|
 | [`ec33d13`] | 优化了 Mirror 酱 CDK 在本地存储的加解密逻辑，以提高其兼容性。 |
 
+| **补丁**                                              |                                                   |
+|:----------------------------------------------------|:--------------------------------------------------|
+| `v3.13.1`<br>[`f83ae35`]                            | 修复了当遥测配置的 DSN 缺失或为空时，可能导致程序异常退出的问题。               |
+| `v3.13.1`<br>[`7013296`]                            | 优化了错误反馈对话框的交互体验，现在上传日志前会显示待上传文件的路径以供确认，并给出上传状态提示。 |
+| `v3.13.1`<br>[`#174`]<br>[`f99793f`]<br>[`543aa50`] | 修复了遥测上报的发布版本号不符合语义化版本规范的问题，并完善了 GL 系的信息采集。        |
+
 ## v3.12
 | **新增**                     |                                                   |
 |:---------------------------|:--------------------------------------------------|
@@ -645,6 +651,7 @@
 [`#167`]: https://github.com/isHarryh/Ark-Pets/pull/167
 [`#169`]: https://github.com/isHarryh/Ark-Pets/pull/169
 [`#170`]: https://github.com/isHarryh/Ark-Pets/pull/170
+[`#174`]: https://github.com/isHarryh/Ark-Pets/pull/174
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -807,3 +814,7 @@
 [`3b8a4c8`]: https://github.com/isHarryh/Ark-Pets/commit/3b8a4c8461db75af7143f8d1ec214728337f0e14
 [`2b31733`]: https://github.com/isHarryh/Ark-Pets/commit/2b3173396a129a536ffccfeec967689e7eb559be
 [`b2d368a`]: https://github.com/isHarryh/Ark-Pets/commit/b2d368aa93ecb727ed44e900439037f4a352eb8c
+[`f83ae35`]: https://github.com/isHarryh/Ark-Pets/commit/f83ae350f45646f630bc036d6c1ef5b98a6e11b3
+[`7013296`]: https://github.com/isHarryh/Ark-Pets/commit/701329688023507a4f15386feee2a418cf8e9796
+[`f99793f`]: https://github.com/isHarryh/Ark-Pets/commit/f99793f8bee03ef59612c87407943268c6d529de
+[`543aa50`]: https://github.com/isHarryh/Ark-Pets/commit/543aa50303518df266f6a2fb9f65fc0f1c90138a
