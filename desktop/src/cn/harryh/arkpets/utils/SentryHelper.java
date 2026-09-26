@@ -232,12 +232,24 @@ public class SentryHelper {
     }
 
     public static boolean captureLogFeedback(List<String> fileList) {
+        return captureLogFeedback(fileList, SentryId.EMPTY_ID);
+    }
+
+    /** Uploads log files as a user feedback, optionally associated with a previously captured event.
+     * @param fileList The log files to attach.
+     * @param associatedEventId The event to associate the feedback with, or {@link SentryId#EMPTY_ID} for none.
+     * @return true if the feedback was submitted.
+     */
+    public static boolean captureLogFeedback(List<String> fileList, SentryId associatedEventId) {
         if (!sdkAvailable) {
             Logger.warn("Telemetry", "Sentry SDK unavailable, unable to upload the user log feedback");
             return false;
         }
+        Feedback feedback = new Feedback("User uploaded ArkPets log files.");
+        if (associatedEventId != null && !SentryId.EMPTY_ID.equals(associatedEventId))
+            feedback.setAssociatedEventId(associatedEventId);
         SentryId sentryId = Sentry.feedback().capture(
-                new Feedback("User uploaded ArkPets log files."),
+                feedback,
                 Hint.withAttachments(fileList.stream().map(Attachment::new).toList())
         );
         if (SentryId.EMPTY_ID.equals(sentryId)) {
@@ -273,47 +285,50 @@ public class SentryHelper {
 
     /** Immediately consumes the WAL file of a process, typically called right after detecting an abnormal exit.
      * @param pid The id of the process whose WAL file should be consumed.
+     * @return The id of the crash event captured from the WAL, or {@link SentryId#EMPTY_ID} if none was captured.
      */
-    public static void consumeWalOfProcess(long pid) {
+    public static SentryId consumeWalOfProcess(long pid) {
         if (!sdkAvailable) {
             Logger.debug("Telemetry", "Sentry SDK unavailable, now keeping the WAL file of process " + pid);
-            return;
+            return SentryId.EMPTY_ID;
         }
 
         // Skip WAL file whose process is still alive
         if (ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
             Logger.debug("Telemetry", "Process " + pid + " is still alive, now keeping its WAL file");
-            return;
+            return SentryId.EMPTY_ID;
         }
 
         File file = WalReader.walFile(pid);
         if (!file.isFile())
-            return;
+            return SentryId.EMPTY_ID;
 
         // If telemetry features were disabled, delete the WAL file and skip consuming.
         if (!enable) {
             Logger.debug("Telemetry", "Telemetry disabled, now deleting the WAL file of process " + pid);
             if (!file.delete())
                 Logger.warn("Telemetry", "Failed to delete the WAL file " + file.getName());
-            return;
+            return SentryId.EMPTY_ID;
         }
 
-        consumeWalFile(file);
+        return consumeWalFile(file);
     }
 
-    private static void consumeWalFile(File file) {
+    private static SentryId consumeWalFile(File file) {
+        SentryId eventId;
         try (WalReader reader = WalReader.open(file)) {
             Logger.debug("Telemetry", "Consuming WAL file " + file.getName());
-            consumeWalRecords(reader.readAll());
+            eventId = consumeWalRecords(reader.readAll());
         } catch (IOException e) {
             Logger.warn("Telemetry", "Failed to consume WAL file " + file.getName() + ", will retry later");
-            return;
+            return SentryId.EMPTY_ID;
         }
         if (!file.delete())
             Logger.warn("Telemetry", "Failed to delete consumed WAL file " + file.getName());
+        return eventId;
     }
 
-    private static void consumeWalRecords(List<WalRecord> records) {
+    private static SentryId consumeWalRecords(List<WalRecord> records) {
         WalData data = collectWalRecords(records);
         if (data.configSnapshot() != null)
             reportConfig(data.configSnapshot(), data.configTimestamp());
@@ -326,7 +341,7 @@ public class SentryHelper {
                     heartbeatRecord.timestampMillis()
             );
         }
-        reportSession(data);
+        return reportSession(data);
     }
 
     private static WalData collectWalRecords(List<WalRecord> records) {
@@ -371,7 +386,8 @@ public class SentryHelper {
         );
     }
 
-    private static void reportSession(WalData data) {
+    private static SentryId reportSession(WalData data) {
+        SentryId eventId = SentryId.EMPTY_ID;
         WalCoreHeartbeatCodec.WalHeartbeatEvent lastModelHeartbeat = data.lastModelHeartbeat();
         if (lastModelHeartbeat != null) {
             long endTimeMillis;
@@ -383,7 +399,7 @@ public class SentryHelper {
                     Exception exception = WalExceptionCodec.INSTANCE.decode(data.exceptionRecord().payload());
                     SentryEvent event = new SentryEvent(exception);
                     event.setTimestamp(new Date(data.exceptionRecord().timestamp()));
-                    Sentry.captureEvent(event);
+                    eventId = Sentry.captureEvent(event);
                 } catch (IOException ignored) {
                 }
             } else if (lastModelHeartbeat.stopped()) {
@@ -401,6 +417,7 @@ public class SentryHelper {
                     data.lastDesktopHeartbeat().stopped() ? SentryLogLevel.INFO : SentryLogLevel.WARN
             );
         }
+        return eventId;
     }
 
     private record WalData(
