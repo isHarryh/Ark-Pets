@@ -10,6 +10,7 @@ import cn.harryh.arkpets.guitasks.ZipTask;
 import cn.harryh.arkpets.network.Connections;
 import cn.harryh.arkpets.network.api.McQueryVersion;
 import com.jfoenix.controls.*;
+import io.sentry.protocol.SentryId;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -419,6 +420,10 @@ public class GuiPrefabs {
         }
 
         public static JFXDialog createErrorDialog(StackPane parent, Throwable e) {
+            return createErrorDialog(parent, e, SentryId.EMPTY_ID);
+        }
+
+        public static JFXDialog createErrorDialog(StackPane parent, Throwable e, SentryId eventId) {
             JFXDialog dialog = Dialogs.createCenteredDialog(parent, false);
 
             VBox content = new VBox();
@@ -480,7 +485,7 @@ public class GuiPrefabs {
             });
 
             if (SentryHelper.isSdkAvailable())
-                layout.setActions(createUploadButton(parent, dialog, e), exportButton, Dialogs.getOkayButton(dialog, null));
+                layout.setActions(createUploadButton(parent, dialog, e, eventId), exportButton, Dialogs.getOkayButton(dialog, null));
             else
                 layout.setActions(exportButton, Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
@@ -550,7 +555,7 @@ public class GuiPrefabs {
             return dialog;
         }
 
-        private static Button createUploadButton(StackPane parent, JFXDialog dialog, Throwable e) {
+        private static Button createUploadButton(StackPane parent, JFXDialog dialog, Throwable e, SentryId eventId) {
             JFXButton uploadButton = new JFXButton();
             uploadButton.setText("上传日志");
             uploadButton.setTextFill(COLOR_WHITE);
@@ -582,7 +587,7 @@ public class GuiPrefabs {
                         "我们将上传本次错误的日志给开发团队，以便诊断问题。\n您有机会在上传之前检查下述文件的内容。",
                         String.join("\n", pathList.stream().map(path -> new File(path).getAbsolutePath()).toList()),
                         () -> {
-                            if (SentryHelper.captureLogFeedback(pathList)) {
+                            if (SentryHelper.captureLogFeedback(pathList, eventId)) {
                                 disposeDialog(dialog);
                                 createCommonDialog(parent,
                                         Icons.getIcon(Icons.SVG_SUCCESS_ALT, COLOR_SUCCESS),

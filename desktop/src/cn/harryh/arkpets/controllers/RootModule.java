@@ -17,6 +17,8 @@ import cn.harryh.arkpets.utils.GuiComponents.Handbook;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
+import io.sentry.protocol.SentryId;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -48,7 +50,7 @@ import static cn.harryh.arkpets.Const.*;
 
 public final class RootModule implements Controller<ArkHomeFX> {
     public Handbook trayExitHandbook = new TrayExitHandBook();
-    public ProcessPool.UnexpectedExitCodeException lastLaunchFailed;
+    private volatile LaunchFailure lastLaunchFailed;
     public GuiPrefabs.PeerNodeComposer moduleWrapperComposer;
 
     @FXML
@@ -191,7 +193,10 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 if (!future.get().isSuccess()) {
                     int exitCode = future.get().exitValue();
                     Logger.warn("Launcher", "Detected an abnormal finalization of an ArkPets thread (exit code " + exitCode + "). Please check the log file for details.");
-                    lastLaunchFailed = future.get().toException();
+                    ProcessPool.UnexpectedExitCodeException cause = future.get().toException();
+                    // Upload the WAL file of the abnormally exited process immediately.
+                    SentryId eventId = SentryHelper.consumeWalOfProcess(future.get().processId());
+                    lastLaunchFailed = new LaunchFailure(cause, eventId);
                     return false;
                 }
                 Logger.debug("Launcher", "Detected a successful finalization of an ArkPets thread.");
@@ -333,15 +338,21 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 Task<Boolean> task = new Task<>() {
                     @Override
                     protected Boolean call() throws Exception {
-                        if (lastLaunchFailed != null) {
-                            Exception e = lastLaunchFailed;
+                        LaunchFailure failure = lastLaunchFailed;
+                        if (failure != null) {
                             lastLaunchFailed = null;
-                            throw e;
+                            throw new LaunchFailureException(failure.cause(), failure.eventId());
                         }
                         return false;
                     }
                 };
-                task.setOnFailed(e -> GuiPrefabs.Dialogs.createErrorDialog(app.body, task.getException()).show());
+                task.setOnFailed(e -> {
+                    Throwable error = task.getException();
+                    if (error instanceof LaunchFailureException launchFailure)
+                        GuiPrefabs.Dialogs.createErrorDialog(app.body, launchFailure.getCause(), launchFailure.eventId()).show();
+                    else
+                        GuiPrefabs.Dialogs.createErrorDialog(app.body, error).show();
+                });
                 return task;
             }
         };
@@ -349,6 +360,22 @@ public final class RootModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(500));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private record LaunchFailure(ProcessPool.UnexpectedExitCodeException cause, SentryId eventId) {
+    }
+
+    private static final class LaunchFailureException extends Exception {
+        private final SentryId eventId;
+
+        private LaunchFailureException(Throwable cause, SentryId eventId) {
+            super(cause);
+            this.eventId = eventId;
+        }
+
+        private SentryId eventId() {
+            return eventId;
+        }
     }
 
     private static class TrayExitHandBook extends Handbook {
