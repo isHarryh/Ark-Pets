@@ -30,13 +30,21 @@ public final class WalReader implements AutoCloseable {
         this.in = stream;
     }
 
+    /** Gets the WAL file of the process with the given id.
+     * @param pid The id of the writing process.
+     * @return The WAL file, which may not exist yet.
+     */
+    public static File walFile(long pid) {
+        return new File(Const.LogConfig.logDir, Const.LogConfig.logWalPattern.formatted(pid));
+    }
+
     /** Opens the WAL file of the process with the given id.
      * @param pid The id of the writing process.
      * @return A new reader.
      * @throws IOException If the file cannot be opened.
      */
     public static WalReader open(long pid) throws IOException {
-        return new WalReader(new File(Const.LogConfig.logDir, Const.LogConfig.logWalPattern.formatted(pid)));
+        return new WalReader(walFile(pid));
     }
 
     /** Opens the given WAL file.

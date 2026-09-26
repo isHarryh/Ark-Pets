@@ -267,16 +267,50 @@ public class SentryHelper {
             // Skip WAL file whose process is still alive
             if (ProcessHandle.of(WalReader.parsePid(file)).map(ProcessHandle::isAlive).orElse(false))
                 continue;
-            try (WalReader reader = WalReader.open(file)) {
-                Logger.debug("Telemetry", "Consuming WAL file " + file.getName());
-                consumeWalRecords(reader.readAll());
-            } catch (IOException e) {
-                Logger.warn("Telemetry", "Failed to consume WAL file " + file.getName() + ", will retry later");
-                continue;
-            }
-            if (!file.delete())
-                Logger.warn("Telemetry", "Failed to delete consumed WAL file " + file.getName());
+            consumeWalFile(file);
         }
+    }
+
+    /** Immediately consumes the WAL file of a process, typically called right after detecting an abnormal exit.
+     * @param pid The id of the process whose WAL file should be consumed.
+     */
+    public static void consumeWalOfProcess(long pid) {
+        if (!sdkAvailable) {
+            Logger.debug("Telemetry", "Sentry SDK unavailable, now keeping the WAL file of process " + pid);
+            return;
+        }
+
+        // Skip WAL file whose process is still alive
+        if (ProcessHandle.of(pid).map(ProcessHandle::isAlive).orElse(false)) {
+            Logger.debug("Telemetry", "Process " + pid + " is still alive, now keeping its WAL file");
+            return;
+        }
+
+        File file = WalReader.walFile(pid);
+        if (!file.isFile())
+            return;
+
+        // If telemetry features were disabled, delete the WAL file and skip consuming.
+        if (!enable) {
+            Logger.debug("Telemetry", "Telemetry disabled, now deleting the WAL file of process " + pid);
+            if (!file.delete())
+                Logger.warn("Telemetry", "Failed to delete the WAL file " + file.getName());
+            return;
+        }
+
+        consumeWalFile(file);
+    }
+
+    private static void consumeWalFile(File file) {
+        try (WalReader reader = WalReader.open(file)) {
+            Logger.debug("Telemetry", "Consuming WAL file " + file.getName());
+            consumeWalRecords(reader.readAll());
+        } catch (IOException e) {
+            Logger.warn("Telemetry", "Failed to consume WAL file " + file.getName() + ", will retry later");
+            return;
+        }
+        if (!file.delete())
+            Logger.warn("Telemetry", "Failed to delete consumed WAL file " + file.getName());
     }
 
     private static void consumeWalRecords(List<WalRecord> records) {
