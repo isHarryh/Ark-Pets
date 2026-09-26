@@ -19,10 +19,8 @@
    </p>
    <p>
       <a href="https://arkpets.harryh.cn?from=readme">🔗官方网站 | Official Website</a>
+      <a href="README.EN.md">🌐English Documentation</a>
    </p>
-   <sub>
-      <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
-   </sub>
 </div>
 
 ## 介 绍 <sub>Intro</sub>
