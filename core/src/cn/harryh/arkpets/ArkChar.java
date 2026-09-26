@@ -124,7 +124,7 @@ public class ArkChar {
         skeleton.updateWorldTransform();
         // 4.Animation setup
         AnimationStateData asd = new AnimationStateData(skeletonData);
-        animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
+        animList = new AnimClipGroup(skeletonData.getAnimations());
         // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);
