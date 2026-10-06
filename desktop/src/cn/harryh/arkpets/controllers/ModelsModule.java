@@ -451,18 +451,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             if (zipFile != null && zipFile.isFile()) {
                 Logger.info("ModelManager", "Importing zip file: " + zipFile);
                 // Go to [Step 1/2]:
-                new UnzipModelsTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
-                    @Override
-                    protected void onSucceeded(boolean result) {
-                        // Go to [Step 2/2]:
-                        new PostUnzipModelTask(parent, GuiTaskStyle.STRICT) {
-                            @Override
-                            protected void onSucceeded(boolean result) {
-                                app.modelsModule.modelReload(true);
-                            }
-                        }.start();
-                    }
-                }.start();
+                importModel(app, zipFile);
             }
         });
 
@@ -777,6 +766,21 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     detail).show();
             Logger.info("ModelManager", "Model repo version check finished (not up-to-dated)");
         }
+    }
+
+    static void importModel(ArkHomeFX app,File zipFile) {
+        new UnzipModelsTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
+            @Override
+            protected void onSucceeded(boolean result) {
+                // Go to [Step 2/2]:
+                new PostUnzipModelTask(parent, GuiTaskStyle.STRICT) {
+                    @Override
+                    protected void onSucceeded(boolean result) {
+                        app.modelsModule.modelReload(true);
+                    }
+                }.start();
+            }
+        }.start();
     }
 
 

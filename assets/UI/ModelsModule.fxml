@@ -280,5 +280,6 @@
         </Text>
         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="使用前请先在 [模型库管理] 中下载模型"/>
         <Text strokeType="OUTSIDE" strokeWidth="0.0" text="如您已下载模型，请尝试点击 [重载] 按钮"/>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="您也可以将下载好的模型库拖入以导入模型"/>
     </VBox>
 </Pane>

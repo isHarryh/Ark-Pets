@@ -28,14 +28,13 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
+import static cn.harryh.arkpets.controllers.ModelsModule.importModel;
 
 
 public final class RootModule implements Controller<ArkHomeFX> {
@@ -95,9 +95,14 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private HBox toast;
 
+    @FXML
+    private StackPane dndNotice;
+
     private ArkHomeFX app;
     private double xOffset;
     private double yOffset;
+    private boolean dragDisabled;
+    private boolean draggingZip;
 
     @Override
     public void initializeWith(ArkHomeFX app) {
@@ -128,6 +133,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         initMenuButtons();
         initLaunchButton();
         initLaunchingStatusListener();
+        initDnd();
     }
 
     /** Pops up the splash screen in the GUI.
@@ -274,6 +280,10 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 this::exit).show();
     }
 
+    public void setDragDisabled(boolean dragDisabled) {
+        this.dragDisabled = dragDisabled;
+    }
+
     private void initLaunchButton() {
         // Set handler for internal start button.
         launchBtn.setOnAction(e -> {
@@ -349,6 +359,51 @@ public final class RootModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(500));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private void initDnd() {
+        rootContainer.setOnDragEntered(e -> {
+            Logger.debug("Launcher", "Drag Entered");
+            List<File> files = e.getDragboard().getFiles();
+            if (listHasZipFile(files)) {
+                GuiPrefabs.blurNode(body, durationFast, null);
+                GuiPrefabs.fadeInNode(dndNotice, durationFast, null);
+                draggingZip = true;
+            }
+        });
+        rootContainer.setOnDragOver(e -> {
+            if (e.getGestureSource() == null && draggingZip) {
+                e.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            }
+        });
+        rootContainer.setOnDragDropped(e -> {
+            Logger.debug("Launcher", "Drag Dropped");
+            e.setDropCompleted(true);
+            List<File> files = e.getDragboard().getFiles();
+            if (listHasZipFile(files)) {
+                File zipFile = files.get(0);
+                GuiPrefabs.Dialogs.createConfirmDialog(
+                        body,
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP_ALT, GuiPrefabs.COLOR_INFO),
+                        "导入模型库",
+                        "准备导入模型库",
+                        zipFile.getAbsolutePath() + " 将作为模型库被导入",
+                        () -> importModel(app, zipFile))
+                .show();
+            }
+        });
+        rootContainer.setOnDragExited(e -> {
+            Logger.debug("Launcher", "Drag Exited");
+            if (draggingZip) {
+                GuiPrefabs.deblurNode(body, durationFast, null);
+                GuiPrefabs.fadeOutNode(dndNotice, durationFast, null);
+                draggingZip = false;
+            }
+        });
+    }
+
+    private boolean listHasZipFile(List<File> files) {
+        return files != null && files.size() == 1 && files.get(0).getName().endsWith(".zip");
     }
 
     private static class TrayExitHandBook extends Handbook {
