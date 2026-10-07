@@ -9,6 +9,8 @@ import cn.harryh.arkpets.EmbeddedLauncher;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
+import cn.harryh.arkpets.guitasks.PostUnzipModelTask;
+import cn.harryh.arkpets.guitasks.UnzipModelsTask;
 import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
 import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.utils.ArgPending;
@@ -28,14 +30,13 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -95,6 +96,9 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private HBox toast;
 
+    @FXML
+    private StackPane dndNotice;
+
     private ArkHomeFX app;
     private double xOffset;
     private double yOffset;
@@ -128,6 +132,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         initMenuButtons();
         initLaunchButton();
         initLaunchingStatusListener();
+        initDnd();
     }
 
     /** Pops up the splash screen in the GUI.
@@ -349,6 +354,62 @@ public final class RootModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(500));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private boolean draggingZip;
+
+    private void initDnd() {
+        rootContainer.setOnDragEntered(e -> {
+            Logger.debug("Launcher", "Drag Entered");
+            List<File> files = e.getDragboard().getFiles();
+            if (files != null && files.size() == 1 && files.get(0).getName().endsWith(".zip")) {
+                GuiPrefabs.blurNode(body, durationFast, null);
+                GuiPrefabs.fadeInNode(dndNotice, durationFast, null);
+                draggingZip =true;
+            }
+        });
+        rootContainer.setOnDragOver(e -> {
+            Logger.debug("Launcher", "Drag Over");
+            if (e.getGestureSource() == null && draggingZip) {
+                e.acceptTransferModes(TransferMode.MOVE);
+            }
+        });
+        rootContainer.setOnDragDropped(e -> {
+            Logger.debug("Launcher", "Drag Dropped");
+            List<File> files = e.getDragboard().getFiles();
+            if (files != null && files.size() == 1 && files.get(0).getName().endsWith(".zip")) {
+                File zipFile = files.get(0);
+                GuiPrefabs.Dialogs.createConfirmDialog(
+                        body,
+                        GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP_ALT, GuiPrefabs.COLOR_INFO),
+                        "导入模型库",
+                        "准备导入模型库",
+                        zipFile.getAbsolutePath() + " 将作为模型库被导入",
+                        () -> {
+                            new UnzipModelsTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
+                                @Override
+                                protected void onSucceeded(boolean result) {
+                                    // Go to [Step 2/2]:
+                                    new PostUnzipModelTask(parent, GuiTaskStyle.STRICT) {
+                                        @Override
+                                        protected void onSucceeded(boolean result) {
+                                            app.modelsModule.modelReload(true);
+                                        }
+                                    }.start();
+                                }
+                            }.start();
+                        })
+                .show();
+            }
+        });
+        rootContainer.setOnDragExited(e -> {
+            Logger.debug("Launcher", "Drag Exited");
+            if (draggingZip) {
+                GuiPrefabs.deblurNode(body, durationFast, null);
+                GuiPrefabs.fadeOutNode(dndNotice, durationFast, null);
+                draggingZip = false;
+            }
+        });
     }
 
     private static class TrayExitHandBook extends Handbook {
