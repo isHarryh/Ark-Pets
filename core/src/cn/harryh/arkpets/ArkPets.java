@@ -81,6 +81,9 @@ public class ArkPets extends InputApplicationAdaptor {
         Gdx.graphics.setForegroundFPS(config.display_fps);
         registerDebugger();
 
+        // Report System info early
+        writeSystemInfo();
+
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
         cha = new ArkChar(config, config.display_scale);
@@ -122,9 +125,6 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 6.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
-
-        // Setup complete
-        writeSystemInfo();
 
         Logger.info("App", "Render");
     }
