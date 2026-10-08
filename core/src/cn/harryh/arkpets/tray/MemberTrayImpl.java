@@ -26,8 +26,8 @@ import static cn.harryh.arkpets.Const.iconFilePng;
 public class MemberTrayImpl extends MemberTray {
     private final ArkPets arkPets;
     private final SocketClient client;
-    private final JDialog popWindow;
-    private final JPopupMenu popMenu;
+    private JDialog popWindow;
+    private JPopupMenu popMenu;
     private TrayIcon icon;
     public AnimData keepAnim;
 
@@ -41,26 +41,28 @@ public class MemberTrayImpl extends MemberTray {
         arkPets = boundArkPets;
         this.client = client;
 
-        // Ui Components:
-        popWindow = new JDialog();
-        popWindow.setUndecorated(true);
-        popWindow.setSize(1, 1);
-        JLabel innerLabel = new JLabel(" " + name + " ");
-        innerLabel.setAlignmentX(0.5f);
+        // Ui Components (must be created on the EDT):
+        runOnEdtAndWait(() -> {
+            popWindow = new JDialog();
+            popWindow.setUndecorated(true);
+            popWindow.setSize(1, 1);
+            JLabel innerLabel = new JLabel(" " + name + " ");
+            innerLabel.setAlignmentX(0.5f);
 
-        popMenu = new JPopupMenu() {
-            @Override
-            public void firePopupMenuWillBecomeInvisible() {
-                popWindow.setVisible(false); // Hide the container when the menu is invisible.
-            }
-        };
-        popMenu.add(innerLabel);
-        popMenu.add(optKeepAnimEn);
-        popMenu.add(optTransparentEn);
-        if (arkPets.canChangeStage())
-            popMenu.add(optChangeStage);
-        popMenu.add(optExit);
-        popMenu.setSize(100, 24 * popMenu.getSubElements().length);
+            popMenu = new JPopupMenu() {
+                @Override
+                public void firePopupMenuWillBecomeInvisible() {
+                    popWindow.setVisible(false); // Hide the container when the menu is invisible.
+                }
+            };
+            popMenu.add(innerLabel);
+            popMenu.add(optKeepAnimEn);
+            popMenu.add(optTransparentEn);
+            if (arkPets.canChangeStage())
+                popMenu.add(optChangeStage);
+            popMenu.add(optExit);
+            popMenu.setSize(100, 24 * popMenu.getSubElements().length);
+        });
 
         Runnable onConnected = this::onConnected;
         SocketSession session = new SocketClient.ClientSocketSession(client, this);
@@ -92,58 +94,70 @@ public class MemberTrayImpl extends MemberTray {
     @Override
     public void onExit() {
         Logger.info("MemberTray", "Request to exit");
-        remove();
-        client.disconnect();
-        arkPets.cha.setAlpha(0f);
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Gdx.app.exit();
-            }
-        }, (int) durationNormal.toMillis());
+        runOnEdt(() -> {
+            remove();
+            client.disconnect();
+            arkPets.cha.setAlpha(0f);
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Gdx.app.postRunnable(Gdx.app::exit);
+                }
+            }, (int) durationNormal.toMillis());
+        });
     }
 
     @Override
     public void onChangeStage() {
         Logger.info("MemberTray", "Request to change stage");
         arkPets.changeStage();
-        if (keepAnim != null) {
-            keepAnim = null;
-            popMenu.remove(optKeepAnimDis);
-            popMenu.add(optKeepAnimEn, 1);
-        }
+        runOnEdt(() -> {
+            if (keepAnim != null) {
+                keepAnim = null;
+                popMenu.remove(optKeepAnimDis);
+                popMenu.add(optKeepAnimEn, 1);
+            }
+        });
     }
 
     @Override
     public void onTransparentDis() {
         Logger.info("MemberTray", "Transparent disabled");
         arkPets.setTransparentMode(false);
-        popMenu.remove(optTransparentDis);
-        popMenu.add(optTransparentEn, 2);
+        runOnEdt(() -> {
+            popMenu.remove(optTransparentDis);
+            popMenu.add(optTransparentEn, 2);
+        });
     }
 
     @Override
     public void onTransparentEn() {
         Logger.info("MemberTray", "Transparent enabled");
         arkPets.setTransparentMode(true);
-        popMenu.remove(optTransparentEn);
-        popMenu.add(optTransparentDis, 2);
+        runOnEdt(() -> {
+            popMenu.remove(optTransparentEn);
+            popMenu.add(optTransparentDis, 2);
+        });
     }
 
     @Override
     public void onKeepAnimDis() {
         Logger.info("MemberTray", "Action-Mode disabled");
         keepAnim = null;
-        popMenu.remove(optKeepAnimDis);
-        popMenu.add(optKeepAnimEn, 1);
+        runOnEdt(() -> {
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
+        });
     }
 
     @Override
     public void onKeepAnimEn() {
         Logger.info("MemberTray", "Action-Mode enabled");
         keepAnim = arkPets.behavior.defaultAnim();
-        popMenu.remove(optKeepAnimEn);
-        popMenu.add(optKeepAnimDis, 1);
+        runOnEdt(() -> {
+            popMenu.remove(optKeepAnimEn);
+            popMenu.add(optKeepAnimDis, 1);
+        });
     }
 
     @Override
@@ -153,73 +167,85 @@ public class MemberTrayImpl extends MemberTray {
 
     @Override
     public void remove() {
-        popMenu.removeAll();
-        popWindow.dispose();
-        client.disconnect();
+        runOnEdt(() -> {
+            popMenu.removeAll();
+            popWindow.dispose();
+            client.disconnect();
+        });
     }
 
     public void onConnected() {
-        // If integration was succeeded, remove the ISOLATED tray icon.
-        Logger.info("MemberTray", "Integrated tray service connected");
-        SystemTray.getSystemTray().remove(icon);
-        client.sendRequest(SocketData.ofLogin(uuid, name));
-        if (arkPets.canChangeStage())
-            sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
-        for (MenuElement element : popMenu.getSubElements()) {
-            if (element.equals(optKeepAnimDis))
-                sendOperation(SocketData.Operation.KEEP_ACTION);
-            if (element.equals(optTransparentDis))
-                sendOperation(SocketData.Operation.TRANSPARENT_MODE);
-        }
+        runOnEdt(() -> {
+            // If integration was succeeded, remove the ISOLATED tray icon.
+            Logger.info("MemberTray", "Integrated tray service connected");
+            SystemTray.getSystemTray().remove(icon);
+            client.sendRequest(SocketData.ofLogin(uuid, name));
+            if (arkPets.canChangeStage())
+                sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);
+            for (MenuElement element : popMenu.getSubElements()) {
+                if (element.equals(optKeepAnimDis))
+                    sendOperation(SocketData.Operation.KEEP_ACTION);
+                if (element.equals(optTransparentDis))
+                    sendOperation(SocketData.Operation.TRANSPARENT_MODE);
+            }
+        });
     }
 
     public void onDisconnected() {
-        // When connection was broken:
-        Logger.info("MemberTray", "Integrated tray service disconnected");
-        Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
-        TrayIcon icon = getTrayIcon(image);
+        runOnEdt(() -> {
+            // When connection was broken:
+            Logger.info("MemberTray", "Integrated tray service disconnected");
+            Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource(iconFilePng));
+            TrayIcon icon = getTrayIcon(image);
 
-        // Add the ISOLATED tray icon to the system tray.
-        try {
-            SystemTray.getSystemTray().add(icon);
-            Logger.info("MemberTray", "Isolated tray icon applied");
-        } catch (AWTException e) {
-            Logger.error("MemberTray", "Unable to apply isolated tray icon, details see below", e);
-        }
+            // Add the ISOLATED tray icon to the system tray.
+            try {
+                SystemTray.getSystemTray().add(icon);
+                Logger.info("MemberTray", "Isolated tray icon applied");
+            } catch (AWTException e) {
+                Logger.error("MemberTray", "Unable to apply isolated tray icon, details see below", e);
+            }
+        });
     }
 
     /** Hides the menu.
      */
-    public synchronized void hideDialog() {
-        if (popMenu.isVisible()) {
-            popMenu.setVisible(false);
-            Logger.debug("MemberTray", "Hidden");
-        }
+    public void hideDialog() {
+        runOnEdt(() -> {
+            if (popMenu.isVisible()) {
+                popMenu.setVisible(false);
+                Logger.debug("MemberTray", "Hidden");
+            }
+        });
     }
 
     /** Shows the menu at the given coordinate.
      */
-    public synchronized void showDialog(int x, int y) {
-        /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
-        Here we will adapt the coordinate for system scaling artificially. See below. */
-        AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-        int scaledX = (int) (x / at.getScaleX());
-        int scaledY = (int) (y / at.getScaleY());
+    public void showDialog(int x, int y) {
+        runOnEdt(() -> {
+            /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
+            Here we will adapt the coordinate for system scaling artificially. See below. */
+            AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
+            int scaledX = (int) (x / at.getScaleX());
+            int scaledY = (int) (y / at.getScaleY());
 
-        // Show the JDialog together with the JPopupMenu.
-        popWindow.setVisible(true);
-        popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
-        popMenu.show(popWindow, 0, 0);
-        Logger.debug("MemberTray", "Shown @ " + x + ", " + y);
+            // Show the JDialog together with the JPopupMenu.
+            popWindow.setVisible(true);
+            popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
+            popMenu.show(popWindow, 0, 0);
+            Logger.debug("MemberTray", "Shown @ " + x + ", " + y);
+        });
     }
 
     /** Toggles the menu at the given coordinate.
      */
     public void toggleDialog(int x, int y) {
-        if (popMenu.isVisible()) {
-            hideDialog();
-        } else {
-            showDialog(x, y);
-        }
+        runOnEdt(() -> {
+            if (popMenu.isVisible()) {
+                hideDialog();
+            } else {
+                showDialog(x, y);
+            }
+        });
     }
 }

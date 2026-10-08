@@ -74,6 +74,7 @@ public class ArkPets extends InputApplicationAdaptor {
     public void create() {
         // When the APP was created
         // 1.App setup
+        Thread.currentThread().setName("Render Thread");
         Logger.info("App", "Create with title \"" + APP_TITLE + "\"");
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setForegroundFPS(config.display_fps);
