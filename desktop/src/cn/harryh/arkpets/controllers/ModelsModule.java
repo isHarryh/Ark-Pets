@@ -45,6 +45,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -514,7 +515,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     public void modelRandom() {
         if (!assertModelLoaded(true))
             return;
-        int idx = (int) (Math.random() * (modelListView.getItems().size() - 1));
+        int size = modelListView.getItems().size();
+        if (size == 0)
+            return;
+        int idx = ThreadLocalRandom.current().nextInt(size);
         modelListView.scrollTo(idx);
         modelListView.getSelectionModel().select(idx);
         modelListView.requestFocus();

@@ -21,6 +21,7 @@
     "display_scale":1.0,
     "download_mc_cdk":"",
     "eco_mode":false,
+    "enable_telemetry":true,
     "initial_position_x":0.2,
     "initial_position_y":0.2,
     "launcher_solid_exit":true,

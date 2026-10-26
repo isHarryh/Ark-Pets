@@ -3,7 +3,12 @@
  */
 package cn.harryh.arkpets.concurrent;
 
+import cn.harryh.arkpets.telemetry.wal.WalExceptionCodec;
+import cn.harryh.arkpets.telemetry.wal.WalReader;
+import cn.harryh.arkpets.telemetry.wal.WalRecord;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +108,10 @@ public final class ProcessPool implements Executor {
         public UnexpectedExitCodeException(int exitCode, long processId) {
             this.exitCode = exitCode;
             this.processId = processId;
+            Exception process = getProcessException();
+            if (process != null) {
+                this.initCause(getProcessException());
+            }
         }
 
         @Override
@@ -112,6 +121,17 @@ public final class ProcessPool implements Executor {
 
         public long getProcessId() {
             return processId;
+        }
+
+        private Exception getProcessException() {
+            try (WalReader reader = WalReader.open(processId)) {
+                for (WalRecord record : reader.readAll()) {
+                    if (record.type().equals(WalExceptionCodec.INSTANCE.type()))
+                        return WalExceptionCodec.INSTANCE.decode(record.payload());
+                }
+            } catch (IOException ignored) {
+            }
+            return null;
         }
     }
 }

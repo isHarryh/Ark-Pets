@@ -1,5 +1,6 @@
 # Keep repository files
 /*/
+!/.agents/
 !/.idea/
 !/assets/
 !/core/
@@ -19,6 +20,10 @@ out/
 tmp*/
 temp*/
 test*/
+
+# Exclude AI agent files
+.claude/
+.opencode/
 
 # Exclude runtime files
 /ArkPetsConfig.json

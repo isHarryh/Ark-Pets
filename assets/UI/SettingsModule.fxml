@@ -127,6 +127,8 @@
                 </HBox>
                 <HBox>
                     <JFXCheckBox fx:id="configEcoMode" mnemonicParsing="false" text="长时间未交互时降低帧率"/>
+                    <JFXCheckBox fx:id="configTelemetry" mnemonicParsing="false" text="上传匿名使用数据"/>
+                    <JFXButton fx:id="configTelemetryHelp"/>
                 </HBox>
                 <HBox>
                     <Label text="窗口系统"/>

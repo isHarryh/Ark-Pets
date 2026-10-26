@@ -4,6 +4,9 @@
 package cn.harryh.arkpets.utils;
 
 
+import java.util.Objects;
+
+
 /** The class represents a semantic version.
  * <hr>
  * Given a version number {@code MAJOR.MINOR.PATCH}, increment the:
@@ -14,7 +17,7 @@ package cn.harryh.arkpets.utils;
  * </ul>
  * @see <a href="https://semver.org/">semver.org</a>
  */
-public class Version {
+public class Version implements Comparable<Version> {
     private final int major;
     private final int minor;
     private final int patch;
@@ -43,20 +46,21 @@ public class Version {
 
     public boolean greaterThan(Version another) {
         if (another == null) return false;
-        return (major > another.major) ||
-                (major == another.major && minor > another.minor) ||
-                (minor == another.minor && patch > another.patch);
+        return compareTo(another) > 0;
     }
 
     public boolean lessThan(Version another) {
         if (another == null) return false;
-        return (major < another.major) ||
-                (major == another.major && minor < another.minor) ||
-                (minor == another.minor && patch < another.patch);
+        return compareTo(another) < 0;
     }
 
-    public int[] toArray() {
-        return new int[]{major, minor, patch};
+    @Override
+    public int compareTo(Version another) {
+        Objects.requireNonNull(another);
+        int diffMajor = Integer.compare(major, another.major);
+        int diffMinor = Integer.compare(minor, another.minor);
+        int diffPatch = Integer.compare(patch, another.patch);
+        return diffMajor != 0 ? diffMajor : (diffMinor != 0 ? diffMinor : diffPatch);
     }
 
     @Override
@@ -74,6 +78,6 @@ public class Version {
 
     @Override
     public int hashCode() {
-        return (major << 8) + (minor << 4) + patch;
+        return (major * 31 + minor) * 31 + patch;
     }
 }

@@ -43,6 +43,8 @@ jobs:
 
       - name: Execute gradle tasks
         run: gradle clean distAll
+        env:
+          ORG_GRADLE_PROJECT_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Upload exe
         uses: actions/upload-artifact@v6

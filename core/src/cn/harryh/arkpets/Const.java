@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public final class Const {
     // App version
-    public static final Version appVersion              = new Version(3, 12, 0);
+    public static final Version appVersion              = new Version(3, 13, 1);
     public static final Version datasetLowestVersion    = new Version(2, 2, 0);
 
     // App name
@@ -137,6 +137,7 @@ public final class Const {
         public static final String logDir           = "logs/";
         public static final String logCorePath      = logDir + "core";
         public static final String logDesktopPath   = logDir + "desktop";
+        public static final String logWalPattern    = "core.%d.wal";
 
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";

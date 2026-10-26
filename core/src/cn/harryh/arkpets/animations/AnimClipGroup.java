@@ -18,15 +18,15 @@ import java.util.*;
 public class AnimClipGroup implements Collection<AnimClip> {
     protected final ArrayList<AnimClip> animClipList;
 
-    public AnimClipGroup(Animation[] animList) {
+    public AnimClipGroup(Iterable<Animation> animations) {
         this.animClipList = new ArrayList<>();
-        for (Animation a : animList)
+        for (Animation a : animations)
             this.animClipList.add(new AnimClip(a));
         sortStages();
     }
 
-    protected AnimClipGroup(Collection<AnimClip> animClipList) {
-        this.animClipList = new ArrayList<>(animClipList);
+    protected AnimClipGroup(Collection<AnimClip> animClips) {
+        this.animClipList = new ArrayList<>(animClips);
     }
 
     /** Finds the animations that match the given type.

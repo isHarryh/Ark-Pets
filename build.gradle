@@ -20,7 +20,7 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = "3.12.0"
+    version = "3.13.1"
     ext {
         // App Metadata
         appName = "ArkPets"
@@ -29,9 +29,10 @@ allprojects {
         appYearCurrent = new Date().format("yyyy", TimeZone.getTimeZone("GMT+0:00"))
         appCopyright = "Copyright (c) ${appYearBegin}-${appYearCurrent} ${appAuthor}" as GStringImpl
         // Prefabs
-        gdxVersion = "1.11.0"
+        gdxVersion = "1.14.2"
         jnaVersion = "5.12.1"
         javaFXVersion = "17.0.15"
+        sentryVersion = "8.51.0"
         dbusVersion = "5.1.0"
         lwjglVersion = "3.3.4"
         javaFXPlatform = ""
@@ -83,7 +84,10 @@ project(":desktop") {
     dependencies {
         implementation project(":core")
         // libGDX Desktop
-        api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        api "com.amilego.gdx:gdx-platform:$gdxVersion:natives-desktop"
+        // Sentry
+        implementation platform("io.sentry:sentry-bom:$sentryVersion")
+        implementation('io.sentry:sentry')
     }
 }
 
@@ -93,11 +97,11 @@ project(":core") {
         // Spine Runtime
         api "com.esotericsoftware.spine:spine-libgdx:3.8.99.1"
         // libGDX
-        api "com.badlogicgames.gdx:gdx:$gdxVersion"
-        api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion") {
+        api "com.amilego.gdx:gdx:$gdxVersion"
+        api("com.amilego.gdx:gdx-backend-lwjgl3:$gdxVersion") {
             exclude group:"org.lwjgl"
         }
-        api ("com.badlogicgames.gdx:gdx-lwjgl3-angle:$gdxVersion"){
+        api ("com.amilego.gdx:gdx-lwjgl3-angle:$gdxVersion"){
             exclude group:"org.lwjgl"
         }
         // JNA

@@ -197,6 +197,12 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
 
     @Deprecated
     @Override
+    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
+        return touchUp(screenX, screenY, pointer, button);
+    }
+
+    @Deprecated
+    @Override
     public boolean mouseMoved(int screenX, int screenY) {
         int dx = screenX - mouseX;
         int dy = screenY - mouseY;
