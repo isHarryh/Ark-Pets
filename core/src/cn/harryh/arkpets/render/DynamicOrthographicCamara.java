@@ -6,6 +6,7 @@ package cn.harryh.arkpets.render;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 
 import java.util.Objects;
 
@@ -133,16 +134,30 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         return curInsert.top + curInsert.bottom + initHeight;
     }
 
+    /** Gets the back buffer width.
+     * @return The back buffer width.
+     */
+    public int getBackWidth() {
+        return HdpiUtils.toBackBufferX((curInsert.left + curInsert.right + initWidth));
+    }
+
+    /** Gets the back buffer height.
+     * @return The back buffer height.
+     */
+    public int getBackHeight() {
+        return HdpiUtils.toBackBufferY((curInsert.top + curInsert.bottom + initHeight));
+    }
+
     /** Gets the FrameBuffer Object that has the same width and height with this camera.
      * Note that the returned FrameBuffer Object may be a cached one.
      * @return The FrameBuffer Object.
      */
     public FrameBuffer getFBO() {
         if (fbo == null) {
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getWidth(), getHeight(), false);
-        } else if (fbo.getWidth() != getWidth() || fbo.getHeight() != getHeight()) {
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getBackWidth(), getBackHeight(), false);
+        } else if (fbo.getWidth() != getBackWidth() || fbo.getHeight() != getBackHeight()) {
             fbo.dispose();
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getWidth(), getHeight(), false);
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getBackWidth(), getBackHeight(), false);
         }
         return fbo;
     }

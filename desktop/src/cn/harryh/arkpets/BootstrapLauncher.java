@@ -4,7 +4,6 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.controllers.Titlebar;
-import cn.harryh.arkpets.guitasks.envchecker.WinGraphicsEnvCheckTask;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
 import cn.harryh.arkpets.telemetry.HeartbeatSession;
@@ -13,6 +12,7 @@ import cn.harryh.arkpets.telemetry.wal.WalCoreHeartbeatCodec;
 import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.SentryHelper;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -118,15 +118,11 @@ public class BootstrapLauncher {
                 Titlebar.forceUiStyle = addition.toLowerCase();
             }
         };
-        // Remove NVIDIA settings when uninstall on windows.
-        new ArgPending("--remove-nvidia", ArgPending.argCache) {
-            @Override
-            protected void process(String command, String addition) {
-                new WinGraphicsEnvCheckTask().removeNvidiaSettings();
-            }
-        };
         // Disable libdecor to avoid glfw and javafx problem on linux.
         if(isLinux) GLFW.glfwInitHint(GLFW.GLFW_WAYLAND_LIBDECOR, GLFW.GLFW_WAYLAND_DISABLE_LIBDECOR);
+        // Start telemetry
+        SentryHelper.init();
+        SentryHelper.beginDesktopSession();
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, ArgPending.argCache);
         Logger.info("System", "Exited from DesktopLauncher successfully");
@@ -158,14 +154,6 @@ public class BootstrapLauncher {
             }
         };
         WindowSystem windowSystem = ArkConfig.getWindowSystemFrom(appConfig.window_system);
-        Logger.info("System", "Entering the app of EmbeddedLauncher");
-        Logger.info("System", "ArkPets version is " + appVersion);
-        Logger.debug("System", "Default charset is " + Charset.defaultCharset());
-        // Init temp folder
-        File temp = new File(PathConfig.tempDirPath);
-        if (!(temp.exists() || temp.mkdir())) {
-            Logger.error("System", "Failed to create the temporary directory.");
-        }
         // Start telemetry heartbeat
         CorePerformanceSampler performanceSampler = appConfig.enable_telemetry ? new CorePerformanceSampler() : null;
         writeConfigRecord(WalConfigCodec.WalConfigSnapshot.collect(appConfig));
@@ -190,6 +178,7 @@ public class BootstrapLauncher {
             // Configure window layout
             config.setDecorated(WindowSystem.needDecorated());
             config.setResizable(WindowSystem.needResize());
+            config.setWindowSizeLimits(1, 1, 65535, 65535);
             config.setWindowedMode(coreWidthDefault, coreHeightDefault);
             config.setWindowPosition(0, 0);
             // Configure window title

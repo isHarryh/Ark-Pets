@@ -2,25 +2,15 @@ package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.X11Extension;
 import cn.harryh.arkpets.natives.X11Helper;
-import cn.harryh.arkpets.natives.XextExtension;
-import cn.harryh.arkpets.utils.Logger;
-import com.sun.jna.Pointer;
 import com.sun.jna.platform.unix.X11;
 import com.sun.jna.ptr.IntByReference;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static cn.harryh.arkpets.platform.X11HWndCtrlFactory.display;
 
 
 public class X11HWndCtrl extends HWndCtrl {
-    private static X11.Display display;
     private static final X11Extension x11 = X11Extension.INSTANCE;
-    private static final XextExtension xext = XextExtension.INSTANCE;
     protected final X11.Window hWnd;
-
-    private static boolean shapeAvailable;
-    private boolean transparentEnable;
 
     public static final int STATE_REMOVE = 0;
     public static final int STATE_ADD = 1;
@@ -28,65 +18,6 @@ public class X11HWndCtrl extends HWndCtrl {
     public X11HWndCtrl(X11Extension.Window hWnd) {
         super(winText(hWnd), getWindowRect(hWnd));
         this.hWnd = hWnd;
-    }
-
-    public static void init() {
-        display = x11.XOpenDisplay(null);
-
-        if (display == null) {
-            throw new RuntimeException("Cannot open X display");
-        } else {
-            Logger.info("System", "Connected to X display");
-        }
-        IntByReference evt = new IntByReference();
-        IntByReference err = new IntByReference();
-        boolean xshape = xext.XShapeQueryExtension(display, evt, err);
-        if (!xshape) {
-            Logger.warn("System", "No XShape extension");
-            shapeAvailable = false;
-        } else {
-            shapeAvailable = true;
-        }
-    }
-
-    public static HWndCtrl find(String className, String windowName) {
-        X11Extension.Window[] wids = getWindows();
-        for (X11Extension.Window win : wids) {
-            String wtitle = winText(win);
-            String wclass = X11Helper.getUtf8Property(display, win, X11.XA_STRING, X11.XA_WM_CLASS);
-            if (className == null) {
-                if (wtitle.equals(windowName)) {
-                    return new X11HWndCtrl(win);
-                }
-            } else {
-                if (wclass.equals(className) && wtitle.equals(windowName)) {
-                    return new X11HWndCtrl(win);
-                }
-            }
-        }
-        return null;
-    }
-
-    public static List<X11HWndCtrl> getWindowList(boolean onlyVisible) {
-        ArrayList<X11HWndCtrl> windowList = new ArrayList<>();
-        X11Extension.Window[] wins = getWindows();
-        for (X11.Window win : wins) {
-            if (!onlyVisible || visible(win)) {
-                windowList.add(new X11HWndCtrl(win));
-            }
-        }
-        Collections.reverse(windowList);
-        return windowList;
-    }
-
-    public static HWndCtrl getTopmost() {
-        List<X11HWndCtrl> list = getWindowList(true);
-        return list.isEmpty() ? null : list.get(0);
-    }
-
-    public static void free() {
-        x11.XCloseDisplay(display);
-        Logger.info("System", "Disconnected from X display");
     }
 
     protected static WindowRect getWindowRect(X11Extension.Window hWnd) {
@@ -156,23 +87,8 @@ public class X11HWndCtrl extends HWndCtrl {
 
         // 0000 0000 1111 0001
         //clientMsg(hWnd,"_NET_MOVERESIZE_WINDOW",3840,x,y,w,h);
-        x11.XSync(display, false);
         x11.XMoveResizeWindow(display, hWnd, x, y, w, h);
-    }
-
-    @Override
-    public void setTransparent(boolean transparent) {
-        if (!shapeAvailable) return;
-        if (transparentEnable != transparent) {
-            if (transparent) {
-                Pointer reg = x11.XCreateRegion();
-                xext.XShapeCombineRegion(display,hWnd, X11.Xext.ShapeInput,0,0,reg, X11.Xext.ShapeSet);
-                x11.XDestroyRegion(reg);
-            } else {
-                xext.XShapeCombineMask(display,hWnd, X11.Xext.ShapeInput,0,0,null, X11.Xext.ShapeSet);
-            }
-            transparentEnable = transparent;
-        }
+        x11.XSync(display, false);
     }
 
     @Override
@@ -214,26 +130,13 @@ public class X11HWndCtrl extends HWndCtrl {
         return hWnd.hashCode();
     }
 
-    private static X11Extension.Window[] getWindows() {
-        X11Extension.Window rootWindow = x11.XDefaultRootWindow(display);
-        byte[] bytes = X11Helper.getProperty(display, rootWindow, X11Extension.XA_WINDOW, X11Helper.getAtom(display, "_NET_CLIENT_LIST_STACKING"));
-
-        X11Extension.Window[] windowList = new X11Extension.Window[bytes.length / X11.Window.SIZE];
-
-        for (int i = 0; i < windowList.length; i++) {
-            windowList[i] = new X11.Window(X11Helper.bytesToInt(bytes, X11.XID.SIZE * i));
-        }
-
-        return windowList;
-    }
-
-    private static String winText(X11Extension.Window hWnd) {
+    static String winText(X11Extension.Window hWnd) {
         String title;
         title = X11Helper.getUtf8Property(display, hWnd, X11Helper.getAtom(display, "UTF8_STRING"), X11Helper.getAtom(display, "_NET_WM_NAME"));
         return title;
     }
 
-    private static boolean visible(X11.Window hWnd) {
+    static boolean visible(X11.Window hWnd) {
         X11.XWindowAttributes attr = new X11.XWindowAttributes();
         x11.XGetWindowAttributes(display, hWnd, attr);
         if (attr.map_state != X11.IsViewable) {
