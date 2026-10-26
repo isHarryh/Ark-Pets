@@ -21,11 +21,12 @@ abstract public class Behavior {
         actionAutoGetter.setValueProducer(() -> {
             StochasticState newState = currentMatrix.transitedAnimOf(currentState);
             if (newState == null) {
-                return currentMatrix.getStateAnim(currentState);
-            } else {
-                currentState = newState;
-                return currentMatrix.getStateAnim(newState);
+                // No state is available to transit to, so fall back to the default animation.
+                currentState = StochasticState.IDLE;
+                return defaultAnim();
             }
+            currentState = newState;
+            return currentMatrix.getStateAnim(newState);
         });
         actionAutoGetter.setCacheAgeProducer(() -> {
             AnimData cache = actionAutoGetter.getCachedValue();
