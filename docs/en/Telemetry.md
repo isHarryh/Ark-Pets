@@ -7,7 +7,7 @@ ArkPets incorporates an opt-out telemetry service designed to record real-world 
 
 - **Stability & Crash Events**: Frequency and stack traces of runtime exceptions;
 - **Performance Metrics**: Rendering efficiency across distinct hardware configurations;
-- **User Preferences**: Feature usage and settings customisation trends.
+- **User Preferences**: Feature usage and settings customization trends.
 
 Telemetry is enabled by default. Users may opt out at any time by toggling **Upload Anonymous Usage Data** under launcher Options.
 
@@ -15,7 +15,7 @@ Telemetry is enabled by default. Users may opt out at any time by toggling **Upl
 
 ### Scope of Data Collection
 
-We enforce strict data minimisation practices:
+We enforce strict data minimization practices:
 
 - **No Personal Data Collected**: Personal files, system clipboards, screen captures, and browsing history are never accessed;
 - **No Sensitive Configuration Data**: Credentials (such as Mirrorchyan CDK access keys) are strictly excluded;
@@ -25,7 +25,7 @@ We enforce strict data minimisation practices:
 
 We implement standard industry protocols to protect system transmissions:
 
-- **Anonymised Analytics**: Collected metrics cannot be mapped to individual user identities. Transient IP metadata is used solely during network transmission;
+- **Anonymized Analytics**: Collected metrics cannot be mapped to individual user identities. Transient IP metadata is used solely during network transmission;
 - **Encrypted In-Transit**: All telemetry events are transmitted over TLS-encrypted endpoints;
 - **Sentry Platform Infrastructure**: Telemetry processing is managed via [Sentry](https://sentry.io), a secure error-monitoring service provider.
 
@@ -49,10 +49,10 @@ Automatically submitted events fall into the following categories:
 | Desktop Session<br>(`DESKTOP_SESSION`) | Launcher UI process termination | Launcher runtime session duration |
 | Config Snapshot<br>(`CONFIG`) | Desktop pet startup | Non-sensitive runtime settings and flags |
 | System Info<br>(`SYSTEM_INFO`) | Post GL context creation | GPU vendor, driver release, operating system architecture |
-| Performance Metrics | Periodic intervals during runtime | Render time, resolution, FPS, RAM utilisation, CPU load |
+| Performance Metrics | Periodic intervals during runtime | Render time, resolution, FPS, RAM utilization, CPU load |
 | Crash Reports | Unhandled exceptions | Exception class names and frame stack traces |
 
-Users can also dispatch application diagnostic logs manually via **Upload Logs** when error dialogues occur.
+Users can also dispatch application diagnostic logs manually via **Upload Logs** when error dialogs occur.
 
 ## Technical Details
 
@@ -62,7 +62,7 @@ Technical details intended for developers and system maintainers.
 
 ArkPets operates across two isolated JVM processes: **Desktop** (JavaFX UI launcher) and **Core** (libGDX pet renderer). Core can execute independently without Desktop. Architectural constraint: **Desktop manages all Sentry network transmissions; Core contains zero network communication drivers.**
 
-Inter-process telemetry transfer utilises Write-Ahead Logging (**WAL**) over file system IPC:
+Inter-process telemetry transfer utilizes Write-Ahead Logging (**WAL**) over file system IPC:
 
 - WAL files reside within log directories, named using PID identifiers (`.wal` extension), using append-only writes;
 - Frame format: `magic("WAL1") | version | type | seq | timestamp | payloadLen | payload | crc32(payload)`. Corrupted frames or trailing checksum failures are discarded on read;
@@ -86,16 +86,29 @@ Additional design considerations:
 
 #### Sentry Data Source Name (DSN)
 
-- **Gradle Pipeline**: Gradle property `SENTRY_DSN` serves as the primary source, defined in `desktop/build.gradle` (falls back to placeholder DSN if missing):
+- **Gradle Pipeline**: Gradle property `SENTRY_DSN` is the only source, defined in `desktop/build.gradle`. When the property is missing or blank, no DSN is injected:
   - `run` and `debug` tasks inject `-Dsentry.dsn=...` via `jvmArgs`;
   - `dist` tasks embed DSN values into distributions via jpackage `--java-options`.
 
-- **CI Builds**: Injected by `.github/workflows/build.yml` via `ORG_GRADLE_PROJECT_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}`.
+- **CI Builds**: Injected by `.github/workflows/build.yml` via `ORG_GRADLE_PROJECT_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}`. When the secret is missing, no DSN is injected either.
 
-- **Manual Configuration**: When running directly outside Gradle pipelines (e.g. IDE execution), configure via (in order of precedence):
+- **Manual Configuration**: When the application is not started through the Gradle tasks above (e.g. launching an entry point from an IDE), configure it manually via (highest precedence first):
   1. Java System property `-Dsentry.dsn`
   2. Environment variable `SENTRY_DSN`
   3. Properties file `sentry.properties`
+
+  When the Gradle property is empty, no system property is injected, so the methods above also take effect in Gradle tasks.
+
+#### Configuration Failure Semantics
+
+Regardless of how the application is started, DSN resolution and failure handling are uniform (centralized in `SentryHelper`), and configuration problems never crash the application:
+
+| DSN State | SDK and Application Behavior | Unreported WAL Data |
+|:---:|:---:|:---|
+| Missing or blank | SDK disabled; logs an `INFO` message | Retained for later upload |
+| Non-blank but malformed | SDK disabled; logs a `WARN` message | Retained for later retry |
+| Valid with telemetry enabled | SDK enabled; telemetry uploaded normally | Deleted locally after a successful upload |
+| Valid with telemetry disabled | SDK enabled; telemetry uploads halted | Deleted locally |
 
 #### Sentry Environment Flag
 
@@ -105,6 +118,6 @@ Defaults to `"dev"`. Release builds override this value to `"production"` using 
 
 | Configuration Target | File Path / Reference |
 |:---|:---|
-| SDK Options Initialisation | `desktop/src/cn/harryh/arkpets/utils/SentryHelper.java` |
+| SDK Options Initialization | `desktop/src/cn/harryh/arkpets/utils/SentryHelper.java` |
 | DSN Resolution & Task Injections | `desktop/build.gradle` |
 | CI Secret Definition | `.github/workflows/build.yml` |

@@ -23,7 +23,7 @@ This walkthrough demonstrates adding a custom operator model named `MyModel`:
            "Operator": "models"
         },
        "sortTags": {
-            // The localised description corresponding to each model label
+            // The localized description corresponding to each model label
             "Operator": "Operator",
             "Skinned": "Outfit"
         },

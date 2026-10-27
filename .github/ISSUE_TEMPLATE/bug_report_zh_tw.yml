@@ -8,7 +8,7 @@ body:
       value: |
         提交問題回報前，請確保您：
         1. 使用的是最新版本的程式。
-        2. 閱讀了[常見問題解答](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/FAQ.md)但未能解決您的問題。
+        2. 閱讀了[常見問題解答](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/zh_CN/FAQ.md)但未能解決您的問題。
         3. 瀏覽了[現存的 GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) 但沒有找到類似的問題。
   - type: input
     id: version

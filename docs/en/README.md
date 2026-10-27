@@ -30,18 +30,18 @@
 1. **Launches *Arknights* character models as desktop pets.** <details><summary>View Details</summary>
     Supported model types currently include:
     1. Operator Base Chibis (including outfits);
-    2. Operator Live2D / Dynamic Illustrations (including outfits);
+    2. Operator dynamic illustrations (Spine-based, including outfits);
     3. Enemy Combat Chibis.
 2. **Graphical User Interface provided via launcher for browsing models and adjusting settings.** <details><summary>View Details</summary>
     1. Search models by name, Pinyin, or brand, or filter by category;
     2. Download community-maintained model repositories directly from the internet;
-    3. Customise interactive actions, placement, and physics parameters;
-    4. Customise display preferences such as image scaling, frame rate limits, and window bounds.
-3. **Simulates base chibi behaviour from the game.** <details><summary>View Details</summary>
+    3. Customize interactive actions, placement, and physics parameters;
+    4. Customize display preferences such as image scaling, frame rate limits, and window bounds.
+3. **Simulates base chibi behavior from the game.** <details><summary>View Details</summary>
     1. Supports walking, sitting, and lying down animations;
     2. Responds to mouse clicks with poke interactions;
     3. Operators with unique base interactions have a chance to trigger them randomly.
-4. **Simulates enemy chibi behaviour from the game.** <details><summary>View Details</summary>
+4. **Simulates enemy chibi behavior from the game.** <details><summary>View Details</summary>
     1. Enemies with walking animations can wander across the screen;
     2. Enemies with attack animations react when clicked.
 5. **Simulated planar gravity field.** <details><summary>View Details</summary>
@@ -71,7 +71,7 @@
 
 Planned updates for future development:
 
-- Internationalisation and responsive layouts
+- Internationalization and responsive layouts
 - On-demand asset downloading
 - Operator voice line support
 - Upgrading core dependency library versions
@@ -79,7 +79,7 @@ Planned updates for future development:
 
 ### Useful Resources
 
-- **Changelog** (Not localised) > [View Here](CHANGELOG.md)
+- **Changelog** (Not localized) > [View Here](../zh_CN/CHANGELOG.md)
 - **FAQ** > [View Here](FAQ.md)
 - **Telemetry Notice** > [View Here](Telemetry.md)
 
@@ -107,9 +107,9 @@ Explore key highlights below, alongside further options inside the launcher itse
 
 - **Auto-Start on Boot**: Enable auto-start under launcher "Settings" to automatically launch your last-used pet upon Windows startup.
 - **Manual Control**: Enable "Manual Mode" via the tray menu to move your pet around using the left and right arrow keys, or cycle through actions with the up and down keys.
-- **Click-Through Mode**: Prevents accidental clicks whilst gaming or watching videos by ignoring all mouse interactions, passing inputs through to the windows underneath.
-- **Taskbar Distance Offset**: If the pet fails to detect your taskbar position properly (causing it to submerge), adjust the taskbar height manually under the "Behaviour" tab.
-- **Highlight Outlines & Shadows**: Recreates in-game base selection effects alongside directional shadows for added depth. Disable these in "Settings" to minimise performance usage on lower-end systems.
+- **Click-Through Mode**: Prevents accidental clicks while gaming or watching videos by ignoring all mouse interactions, passing inputs through to the windows underneath.
+- **Taskbar Distance Offset**: If the pet fails to detect your taskbar position properly (causing it to submerge), adjust the taskbar height manually under the "Behavior" tab.
+- **Highlight Outlines & Shadows**: Recreates in-game base selection effects alongside directional shadows for added depth. Disable these in "Settings" to minimize performance usage on lower-end systems.
 
 #### Launcher Features
 
@@ -132,15 +132,15 @@ Native builds for macOS and Linux are currently in development.
 
 ## About
 
-### Acknowledgements
+### Acknowledgments
 
 Sincere thanks to every individual and community contributor who supported the development of ArkPets.
 
 - See [Credits and Third-Party Dependencies](Credits.md)
 
-### Licence
+### License
 
-This project is licensed under the **GPL-3.0 Licence**. Source code may be freely modified and distributed, provided copyright notices are retained and derivative works remain open source under the same terms.
+This project is licensed under the **GPL-3.0 License**. Source code may be freely modified and distributed, provided copyright notices are retained and derivative works remain open source under the same terms.
 
 ### Contributing
 

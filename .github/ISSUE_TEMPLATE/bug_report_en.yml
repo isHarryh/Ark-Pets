@@ -8,7 +8,7 @@ body:
       value: |
         Before submitting a bug report, please make sure that:
         1. You are using the latest version of the program.
-        2. You have read the [FAQ](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/FAQ.md) and your issue is not resolved.
+        2. You have read the [FAQ](https://github.com/isHarryh/Ark-Pets/blob/v3.x/docs/en/FAQ.md) and your issue is not resolved.
         3. You have browsed [existing GitHub Issues](https://github.com/isHarryh/Ark-Pets/issues) and found no similar issues.
   - type: input
     id: version

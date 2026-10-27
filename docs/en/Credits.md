@@ -1,7 +1,7 @@
 ArkPets Supplementary Documentation
-# Credits & Acknowledgements
+# Credits & Acknowledgments
 
-Our heartfelt gratitude goes to all individuals and organisations who have contributed to the development of ArkPets.
+Our heartfelt gratitude goes to all individuals and organizations who have contributed to the development of ArkPets.
 
 ## Individuals
 
@@ -32,7 +32,7 @@ Special thanks to community members providing insightful issues and suggestions:
 
 -----
 
-## Organisations
+## Organizations
 
 <a href="https://www.oracle.com/java">
     <img alt="Java" src="https://img.shields.io/badge/java-%23F8981D?style=for-the-badge&logo=java&logoColor=white">
@@ -67,7 +67,7 @@ Refer to `build.gradle` in the repository root for detailed *Group-Artifact-Vers
 | [OpenJFX](https://openjfx.io) | JavaFX GUI Toolkit |
 | [JFoenix](https://github.com/sshahine/JFoenix) | JavaFX Material Design Component Library |
 | [JNA](https://github.com/java-native-access/jna) | Java Native Access Interface |
-| [Alibaba FastJSON](https://github.com/alibaba/fastjson) | JSON Serialisation Library |
+| [Alibaba FastJSON](https://github.com/alibaba/fastjson) | JSON Serialization Library |
 | [reload4j](https://reload4j.qos.ch) | Logging Utility Framework |
 | [TinyPinyin](https://github.com/promeG/TinyPinyin) | Pinyin Conversion Library |
 | [Opencc4j](https://github.com/houbb/opencc4j) | Chinese Character Conversion Engine |
