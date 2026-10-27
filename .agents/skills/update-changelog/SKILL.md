@@ -7,7 +7,7 @@ description: Use this skill when you're requested to update the changelog file o
 
 ## Changelog Format
 
-The ArkPets project uses a special format of changelog file. The changelog file of this project is `CHANGELOG.md`.
+The ArkPets project uses a special format of changelog file. The changelog file of this project is `docs/zh_CN/CHANGELOG.md`.
 
 Since v3.x, each changelog section of a major/minor version should contain:
 

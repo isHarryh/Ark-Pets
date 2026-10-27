@@ -30,8 +30,13 @@ Two Gradle modules (see `settings.gradle`), root package `cn.harryh.arkpets`:
 core/     Pet runtime (libGDX app) and shared code, depended on by desktop
 desktop/  Launcher (JavaFX app), main entry classes
 assets/   Shared resources (desktop's resources directory points here)
-docs/     User-facing docs (Debug.md, CmdLine.md, CustomModel.md, FAQ.md, Telemetry.md)
+docs/     User-facing docs, localized under en/ and zh_CN/
 ```
+
+> **Docs layout**:
+> `docs/en/` holds the English docs and `docs/zh_CN/` holds the Chinese docs.
+> The root `README.md` is the Chinese README, and `docs/zh_CN/README.md` is a symlink to it.
+> The changelog lives at `docs/zh_CN/CHANGELOG.md` and is not localized.
 
 > **Non-standard source layout**:
 > sources live directly in `src/` (i.e. `core/src/cn/harryh/...`), NOT in `src/main/java`.
@@ -49,7 +54,7 @@ docs/     User-facing docs (Debug.md, CmdLine.md, CustomModel.md, FAQ.md, Teleme
 | P `render`      | Custom shaders, dynamic orthographic camera                          |
 | P `platform`    | Win32 window control via JNA, startup config                         |
 | P `concurrent`  | Launcher & pet IPC: `SocketServer`, `SocketClient`, `ProcessPool`    |
-| P `telemetry`   | Opt-in telemetry with a WAL design, see `docs/Telemetry.md`          |
+| P `telemetry`   | Opt-in telemetry with a WAL design, see `docs/zh_CN/Telemetry.md`    |
 | P `tray`        | System tray integration (`HostTray`, `MemberTray*`)                  |
 | P `transitions` | Easing/transition helpers for smooth movement                        |
 | C `ArkPets`     | The libGDX `ApplicationListener` for a single pet                    |
@@ -70,7 +75,7 @@ docs/     User-facing docs (Debug.md, CmdLine.md, CustomModel.md, FAQ.md, Teleme
 `DesktopLauncher` (JavaFX launcher) starts pets either embedded
 or as separate processes via the socket-based IPC in `core/.../concurrent`.
 `--direct-start` CLI flag skips the launcher and boots `EmbeddedLauncher` (libGDX) directly.
-CLI options are documented in `docs/CmdLine.md`.
+CLI options are documented in `docs/zh_CN/CmdLine.md`.
 
 ## Building
 
@@ -105,4 +110,4 @@ The build CI is available at `.github/workflows/build.yml`.
 ### VCS
 
 - **Commit messages**: conventional commits style written in English.
-- **Changelog**: `CHANGELOG.md` uses a custom table format. When asked to update the changelog, follow the skill at `.agents/skills/update-changelog/SKILL.md`.
+- **Changelog**: `docs/zh_CN/CHANGELOG.md` uses a custom table format. When asked to update the changelog, follow the skill at `.agents/skills/update-changelog/SKILL.md`.
