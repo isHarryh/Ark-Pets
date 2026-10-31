@@ -1,6 +1,7 @@
 package cn.harryh.arkpets.platform;
 
 import cn.harryh.arkpets.natives.CoreGraphics;
+import cn.harryh.arkpets.natives.MacHelper;
 import cn.harryh.arkpets.natives.ObjCHelper;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
@@ -11,6 +12,7 @@ import com.sun.jna.platform.mac.CoreFoundation.CFArrayRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFDictionaryRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFNumberRef;
 import com.sun.jna.platform.mac.CoreFoundation.CFStringRef;
+import org.lwjgl.glfw.GLFWNativeCocoa;
 
 import java.util.Objects;
 
@@ -145,6 +147,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
         super.attachGLFWWindow(graphics);
         nsWin = new Pointer(glfwGetCocoaWindow(glfwHandle));
         registerMethods(nsWin);
+
+        MacHelper.tryFixLayers(GLFWNativeCocoa.glfwGetCocoaView(glfwHandle));
     }
 
     @Override
