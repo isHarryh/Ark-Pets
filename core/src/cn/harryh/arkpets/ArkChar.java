@@ -23,6 +23,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.glutils.HdpiUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.SerializationException;
@@ -180,12 +181,14 @@ public class ArkChar {
 
     /** Gets the specified pixel's color value.
      * Note that the image may be flipped along the y-axis.
-     * @param x The X-axis coordinate.
-     * @param y The Y-axis coordinate.
+     * @param x The X-axis coordinate in the camera's logical coordinate system.
+     * @param y The Y-axis coordinate in the camera's logical coordinate system.
      * @return The RGBA8888 value of the specified pixel.
      */
     public int getPixel(int x, int y) {
-        Pixmap pixmap = Pixmap.createFromFrameBuffer(x, y, 1, 1);
+        // The framebuffer on the screen is HDPI scaled, so the logical coordinate must be converted.
+        Pixmap pixmap = Pixmap.createFromFrameBuffer(
+                HdpiUtils.toBackBufferX(x), HdpiUtils.toBackBufferY(y), 1, 1);
         int pixel = pixmap.getPixel(0, 0);
         pixmap.dispose();
         return pixel;
@@ -252,6 +255,8 @@ public class ArkChar {
             return;
         // Prepare a Frame Buffer Object
         camera.setInsertMaxed();
+        // The snapshot is measured in logical units, so the FBO must not be HDPI scaled during the fitting.
+        camera.setFitMode(true);
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
@@ -279,6 +284,7 @@ public class ArkChar {
         // Take down the snapshot from the rendered FBO
         PixmapWrapper pw = PixmapWrapper.fromCamera(camera);
         camera.getFBO().end();
+        camera.setFitMode(false);
         // Crop the canvas in order to fit the snapshot
         float alphaThreshold = Math.max(0f, Math.min(coverage, 1f));
         Insert insert;

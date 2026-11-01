@@ -19,6 +19,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
     protected final Insert maxInsert = new Insert();
     protected final Insert minInsert = new Insert();
     protected FrameBuffer fbo;
+    protected boolean fitMode = false;
 
     protected static final int stepLength = 2;
     protected static final boolean cameraYDown = false;
@@ -148,16 +149,43 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         return HdpiUtils.toBackBufferY((curInsert.top + curInsert.bottom + initHeight));
     }
 
+    /** Gets the FrameBuffer width in pixels.
+     * Note that the FrameBuffer may be HDPI scaled, so it is not necessarily equal to the camera's logical width.
+     * @return The FrameBuffer width in pixels.
+     */
+    public int getFBOWidth() {
+        return fitMode ? getWidth() : getBackWidth();
+    }
+
+    /** Gets the FrameBuffer height in pixels.
+     * Note that the FrameBuffer may be HDPI scaled, so it is not necessarily equal to the camera's logical height.
+     * @return The FrameBuffer height in pixels.
+     */
+    public int getFBOHeight() {
+        return fitMode ? getHeight() : getBackHeight();
+    }
+
+    /** Sets whether the FrameBuffer should be rendered at the logical size instead of the back buffer size.
+     * The canvas fitting measures the rendered pixels in logical units, so the FrameBuffer must not be HDPI
+     * scaled during the fitting, otherwise the measured geometry would be inconsistent with the camera geometry.
+     * @param fitMode true to render the FrameBuffer at the logical size.
+     */
+    public void setFitMode(boolean fitMode) {
+        this.fitMode = fitMode;
+    }
+
     /** Gets the FrameBuffer Object that has the same width and height with this camera.
      * Note that the returned FrameBuffer Object may be a cached one.
      * @return The FrameBuffer Object.
      */
     public FrameBuffer getFBO() {
+        final int width = getFBOWidth();
+        final int height = getFBOHeight();
         if (fbo == null) {
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getBackWidth(), getBackHeight(), false);
-        } else if (fbo.getWidth() != getBackWidth() || fbo.getHeight() != getBackHeight()) {
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+        } else if (fbo.getWidth() != width || fbo.getHeight() != height) {
             fbo.dispose();
-            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, getBackWidth(), getBackHeight(), false);
+            fbo = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
         }
         return fbo;
     }

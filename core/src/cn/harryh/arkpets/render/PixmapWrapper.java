@@ -124,12 +124,13 @@ public class PixmapWrapper {
     }
 
     /** Creates a PixmapWrapper object from the given DynamicOrthographicCamara's framebuffer.
+     * Note that the framebuffer may be HDPI scaled, so the pixmap is as large as the framebuffer in pixels.
      * @param camara The given DynamicOrthographicCamara.
      * @return The created PixmapWrapper object.
      */
     public static PixmapWrapper fromCamera(DynamicOrthographicCamara camara) {
         return new PixmapWrapper(
-                Pixmap.createFromFrameBuffer(0, 0, camara.getWidth(), camara.getHeight())
+                Pixmap.createFromFrameBuffer(0, 0, camara.getFBOWidth(), camara.getFBOHeight())
         );
     }
 
