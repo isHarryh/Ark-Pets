@@ -10,7 +10,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -90,13 +89,13 @@ public class HostTray {
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (e.getButton() == 3 && e.isPopupTrigger())
+                    if (e.getButton() == 3 || e.isPopupTrigger())
                         showDialog(e.getX() + 5, e.getY());
                 }
 
                 @Override
                 public void mousePressed(MouseEvent e) {
-                    if (e.getButton() == 3 && e.isPopupTrigger())
+                    if (e.getButton() == 3 || e.isPopupTrigger())
                         showDialog(e.getX() + 5, e.getY());
                 }
             });
@@ -129,16 +128,14 @@ public class HostTray {
     public void showDialog(int x, int y) {
         if (!initialized)
             return;
-        /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
-        Here we will adapt the coordinate for system scaling artificially. See below. */
-        AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-        int scaledX = (int) (x / at.getScaleX());
-        int scaledY = (int) (y / at.getScaleY());
+        Point anchor = TrayPopup.toLogicalPoint(x, y, popWindow);
+        Point location = TrayPopup.getLocation(anchor.x, anchor.y, popMenu.getPreferredSize());
 
         // Show the JDialog together with the JPopupMenu.
+        popWindow.setLocation(location);
         popWindow.setVisible(true);
-        popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
         popMenu.show(popWindow, 0, 0);
+        Logger.debug("HostTray", "Shown @ " + location.x + ", " + location.y);
     }
 
     public void showStage() {
