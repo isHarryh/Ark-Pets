@@ -85,14 +85,10 @@ public class MemberTrayImpl extends MemberTray {
         icon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == 3 || e.isPopupTrigger())
-                    showDialogFromTray(e.getX() + 5, e.getY());
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == 3 || e.isPopupTrigger())
-                    showDialogFromTray(e.getX() + 5, e.getY());
+                // Note that the right click is reported by both the press and the release event on Windows,
+                // so only the release event is handled in order to show the menu exactly once.
+                if (SwingUtilities.isRightMouseButton(e) || e.isPopupTrigger())
+                    showDialog();
             }
         });
         return icon;
@@ -206,38 +202,30 @@ public class MemberTrayImpl extends MemberTray {
         }
     }
 
-    /** Shows the menu at the given coordinate.
-     * The coordinate is expected in the logical screen space, which is shared by the libGDX and AWT.
+    /** Shows the menu at the current mouse pointer.
      */
-    public synchronized void showDialog(int x, int y) {
-        showDialogAt(x, y);
-    }
-
-    /** Shows the menu at the given tray icon event coordinate.
-     */
-    public synchronized void showDialogFromTray(int x, int y) {
-        Point point = TrayPopup.toLogicalPoint(x, y, popWindow);
-        showDialogAt(point.x, point.y);
-    }
-
-    private synchronized void showDialogAt(int x, int y) {
-        // Show the JDialog together with the JPopupMenu.
+    public synchronized void showDialog() {
+        // Note that the pointer location is reported in the logical screen space shared by the AWT and libGDX,
+        // so it is used directly instead of the device pixels given by libGDX.
+        Point anchor = TrayPopup.getPointerLocation(popWindow);
         // Note that `JPopupMenu#pack` does nothing before the menu was shown once,
         // so the preferred size is used to measure the menu size instead.
-        Point location = TrayPopup.getLocation(x, y, popMenu.getPreferredSize());
+        Point location = TrayPopup.getLocation(anchor, popMenu.getPreferredSize());
+
+        // Show the JDialog together with the JPopupMenu.
         popWindow.setLocation(location);
         popWindow.setVisible(true);
         popMenu.show(popWindow, 0, 0);
         Logger.debug("MemberTray", "Shown @ " + location.x + ", " + location.y);
     }
 
-    /** Toggles the menu at the given coordinate.
+    /** Toggles the menu at the current mouse pointer.
      */
-    public void toggleDialog(int x, int y) {
+    public void toggleDialog() {
         if (popMenu.isVisible()) {
             hideDialog();
         } else {
-            showDialog(x, y);
+            showDialog();
         }
     }
 }

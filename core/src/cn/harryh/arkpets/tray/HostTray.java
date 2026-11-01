@@ -89,14 +89,10 @@ public class HostTray {
             trayIcon.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (e.getButton() == 3 || e.isPopupTrigger())
-                        showDialog(e.getX() + 5, e.getY());
-                }
-
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.getButton() == 3 || e.isPopupTrigger())
-                        showDialog(e.getX() + 5, e.getY());
+                    // Note that the right click is reported by both the press and the release event on Windows,
+                    // so only the release event is handled in order to show the menu exactly once.
+                    if (SwingUtilities.isRightMouseButton(e) || e.isPopupTrigger())
+                        showDialog();
                 }
             });
             trayIcon.addMouseListener(new MouseAdapter() {
@@ -125,11 +121,11 @@ public class HostTray {
         }
     }
 
-    public void showDialog(int x, int y) {
+    public void showDialog() {
         if (!initialized)
             return;
-        Point anchor = TrayPopup.toLogicalPoint(x, y, popWindow);
-        Point location = TrayPopup.getLocation(anchor.x, anchor.y, popMenu.getPreferredSize());
+        Point anchor = TrayPopup.getPointerLocation(popWindow);
+        Point location = TrayPopup.getLocation(anchor, popMenu.getPreferredSize());
 
         // Show the JDialog together with the JPopupMenu.
         popWindow.setLocation(location);

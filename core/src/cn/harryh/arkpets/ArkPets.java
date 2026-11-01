@@ -272,9 +272,7 @@ public class ArkPets extends InputApplicationAdaptor {
                 tray.hideDialog();
             } else if (getMouseButton() == Input.Buttons.RIGHT) {
                 // Right Click: Toggle the menu at the cursor
-                tray.toggleDialog(
-                        (int) (windowPosition.now().x + getMouseX()),
-                        (int) (windowPosition.now().y + getMouseY()));
+                tray.toggleDialog();
             }
         }
     }
