@@ -10,6 +10,8 @@ import cn.harryh.arkpets.controllers.ModelsModule;
 import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.controllers.Titlebar;
+import cn.harryh.arkpets.naitves.MacUIHelper;
+import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
@@ -94,6 +96,10 @@ public class ArkHomeFX extends Application {
 
         // After the stage is shown, do initialization.
         stage.show();
+        if(isMac) {
+            ObjCHelper.init();
+            MacUIHelper.adjustNativeWindow(stage);
+        }
         rootModule.popSplashScreen(e -> {
             // Initialize socket server and HostTray.
             try {
