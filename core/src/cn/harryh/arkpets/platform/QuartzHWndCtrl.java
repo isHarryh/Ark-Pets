@@ -105,13 +105,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
         newRect.origin.y = currentScreenRect.getValue().size.height - y - h;
         newRect.size.width = (w);
         newRect.size.height = (h);
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitFrame"),
-                null,
-                1
-        });
+        ObjCHelper.runOnMain(fcb);
     }
 
     @Override
@@ -128,13 +122,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void setTopmost(boolean enable) {
         if(nsWin == null) return;
         layer = enable ? NSStatusWindowLevel : NSNormalWindowLevel;
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitLevel"),
-                null,
-                1
-        });
+        ObjCHelper.runOnMain(lcb);
     }
 
     @Override
@@ -179,8 +167,6 @@ public class QuartzHWndCtrl extends HWndCtrl {
                 nsWin,
                 ObjCHelper.sel("class")
         });
-        ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
-        ObjCHelper.addRunOnAppKitMethod(cls, lcb, "Level");
     }
 
     static String getWindowName(Pointer value) {
@@ -236,7 +222,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private class FrameCallback implements ObjCHelper.ThreadCallback {
         @Override
-        public void callback(Pointer id, Pointer _cmd) {
+        public void callback(Pointer ctx) {
             ObjCHelper.msgSend.invokeVoid(new Object[]{
                     nsWin,
                     ObjCHelper.sel("setFrame:display:animate:"),
@@ -248,7 +234,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private class LevelCallback implements ObjCHelper.ThreadCallback {
         @Override
-        public void callback(Pointer id, Pointer _cmd) {
+        public void callback(Pointer ctx) {
             ObjCHelper.msgSend.invokeVoid(new Object[]{
                     nsWin,
                     ObjCHelper.sel("setLevel:"),

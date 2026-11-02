@@ -12,12 +12,17 @@ public class ObjCHelper {
     private static final Map<String, Pointer> clsMap = new HashMap<>();
     public static Function msgSend;
     public static Function msgSend_stret;
+    private static Pointer MAIN_QUEUE;
+    private static Function DISPATCH_SYNC;
 
     public static void init() {
         msgSend = Function.getFunction("objc.A", "objc_msgSend");
         if (Const.isIntel) {
             msgSend_stret = Function.getFunction("objc.A", "objc_msgSend_stret");
         }
+        NativeLibrary sys = NativeLibrary.getInstance("System");
+        DISPATCH_SYNC = sys.getFunction("dispatch_sync_f");
+        MAIN_QUEUE = sys.getGlobalVariableAddress("_dispatch_main_q");
     }
 
     public static Pointer cls(String cls) {
@@ -40,21 +45,19 @@ public class ObjCHelper {
         return ptr;
     }
 
+    public static void runOnMain(ThreadCallback cb) {
+        DISPATCH_SYNC.invoke(Void.class, new Object[]{MAIN_QUEUE, Pointer.NULL, cb});
+    }
+
     private interface Runtime extends Library {
         Runtime INSTANCE = Native.load("objc.A", Runtime.class);
 
         Pointer sel_getUid(String msg);
 
         Pointer objc_lookUpClass(String name);
-
-        boolean class_addMethod(Pointer cls, Pointer name, Callback imp, String types);
-    }
-
-    public static void addRunOnAppKitMethod(Pointer targetCls, ThreadCallback cb, String name) {
-        Runtime.INSTANCE.class_addMethod(targetCls, sel("apRunOnAppKit" + name), cb, "v@:");
     }
 
     public interface ThreadCallback extends Callback {
-        void callback(Pointer id, Pointer _cmd);
+        void callback(Pointer ctx);
     }
 }
