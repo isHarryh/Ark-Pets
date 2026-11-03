@@ -18,11 +18,9 @@
       <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/isHarryh/Ark-Pets/build.yml?label=Build">
    </p>
    <p>
-      <a href="https://arkpets.harryh.cn?from=readme">🔗官方网站 | Official Website</a>
+      <a href="https://arkpets.harryh.cn?from=readme">🔗官方网站 | Official Website</a> • 
+      <a href="/docs/en/README.md">🌐English Documentation</a>
    </p>
-   <sub>
-      <i> This project only supports Chinese docs. If you are an English user, feel free to contact us. </i>
-   </sub>
 </div>
 
 ## 介 绍 <sub>Intro</sub>
@@ -81,9 +79,9 @@
 
 ### 常用文档
 
-- **更新日志** > [点击查看](CHANGELOG.md)
-- **常见问题解答** > [点击查看](docs/FAQ.md)
-- **遥测功能说明** > [点击查看](docs/Telemetry.md)
+- **更新日志** > [点击查看](/docs/zh_CN/CHANGELOG.md)
+- **常见问题解答** > [点击查看](/docs/zh_CN/FAQ.md)
+- **遥测功能说明** > [点击查看](/docs/zh_CN/Telemetry.md)
 
 ## 使用方法 <sub>Usage</sub>
 
@@ -126,8 +124,8 @@
 
 - 您还可以下载 `zip` 版的程序压缩包解压，实现免安装使用。
 - 如果您的电脑上存在 `JDK17` 的 [Java](https://www.java.com) 运行环境，您还可以下载 `jar` 版的程序文件直接运行（但无法使用开机自启动功能）。
-- 如果您想用命令行启动桌宠，[点击查看](docs/CmdLine.md)说明。
-- 如果您想添加自定义的模型，[点击查看](docs/CustomModel.md)说明。
+- 如果您想用命令行启动桌宠，[点击查看](/docs/zh_CN/CmdLine.md)说明。
+- 如果您想添加自定义的模型，[点击查看](/docs/zh_CN/CustomModel.md)说明。
 - 如果您想使用直播流软件捕捉桌宠窗口，可以在启动器 “选项” 页面禁用 “桌宠作为后台程序启动”。
 
 目前本程序不支持在其他操作系统运行。好消息是，对于 MacOS 和 Linux 的支持已处于开发阶段，敬请期待。
@@ -138,7 +136,7 @@
 
 感谢所有曾经为 ArkPets 的开发提供过各种形式的帮助的个人和组织。
 
-- 另见 [鸣谢和第三方库说明](docs/Credits.md)
+- 另见 [鸣谢和第三方库说明](/docs/zh_CN/Credits.md)
 
 ### 许可证
 
