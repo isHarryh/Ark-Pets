@@ -87,10 +87,8 @@ public class QuartzHWndCtrlFactory extends HWndCtrlFactory{
 
     @Override
     public HWndCtrl.MousePoint getMousePos() {
-        CGPoint.ByValue point = (CGPoint.ByValue) ObjCHelper.msgSend.invoke(CGPoint.ByValue.class,new Object[]{
-                ObjCHelper.cls("NSEvent"),
-                ObjCHelper.sel("mouseLocation")
-        });
+        CGPoint.ByValue point = ObjCHelper.sendStruct(
+                CGPoint.ByValue.class, ObjCHelper.cls("NSEvent"), "mouseLocation");
         return new HWndCtrl.MousePoint((int) Math.floor(point.x), (int) Math.floor(currentScreenRect.getValue().size.height - point.y));
     }
 

@@ -17,7 +17,6 @@ import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
-import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.SentryHelper;
 import javafx.application.Application;
@@ -149,7 +148,7 @@ public class ArkHomeFX extends Application {
             SentryHelper.setEnable(config.enable_telemetry);
             SentryHelper.consumePendingWal();
             if (isMac)
-                GuiPrefabs.disableNSWindowRestore(GuiPrefabs.getStageNativeHandle(stage));
+                MacUIHelper.disableWindowRestoration(stage);
 
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);

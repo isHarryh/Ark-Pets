@@ -24,10 +24,6 @@ import static org.lwjgl.glfw.GLFWNativeCocoa.glfwGetCocoaWindow;
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
 
-    private final FrameCallback fcb = new FrameCallback();
-
-    private final LevelCallback lcb = new LevelCallback();
-
     private final long windowID;
     private Pointer nsWin;
     long layer;
@@ -43,10 +39,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public boolean isForeground() {
         if (nsWin == null) return false;
-        return ObjCHelper.msgSend.invokeInt(new Object[]{
-                nsWin,
-                ObjCHelper.sel("isKeyWindow")
-        }) == 1;
+        return ObjCHelper.sendInt(nsWin, "isKeyWindow") != 0;
     }
 
     @Override
@@ -92,10 +85,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setForeground() {
         if (nsWin == null) return;
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("orderFrontRegardless:")
-        });
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsWin, "orderFrontRegardless:"));
     }
 
     @Override
@@ -105,24 +95,24 @@ public class QuartzHWndCtrl extends HWndCtrl {
         newRect.origin.y = currentScreenRect.getValue().size.height - y - h;
         newRect.size.width = (w);
         newRect.size.height = (h);
-        ObjCHelper.runOnMain(fcb);
+        ObjCHelper.runOnMain(() ->
+                ObjCHelper.sendVoid(nsWin, "setFrame:display:animate:", newRect, true, false));
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsApp,
-                ObjCHelper.sel("setActivationPolicy:"),
-                enable ? 0 : 1
-        });
+        if (nsApp == null) return;
+        long policy = enable ? 0 : 1;
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsApp, "setActivationPolicy:", policy));
     }
 
     @Override
     public void setTopmost(boolean enable) {
         if(nsWin == null) return;
         layer = enable ? NSStatusWindowLevel : NSNormalWindowLevel;
-        ObjCHelper.runOnMain(lcb);
+        long level = layer;
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsWin, "setLevel:", level));
     }
 
     @Override
@@ -134,9 +124,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void attachGLFWWindow(Lwjgl3Graphics graphics) {
         super.attachGLFWWindow(graphics);
         nsWin = new Pointer(glfwGetCocoaWindow(glfwHandle));
-        registerMethods(nsWin);
 
-        MacHelper.tryFixLayers(GLFWNativeCocoa.glfwGetCocoaView(glfwHandle));
+        long cocoaView = GLFWNativeCocoa.glfwGetCocoaView(glfwHandle);
+        if (cocoaView != 0) {
+            MacHelper.tryFixLayers(new Pointer(cocoaView));
+        }
     }
 
     @Override
@@ -155,18 +147,8 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private void checkNSApp() {
         if (nsApp == null) {
-            nsApp = ObjCHelper.msgSend.invokePointer(new Object[]{
-                    ObjCHelper.cls("NSApplication"),
-                    ObjCHelper.sel("sharedApplication")
-            });
+            nsApp = ObjCHelper.sendPointer(ObjCHelper.cls("NSApplication"), "sharedApplication");
         }
-    }
-
-    private void registerMethods(Pointer nsWin) {
-        Pointer cls = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nsWin,
-                ObjCHelper.sel("class")
-        });
     }
 
     static String getWindowName(Pointer value) {
@@ -196,50 +178,5 @@ public class QuartzHWndCtrl extends HWndCtrl {
             }
         }
         return new WindowRect(0, 0, 0, 0);
-    }
-
-    private CGRect getScreenSize() {
-        /*Pointer nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nsWin,
-                ObjCHelper.sel("screen")
-        });
-        if (Const.isARM) {
-            return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
-                    nsScreen,
-                    ObjCHelper.sel("frame")
-            });
-        } else {
-            CGRect.ByReference rect = new CGRect.ByReference();
-            ObjCHelper.msgSend_stret.invokeVoid(new Object[]{
-                    rect,
-                    nsScreen,
-                    ObjCHelper.sel("frame")
-            });
-            return rect;
-        }*/
-        return CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID());
-    }
-
-    private class FrameCallback implements ObjCHelper.ThreadCallback {
-        @Override
-        public void callback(Pointer ctx) {
-            ObjCHelper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCHelper.sel("setFrame:display:animate:"),
-                    newRect,
-                    1, 0
-            });
-        }
-    }
-
-    private class LevelCallback implements ObjCHelper.ThreadCallback {
-        @Override
-        public void callback(Pointer ctx) {
-            ObjCHelper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCHelper.sel("setLevel:"),
-                    layer
-            });
-        }
     }
 }

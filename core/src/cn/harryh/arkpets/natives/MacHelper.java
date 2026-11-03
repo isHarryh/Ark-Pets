@@ -1,31 +1,40 @@
 package cn.harryh.arkpets.natives;
 
 import cn.harryh.arkpets.utils.Logger;
+import com.sun.jna.Pointer;
 
 
 /** @see <a href="https://github.com/isHarryh/Ark-Pets/issues/182">ArkPets Issue #182</a>
  */
 public class MacHelper {
-    public static void tryFixLayers(long view) {
-        var layers = ObjCHelper.msgSend.invokePointer(new Object[]{view, ObjCHelper.sel("layer")});
-        if (layers == null) {
-            Logger.error("System", "view.layer is null");
+    public static void tryFixLayers(Pointer view) {
+        if (view == null || Pointer.nativeValue(view) == 0) {
+            Logger.error("System", "view is null");
             return;
         }
 
-        var sublayers = ObjCHelper.msgSend.invokePointer(new Object[]{layers, ObjCHelper.sel("sublayers")
-        });
-        if (sublayers == null) {
-            Logger.error("System", "layer.sublayers is null");
-            return;
-        }
+        try {
+            Pointer layers = ObjCHelper.sendPointer(view, "layer");
+            if (layers == null) {
+                Logger.error("System", "view.layer is null");
+                return;
+            }
 
-        var firstLayer = ObjCHelper.msgSend.invokePointer(new Object[]{sublayers, ObjCHelper.sel("firstObject")});
-        if (firstLayer == null) {
-            Logger.error("System", "sublayers[0] is null");
-            return;
-        }
+            Pointer sublayers = ObjCHelper.sendPointer(layers, "sublayers");
+            if (sublayers == null) {
+                Logger.error("System", "layer.sublayers is null");
+                return;
+            }
 
-        ObjCHelper.msgSend.invoke(new Object[]{firstLayer, ObjCHelper.sel("setOpaque:"), 0});
+            Pointer firstLayer = ObjCHelper.sendPointer(sublayers, "firstObject");
+            if (firstLayer == null) {
+                Logger.error("System", "sublayers[0] is null");
+                return;
+            }
+
+            ObjCHelper.sendVoid(firstLayer, "setOpaque:", false);
+        } catch (RuntimeException e) {
+            Logger.error("System", "Failed to fix Metal layer opacity, details see below.", e);
+        }
     }
 }

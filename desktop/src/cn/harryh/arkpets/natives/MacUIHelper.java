@@ -1,5 +1,6 @@
 package cn.harryh.arkpets.natives;
 
+import cn.harryh.arkpets.utils.Logger;
 import com.sun.javafx.tk.TKStage;
 import com.sun.jna.Pointer;
 import javafx.stage.Stage;
@@ -8,109 +9,97 @@ import javafx.stage.Window;
 import java.lang.reflect.Field;
 
 
+/**
+ * Utilities for customizing the native {@code NSWindow} behind a JavaFX {@link Stage}.
+ */
 public class MacUIHelper {
+    private static final String TAG = "MacUIHelper";
+
+    // Titled(1) | Closable(2) | Miniaturizable(4) | FullSizeContentView(1 << 15)
+    private static final long NS_WINDOW_STYLE_MASK = 32775L;
+    private static final long NS_TITLE_VISIBILITY_HIDDEN = 1L;
+    private static final long NS_WINDOW_BUTTON_CLOSE = 0L;
+    private static final long NS_WINDOW_BUTTON_MINIATURIZE = 1L;
+    private static final long NS_WINDOW_BUTTON_ZOOM = 2L;
+    private static final long NS_LAYOUT_ATTRIBUTE_LEFT = 1L;
+    private static final long NS_LAYOUT_RELATION_EQUAL = 0L;
+    private static final double TITLE_BUTTON_LEFT_MARGIN = 15;
+    private static final double TITLE_BUTTON_SPACING = 20;
+
+    /**
+     * Applies the launcher's transparent, borderless title bar style.
+     */
     public static void adjustNativeWindow(Stage stage) {
-        long nswindow;
-        try {
-            Field peerF = Window.class.getDeclaredField("peer");
-            peerF.setAccessible(true);
-            TKStage tkStage = (TKStage) peerF.get(stage);
-            nswindow = tkStage.getRawHandle();
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-        ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setStyleMask:"),
-                32775
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setTitleVisibility:"),
-                1
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setTitlebarAppearsTransparent:"),
-                1
-        });
-        Pointer clearColor = ObjCHelper.msgSend.invokePointer(new Object[]{
-                ObjCHelper.cls("NSColor"),
-                ObjCHelper.sel("clearColor")
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setBackgroundColor:"),
-                clearColor
-        });
-        /*ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setOpaque:"),
-                0
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                nswindow,
-                ObjCHelper.sel("setHasShadow:"),
-                0
-        });*/
-        //System.err.println(mask);
-        processTitle(nswindow);
-    }
-    private static void processTitle(long nswindow) {
-        Pointer buttonZoom = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nswindow,
-                ObjCHelper.sel("standardWindowButton:"),
-                2
-        });
-        Pointer buttonMini = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nswindow,
-                ObjCHelper.sel("standardWindowButton:"),
-                1
-        });
-        Pointer buttonClose = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nswindow,
-                ObjCHelper.sel("standardWindowButton:"),
-                0
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                buttonZoom,
-                ObjCHelper.sel("setHidden:"),
-                1
-        });
-        Pointer superView = ObjCHelper.msgSend.invokePointer(new Object[]{
-                buttonZoom,
-                ObjCHelper.sel("superview")
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                buttonClose,
-                ObjCHelper.sel("setTranslatesAutoresizingMaskIntoConstraints:"),
-                0
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                buttonMini,
-                ObjCHelper.sel("setTranslatesAutoresizingMaskIntoConstraints:"),
-                0
-        });
-        createConstraint(buttonClose,1,superView,1,15);
-        createConstraint(buttonMini,1,buttonClose,1,20);
+        Pointer window = getNSWindowHandle(stage);
+        if (window == null) return;
+        applyStyle(window);
+        processTitle(window);
     }
 
-    private static void createConstraint(Pointer item,long attr,Pointer toItem,long toAttr,double constant) {
-        Pointer con = ObjCHelper.msgSend.invokePointer(new Object[]{
+    /**
+     * Prevents macOS from restoring the window's previous state on the next launch.
+     */
+    public static void disableWindowRestoration(Stage stage) {
+        Pointer window = getNSWindowHandle(stage);
+        if (window == null) return;
+        ObjCHelper.sendVoid(window, "setRestorable:", false);
+    }
+
+    /**
+     * Obtains the native {@code NSWindow} pointer behind a JavaFX {@link Stage}.
+     *
+     * @return The window pointer, or {@code null} if it cannot be resolved.
+     */
+    public static Pointer getNSWindowHandle(Stage stage) {
+        try {
+            Field peerField = Window.class.getDeclaredField("peer");
+            peerField.setAccessible(true);
+            TKStage tkStage = (TKStage) peerField.get(stage);
+            long handle = tkStage.getRawHandle();
+            return handle == 0 ? null : new Pointer(handle);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            Logger.warn(TAG, "Failed to obtain the native NSWindow handle: " + e);
+            return null;
+        }
+    }
+
+    private static void applyStyle(Pointer window) {
+        ObjCHelper.sendVoid(window, "setStyleMask:", NS_WINDOW_STYLE_MASK);
+        ObjCHelper.sendVoid(window, "setTitleVisibility:", NS_TITLE_VISIBILITY_HIDDEN);
+        ObjCHelper.sendVoid(window, "setTitlebarAppearsTransparent:", 1L);
+        Pointer clearColor = ObjCHelper.sendPointer(ObjCHelper.cls("NSColor"), "clearColor");
+        ObjCHelper.sendVoid(window, "setBackgroundColor:", clearColor);
+    }
+
+    private static void processTitle(Pointer window) {
+        Pointer buttonZoom = ObjCHelper.sendPointer(
+                window, "standardWindowButton:", NS_WINDOW_BUTTON_ZOOM);
+        Pointer buttonMini = ObjCHelper.sendPointer(
+                window, "standardWindowButton:", NS_WINDOW_BUTTON_MINIATURIZE);
+        Pointer buttonClose = ObjCHelper.sendPointer(
+                window, "standardWindowButton:", NS_WINDOW_BUTTON_CLOSE);
+        ObjCHelper.sendVoid(buttonZoom, "setHidden:", true);
+        Pointer superView = ObjCHelper.sendPointer(buttonZoom, "superview");
+        ObjCHelper.sendVoid(buttonClose, "setTranslatesAutoresizingMaskIntoConstraints:", false);
+        ObjCHelper.sendVoid(buttonMini, "setTranslatesAutoresizingMaskIntoConstraints:", false);
+        createConstraint(buttonClose, NS_LAYOUT_ATTRIBUTE_LEFT, superView,
+                NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_LEFT_MARGIN);
+        createConstraint(buttonMini, NS_LAYOUT_ATTRIBUTE_LEFT, buttonClose,
+                NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_SPACING);
+    }
+
+    private static void createConstraint(Pointer item, long attribute, Pointer toItem,
+                                         long toAttribute, double constant) {
+        Pointer constraint = ObjCHelper.sendPointer(
                 ObjCHelper.cls("NSLayoutConstraint"),
-                ObjCHelper.sel("constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:"),
+                "constraintWithItem:attribute:relatedBy:toItem:attribute:multiplier:constant:",
                 item,
-                attr,
-                0,
+                attribute,
+                NS_LAYOUT_RELATION_EQUAL,
                 toItem,
-                toAttr,
+                toAttribute,
                 1.0,
-                constant
-        });
-        ObjCHelper.msgSend.invoke(new Object[]{
-                con,
-                ObjCHelper.sel("setActive:"),
-                1
-        });
+                constant);
+        ObjCHelper.sendVoid(constraint, "setActive:", true);
     }
 }
