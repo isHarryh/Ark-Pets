@@ -1,4 +1,4 @@
-package cn.harryh.arkpets.naitves;
+package cn.harryh.arkpets.natives;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.WString;

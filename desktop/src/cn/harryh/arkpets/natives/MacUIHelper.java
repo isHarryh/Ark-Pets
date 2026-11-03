@@ -1,6 +1,5 @@
-package cn.harryh.arkpets.naitves;
+package cn.harryh.arkpets.natives;
 
-import cn.harryh.arkpets.natives.ObjCHelper;
 import com.sun.javafx.tk.TKStage;
 import com.sun.jna.Pointer;
 import javafx.stage.Stage;
@@ -37,7 +36,7 @@ public class MacUIHelper {
         });
         Pointer clearColor = ObjCHelper.msgSend.invokePointer(new Object[]{
                 ObjCHelper.cls("NSColor"),
-                ObjCHelper.sel("redColor")
+                ObjCHelper.sel("clearColor")
         });
         ObjCHelper.msgSend.invoke(new Object[]{
                 nswindow,

@@ -3,8 +3,8 @@
  */
 package cn.harryh.arkpets.startup;
 
-import cn.harryh.arkpets.naitves.IPersistFile;
-import cn.harryh.arkpets.naitves.IShellLink;
+import cn.harryh.arkpets.natives.IPersistFile;
+import cn.harryh.arkpets.natives.IShellLink;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 

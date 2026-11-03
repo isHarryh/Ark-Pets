@@ -10,7 +10,7 @@ import cn.harryh.arkpets.controllers.ModelsModule;
 import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.controllers.Titlebar;
-import cn.harryh.arkpets.naitves.MacUIHelper;
+import cn.harryh.arkpets.natives.MacUIHelper;
 import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.DialogComposer;
