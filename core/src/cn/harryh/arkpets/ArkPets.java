@@ -53,6 +53,21 @@ public class ArkPets extends InputApplicationAdaptor {
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
+    // Drag anchor in absolute screen coordinates. The cursor delta must never be derived from window-relative
+    // coordinates, because ArkPets moves its own window while dragging and that would feed the window's own
+    // movement back into the drag, causing a diverging oscillation.
+    private boolean dragAnchored = false;
+    private int dragAnchorCursorX;
+    private int dragAnchorCursorY;
+    private int dragAnchorWindowX;
+    private int dragAnchorWindowY;
+    // The absolute cursor is only needed once per rendered frame. Querying it for every drag event would be
+    // wasteful on platforms where the query is an IPC round-trip (e.g. the Wayland compositor D-Bus interface).
+    private int frameIndex;
+    private int dragCursorFrame = -1;
+    private int dragCursorX;
+    private int dragCursorY;
+
     public ArkPets(String title, ArkConfig appConfig, CorePerformanceSampler performanceSampler) {
         APP_TITLE = title;
         this.performanceSampler = performanceSampler;
@@ -129,6 +144,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
     @Override
     public void render() {
+        frameIndex++;
         if (performanceSampler != null)
             performanceSampler.beginFrame();
 
@@ -177,6 +193,8 @@ public class ArkPets extends InputApplicationAdaptor {
         // 3.Window properties.
         windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.addProgress(Gdx.graphics.getDeltaTime());
+        if (isMouseDragging())
+            windowPosition.setToEnd(); // The drag is anchored to the cursor, so it must follow without easing.
         updateWindow();
 
         // 4.Outline.
@@ -253,6 +271,7 @@ public class ArkPets extends InputApplicationAdaptor {
     /* INPUT PROCESS */
     @Override
     protected void onMouseDown() {
+        dragAnchored = false;
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
             RelativeWindowPosition rwp = getUnderlyingRWP();
@@ -277,20 +296,37 @@ public class ArkPets extends InputApplicationAdaptor {
 
     @Override
     protected void onMouseDrag() {
-        if (getMouseButton() != Input.Buttons.RIGHT) {
-            // Update window position
-            int x = (int) (windowPosition.now().x + getMouseDeltaX());
-            int y = (int) (windowPosition.now().y + getMouseDeltaY());
-            plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
-            windowPosition.setToEnd();
-            tray.hideDialog();
-            if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
-                changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
+        if (getMouseButton() == Input.Buttons.RIGHT)
+            return;
+
+        // Follow the absolute cursor position from a fixed anchor instead of accumulating window-relative
+        // deltas. The window moves under the cursor every frame, so window-relative deltas contain the
+        // window's own displacement and make the drag loop unstable (a per-frame oscillation that grows
+        // until it is clamped by the walkable area).
+        if (dragCursorFrame != frameIndex) {
+            HWndCtrl.MousePoint cursor = WindowSystem.getMousePos();
+            dragCursorFrame = frameIndex;
+            dragCursorX = cursor.x();
+            dragCursorY = cursor.y();
         }
+        if (!dragAnchored) {
+            dragAnchored = true;
+            dragAnchorCursorX = dragCursorX;
+            dragAnchorCursorY = dragCursorY;
+            dragAnchorWindowX = (int) windowPosition.now().x;
+            dragAnchorWindowY = (int) windowPosition.now().y;
+        }
+        int x = dragAnchorWindowX + dragCursorX - dragAnchorCursorX;
+        int y = dragAnchorWindowY + dragCursorY - dragAnchorCursorY;
+        plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
+        tray.hideDialog();
+        if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
+            changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
     }
 
     @Override
     protected void onMouseUp() {
+        dragAnchored = false;
         if (isMouseDragging()) {
             if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 1)
                 changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
