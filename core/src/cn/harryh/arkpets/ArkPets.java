@@ -7,6 +7,7 @@ import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
+import cn.harryh.arkpets.natives.MacHelper;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.render.PixmapWrapper;
@@ -27,9 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static cn.harryh.arkpets.Const.*;
 import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
-import static cn.harryh.arkpets.Const.changeDirectionXThreshold;
-import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
 public class ArkPets extends InputApplicationAdaptor {
@@ -534,6 +534,14 @@ public class ArkPets extends InputApplicationAdaptor {
                 StringBuilder builder = new StringBuilder("Showing window list\n");
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
+                var dpid = MacHelper.findDockPid();
+                Logger.debug("Debugger", "DockPID: " + dpid);
+                if(isMac) {
+                    var dockFrame = MacHelper.getDockRealFrame((int) dpid);
+                    Logger.debug("Debugger", dockFrame == null ? "DockFrame: null"
+                            : "DockFrame: x=" + dockFrame.origin.x + " y=" + dockFrame.origin.y
+                            + " w=" + dockFrame.size.width + " h=" + dockFrame.size.height);
+                }
             });
         }
     }

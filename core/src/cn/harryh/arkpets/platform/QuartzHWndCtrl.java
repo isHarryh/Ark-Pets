@@ -3,6 +3,7 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.MacHelper;
 import cn.harryh.arkpets.natives.ObjCHelper;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -27,13 +28,20 @@ public class QuartzHWndCtrl extends HWndCtrl {
     private final long windowID;
     private Pointer nsWin;
     long layer;
+    boolean onScreen;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
     public QuartzHWndCtrl(CFDictionaryRef dict) {
-        super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict.getValue(kCGWindowBounds)));
+        super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict));
         windowID = new CFNumberRef(dict.getValue(kCGWindowNumber)).longValue();
         layer = new CFNumberRef(dict.getValue(kCGWindowLayer)).longValue();
+        Pointer onScreenRef = dict.getValue(kCGWindowIsOnscreen);
+        if (onScreenRef!=null) {
+            onScreen = new CoreFoundation.CFBooleanRef(onScreenRef).booleanValue();
+        } else {
+            onScreen = false;
+        }
     }
 
     @Override
@@ -44,7 +52,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     @Override
     public boolean isVisible() {
-        return false;
+        return onScreen;
     }
 
     @Override
@@ -155,6 +163,16 @@ public class QuartzHWndCtrl extends HWndCtrl {
         return value == null ? "" : new CFStringRef(value).stringValue();
     }
 
+    static int getWindowPid(CFDictionaryRef dict) {
+        Pointer value = dict.getValue(kCGWindowOwnerPID);
+        return value == null ? -1 : new CoreFoundation.CFNumberRef(value).intValue();
+    }
+
+    private static boolean isDockWindow(CFDictionaryRef dict) {
+        long dockPid = QuartzHWndCtrlFactory.dockPid;
+        return dockPid > 0 && getWindowPid(dict) == dockPid;
+    }
+
     static String getWindowName(Pointer own, Pointer title) {
         String ownName;
         String titleName;
@@ -164,7 +182,24 @@ public class QuartzHWndCtrl extends HWndCtrl {
         return titleName;
     }
 
-    private static WindowRect getWindowRect(Pointer value) {
+    private static WindowRect getWindowRect(CFDictionaryRef dict) {
+        if (isDockWindow(dict)) {
+            CoreGraphics.CGRect dockRect = QuartzHWndCtrlFactory.dockFrame.getValue();
+            if (dockRect != null) {
+                return new WindowRect(
+                        (int) Math.round(dockRect.origin.y),
+                        (int) Math.round(dockRect.origin.y + dockRect.size.height),
+                        (int) Math.round(dockRect.origin.x),
+                        (int) Math.round(dockRect.origin.x + dockRect.size.width)
+                );
+            }
+            // The CGWindowBounds of the Dock covers the whole screen, so it must never be used as a fallback:
+            // it would shadow the barriers of every other window. Return an empty rect instead, which never
+            // matches the pet or the walkable line.
+            Logger.debug("System", "Dock frame is unavailable, ignoring the Dock window");
+            return new WindowRect(0, 0, 0, 0);
+        }
+        Pointer value = dict.getValue(kCGWindowBounds);
         if (value != null) {
             CGRect.ByReference rect = new CGRect.ByReference();
             boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);

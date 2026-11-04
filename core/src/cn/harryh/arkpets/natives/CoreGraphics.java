@@ -14,6 +14,8 @@ public interface CoreGraphics extends Library {
     CFStringRef kCGWindowLayer = CFStringRef.createCFString("kCGWindowLayer");
     CFStringRef kCGWindowName = CFStringRef.createCFString("kCGWindowName");
     CFStringRef kCGWindowOwnerName = CFStringRef.createCFString("kCGWindowOwnerName");
+    CFStringRef kCGWindowIsOnscreen = CFStringRef.createCFString("kCGWindowIsOnscreen");
+    CFStringRef kCGWindowOwnerPID = CFStringRef.createCFString("kCGWindowOwnerPID");
 
     int kCGWindowListExcludeDesktopElements = (1 << 4);
     int kCGWindowListOptionOnScreenOnly = 1;
@@ -61,5 +63,11 @@ public interface CoreGraphics extends Library {
     class CGSize extends Structure {
         public double width;
         public double height;
+
+        public static class ByReference extends CGSize implements Structure.ByReference {
+        }
+
+        public static class ByValue extends CGSize implements Structure.ByValue {
+        }
     }
 }
