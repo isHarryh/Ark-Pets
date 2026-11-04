@@ -11,16 +11,16 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 
 public class HostTray {
     protected TrayIcon trayIcon;
     protected boolean initialized = false;
-    protected Map<UUID, MemberTray> arkPetTrays = new HashMap<>();
+    protected Map<UUID, MemberTray> arkPetTrays = new ConcurrentHashMap<>();
 
     private JDialog popWindow;
     private JPopupMenu popMenu;
@@ -43,13 +43,17 @@ public class HostTray {
                 UIManager.setLookAndFeel(laf);
             } catch (Exception ignored) {
             }
+            Const.FontsConfig.REGULAR.loadFontToSwing();
         });
-        Const.FontsConfig.REGULAR.loadFontToSwing();
     }
 
     public static HostTray getInstance() {
         if (instance == null)
-            instance = new HostTray();
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    instance = new HostTray();
+                });
+            } catch (Exception ignored) { }
         return instance;
     }
 
@@ -111,10 +115,16 @@ public class HostTray {
         if (initialized)
             return;
         try {
-            SystemTray.getSystemTray().add(trayIcon);
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    SystemTray.getSystemTray().add(trayIcon);
+                } catch (AWTException e) {
+                    Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
+                }
+            });
             Logger.info("HostTray", "HostTray icon applied");
             initialized = true;
-        } catch (AWTException e) {
+        } catch (Exception e) {
             Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
         }
     }
@@ -159,11 +169,11 @@ public class HostTray {
     }
 
     public void addMemberTray(JMenu menu) {
-        playerMenu.add(menu);
+        SwingUtilities.invokeLater(()->playerMenu.add(menu));
     }
 
     public void removeMemberTray(JMenu menu) {
-        playerMenu.remove(menu);
+        SwingUtilities.invokeLater(()->playerMenu.remove(menu));
     }
 
     public void addMemberTray(UUID uuid, MemberTray tray) {
