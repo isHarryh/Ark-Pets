@@ -19,6 +19,7 @@ import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.SentryHelper;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -95,14 +96,16 @@ public class ArkHomeFX extends Application {
             e.consume();
             titleBar.windowClose(null);
         });
+        ObjCHelper.init();
+        stage.setOnShown(e -> {
+            if(isMac) {
+                MacUIHelper.adjustNativeWindow(stage);
+            }
+        });
         titleBar.titleText.setText(desktopTitle);
 
         // After the stage is shown, do initialization.
         stage.show();
-        if(isMac) {
-            ObjCHelper.init();
-            MacUIHelper.adjustNativeWindow(stage);
-        }
         rootModule.popSplashScreen(e -> {
             // Initialize socket server and HostTray.
             try {
