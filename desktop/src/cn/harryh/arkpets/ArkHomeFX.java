@@ -91,6 +91,10 @@ public class ArkHomeFX extends Application {
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setTitle(desktopTitle);
+        stage.setOnCloseRequest(e -> {
+            e.consume();
+            titleBar.windowClose(null);
+        });
         titleBar.titleText.setText(desktopTitle);
 
         // After the stage is shown, do initialization.
