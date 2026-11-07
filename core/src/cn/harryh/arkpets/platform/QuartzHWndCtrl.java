@@ -3,6 +3,7 @@ package cn.harryh.arkpets.platform;
 import cn.harryh.arkpets.natives.CoreGraphics;
 import cn.harryh.arkpets.natives.MacHelper;
 import cn.harryh.arkpets.natives.ObjCHelper;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
@@ -24,34 +25,34 @@ import static org.lwjgl.glfw.GLFWNativeCocoa.glfwGetCocoaWindow;
 public class QuartzHWndCtrl extends HWndCtrl {
     private static Pointer nsApp;
 
-    private final FrameCallback fcb = new FrameCallback();
-
-    private final LevelCallback lcb = new LevelCallback();
-
     private final long windowID;
     private Pointer nsWin;
     long layer;
+    boolean onScreen;
     // 0:Uncheck 1:Checked,Available -1:Checked,Unavailable
     private final CGRect.ByValue newRect = new CGRect.ByValue();
 
     public QuartzHWndCtrl(CFDictionaryRef dict) {
-        super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict.getValue(kCGWindowBounds)));
+        super(getWindowName(dict.getValue(kCGWindowOwnerName), dict.getValue(kCGWindowName)), getWindowRect(dict));
         windowID = new CFNumberRef(dict.getValue(kCGWindowNumber)).longValue();
         layer = new CFNumberRef(dict.getValue(kCGWindowLayer)).longValue();
+        Pointer onScreenRef = dict.getValue(kCGWindowIsOnscreen);
+        if (onScreenRef!=null) {
+            onScreen = new CoreFoundation.CFBooleanRef(onScreenRef).booleanValue();
+        } else {
+            onScreen = false;
+        }
     }
 
     @Override
     public boolean isForeground() {
         if (nsWin == null) return false;
-        return ObjCHelper.msgSend.invokeInt(new Object[]{
-                nsWin,
-                ObjCHelper.sel("isKeyWindow")
-        }) == 1;
+        return ObjCHelper.sendInt(nsWin, "isKeyWindow") != 0;
     }
 
     @Override
     public boolean isVisible() {
-        return false;
+        return onScreen;
     }
 
     @Override
@@ -92,10 +93,7 @@ public class QuartzHWndCtrl extends HWndCtrl {
     @Override
     public void setForeground() {
         if (nsWin == null) return;
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("orderFrontRegardless:")
-        });
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsWin, "orderFrontRegardless:"));
     }
 
     @Override
@@ -105,36 +103,24 @@ public class QuartzHWndCtrl extends HWndCtrl {
         newRect.origin.y = currentScreenRect.getValue().size.height - y - h;
         newRect.size.width = (w);
         newRect.size.height = (h);
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitFrame"),
-                null,
-                1
-        });
+        ObjCHelper.runOnMain(() ->
+                ObjCHelper.sendVoid(nsWin, "setFrame:display:animate:", newRect, true, false));
     }
 
     @Override
     public void setTaskbar(boolean enable) {
         checkNSApp();
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsApp,
-                ObjCHelper.sel("setActivationPolicy:"),
-                enable ? 0 : 1
-        });
+        if (nsApp == null) return;
+        long policy = enable ? 0 : 1;
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsApp, "setActivationPolicy:", policy));
     }
 
     @Override
     public void setTopmost(boolean enable) {
         if(nsWin == null) return;
         layer = enable ? NSStatusWindowLevel : NSNormalWindowLevel;
-        ObjCHelper.msgSend.invokeVoid(new Object[]{
-                nsWin,
-                ObjCHelper.sel("performSelectorOnMainThread:withObject:waitUntilDone:"),
-                ObjCHelper.sel("apRunOnAppKitLevel"),
-                null,
-                1
-        });
+        long level = layer;
+        ObjCHelper.runOnMain(() -> ObjCHelper.sendVoid(nsWin, "setLevel:", level));
     }
 
     @Override
@@ -146,9 +132,11 @@ public class QuartzHWndCtrl extends HWndCtrl {
     public void attachGLFWWindow(Lwjgl3Graphics graphics) {
         super.attachGLFWWindow(graphics);
         nsWin = new Pointer(glfwGetCocoaWindow(glfwHandle));
-        registerMethods(nsWin);
 
-        MacHelper.tryFixLayers(GLFWNativeCocoa.glfwGetCocoaView(glfwHandle));
+        long cocoaView = GLFWNativeCocoa.glfwGetCocoaView(glfwHandle);
+        if (cocoaView != 0) {
+            MacHelper.tryFixLayers(new Pointer(cocoaView));
+        }
     }
 
     @Override
@@ -167,24 +155,22 @@ public class QuartzHWndCtrl extends HWndCtrl {
 
     private void checkNSApp() {
         if (nsApp == null) {
-            nsApp = ObjCHelper.msgSend.invokePointer(new Object[]{
-                    ObjCHelper.cls("NSApplication"),
-                    ObjCHelper.sel("sharedApplication")
-            });
+            nsApp = ObjCHelper.sendPointer(ObjCHelper.cls("NSApplication"), "sharedApplication");
         }
-    }
-
-    private void registerMethods(Pointer nsWin) {
-        Pointer cls = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nsWin,
-                ObjCHelper.sel("class")
-        });
-        ObjCHelper.addRunOnAppKitMethod(cls, fcb, "Frame");
-        ObjCHelper.addRunOnAppKitMethod(cls, lcb, "Level");
     }
 
     static String getWindowName(Pointer value) {
         return value == null ? "" : new CFStringRef(value).stringValue();
+    }
+
+    static int getWindowPid(CFDictionaryRef dict) {
+        Pointer value = dict.getValue(kCGWindowOwnerPID);
+        return value == null ? -1 : new CoreFoundation.CFNumberRef(value).intValue();
+    }
+
+    private static boolean isDockWindow(CFDictionaryRef dict) {
+        long dockPid = QuartzHWndCtrlFactory.dockPid;
+        return dockPid > 0 && getWindowPid(dict) == dockPid;
     }
 
     static String getWindowName(Pointer own, Pointer title) {
@@ -196,7 +182,24 @@ public class QuartzHWndCtrl extends HWndCtrl {
         return titleName;
     }
 
-    private static WindowRect getWindowRect(Pointer value) {
+    private static WindowRect getWindowRect(CFDictionaryRef dict) {
+        if (isDockWindow(dict)) {
+            CoreGraphics.CGRect dockRect = QuartzHWndCtrlFactory.dockFrame.getValue();
+            if (dockRect != null) {
+                return new WindowRect(
+                        (int) Math.round(dockRect.origin.y),
+                        (int) Math.round(dockRect.origin.y + dockRect.size.height),
+                        (int) Math.round(dockRect.origin.x),
+                        (int) Math.round(dockRect.origin.x + dockRect.size.width)
+                );
+            }
+            // The CGWindowBounds of the Dock covers the whole screen, so it must never be used as a fallback:
+            // it would shadow the barriers of every other window. Return an empty rect instead, which never
+            // matches the pet or the walkable line.
+            Logger.debug("System", "Dock frame is unavailable, ignoring the Dock window");
+            return new WindowRect(0, 0, 0, 0);
+        }
+        Pointer value = dict.getValue(kCGWindowBounds);
         if (value != null) {
             CGRect.ByReference rect = new CGRect.ByReference();
             boolean success = CoreGraphics.INSTANCE.CGRectMakeWithDictionaryRepresentation(new CFDictionaryRef(value), rect);
@@ -210,50 +213,5 @@ public class QuartzHWndCtrl extends HWndCtrl {
             }
         }
         return new WindowRect(0, 0, 0, 0);
-    }
-
-    private CGRect getScreenSize() {
-        /*Pointer nsScreen = ObjCHelper.msgSend.invokePointer(new Object[]{
-                nsWin,
-                ObjCHelper.sel("screen")
-        });
-        if (Const.isARM) {
-            return (CGRect.ByValue) ObjCHelper.msgSend.invoke(CGRect.ByValue.class, new Object[]{
-                    nsScreen,
-                    ObjCHelper.sel("frame")
-            });
-        } else {
-            CGRect.ByReference rect = new CGRect.ByReference();
-            ObjCHelper.msgSend_stret.invokeVoid(new Object[]{
-                    rect,
-                    nsScreen,
-                    ObjCHelper.sel("frame")
-            });
-            return rect;
-        }*/
-        return CoreGraphics.INSTANCE.CGDisplayBounds(CoreGraphics.INSTANCE.CGMainDisplayID());
-    }
-
-    private class FrameCallback implements ObjCHelper.ThreadCallback {
-        @Override
-        public void callback(Pointer id, Pointer _cmd) {
-            ObjCHelper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCHelper.sel("setFrame:display:animate:"),
-                    newRect,
-                    1, 0
-            });
-        }
-    }
-
-    private class LevelCallback implements ObjCHelper.ThreadCallback {
-        @Override
-        public void callback(Pointer id, Pointer _cmd) {
-            ObjCHelper.msgSend.invokeVoid(new Object[]{
-                    nsWin,
-                    ObjCHelper.sel("setLevel:"),
-                    layer
-            });
-        }
     }
 }

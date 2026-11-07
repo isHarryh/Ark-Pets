@@ -15,7 +15,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -60,7 +59,6 @@ public class MemberTrayImpl extends MemberTray {
         if (arkPets.canChangeStage())
             popMenu.add(optChangeStage);
         popMenu.add(optExit);
-        popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
         Runnable onConnected = this::onConnected;
         SocketSession session = new SocketClient.ClientSocketSession(client, this);
@@ -87,14 +85,10 @@ public class MemberTrayImpl extends MemberTray {
         icon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (e.getButton() == 3 && e.isPopupTrigger())
-                    showDialog(e.getX() + 5, e.getY());
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (e.getButton() == 3 && e.isPopupTrigger())
-                    showDialog(e.getX() + 5, e.getY());
+                // Note that the right click is reported by both the press and the release event on Windows,
+                // so only the release event is handled in order to show the menu exactly once.
+                if (SwingUtilities.isRightMouseButton(e) || e.isPopupTrigger())
+                    showDialog();
             }
         });
         return icon;
@@ -208,29 +202,30 @@ public class MemberTrayImpl extends MemberTray {
         }
     }
 
-    /** Shows the menu at the given coordinate.
+    /** Shows the menu at the current mouse pointer.
      */
-    public synchronized void showDialog(int x, int y) {
-        /* Use `System.setProperty("sun.java2d.uiScale", "1")` can also avoid system scaling.
-        Here we will adapt the coordinate for system scaling artificially. See below. */
-        AffineTransform at = popWindow.getGraphicsConfiguration().getDefaultTransform();
-        int scaledX = (int) (x / at.getScaleX());
-        int scaledY = (int) (y / at.getScaleY());
+    public synchronized void showDialog() {
+        // Note that the pointer location is reported in the logical screen space shared by the AWT and libGDX,
+        // so it is used directly instead of the device pixels given by libGDX.
+        Point anchor = TrayPopup.getPointerLocation(popWindow);
+        // Note that `JPopupMenu#pack` does nothing before the menu was shown once,
+        // so the preferred size is used to measure the menu size instead.
+        Point location = TrayPopup.getLocation(anchor, popMenu.getPreferredSize());
 
         // Show the JDialog together with the JPopupMenu.
-        popWindow.setLocation(scaledX, scaledY - popMenu.getHeight());
+        popWindow.setLocation(location);
         popWindow.setVisible(true);
         popMenu.show(popWindow, 0, 0);
-        Logger.debug("MemberTray", "Shown @ " + x + ", " + y);
+        Logger.debug("MemberTray", "Shown @ " + location.x + ", " + location.y);
     }
 
-    /** Toggles the menu at the given coordinate.
+    /** Toggles the menu at the current mouse pointer.
      */
-    public void toggleDialog(int x, int y) {
+    public void toggleDialog() {
         if (popMenu.isVisible()) {
             hideDialog();
         } else {
-            showDialog(x, y);
+            showDialog();
         }
     }
 }

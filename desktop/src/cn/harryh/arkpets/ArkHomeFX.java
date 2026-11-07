@@ -10,14 +10,16 @@ import cn.harryh.arkpets.controllers.ModelsModule;
 import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.controllers.Titlebar;
+import cn.harryh.arkpets.natives.MacUIHelper;
+import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
-import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.SentryHelper;
+import com.sun.javafx.application.PlatformImpl;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -90,6 +92,16 @@ public class ArkHomeFX extends Application {
         stage.setResizable(false);
         stage.setScene(scene);
         stage.setTitle(desktopTitle);
+        stage.setOnCloseRequest(e -> {
+            e.consume();
+            titleBar.windowClose(null);
+        });
+        ObjCHelper.init();
+        stage.setOnShown(e -> {
+            if(isMac) {
+                MacUIHelper.adjustNativeWindow(stage);
+            }
+        });
         titleBar.titleText.setText(desktopTitle);
 
         // After the stage is shown, do initialization.
@@ -143,7 +155,7 @@ public class ArkHomeFX extends Application {
             SentryHelper.setEnable(config.enable_telemetry);
             SentryHelper.consumePendingWal();
             if (isMac)
-                GuiPrefabs.disableNSWindowRestore(GuiPrefabs.getStageNativeHandle(stage));
+                MacUIHelper.disableWindowRestoration(stage);
 
             Logger.info("Launcher", "Finished starting");
         }, Duration.ZERO, durationFast);

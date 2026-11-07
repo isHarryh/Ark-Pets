@@ -132,7 +132,7 @@ public class Titlebar implements Controller<ArkHomeFX> {
 
     private void initMacTitlebar() {
         AnchorPane.setLeftAnchor(title, 52.0);
-        macTitleButtons.setVisible(true);
+        //macTitleButtons.setVisible(true);
         AnchorPane.setRightAnchor(titleButtons, null);
         titleButtons.setVisible(false);
         app.stage.focusedProperty().addListener((e, oldValue, newValue) -> {
