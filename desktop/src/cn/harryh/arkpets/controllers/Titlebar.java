@@ -44,10 +44,10 @@ public class Titlebar implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        if (forceUiStyle.equals("mac") || isMac) {
+        if (forceUiStyle.equals("win") || Const.isWindows){
+            // TODO
+        } else if (forceUiStyle.equals("mac") || isMac) {
             initMacTitlebar();
-        } else if (forceUiStyle.equals("win") || Const.isWindows){
-
         }
     }
 
