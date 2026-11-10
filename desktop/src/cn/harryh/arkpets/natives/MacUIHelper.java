@@ -28,12 +28,24 @@ public class MacUIHelper {
 
     /**
      * Applies the launcher's transparent, borderless title bar style.
+     *
+     * @return {@code true} if the native traffic lights are ready to be used, or
+     * {@code false} if the caller should fall back to the self-drawn title buttons.
      */
-    public static void adjustNativeWindow(Stage stage) {
-        Pointer window = getNSWindowHandle(stage);
-        if (window == null) return;
-        applyStyle(window);
-        processTitle(window);
+    public static boolean adjustNativeWindow(Stage stage) {
+        Pointer window = null;
+        try {
+            ObjCHelper.init();
+            window = getNSWindowHandle(stage);
+            if (window == null) return false;
+            applyStyle(window);
+            return processTitle(window);
+        } catch (RuntimeException | LinkageError e) {
+            if (window != null) hideStandardButtons(window);
+            Logger.warn(TAG, "Failed to adjust the native window, " +
+                    "falling back to the self-drawn title buttons: " + e);
+            return false;
+        }
     }
 
     /**
@@ -57,7 +69,7 @@ public class MacUIHelper {
             TKStage tkStage = (TKStage) peerField.get(stage);
             long handle = tkStage.getRawHandle();
             return handle == 0 ? null : new Pointer(handle);
-        } catch (ReflectiveOperationException | RuntimeException e) {
+        } catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
             Logger.warn(TAG, "Failed to obtain the native NSWindow handle: " + e);
             return null;
         }
@@ -71,21 +83,53 @@ public class MacUIHelper {
         ObjCHelper.sendVoid(window, "setBackgroundColor:", clearColor);
     }
 
-    private static void processTitle(Pointer window) {
-        Pointer buttonZoom = ObjCHelper.sendPointer(
-                window, "standardWindowButton:", NS_WINDOW_BUTTON_ZOOM);
-        Pointer buttonMini = ObjCHelper.sendPointer(
-                window, "standardWindowButton:", NS_WINDOW_BUTTON_MINIATURIZE);
-        Pointer buttonClose = ObjCHelper.sendPointer(
-                window, "standardWindowButton:", NS_WINDOW_BUTTON_CLOSE);
-        ObjCHelper.sendVoid(buttonZoom, "setHidden:", true);
-        Pointer superView = ObjCHelper.sendPointer(buttonZoom, "superview");
-        ObjCHelper.sendVoid(buttonClose, "setTranslatesAutoresizingMaskIntoConstraints:", false);
-        ObjCHelper.sendVoid(buttonMini, "setTranslatesAutoresizingMaskIntoConstraints:", false);
-        createConstraint(buttonClose, NS_LAYOUT_ATTRIBUTE_LEFT, superView,
-                NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_LEFT_MARGIN);
-        createConstraint(buttonMini, NS_LAYOUT_ATTRIBUTE_LEFT, buttonClose,
-                NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_SPACING);
+    private static boolean processTitle(Pointer window) {
+        try {
+            Pointer buttonZoom = ObjCHelper.sendPointer(
+                    window, "standardWindowButton:", NS_WINDOW_BUTTON_ZOOM);
+            Pointer buttonMini = ObjCHelper.sendPointer(
+                    window, "standardWindowButton:", NS_WINDOW_BUTTON_MINIATURIZE);
+            Pointer buttonClose = ObjCHelper.sendPointer(
+                    window, "standardWindowButton:", NS_WINDOW_BUTTON_CLOSE);
+            if (buttonZoom == null || buttonMini == null || buttonClose == null) {
+                hideStandardButtons(window);
+                return false;
+            }
+            Pointer superView = ObjCHelper.sendPointer(buttonZoom, "superview");
+            if (superView == null) {
+                hideStandardButtons(window);
+                return false;
+            }
+            ObjCHelper.sendVoid(buttonZoom, "setHidden:", true);
+            ObjCHelper.sendVoid(buttonClose, "setTranslatesAutoresizingMaskIntoConstraints:", false);
+            ObjCHelper.sendVoid(buttonMini, "setTranslatesAutoresizingMaskIntoConstraints:", false);
+            createConstraint(buttonClose, NS_LAYOUT_ATTRIBUTE_LEFT, superView,
+                    NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_LEFT_MARGIN);
+            createConstraint(buttonMini, NS_LAYOUT_ATTRIBUTE_LEFT, buttonClose,
+                    NS_LAYOUT_ATTRIBUTE_LEFT, TITLE_BUTTON_SPACING);
+            return true;
+        } catch (RuntimeException | LinkageError e) {
+            Logger.warn(TAG, "Failed to process the native title buttons, " +
+                    "falling back to the self-drawn title buttons: " + e);
+            hideStandardButtons(window);
+            return false;
+        }
+    }
+
+    private static void hideStandardButtons(Pointer window) {
+        try {
+            long[] buttons = {
+                    NS_WINDOW_BUTTON_CLOSE,
+                    NS_WINDOW_BUTTON_MINIATURIZE,
+                    NS_WINDOW_BUTTON_ZOOM
+            };
+            for (long buttonId : buttons) {
+                Pointer button = ObjCHelper.sendPointer(window, "standardWindowButton:", buttonId);
+                if (button != null) ObjCHelper.sendVoid(button, "setHidden:", true);
+            }
+        } catch (RuntimeException | LinkageError e) {
+            Logger.warn(TAG, "Failed to hide the native window buttons: " + e);
+        }
     }
 
     private static void createConstraint(Pointer item, long attribute, Pointer toItem,

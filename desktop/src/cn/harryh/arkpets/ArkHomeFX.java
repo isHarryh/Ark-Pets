@@ -11,7 +11,6 @@ import cn.harryh.arkpets.controllers.RootModule;
 import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.controllers.Titlebar;
 import cn.harryh.arkpets.natives.MacUIHelper;
-import cn.harryh.arkpets.natives.ObjCHelper;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.FXMLHelper;
@@ -96,10 +95,9 @@ public class ArkHomeFX extends Application {
             e.consume();
             titleBar.windowClose(null);
         });
-        ObjCHelper.init();
         stage.setOnShown(e -> {
-            if(isMac) {
-                MacUIHelper.adjustNativeWindow(stage);
+            if (isMac && titleBar.isMacStyle()) {
+                titleBar.setNativeMacTitlebar(MacUIHelper.adjustNativeWindow(stage));
             }
         });
         titleBar.titleText.setText(desktopTitle);
