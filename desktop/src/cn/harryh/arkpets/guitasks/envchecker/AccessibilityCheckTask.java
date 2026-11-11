@@ -32,7 +32,7 @@ public class AccessibilityCheckTask extends EnvCheckTask{
     public boolean run() {
         if (HIServices.INSTANCE.AXIsProcessTrusted() == 0) {
             try {
-                Desktop.getDesktop().browse(new URI("x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"));
+                Runtime.getRuntime().exec("open x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility");
             } catch (Exception e) {
                 Logger.error("Launcher", "Failed to open System Preferences Page");
             }
