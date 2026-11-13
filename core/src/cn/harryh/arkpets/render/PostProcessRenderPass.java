@@ -61,7 +61,10 @@ public class PostProcessRenderPass {
         Pixmap pixmap = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
         pixmap.setColor(bgColor);
         pixmap.fill();
+        if (bgTexture != null)
+            bgTexture.dispose();
         bgTexture = new Texture(pixmap);
+        pixmap.dispose();
     }
 
     /** Requests to set the outline's alpha value.
