@@ -13,6 +13,7 @@ import javafx.util.Duration;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -164,10 +165,22 @@ public final class Const {
             this.fileSize = fileSize;
         }
 
+        /** Loads the font into JavaFX.
+         * <p>
+         * Note: The font is loaded through an {@link InputStream} instead of a file URL on purpose.
+         * {@code Font.loadFont(String, double)} keeps the URL-encoded characters (e.g. {@code %20})
+         * of the given URL as-is, thus it silently fails when the temp directory path contains
+         * characters that require encoding, such as the space in "Application Support" on macOS.
+         */
         public void loadFontToJavafx() {
-            if (System.getProperty("arkpets.usesystemfont") == null) {
-                javafx.scene.text.Font.loadFont(Objects.requireNonNull(extractFont()).toURI().toString(),
-                        javafx.scene.text.Font.getDefault().getSize());
+            if (System.getProperty("arkpets.usesystemfont") != null)
+                return;
+            File fontFile = Objects.requireNonNull(extractFont());
+            try (InputStream stream = new FileInputStream(fontFile)) {
+                if (javafx.scene.text.Font.loadFont(stream, javafx.scene.text.Font.getDefault().getSize()) == null)
+                    Logger.warn("System", "Failed to load font " + name + " into JavaFX");
+            } catch (IOException e) {
+                Logger.error("System", "Failed to load font " + name + " into JavaFX, details see below.", e);
             }
         }
 

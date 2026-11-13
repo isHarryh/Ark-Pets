@@ -31,6 +31,7 @@ public class Titlebar implements Controller<ArkHomeFX> {
     public static String forceUiStyle = "";
 
     private ArkHomeFX app;
+    private boolean macStyle;
     private double xOffset;
     private double yOffset;
     private final Rectangle2D area = new Rectangle2D(0, 0, 16, 16);
@@ -43,11 +44,29 @@ public class Titlebar implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        if (forceUiStyle.equals("mac") || isMac) {
+        if (forceUiStyle.equals("win") || Const.isWindows){
+            // TODO
+        } else if (forceUiStyle.equals("mac") || isMac) {
             initMacTitlebar();
-        } else if (forceUiStyle.equals("win") || Const.isWindows){
-
         }
+    }
+
+    /**
+     * Gets whether the macOS-style title bar is currently in use.
+     */
+    public boolean isMacStyle() {
+        return macStyle;
+    }
+
+    /**
+     * Switches the macOS title bar between the native traffic lights and the self-drawn ones.
+     *
+     * @param useNative {@code true} to keep the native traffic lights, or {@code false}
+     *                  to fall back to the self-drawn title buttons.
+     */
+    public void setNativeMacTitlebar(boolean useNative) {
+        if (!macStyle) return;
+        macTitleButtons.setVisible(!useNative);
     }
 
     @FXML
@@ -131,8 +150,12 @@ public class Titlebar implements Controller<ArkHomeFX> {
     }
 
     private void initMacTitlebar() {
+        macStyle = true;
         AnchorPane.setLeftAnchor(title, 52.0);
-        macTitleButtons.setVisible(true);
+        // The self-drawn buttons are shown immediately when the macOS style is forced on a
+        // platform without native traffic lights. Otherwise they stay hidden until the
+        // native window customization reports a failure.
+        macTitleButtons.setVisible(!isMac);
         AnchorPane.setRightAnchor(titleButtons, null);
         titleButtons.setVisible(false);
         app.stage.focusedProperty().addListener((e, oldValue, newValue) -> {
