@@ -117,7 +117,9 @@ public class SentryHelper {
                                 SentryAttribute.stringAttribute("core.gpu.version", info.gpuVersion()),
                                 SentryAttribute.stringAttribute("core.os.name", info.osName()),
                                 SentryAttribute.stringAttribute("core.os.arch", info.osArch()),
-                                SentryAttribute.stringAttribute("core.gpu.renderer", info.gpuRenderer())
+                                SentryAttribute.stringAttribute("core.gpu.renderer", info.gpuRenderer()),
+                                SentryAttribute.integerAttribute("core.gpu.maxTexture", info.gpuMaxTexture()),
+                                SentryAttribute.integerAttribute("core.gpu.maxRenderbuffer", info.gpuMaxRenderbuffer())
                         )
                 ),
                 "SYSTEM_INFO"
