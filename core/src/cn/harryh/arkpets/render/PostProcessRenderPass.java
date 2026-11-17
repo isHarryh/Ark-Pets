@@ -58,7 +58,7 @@ public class PostProcessRenderPass {
      * @param bgColor The background color which can include alpha value.
      */
     public void setCanvas(Color bgColor) {
-        Pixmap pixmap = new Pixmap(canvasMaxSize, canvasMaxSize, Format.RGBA8888);
+        Pixmap pixmap = new Pixmap(1, 1, Format.RGBA8888);
         pixmap.setColor(bgColor);
         pixmap.fill();
         if (bgTexture != null)
@@ -106,7 +106,7 @@ public class PostProcessRenderPass {
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
         batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.draw(bgTexture, 0, 0);
+        batch.draw(bgTexture, 0, 0, camera.getWidth(), camera.getHeight());
         batch.draw(passedTexture,
                 0, 0, 0, 0, camera.getWidth(), camera.getHeight(),
                 1, 1, 0,
