@@ -39,7 +39,7 @@ public class GeneralBehavior extends Behavior {
     }
 
     private StochasticMatrix getMatrix(AnimClipGroup animClips) {
-        StochasticMatrix mat = new StochasticMatrix(StochasticMatrix.DEFAULT_WEIGHTS);
+        StochasticMatrix mat = StochasticMatrix.createDefault();
 
         // Bind and disable states based on config
         AnimData idleAnim, sitAnim, sleepAnim, moveAnim, specialAnim;
@@ -71,9 +71,10 @@ public class GeneralBehavior extends Behavior {
             mat.disable(StochasticState.SPECIAL);
         }
 
-        // Scale idle weights based on activation value
+        // Scale the incoming weights of IDLE based on the activation value:
+        // the higher the activation level, the less likely the character stays idle.
         float factor = 1 + (8 - Math.max(0, Math.min(16, config.behavior_ai_activation))) / 8f;
-        mat.scale(StochasticState.IDLE, factor);
+        mat.scaleIncoming(StochasticState.IDLE, factor);
 
         return mat;
     }

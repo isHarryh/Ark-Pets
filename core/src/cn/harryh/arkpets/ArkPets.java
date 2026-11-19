@@ -23,6 +23,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -533,6 +534,13 @@ public class ArkPets extends InputApplicationAdaptor {
                 StringBuilder builder = new StringBuilder("Showing window list\n");
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
+            });
+            registerKeyTyped('M', () -> {
+                Logger.debug("Debugger", "Matrix info");
+                Logger.debug("Debugger", behavior.getCurrentMatrixState().toString());
+                for (int[] m : behavior.getDebugMatrix()) {
+                    Logger.debug("Debugger", Arrays.toString(m));
+                }
             });
         }
     }
