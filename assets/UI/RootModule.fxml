@@ -17,6 +17,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.Text?>
 <?import java.lang.String?>
+<?import javafx.scene.control.Label?>
 <StackPane fx:id="rootContainer" prefHeight="410.0" prefWidth="620.0" styleClass="root-container"
            stylesheets="@Main.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="cn.harryh.arkpets.controllers.RootModule">
@@ -204,5 +205,13 @@
             </StackPane.margin>
         </HBox>
 
+        <!-- ********** 5. DND Notice ********** -->
+        <StackPane fx:id="dndNotice" id="DNDNotice" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                    minWidth="-Infinity" prefHeight="70.0" prefWidth="120.0" StackPane.alignment="CENTER"
+                    visible="false">
+            <SVGPath content="M11.625 15.513q-.175-.063-.325-.213l-3.6-3.6q-.3-.3-.288-.7t.288-.7q.3-.3.713-.312t.712.287L11 12.15V5q0-.425.288-.712T12 4t.713.288T13 5v7.15l1.875-1.875q.3-.3.713-.288t.712.313q.275.3.288.7t-.288.7l-3.6 3.6q-.15.15-.325.213t-.375.062t-.375-.062M6 20q-.825 0-1.412-.587T4 18v-2q0-.425.288-.712T5 15t.713.288T6 16v2h12v-2q0-.425.288-.712T19 15t.713.288T20 16v2q0 .825-.587 1.413T18 20z"
+                    scaleX="4" scaleY="4" StackPane.alignment="TOP_CENTER" fill="grey"/>
+            <Label text="松开鼠标以导入模型库" styleClass="config-help-text" StackPane.alignment="BOTTOM_CENTER"/>
+        </StackPane>
     </StackPane>
 </StackPane>
