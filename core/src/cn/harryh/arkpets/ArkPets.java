@@ -21,8 +21,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.utils.BufferUtils;
 
 import java.io.IOException;
+import java.nio.IntBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -79,6 +81,9 @@ public class ArkPets extends InputApplicationAdaptor {
         Gdx.graphics.setForegroundFPS(config.display_fps);
         registerDebugger();
 
+        // Report System info early
+        writeSystemInfo();
+
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
         cha = new ArkChar(config, config.display_scale);
@@ -120,9 +125,6 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 6.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
-
-        // Setup complete
-        writeSystemInfo();
 
         Logger.info("App", "Render");
     }
@@ -546,11 +548,19 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     private void writeSystemInfo() {
+        IntBuffer tmp = BufferUtils.newIntBuffer(1);
+        Gdx.gl.glGetIntegerv(GL20.GL_MAX_TEXTURE_SIZE, tmp);
+        int textureSize = tmp.get(0);
+        tmp.put(0, 0);
+        Gdx.gl.glGetIntegerv(GL20.GL_MAX_RENDERBUFFER_SIZE, tmp);
+        int renderbufferSize = tmp.get(0);
         try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
             writer.append(WalSystemInfoCodec.INSTANCE, new WalSystemInfoCodec.SystemInfo(
                     Gdx.gl.glGetString(GL20.GL_VENDOR),
                     Gdx.gl.glGetString(GL20.GL_VERSION),
-                    Gdx.gl.glGetString(GL20.GL_RENDERER)
+                    Gdx.gl.glGetString(GL20.GL_RENDERER),
+                    textureSize,
+                    renderbufferSize
             ));
         } catch (IOException e) {
             Logger.warn("System", "Failed to write system info");

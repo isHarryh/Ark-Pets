@@ -48,7 +48,7 @@ Automatically submitted events fall into the following categories:
 | Model Session<br>(`MODEL_SESSION`) | Desktop pet process termination | Active model identifier, session duration, exit state (clean shutdown, exception, crash) |
 | Desktop Session<br>(`DESKTOP_SESSION`) | Launcher UI process termination | Launcher runtime session duration |
 | Config Snapshot<br>(`CONFIG`) | Desktop pet startup | Non-sensitive runtime settings and flags |
-| System Info<br>(`SYSTEM_INFO`) | Post GL context creation | GPU vendor, driver release, operating system architecture |
+| System Info<br>(`SYSTEM_INFO`) | Post GL context creation | GPU vendor, model, driver release, specs, operating system architecture |
 | Performance Metrics | Periodic intervals during runtime | Render time, resolution, FPS, RAM utilization, CPU load |
 | Crash Reports | Unhandled exceptions | Exception class names and frame stack traces |
 

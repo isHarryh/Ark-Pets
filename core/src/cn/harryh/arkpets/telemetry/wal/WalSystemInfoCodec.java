@@ -24,7 +24,9 @@ public final class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.Sys
             dos.writeUTF(value.gpuVersion());
             dos.writeUTF(value.osName());
             dos.writeUTF(value.osArch());
-            dos.writeUTF(value.gpuRenderer()); // for compatibility
+            dos.writeUTF(value.gpuRenderer());
+            dos.writeInt(value.gpuMaxTexture());
+            dos.writeInt(value.gpuMaxRenderbuffer());
         }
         return bos.toByteArray();
     }
@@ -36,14 +38,17 @@ public final class WalSystemInfoCodec implements WalCodec<WalSystemInfoCodec.Sys
             String gpuVersion = dis.readUTF();
             String osName = dis.readUTF();
             String osArch = dis.readUTF();
-            String gpuRenderer = dis.readUTF(); // for compatibility
-            return new SystemInfo(gpuInfo, gpuVersion, osName, osArch, gpuRenderer);
+            String gpuRenderer = dis.readUTF();
+            int textureSize = dis.readInt();
+            int renderbufferSize = dis.readInt();
+            return new SystemInfo(gpuInfo, gpuVersion, osName, osArch, gpuRenderer, textureSize, renderbufferSize);
         }
     }
 
-    public record SystemInfo(String gpuName, String gpuVersion, String osName, String osArch, String gpuRenderer) {
-        public SystemInfo(String gpuInfo, String gpuVersion, String gpuRenderer) {
-            this(gpuInfo, gpuVersion, System.getProperty("os.name"), System.getProperty("os.arch"), gpuRenderer);
+    public record SystemInfo(String gpuName, String gpuVersion, String osName, String osArch, String gpuRenderer,
+                             int gpuMaxTexture, int gpuMaxRenderbuffer) {
+        public SystemInfo(String gpuInfo, String gpuVersion, String gpuRenderer, int gpuMaxTexture, int gpuMaxRenderbuffer) {
+            this(gpuInfo, gpuVersion, System.getProperty("os.name"), System.getProperty("os.arch"), gpuRenderer, gpuMaxTexture, gpuMaxRenderbuffer);
         }
     }
 }
