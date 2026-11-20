@@ -550,10 +550,10 @@ public class ArkPets extends InputApplicationAdaptor {
     private void writeSystemInfo() {
         IntBuffer tmp = BufferUtils.newIntBuffer(1);
         Gdx.gl.glGetIntegerv(GL20.GL_MAX_TEXTURE_SIZE, tmp);
-        int textureSize = tmp.get();
-        tmp.clear();
+        int textureSize = tmp.get(0);
+        tmp.put(0, 0);
         Gdx.gl.glGetIntegerv(GL20.GL_MAX_RENDERBUFFER_SIZE, tmp);
-        int renderbufferSize = tmp.get();
+        int renderbufferSize = tmp.get(0);
         try (WalWriter writer = WalWriter.open(ProcessHandle.current().pid())) {
             writer.append(WalSystemInfoCodec.INSTANCE, new WalSystemInfoCodec.SystemInfo(
                     Gdx.gl.glGetString(GL20.GL_VENDOR),
