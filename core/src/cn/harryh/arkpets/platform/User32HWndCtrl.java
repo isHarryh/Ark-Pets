@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.platform;
 
+import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.COM.COMUtils;
@@ -10,6 +11,7 @@ import com.sun.jna.platform.win32.COM.Unknown;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinNT.HRESULT;
+import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
 
 import java.util.ArrayList;
@@ -35,6 +37,12 @@ public class User32HWndCtrl extends HWndCtrl {
     private static final int MK_LBUTTON  = 0x0001;
     private static final int MK_RBUTTON  = 0x0002;
     private static final int MK_MBUTTON  = 0x0010;
+
+    /** DWM window attribute that gets whether the window is cloaked. */
+    private static final int DWMWA_CLOAKED = 14;
+
+    /** The size in bytes of the output buffer of {@link #DWMWA_CLOAKED}, which is a DWORD. */
+    private static final int DWMWA_CLOAKED_SIZE = Integer.BYTES;
 
     private static TaskbarList taskbarList = null;
 
@@ -141,8 +149,9 @@ public class User32HWndCtrl extends HWndCtrl {
      */
     public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible) {
         ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
+        IntByReference cloaked = new IntByReference();
         User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd)))
+            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd, cloaked)))
                 windowList.add(new User32HWndCtrl(hWnd));
             return true;
         }, null);
@@ -156,9 +165,12 @@ public class User32HWndCtrl extends HWndCtrl {
      */
     public static ArrayList<User32HWndCtrl> getWindowList(boolean only_visible, long exclude_ws_ex) {
         ArrayList<User32HWndCtrl> windowList = new ArrayList<>();
+        IntByReference cloaked = new IntByReference();
         User32.INSTANCE.EnumWindows((hWnd, arg1) -> {
-            if (User32.INSTANCE.IsWindow(hWnd) && (!only_visible || isVisible(hWnd))
-                    && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & exclude_ws_ex) != exclude_ws_ex)
+            // Test the inexpensive window styles before querying the expensive visibility.
+            if (User32.INSTANCE.IsWindow(hWnd)
+                    && (User32.INSTANCE.GetWindowLong(hWnd, WinUser.GWL_EXSTYLE) & exclude_ws_ex) != exclude_ws_ex
+                    && (!only_visible || isVisible(hWnd, cloaked)))
                 windowList.add(new User32HWndCtrl(hWnd));
             return true;
         }, null);
@@ -208,12 +220,31 @@ public class User32HWndCtrl extends HWndCtrl {
         return new WindowRect(rect.top, rect.bottom, rect.left, rect.right);
     }
 
+    /** Checks whether a window is visible.
+     * @param hWnd The handle of the window.
+     * @return True if the window is visible, false otherwise.
+     */
     protected static boolean isVisible(HWND hWnd) {
+        return isVisible(hWnd, new IntByReference());
+    }
+
+    /** Checks whether a window is visible.
+     * @param hWnd The handle of the window.
+     * @param cloaked A reusable buffer that receives the cloaked state of the window.
+     * @return True if the window is visible, false otherwise.
+     */
+    protected static boolean isVisible(HWND hWnd, IntByReference cloaked) {
         try {
             if (!User32.INSTANCE.IsWindowVisible(hWnd) || !User32.INSTANCE.IsWindowEnabled(hWnd))
                 return false;
             WindowRect rect = getWindowRect(hWnd);
             if (rect.top() == rect.bottom() || rect.left() == rect.right())
+                return false;
+            // A cloaked window (e.g. a suspended UWP app, or a window on another virtual desktop)
+            // still passes the checks above, so the DWM state is needed to tell whether it is shown.
+            cloaked.setValue(0);
+            HRESULT hr = Dwmapi.INSTANCE.DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, cloaked, DWMWA_CLOAKED_SIZE);
+            if (hr.intValue() == 0 && cloaked.getValue() != 0)
                 return false;
         } catch (Exception e) {
             return false;
@@ -301,5 +332,21 @@ public class User32HWndCtrl extends HWndCtrl {
         public String toString() {
             return "TaskbarList{" + "pointer=" + this.getPointer() + '}';
         }
+    }
+
+    /** The Windows Desktop Window Manager API.
+     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/">DWMAPI</a>
+     */
+    public interface Dwmapi extends Library {
+        Dwmapi INSTANCE = Native.load("dwmapi", Dwmapi.class);
+
+        /** Gets the value of a window attribute.
+         * @param hwnd The handle of the window.
+         * @param dwAttribute The attribute to query, such as {@code DWMWA_CLOAKED}.
+         * @param pvAttribute A buffer that receives the value of the attribute.
+         * @param cbAttribute The size in bytes of the buffer {@code pvAttribute}.
+         * @return The HRESULT of the operation.
+         */
+        HRESULT DwmGetWindowAttribute(HWND hwnd, int dwAttribute, IntByReference pvAttribute, int cbAttribute);
     }
 }
