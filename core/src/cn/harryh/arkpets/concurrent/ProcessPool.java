@@ -75,6 +75,7 @@ public final class ProcessPool implements Executor {
         List<String> command = new ArrayList<>();
         command.add(javaBin);
         command.addAll(jvmArgs);
+        command.add("-Dfile.encoding=UTF-8");
         command.add("-cp");
         command.add(classpath);
         command.add(className);
