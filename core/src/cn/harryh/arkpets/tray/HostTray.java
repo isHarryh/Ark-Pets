@@ -53,7 +53,9 @@ public class HostTray {
                 SwingUtilities.invokeAndWait(() -> {
                     instance = new HostTray();
                 });
-            } catch (Exception ignored) { }
+            } catch (Exception e) {
+                Logger.error("HostTray","Failed to get tray instance");
+            }
         return instance;
     }
 
@@ -118,12 +120,12 @@ public class HostTray {
             SwingUtilities.invokeAndWait(() -> {
                 try {
                     SystemTray.getSystemTray().add(trayIcon);
+                    Logger.info("HostTray", "HostTray icon applied");
+                    initialized = true;
                 } catch (AWTException e) {
                     Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
                 }
             });
-            Logger.info("HostTray", "HostTray icon applied");
-            initialized = true;
         } catch (Exception e) {
             Logger.error("HostTray", "Unable to apply HostTray icon, details see below.", e);
         }
