@@ -471,6 +471,31 @@ JFXSlider {
     -fx-background-radius: 0;
 }
 
+/* Drop zone in the model import dialog */
+.import-drop-zone {
+    -fx-background-color: derive(-theme-color-light, 92%);
+    -fx-background-radius: 8px;
+    -fx-border-color: derive(-theme-color-light, 45%);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1.5px;
+    -fx-border-style: dashed;
+    -fx-padding: 15px;
+}
+
+.import-drop-zone-active {
+    -fx-background-color: derive(-theme-color-light, 78%);
+    -fx-border-color: -theme-color;
+    -fx-border-style: solid;
+}
+
+.import-drop-zone SVGPath {
+    -fx-fill: -theme-color-light;
+}
+
+.import-drop-zone-active SVGPath {
+    -fx-fill: -theme-color;
+}
+
 /* Expandable text area for popup dialogs */
 .popup-detail-field {
     -fx-alignment: top-left;
