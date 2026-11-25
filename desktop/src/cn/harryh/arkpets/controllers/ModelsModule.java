@@ -438,33 +438,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             new VerifyModelsTask(app.body, GuiTask.GuiTaskStyle.COMMON, app.modelsDataset).start();
         });
 
-        modelImport.setOnAction(e -> {
-            // Initialize the file chooser
-            Logger.info("ModelManager", "Opening file chooser to import zip file");
-            FileChooser fileChooser = new FileChooser();
-            FileChooser.ExtensionFilter extensionFilter1 = new FileChooser.ExtensionFilter("All Files", "*.*");
-            FileChooser.ExtensionFilter extensionFilter2 = new FileChooser.ExtensionFilter("Archives", "*.zip");
-            fileChooser.getExtensionFilters().addAll(extensionFilter1, extensionFilter2);
-            fileChooser.setSelectedExtensionFilter(extensionFilter2);
-            // Handle the chosen file
-            File zipFile = fileChooser.showOpenDialog(app.getWindow());
-            if (zipFile != null && zipFile.isFile()) {
-                Logger.info("ModelManager", "Importing zip file: " + zipFile);
-                // Go to [Step 1/2]:
-                new UnzipModelsTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
-                    @Override
-                    protected void onSucceeded(boolean result) {
-                        // Go to [Step 2/2]:
-                        new PostUnzipModelTask(parent, GuiTaskStyle.STRICT) {
-                            @Override
-                            protected void onSucceeded(boolean result) {
-                                app.modelsModule.modelReload(true);
-                            }
-                        }.start();
-                    }
-                }.start();
-            }
-        });
+        modelImport.setOnAction(e -> app.dialogs.popDialog("importModelDialog"));
 
         modelExport.setOnAction(e -> {
             // Initialize the file chooser
@@ -777,6 +751,21 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     detail).show();
             Logger.info("ModelManager", "Model repo version check finished (not up-to-dated)");
         }
+    }
+
+    static void importModel(ArkHomeFX app, File zipFile) {
+        new UnzipModelsTask(app.body, GuiTask.GuiTaskStyle.STRICT, zipFile.getPath()) {
+            @Override
+            protected void onSucceeded(boolean result) {
+                // Go to [Step 2/2]:
+                new PostUnzipModelTask(parent, GuiTaskStyle.STRICT) {
+                    @Override
+                    protected void onSucceeded(boolean result) {
+                        app.modelsModule.modelReload(true);
+                    }
+                }.start();
+            }
+        }.start();
     }
 
 

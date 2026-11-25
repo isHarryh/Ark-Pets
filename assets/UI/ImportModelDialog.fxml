@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Copyright (c) 2022-2026, Harry Huang, Litwak913
+    At GPL-3.0 License
+-->
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+<?import java.lang.String?>
+<AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0"
+            cache="true" cacheHint="SPEED" styleClass="wrapper" stylesheets="@Main.css"
+            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="cn.harryh.arkpets.controllers.ImportModelDialog">
+    <HBox spacing="10.0" styleClass="dialog-oper-bar"
+          AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0" AnchorPane.topAnchor="-15.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <HBox alignment="CENTER_LEFT" fillHeight="false" prefHeight="50.0" spacing="5.0"
+              styleClass="tool-bar-mask" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+                <Insets left="150.0"/>
+            </HBox.margin>
+            <padding>
+                <Insets left="10.0" right="10.0"/>
+            </padding>
+            <Label fx:id="modelsRepoLink" styleClass="config-hyper-link"
+                   text="前往 ArkModels 模型库 GitHub 下载压缩包"/>
+            <Pane visible="false" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="modelsHelpLink" styleClass="config-hyper-link" text="下载时遇到问题？"/>
+        </HBox>
+    </HBox>
+    <HBox prefHeight="50.0" prefWidth="150.0" spacing="10.0" styleClass="dialog-title-bar"
+          AnchorPane.leftAnchor="-25.0" AnchorPane.topAnchor="-25.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <JFXButton fx:id="dialogReturn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                   prefHeight="32.0" prefWidth="32.0" text=" ">
+            <graphic>
+                <AnchorPane prefHeight="32.0" prefWidth="32.0" styleClass="btn-icon">
+                    <SVGPath
+                            content="m10.978 14.999v3.251c0 .412-.335.75-.752.75-.188 0-.375-.071-.518-.206-1.775-1.685-4.945-4.692-6.396-6.069-.2-.189-.312-.452-.312-.725 0-.274.112-.536.312-.725 1.451-1.377 4.621-4.385 6.396-6.068.143-.136.33-.207.518-.207.417 0 .752.337.752.75v3.251h9.02c.531 0 1.002.47 1.002 1v3.998c0 .53-.471 1-1.002 1z"
+                            scaleX="1.75" scaleY="1.75" translateX="30.0" translateY="-2.5"/>
+                </AnchorPane>
+            </graphic>
+            <styleClass>
+                <String fx:value="btn-plain-light"/>
+                <String fx:value="btn-iconified"/>
+            </styleClass>
+        </JFXButton>
+        <Label styleClass="dialog-title-label" text="导入模型库"/>
+    </HBox>
+    <VBox alignment="CENTER" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
+        <StackPane fx:id="dropZone" maxHeight="Infinity" maxWidth="Infinity" styleClass="import-drop-zone"
+                   VBox.vgrow="ALWAYS">
+            <VBox alignment="CENTER" spacing="8.0">
+                <SVGPath
+                        content="M11.625 15.513q-.175-.063-.325-.213l-3.6-3.6q-.3-.3-.288-.7t.288-.7q.3-.3.713-.312t.712.287L11 12.15V5q0-.425.288-.712T12 4t.713.288T13 5v7.15l1.875-1.875q.3-.3.713-.288t.712.313q.275.3.288.7t-.288.7l-3.6 3.6q-.15.15-.325.213t-.375.062t-.375-.062M6 20q-.825 0-1.412-.587T4 18v-2q0-.425.288-.712T5 15t.713.288T6 16v2h12v-2q0-.425.288-.712T19 15t.713.288T20 16v2q0 .825-.587 1.413T18 20z"
+                        scaleX="2.75" scaleY="2.75">
+                    <VBox.margin>
+                        <Insets bottom="10.0"/>
+                    </VBox.margin>
+                </SVGPath>
+                <Label fx:id="dropLabel" styleClass="info-primary" text="将模型库压缩包拖入此处" textAlignment="CENTER"/>
+                <VBox fx:id="selectFileVBox" alignment="CENTER" spacing="8.0">
+                    <Label styleClass="config-help-text" text="或"/>
+                    <JFXButton fx:id="selectFile" mnemonicParsing="false" prefHeight="32.0" prefWidth="100.0"
+                               styleClass="btn-primary" text="选择文件"/>
+                </VBox>
+            </VBox>
+        </StackPane>
+    </VBox>
+</AnchorPane>

@@ -105,6 +105,7 @@ public final class Const {
         public static final String urlOfficialHomePage      = "https://arkpets.harryh.cn/?from=client";
         public static final String urlRepoPage              = "https://github.com/isHarryh/Ark-Pets";
         public static final String urlRepoReadmePage        = "https://github.com/isHarryh/Ark-Pets#readme";
+        public static final String urlModelsRepoPage        = "https://github.com/isHarryh/Ark-Models";
         public static final String urlMirrorChyan           = "https://mirrorchyan.com/";
         public static final String urlWikiPrefix            = "https://prts.wiki/w/";
         public static final String tempDirPath              = "temp/";

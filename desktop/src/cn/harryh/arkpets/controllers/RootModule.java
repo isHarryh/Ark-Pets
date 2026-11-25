@@ -28,10 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
@@ -122,6 +119,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         List<Node> backgroundNodes = List.of(sidebar, wrapper1, wrapper2, wrapper3);
         app.dialogs.registerDialog("announceDialog", body, backgroundNodes, "/UI/AnnounceDialog.fxml");
         app.dialogs.registerDialog("downloadDialog", body, backgroundNodes, "/UI/DownloadDialog.fxml");
+        app.dialogs.registerDialog("importModelDialog", body, backgroundNodes, "/UI/ImportModelDialog.fxml");
         app.dialogs.registerDialog("logDialog", body, backgroundNodes, "/UI/LogDialog.fxml");
 
         initAnnoEntrance();
