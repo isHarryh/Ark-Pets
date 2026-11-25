@@ -21,6 +21,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Locale;
 
+import static cn.harryh.arkpets.Const.PathConfig.urlModelsRepoPage;
+import static cn.harryh.arkpets.Const.PathConfig.urlOfficialHelpPage;
+
 
 /** The dialog controller for importing a model library from a zip archive.
  */
@@ -34,6 +37,10 @@ public final class ImportModelDialog implements DialogController<ArkHomeFX> {
     @FXML
     private StackPane dropZone;
     @FXML
+    private Label modelsHelpLink;
+    @FXML
+    private Label modelsRepoLink;
+    @FXML
     private Button selectFile;
     @FXML
     private VBox selectFileVBox;
@@ -44,6 +51,8 @@ public final class ImportModelDialog implements DialogController<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+        modelsRepoLink.setOnMouseClicked(e -> app.popBrowser(urlModelsRepoPage));
+        modelsHelpLink.setOnMouseClicked(e -> app.popBrowser(urlOfficialHelpPage));
         selectFile.setOnAction(e -> chooseFile());
         initDragAndDrop();
     }

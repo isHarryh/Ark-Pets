@@ -6,7 +6,7 @@
 -->
 
 <?import com.jfoenix.controls.JFXButton?>
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.SVGPath?>
@@ -15,6 +15,25 @@
             cache="true" cacheHint="SPEED" styleClass="wrapper" stylesheets="@Main.css"
             xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="cn.harryh.arkpets.controllers.ImportModelDialog">
+    <HBox spacing="10.0" styleClass="dialog-oper-bar"
+          AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0" AnchorPane.topAnchor="-15.0">
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+        </padding>
+        <HBox alignment="CENTER_LEFT" fillHeight="false" prefHeight="50.0" spacing="5.0"
+              styleClass="tool-bar-mask" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+                <Insets left="150.0"/>
+            </HBox.margin>
+            <padding>
+                <Insets left="10.0" right="10.0"/>
+            </padding>
+            <Label fx:id="modelsRepoLink" styleClass="config-hyper-link"
+                   text="前往 ArkModels 模型库 GitHub 下载压缩包"/>
+            <Pane visible="false" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="modelsHelpLink" styleClass="config-hyper-link" text="下载时遇到问题？"/>
+        </HBox>
+    </HBox>
     <HBox prefHeight="50.0" prefWidth="150.0" spacing="10.0" styleClass="dialog-title-bar"
           AnchorPane.leftAnchor="-25.0" AnchorPane.topAnchor="-25.0">
         <padding>
@@ -37,7 +56,7 @@
         <Label styleClass="dialog-title-label" text="导入模型库"/>
     </HBox>
     <VBox alignment="CENTER" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="55.0">
         <StackPane fx:id="dropZone" maxHeight="Infinity" maxWidth="Infinity" styleClass="import-drop-zone"
                    VBox.vgrow="ALWAYS">
             <VBox alignment="CENTER" spacing="8.0">
