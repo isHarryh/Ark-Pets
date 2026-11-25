@@ -48,7 +48,7 @@ public class StochasticMatrix {
      * @param weights The weights array of the states.
      * @param disabledRef The reference to the disabled states array. If a state is disabled, its weight is ignored.
      */
-    public record StochasticMatrixRow(int[] weights, boolean[] disabledRef) {
+    private record StochasticMatrixRow(int[] weights, boolean[] disabledRef) {
         public StochasticMatrixRow {
             if (weights.length != StochasticState.values().length)
                 throw new IllegalArgumentException("Weights length mismatch");
@@ -56,13 +56,6 @@ public class StochasticMatrix {
 
         public StochasticState random() {
             int sum = IntStream.range(0, weights.length).filter(i -> !disabledRef[i]).map(i -> weights[i]).sum();
-            if (sum <= 0) {
-                // All enabled weights are zero. Choose uniformly among the enabled states to avoid a deadlock.
-                int[] enabled = IntStream.range(0, weights.length).filter(i -> !disabledRef[i]).toArray();
-                if (enabled.length == 0)
-                    return null;
-                return StochasticState.values()[enabled[(int) (Math.random() * enabled.length)]];
-            }
             int rnd = (int) (Math.random() * sum);
             int acc = 0;
             for (int i = 0; i < weights.length; i++) {
@@ -118,8 +111,13 @@ public class StochasticMatrix {
         return binds[state.ordinal()];
     }
 
+    /** Gets the next state to transit to from the given state.
+     * @param state The current state.
+     * @return The next state, or the given state if no transition is available.
+     */
     public StochasticState transitedAnimOf(StochasticState state) {
-        return weights[state.ordinal()].random();
+        StochasticState newState = weights[state.ordinal()].random();
+        return newState == null ? state : newState;
     }
 
     public AnimData getStateAnim(StochasticState state) {
