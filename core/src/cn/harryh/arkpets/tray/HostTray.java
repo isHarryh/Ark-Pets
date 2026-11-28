@@ -51,10 +51,14 @@ public class HostTray {
         if (instance == null)
             try {
                 SwingUtilities.invokeAndWait(() -> {
-                    instance = new HostTray();
+                    try {
+                        instance = new HostTray();
+                    } catch (Exception e) {
+                        Logger.error("HostTray","Failed to get tray instance", e);
+                    }
                 });
             } catch (Exception e) {
-                Logger.error("HostTray","Failed to get tray instance");
+                Logger.error("HostTray","Failed to get tray instance", e);
             }
         return instance;
     }

@@ -91,10 +91,14 @@ public class ArkHomeFX extends Application {
             // Initialize socket server and HostTray.
             try {
                 HostTray hostTray = HostTray.getInstance();
-                hostTray.setOnCloseStage(() -> Platform.runLater(rootModule::exit));
-                hostTray.setOnShowStage(() -> Platform.runLater(stage::show));
-                SocketServer.getInstance().startServer(hostTray);
-                hostTray.applyTrayIcon();
+                if (hostTray != null) {
+                    hostTray.setOnCloseStage(() -> Platform.runLater(rootModule::exit));
+                    hostTray.setOnShowStage(() -> Platform.runLater(stage::show));
+                    SocketServer.getInstance().startServer(hostTray);
+                    hostTray.applyTrayIcon();
+                } else {
+                    Logger.error("HostTray","Failed to get tray instance");
+                }
             } catch (PortUtils.NoPortAvailableException ex) {
                 Logger.error("SocketServer", "No available port, thus server cannot be started");
                 // No HostTray icon will be applied when this situation happens.
