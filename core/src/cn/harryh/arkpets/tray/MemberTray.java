@@ -21,24 +21,25 @@ public abstract class MemberTray {
     protected final UUID uuid;
     protected final String name;
 
-    static {
-        Runnable init = new Runnable() { // DO NOT USE LAMBDA IN STATIC
-            @Override
-            public void run() {
-                String laf = UIManager.getSystemLookAndFeelClassName();
-                if (laf.contains("WindowsLookAndFeel")) {
-                    UIManager.put("MenuItem.margin", new Insets(0, -18, 0, 0));
-                    UIManager.put("Menu.margin", new Insets(0, -18, 0, 0));
-                }
-                try {
-                    UIManager.setLookAndFeel(laf);
-                } catch (Exception ignored) {
-                }
-                Const.FontsConfig.REGULAR.loadFontToSwing();
+    /** Initializes the Swing Look-and-Feel and fonts on the EDT.
+     * Callers must invoke this manually before creating any tray instances,
+     * as it is no longer triggered by the class initialization.
+     */
+    public static void initLaF() {
+        Runnable init = () -> {
+            String laf = UIManager.getSystemLookAndFeelClassName();
+            if (laf.contains("WindowsLookAndFeel")) {
+                UIManager.put("MenuItem.margin", new Insets(0, -18, 0, 0));
+                UIManager.put("Menu.margin", new Insets(0, -18, 0, 0));
             }
+            try {
+                UIManager.setLookAndFeel(laf);
+            } catch (Exception ignored) {
+            }
+            Const.FontsConfig.REGULAR.loadFontToSwing();
         };
         if (SwingUtilities.isEventDispatchThread()) {
-            // The class may be initialized on the EDT, where invokeAndWait is not allowed.
+            // This method may be invoked on the EDT, where invokeAndWait is not allowed.
             init.run();
         } else {
             try {

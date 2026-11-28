@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class HostTray {
     protected TrayIcon trayIcon;
-    protected boolean initialized = false;
+    protected volatile boolean initialized = false;
     protected Map<UUID, MemberTray> arkPetTrays = new ConcurrentHashMap<>();
 
     private JDialog popWindow;

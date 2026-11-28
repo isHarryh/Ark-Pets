@@ -14,6 +14,7 @@ import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
 import cn.harryh.arkpets.telemetry.wal.WalSystemInfoCodec;
 import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.MemberTray;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
@@ -119,6 +120,7 @@ public class ArkPets extends InputApplicationAdaptor {
         updateWindow();
 
         // 6.Tray icon setup
+        MemberTray.initLaF();
         tray = new MemberTrayImpl(this, new SocketClient());
 
         // Setup complete
