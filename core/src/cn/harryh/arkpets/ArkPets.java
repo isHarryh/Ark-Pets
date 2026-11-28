@@ -285,7 +285,6 @@ public class ArkPets extends InputApplicationAdaptor {
             int y = (int) (windowPosition.now().y + getMouseDeltaY());
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
-            tray.hideDialog();
             if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
                 changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         }
