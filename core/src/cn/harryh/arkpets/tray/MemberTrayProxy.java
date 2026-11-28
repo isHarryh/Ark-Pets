@@ -13,7 +13,7 @@ import javax.swing.*;
 public class MemberTrayProxy extends MemberTray {
     private final SocketSession session;
     private final HostTray hostTray;
-    private final JMenu popMenu;
+    private JMenu popMenu;
 
     /** Initializes a host-proxy tray icon instance for a registering ArkPets.
      * @param socketData The ArkPets login data.
@@ -25,23 +25,25 @@ public class MemberTrayProxy extends MemberTray {
         this.session = session;
         this.hostTray = hostTray;
 
-        // Ui Components:
-        JLabel innerLabel = new JLabel(" " + name + " ");
-        innerLabel.setAlignmentX(0.5f);
+        // Ui Components (must be created on the EDT):
+        runOnEdtAndWait(() -> {
+            JLabel innerLabel = new JLabel(" " + name + " ");
+            innerLabel.setAlignmentX(0.5f);
 
-        popMenu = new JMenu(name);
-        popMenu.add(innerLabel);
-        popMenu.add(optKeepAnimEn);
-        popMenu.add(optTransparentEn);
-        popMenu.add(optExit);
-        popMenu.setSize(100, 24 * popMenu.getSubElements().length);
+            popMenu = new JMenu(name);
+            popMenu.add(innerLabel);
+            popMenu.add(optKeepAnimEn);
+            popMenu.add(optTransparentEn);
+            popMenu.add(optExit);
+            popMenu.setSize(100, 24 * popMenu.getSubElements().length);
 
-        hostTray.addMemberTray(popMenu);
+            hostTray.addMemberTray(popMenu);
+        });
     }
 
     public void onCanChangeStage() {
         Logger.info("ProxyTray", "Can change stage");
-        popMenu.add(optChangeStage, 3);
+        runOnEdt(() -> popMenu.add(optChangeStage, 3));
     }
 
     @Override
@@ -53,36 +55,46 @@ public class MemberTrayProxy extends MemberTray {
     @Override
     public void onChangeStage() {
         Logger.info("ProxyTray", "Request to change stage");
-        popMenu.remove(optKeepAnimDis);
-        popMenu.add(optKeepAnimEn, 1);
+        runOnEdt(() -> {
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
+        });
     }
 
     @Override
     public void onTransparentDis() {
         Logger.info("ProxyTray", "Transparent disabled");
-        popMenu.remove(optTransparentDis);
-        popMenu.add(optTransparentEn, 2);
+        runOnEdt(() -> {
+            popMenu.remove(optTransparentDis);
+            popMenu.add(optTransparentEn, 2);
+        });
     }
 
     @Override
     public void onTransparentEn() {
         Logger.info("ProxyTray", "Transparent enabled");
-        popMenu.remove(optTransparentEn);
-        popMenu.add(optTransparentDis, 2);
+        runOnEdt(() -> {
+            popMenu.remove(optTransparentEn);
+            popMenu.add(optTransparentDis, 2);
+        });
     }
 
     @Override
     public void onKeepAnimDis() {
         Logger.info("ProxyTray", "Action-Mode disabled");
-        popMenu.remove(optKeepAnimDis);
-        popMenu.add(optKeepAnimEn, 1);
+        runOnEdt(() -> {
+            popMenu.remove(optKeepAnimDis);
+            popMenu.add(optKeepAnimEn, 1);
+        });
     }
 
     @Override
     public void onKeepAnimEn() {
         Logger.info("ProxyTray", "Action-Mode enabled");
-        popMenu.remove(optKeepAnimEn);
-        popMenu.add(optKeepAnimDis, 1);
+        runOnEdt(() -> {
+            popMenu.remove(optKeepAnimEn);
+            popMenu.add(optKeepAnimDis, 1);
+        });
     }
 
     @Override
@@ -92,6 +104,6 @@ public class MemberTrayProxy extends MemberTray {
 
     @Override
     public void remove() {
-        hostTray.removeMemberTray(popMenu);
+        runOnEdt(() -> hostTray.removeMemberTray(popMenu));
     }
 }

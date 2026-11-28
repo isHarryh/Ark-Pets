@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.concurrent;
 
 import cn.harryh.arkpets.tray.HostTray;
+import cn.harryh.arkpets.tray.MemberTray;
 import cn.harryh.arkpets.tray.MemberTrayProxy;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson2.JSONException;
@@ -132,6 +133,7 @@ public final class SocketServer {
                     }
                     case ACTIVATE_LAUNCHER -> hostTray.showStage();
                     case LOGIN -> {
+                        MemberTray.initLaF();
                         tray = new MemberTrayProxy(socketData, this, hostTray);
                         hostTray.addMemberTray(uuid, tray);
                     }

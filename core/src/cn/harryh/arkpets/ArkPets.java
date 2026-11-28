@@ -14,6 +14,7 @@ import cn.harryh.arkpets.telemetry.CorePerformanceSampler;
 import cn.harryh.arkpets.telemetry.wal.WalSystemInfoCodec;
 import cn.harryh.arkpets.telemetry.wal.WalWriter;
 import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.MemberTray;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
@@ -124,6 +125,7 @@ public class ArkPets extends InputApplicationAdaptor {
         updateWindow();
 
         // 6.Tray icon setup
+        MemberTray.initLaF();
         tray = new MemberTrayImpl(this, new SocketClient());
 
         Logger.info("App", "Render");
@@ -285,7 +287,6 @@ public class ArkPets extends InputApplicationAdaptor {
             int y = (int) (windowPosition.now().y + getMouseDeltaY());
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
-            tray.hideDialog();
             if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
                 changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         }
