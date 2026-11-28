@@ -110,7 +110,7 @@ public class MemberTrayImpl extends MemberTray {
     @Override
     public void onChangeStage() {
         Logger.info("MemberTray", "Request to change stage");
-        arkPets.changeStage();
+        Gdx.app.postRunnable(arkPets::changeStage);
         runOnEdt(() -> {
             if (keepAnim != null) {
                 keepAnim = null;
@@ -123,7 +123,7 @@ public class MemberTrayImpl extends MemberTray {
     @Override
     public void onTransparentDis() {
         Logger.info("MemberTray", "Transparent disabled");
-        arkPets.setTransparentMode(false);
+        Gdx.app.postRunnable(() -> arkPets.setTransparentMode(false));
         runOnEdt(() -> {
             popMenu.remove(optTransparentDis);
             popMenu.add(optTransparentEn, 2);
@@ -133,7 +133,7 @@ public class MemberTrayImpl extends MemberTray {
     @Override
     public void onTransparentEn() {
         Logger.info("MemberTray", "Transparent enabled");
-        arkPets.setTransparentMode(true);
+        Gdx.app.postRunnable(() -> arkPets.setTransparentMode(true));
         runOnEdt(() -> {
             popMenu.remove(optTransparentEn);
             popMenu.add(optTransparentDis, 2);
