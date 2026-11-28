@@ -94,17 +94,22 @@ public class MemberTrayImpl extends MemberTray {
     @Override
     public void onExit() {
         Logger.info("MemberTray", "Request to exit");
-        runOnEdt(() -> {
-            remove();
-            client.disconnect();
-            arkPets.cha.setAlpha(0f);
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    Gdx.app.postRunnable(Gdx.app::exit);
-                }
-            }, (int) durationNormal.toMillis());
-        });
+        // The Swing cleanup runs on the EDT, while the exit scheduling is deliberately
+        // decoupled from it, so that a failure in the cleanup cannot prevent the app
+        // from exiting. The intentional-close flag has been set either by the logout
+        // handler (before this method was invoked) or by remove() -> disconnect()
+        // below, so neither the disconnected-notification nor the reconnection
+        // workflow will be triggered by the upcoming socket closure.
+        runOnEdt(this::remove);
+        arkPets.cha.setAlpha(0f);
+        Timer exitTimer = new Timer("MemberTray-Exit", true);
+        exitTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Gdx.app.postRunnable(Gdx.app::exit);
+                exitTimer.cancel();
+            }
+        }, (int) durationNormal.toMillis());
     }
 
     @Override
@@ -178,7 +183,8 @@ public class MemberTrayImpl extends MemberTray {
         runOnEdt(() -> {
             // If integration was succeeded, remove the ISOLATED tray icon.
             Logger.info("MemberTray", "Integrated tray service connected");
-            SystemTray.getSystemTray().remove(icon);
+            if (icon != null)
+                SystemTray.getSystemTray().remove(icon);
             client.sendRequest(SocketData.ofLogin(uuid, name));
             if (arkPets.canChangeStage())
                 sendOperation(SocketData.Operation.CAN_CHANGE_STAGE);

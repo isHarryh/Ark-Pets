@@ -18,7 +18,14 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public class SocketClient {
-    private boolean connected = false;
+    private volatile boolean connected = false;
+    /** Indicates that the ongoing closure of this client was intentionally initiated
+     * (either locally by {@link #disconnect()} or remotely by a logout request),
+     * rather than caused by an unexpected connection break. <br/>
+     * When set, the broken-session callback will neither perform the
+     * disconnected-notification nor start the reconnection workflow.
+     */
+    private volatile boolean intentionalClose = false;
     private SocketSession session;
     private Timer timer;
 
@@ -26,22 +33,26 @@ public class SocketClient {
     }
 
     public void connectWithRetry(Runnable onConnected, SocketSession session) {
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-                           @Override
-                           public void run() {
-                               connect(onConnected, session);
-                               if (connected)
-                                   timer.cancel();
-                           }
-                       },
+        if (timer != null)
+            timer.cancel();
+        intentionalClose = false;
+        Timer retryTimer = new Timer("SocketClient-Retry", true);
+        timer = retryTimer;
+        retryTimer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    connect(onConnected, session);
+                                    if (connected)
+                                        retryTimer.cancel();
+                                }
+                            },
                 reconnectDelayMillis,
                 reconnectDelayMillis
         );
     }
 
     public void connect(Runnable onConnected, SocketSession session) {
-        if (connected)
+        if (connected || intentionalClose)
             return;
         try {
             int port = PortUtils.getServerPort(serverPorts);
@@ -65,7 +76,20 @@ public class SocketClient {
         }
     }
 
+    /** Marks the ongoing closure as intentional, so that the subsequent broken-session
+     * callback will neither perform the disconnected-notification nor start the
+     * reconnection workflow.
+     */
+    public void markIntentionalClose() {
+        intentionalClose = true;
+    }
+
     public void disconnect() {
+        intentionalClose = true;
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
         if (connected)
             connected = false;
         if (session != null)
@@ -104,7 +128,12 @@ public class SocketClient {
                 if (socketData.uuid.compareTo(this.uuid) == 0 && memberTray != null) {
                     // If the connection is normal:
                     switch (socketData.operation) {
-                        case LOGOUT                 -> memberTray.onExit();
+                        case LOGOUT                 -> {
+                            // A logout always leads to the exit of this member, so mark the
+                            // upcoming closure as intentional before the exit workflow starts.
+                            client.markIntentionalClose();
+                            memberTray.onExit();
+                        }
                         case KEEP_ACTION            -> memberTray.onKeepAnimEn();
                         case NO_KEEP_ACTION         -> memberTray.onKeepAnimDis();
                         case TRANSPARENT_MODE       -> memberTray.onTransparentEn();
@@ -123,6 +152,10 @@ public class SocketClient {
 
         @Override
         protected void onBroken() {
+            if (client.intentionalClose) {
+                Logger.info("SocketClient", "(x)" + this + " closed intentionally, skip reconnecting");
+                return;
+            }
             Logger.info("SocketClient", "(x)" + this + " broken");
             memberTray.onDisconnected();
             client.disconnect();

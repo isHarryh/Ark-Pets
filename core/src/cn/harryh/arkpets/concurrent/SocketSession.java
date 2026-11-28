@@ -46,9 +46,10 @@ abstract public class SocketSession implements Runnable {
         return target != null ? target.getPort() : 0;
     }
 
-    /** Closes this session together with the socket and the I/O stream.
+    /** Closes this session together with the socket and the I/O stream. <br/>
+     * This method is idempotent and thread-safe.
      */
-    public final void close() {
+    public synchronized final void close() {
         if (!hasTarget || hasClosed)
             return;
         hasClosed = true;
